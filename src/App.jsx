@@ -400,6 +400,9 @@ export default function App() {
   const [selC, setSelC] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(null);
   const fRef = useRef();
+  const [teamData, setTeamData] = useState([]);
+  const [teamLoading, setTeamLoading] = useState(false);
+  const [inviteCopied, setInviteCopied] = useState(false);
 
   // ── PWA install ───────────────────────────────────────────────────────────────
   const installPromptRef = useRef(null);
@@ -517,6 +520,30 @@ export default function App() {
     }, 400);
     return () => clearTimeout(t);
   }, [schedChecked]);
+
+  async function loadTeamData() {
+    if (!profile.is_admin) return;
+    setTeamLoading(true);
+    try {
+      const { data: profiles } = await supabase.from("profiles").select("*").order("name");
+      const { data: logs } = await supabase.from("daily_logs").select("user_id,date,counts,pb");
+      const todayStr = todayKey();
+      const monthStart = todayStr.slice(0,7) + "-01";
+      const team = (profiles||[]).map(p => {
+        const userLogs = (logs||[]).filter(l => l.user_id === p.id);
+        const todayLog = userLogs.find(l => l.date === todayStr) || {};
+        const monthClosings = userLogs.filter(l => l.date >= monthStart).reduce((s,l) => s + (l.counts?.closings||0), 0);
+        const allTimeCalls = userLogs.reduce((s,l) => s + (l.counts?.conversations||0), 0);
+        const allTimeClosings = userLogs.reduce((s,l) => s + (l.counts?.closings||0), 0);
+        return { ...p, todayLog, monthClosings, allTimeCalls, allTimeClosings };
+      });
+      setTeamData(team);
+    } finally {
+      setTeamLoading(false);
+    }
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { if (tab==="team" && profile?.is_admin) loadTeamData(); }, [tab, profile?.is_admin]);
 
   const tomTimer = useRef(null);
   const setTom = useCallback((i, val) => {
@@ -1285,25 +1312,98 @@ export default function App() {
       {/* TEAM tab */}
       {tab==="team" && (
         <div>
-          <div style={{background:C.amberBg,border:`1px solid ${C.amberBd}`,borderRadius:8,padding:"12px 14px",marginBottom:16}}>
-            <div style={{fontFamily:F.mono,fontSize:10,color:C.amber}}>Team view connects when LO accounts are live. Your stats are in History.</div>
-          </div>
-          <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:10,padding:"18px 16px"}}>
-            <div style={{fontFamily:F.cond,fontSize:13,fontWeight:700,letterSpacing:"0.1em",textTransform:"uppercase",color:C.mid,marginBottom:14}}>Your Profile</div>
-            {[
-              ["Name",profile.name],
-              ["Accountability Partner",profile.partnerName||"—"],
-              ["Partner Phone",profile.partnerPhone||"—"],
-              ["Avg Commission",`$${Number(profile.avgCommission||0).toLocaleString()}`],
-              ["Baseline Closings/Mo",profile.baselineClosings],
-              ["Dollar Per Conversation",`$${dpc.toLocaleString()}`],
-            ].map(([k,v])=>(
-              <div key={k} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:`1px solid ${C.rule}`}}>
-                <span style={{fontFamily:F.mono,fontSize:11,color:C.light}}>{k}</span>
-                <span style={{fontFamily:F.cond,fontSize:13,fontWeight:700,color:C.ink}}>{v}</span>
+          {profile.is_admin ? (
+            /* ── ADMIN VIEW ── */
+            <div>
+              {/* Invite banner */}
+              <div style={{background:C.greenBg||"#eef6f1",border:`1px solid ${C.green}`,borderRadius:8,padding:"12px 14px",marginBottom:16,display:"flex",alignItems:"center",gap:10}}>
+                <div style={{flex:1}}>
+                  <div style={{fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.12em",textTransform:"uppercase",color:C.green,marginBottom:3}}>Invite a Loan Officer</div>
+                  <div style={{fontFamily:F.mono,fontSize:10,color:C.mid}}>Share this link — they self-sign-up and appear here automatically</div>
+                  <div style={{fontFamily:F.mono,fontSize:11,color:C.ink,marginTop:4,wordBreak:"break-all"}}>getunlocked-producer.vercel.app</div>
+                </div>
+                <button onClick={()=>{navigator.clipboard.writeText("https://getunlocked-producer.vercel.app");setInviteCopied(true);setTimeout(()=>setInviteCopied(false),2000);}}
+                  style={{...btnP,width:"auto",padding:"8px 14px",fontSize:11,flexShrink:0}}>
+                  {inviteCopied?"Copied!":"Copy Link"}
+                </button>
               </div>
-            ))}
-          </div>
+
+              {/* Team cards */}
+              {teamLoading ? (
+                <div style={{textAlign:"center",padding:32,fontFamily:F.mono,fontSize:11,color:C.light}}>Loading team data…</div>
+              ) : teamData.length === 0 ? (
+                <div style={{textAlign:"center",padding:32,fontFamily:F.mono,fontSize:11,color:C.light}}>No LO accounts yet. Share the invite link above.</div>
+              ) : (
+                teamData.map(lo => {
+                  const c = lo.todayLog?.counts || {};
+                  const convos = c.conversations||0;
+                  const apps   = c.apps||0;
+                  const closes = c.closings||0;
+                  const preapp = c.preapprovals||0;
+                  const dbOut  = c.database||0;
+                  const rtOut  = c.realtor||0;
+                  const hasPB  = lo.todayLog?.pb;
+                  const statRow = (label, val, goal) => (
+                    <div key={label} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"5px 0",borderBottom:`1px solid ${C.rule}`}}>
+                      <span style={{fontFamily:F.mono,fontSize:10,color:C.light}}>{label}</span>
+                      <span style={{fontFamily:F.cond,fontSize:13,fontWeight:700,color:goal&&val>=goal?C.green:C.ink}}>{val}{goal?` / ${goal}`:""}</span>
+                    </div>
+                  );
+                  return (
+                    <div key={lo.id} style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:10,padding:"16px",marginBottom:14}}>
+                      {/* LO header */}
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:12,paddingBottom:10,borderBottom:`2px solid ${C.rule}`}}>
+                        <div style={{fontFamily:F.cond,fontSize:16,fontWeight:700,color:C.ink,letterSpacing:"0.05em",textTransform:"uppercase"}}>{lo.name||lo.email}</div>
+                        {lo.is_admin && <span style={{fontFamily:F.mono,fontSize:9,color:C.green,background:C.greenBg||"#eef6f1",padding:"2px 6px",borderRadius:4}}>ADMIN</span>}
+                      </div>
+
+                      {/* TODAY section */}
+                      <div style={{fontFamily:F.cond,fontSize:10,fontWeight:700,letterSpacing:"0.15em",textTransform:"uppercase",color:C.green,marginBottom:6}}>Today</div>
+                      {statRow("Phone Conversations", convos, 5)}
+                      {statRow("Applications Taken",  apps,   1)}
+                      {statRow("Database Outreach",   dbOut,  10)}
+                      {statRow("Realtor Outreach",    rtOut,  5)}
+                      {statRow("Closings Today",      closes, 0)}
+                      {statRow("Pre-Approvals",       preapp, 0)}
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"5px 0",borderBottom:`1px solid ${C.rule}`}}>
+                        <span style={{fontFamily:F.mono,fontSize:10,color:C.light}}>Power Blocks Done</span>
+                        <span style={{fontFamily:F.cond,fontSize:13,fontWeight:700,color:hasPB?C.green:C.ink}}>{hasPB?"✓ Yes":"—"}</span>
+                      </div>
+
+                      {/* MONTH & ALL-TIME */}
+                      <div style={{fontFamily:F.cond,fontSize:10,fontWeight:700,letterSpacing:"0.15em",textTransform:"uppercase",color:C.green,marginTop:12,marginBottom:6}}>Month &amp; All-Time</div>
+                      {statRow("Closings This Month",  lo.monthClosings, 0)}
+                      {statRow("All-Time Closings",    lo.allTimeClosings, 0)}
+                      {statRow("All-Time Conversations", lo.allTimeCalls, 0)}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          ) : (
+            /* ── LO VIEW: own profile only ── */
+            <div>
+              <div style={{background:C.amberBg,border:`1px solid ${C.amberBd}`,borderRadius:8,padding:"12px 14px",marginBottom:16}}>
+                <div style={{fontFamily:F.mono,fontSize:10,color:C.amber}}>Team view connects when LO accounts are live. Your stats are in History.</div>
+              </div>
+              <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:10,padding:"18px 16px"}}>
+                <div style={{fontFamily:F.cond,fontSize:13,fontWeight:700,letterSpacing:"0.1em",textTransform:"uppercase",color:C.mid,marginBottom:14}}>Your Profile</div>
+                {[
+                  ["Name",profile.name],
+                  ["Accountability Partner",profile.partnerName||"—"],
+                  ["Partner Phone",profile.partnerPhone||"—"],
+                  ["Avg Commission",`$${Number(profile.avgCommission||0).toLocaleString()}`],
+                  ["Baseline Closings/Mo",profile.baselineClosings],
+                  ["Dollar Per Conversation",`$${dpc.toLocaleString()}`],
+                ].map(([k,v])=>(
+                  <div key={k} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:`1px solid ${C.rule}`}}>
+                    <span style={{fontFamily:F.mono,fontSize:11,color:C.light}}>{k}</span>
+                    <span style={{fontFamily:F.cond,fontSize:13,fontWeight:700,color:C.ink}}>{v}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
