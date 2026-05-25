@@ -403,6 +403,7 @@ export default function App() {
   const [teamData, setTeamData] = useState([]);
   const [teamLoading, setTeamLoading] = useState(false);
   const [inviteCopied, setInviteCopied] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // ── PWA install ───────────────────────────────────────────────────────────────
   const installPromptRef = useRef(null);
@@ -436,7 +437,8 @@ export default function App() {
     try {
       const { data: pData } = await supabase.from("profiles").select("*").eq("id", userId).single();
       if (pData) {
-        setProfile({ name:pData.name||"", partnerName:pData.partner_name||"", partnerPhone:pData.partner_phone||"", avgCommission:pData.avg_commission||4000, baselineClosings:pData.baseline_closings||2, is_admin:pData.is_admin||false });
+        setProfile({ name:pData.name||"", partnerName:pData.partner_name||"", partnerPhone:pData.partner_phone||"", avgCommission:pData.avg_commission||4000, baselineClosings:pData.baseline_closings||2 });
+        setIsAdmin(pData.is_admin||false);
         setStreak(pData.streak||0);
         if (!pData.name) setShowOnboarding(true);
         if (!pData.install_dismissed) {
@@ -522,7 +524,7 @@ export default function App() {
   }, [schedChecked]);
 
   async function loadTeamData() {
-    if (!profile.is_admin) return;
+    if (!isAdmin) return;
     setTeamLoading(true);
     try {
       const { data: profiles } = await supabase.from("profiles").select("*").order("name");
@@ -543,7 +545,7 @@ export default function App() {
     }
   }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { if (tab==="team" && profile?.is_admin) loadTeamData(); }, [tab, profile?.is_admin]);
+  useEffect(() => { if (tab==="team" && isAdmin) loadTeamData(); }, [tab, isAdmin]);
 
   const tomTimer = useRef(null);
   const setTom = useCallback((i, val) => {
@@ -765,7 +767,7 @@ export default function App() {
     } catch(e) { setAuthError(e.message||"Authentication failed"); }
     finally { setAuthLoading(false); }
   }
-  async function signOut() { await supabase.auth.signOut(); setContacts([]); setHistory([]); setProfile({name:"",partnerName:"",partnerPhone:"",avgCommission:4000,baselineClosings:2}); setCounts({}); setPb(false); setSched(null); setAccepted(false); }
+  async function signOut() { await supabase.auth.signOut(); setContacts([]); setHistory([]); setProfile({name:"",partnerName:"",partnerPhone:"",avgCommission:4000,baselineClosings:2}); setIsAdmin(false); setCounts({}); setPb(false); setSched(null); setAccepted(false); }
 
 
   // ════════════════════════════════════════════════════════════════════════════
@@ -1312,7 +1314,7 @@ export default function App() {
       {/* TEAM tab */}
       {tab==="team" && (
         <div>
-          {profile.is_admin ? (
+          {isAdmin ? (
             /* ── ADMIN VIEW ── */
             <div>
               {/* Invite banner */}
