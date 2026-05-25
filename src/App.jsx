@@ -461,7 +461,7 @@ export default function App() {
       if (logData) {
         setCounts(logData.counts||{});
         setPb(logData.pb||false);
-        setTomorrow(logData.tomorrow||["","",""]);
+        setTomorrow(Array.isArray(logData.tomorrow) ? logData.tomorrow : ["","",""]);
         if (logData.sched && logData.sched.blocks) {
           const { _checked, ...actualSched } = logData.sched;
           setSched(actualSched); setSchedWarn(actualSched.warnings||[]);
@@ -858,6 +858,7 @@ export default function App() {
 
   function renderBlocks() {
     let ls=null;
+    if (!Array.isArray(sched?.blocks)) return null;
     return sched.blocks.map(b=>{
       const sec=SM[b.id]??null, show=sec&&sec!==ls;
       if(sec) ls=sec;
