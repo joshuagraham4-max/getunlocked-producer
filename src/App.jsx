@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
+import { supabase } from "./supabase.js";
 
 const C = {
   bg:"#f5f0e8", card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc",
@@ -13,11 +14,7 @@ const C = {
   olive:"#7a6a1e", oliveBg:"#f8f4e3", oliveBd:"#dcd890",
 };
 const F = { mono:"'DM Mono',monospace", cond:"'Barlow Condensed',sans-serif", body:"'Barlow',sans-serif" };
-const KEY = "gu_v5";
 const todayKey = () => new Date().toISOString().slice(0,10);
-const loadS = () => { try { return JSON.parse(localStorage.getItem(KEY)||"{}"); } catch { return {}; } };
-const saveS = (d) => { try { localStorage.setItem(KEY,JSON.stringify(d)); } catch {} };
-
 const toMins = (h,m=0) => h*60+m;
 const fmt = (mins) => {
   const h=Math.floor(mins/60)%24, m=mins%60, ap=h>=12?"PM":"AM", h12=h>12?h-12:h===0?12:h;
@@ -58,70 +55,65 @@ function buildSched({startHour,mode,hasMeeting,meetingMins,meetingDurMins,meetin
   const push=(b)=>{ const bl={...b,start:cur,end:cur+b.dur}; blocks.push(bl); cur+=b.dur; };
   blocks.push({id:"buffer",label:"Arrival Buffer",tag:"Optional",type:"buffer",start:bufStart,end:dayStart,dur:30,scoreLabel:null,desc:"30-min buffer built in."});
   const dd=mode==="on"?60:90;
-
   if(hasMeeting&&meetingMins!==null) {
     const tb=meetingDurMins>=60?20:10;
     const dealEnd=dayStart+dd, warmupEnd=dealEnd+15;
     if(meetingMins<=dayStart) {
-      // Meeting is at or before day start — it leads the day
       cur=meetingMins;
       push({id:"meeting",label:"In-Person Meeting",tag:"Scheduled",type:"meeting",dur:meetingDurMins+tb,scoreLabel:"Meeting completed",desc:`Meeting at ${fmt(meetingMins)} + ${tb} min travel buffer.`});
-      push({id:"warmup",label:"Warm-Up Call · 15 min",tag:"Non-Negotiable",type:"warmup",dur:15,scoreLabel:"Warm-up call made",desc:"Warm-up call after re-entry. Now into phone mode."});
-      push({id:"deals",label:`Deal Pipeline Review · ${dd} min`,tag:mode==="on"?"Tight Cap":"Full Review",type:"deals",dur:dd,scoreLabel:"Deal pipeline reviewed",desc:"Post-meeting deal review."});
+      push({id:"warmup",label:"Warm-Up Call \xb7 15 min",tag:"Non-Negotiable",type:"warmup",dur:15,scoreLabel:"Warm-up call made",desc:"Warm-up call after re-entry. Now into phone mode."});
+      push({id:"deals",label:`Deal Pipeline Review \xb7 ${dd} min`,tag:mode==="on"?"Tight Cap":"Full Review",type:"deals",dur:dd,scoreLabel:"Deal pipeline reviewed",desc:"Post-meeting deal review."});
     } else if(meetingMins<warmupEnd) {
-      // Meeting is early — compress deal review and warm-up to fit before it
       const space=meetingMins-dayStart;
       if(space>=30) {
         const compDeal=space-15;
-        push({id:"deals",label:`Deal Pipeline Review · ${compDeal} min`,tag:"Compressed",type:"deals",dur:compDeal,scoreLabel:"Deal pipeline reviewed",desc:`Compressed to fit your ${fmt(meetingMins)} meeting. Triage only.`});
-        push({id:"warmup",label:"Warm-Up Call · 15 min",tag:"Non-Negotiable",type:"warmup",dur:15,scoreLabel:"Warm-up call made",desc:"Quick warm call right before your meeting."});
+        push({id:"deals",label:`Deal Pipeline Review \xb7 ${compDeal} min`,tag:"Compressed",type:"deals",dur:compDeal,scoreLabel:"Deal pipeline reviewed",desc:`Compressed to fit your ${fmt(meetingMins)} meeting. Triage only.`});
+        push({id:"warmup",label:"Warm-Up Call \xb7 15 min",tag:"Non-Negotiable",type:"warmup",dur:15,scoreLabel:"Warm-up call made",desc:"Quick warm call right before your meeting."});
       } else if(space>=15) {
-        push({id:"warmup",label:"Warm-Up Call · 15 min",tag:"Non-Negotiable",type:"warmup",dur:15,scoreLabel:"Warm-up call made",desc:"Warm-up call before meeting. Deal review moves to after."});
+        push({id:"warmup",label:"Warm-Up Call \xb7 15 min",tag:"Non-Negotiable",type:"warmup",dur:15,scoreLabel:"Warm-up call made",desc:"Warm-up call before meeting. Deal review moves to after."});
       }
       cur=meetingMins;
       push({id:"meeting",label:"In-Person Meeting",tag:"Scheduled",type:"meeting",dur:meetingDurMins+tb,scoreLabel:"Meeting completed",desc:`Meeting at ${fmt(meetingMins)} + ${tb} min travel buffer.`});
       if(!blocks.find(b=>b.id==="deals")) {
-        push({id:"deals",label:`Deal Pipeline Review · ${dd} min`,tag:mode==="on"?"Tight Cap":"Full Review",type:"deals",dur:dd,scoreLabel:"Deal pipeline reviewed",desc:"Post-meeting deal review."});
+        push({id:"deals",label:`Deal Pipeline Review \xb7 ${dd} min`,tag:mode==="on"?"Tight Cap":"Full Review",type:"deals",dur:dd,scoreLabel:"Deal pipeline reviewed",desc:"Post-meeting deal review."});
       }
     } else {
-      // Meeting is after deal review + warm-up — normal flow
-      push({id:"deals",label:`Deal Pipeline Review · ${dd} min`,tag:mode==="on"?"Tight Cap":"Full Review",type:"deals",dur:dd,scoreLabel:"Deal pipeline reviewed",desc:mode==="on"?"8-10 min per deal. One action, move.":"10-15 min per deal, soonest close first."});
-      push({id:"warmup",label:"Warm-Up Call · 15 min",tag:"Non-Negotiable",type:"warmup",dur:15,scoreLabel:"Warm-up call made",desc:"Easiest warm call in your list. Bridges desk work into phone mode."});
+      push({id:"deals",label:`Deal Pipeline Review \xb7 ${dd} min`,tag:mode==="on"?"Tight Cap":"Full Review",type:"deals",dur:dd,scoreLabel:"Deal pipeline reviewed",desc:mode==="on"?"8-10 min per deal. One action, move.":"10-15 min per deal, soonest close first."});
+      push({id:"warmup",label:"Warm-Up Call \xb7 15 min",tag:"Non-Negotiable",type:"warmup",dur:15,scoreLabel:"Warm-up call made",desc:"Easiest warm call in your list. Bridges desk work into phone mode."});
       const gap=meetingMins-cur;
-      if(gap>=20) push({id:"calls1a",label:`Calls · ${gap} min`,tag:"Pre-Meeting",type:"calls",dur:gap,scoreLabel:"Pre-meeting calls logged",desc:"Dial window before meeting."});
+      if(gap>=20) push({id:"calls1a",label:`Calls \xb7 ${gap} min`,tag:"Pre-Meeting",type:"calls",dur:gap,scoreLabel:"Pre-meeting calls logged",desc:"Dial window before meeting."});
       else cur=meetingMins;
       push({id:"meeting",label:"In-Person Meeting",tag:"Scheduled",type:"meeting",dur:meetingDurMins+tb,scoreLabel:"Meeting completed",desc:`Meeting at ${fmt(meetingMins)} + ${tb} min travel buffer.`});
     }
-    push({id:"calls1b",label:"Calls · 45 min",tag:"Post-Meeting",type:"calls",dur:45,scoreLabel:"Post-meeting calls logged",desc:"Resume outbound after re-entry."});
+    push({id:"calls1b",label:"Calls \xb7 45 min",tag:"Post-Meeting",type:"calls",dur:45,scoreLabel:"Post-meeting calls logged",desc:"Resume outbound after re-entry."});
     if(meeting2Mins) {
       const tb2=(meeting2DurMins||60)>=60?20:10;
       if(meeting2Mins>cur) {
         const gap=meeting2Mins-cur;
-        if(gap>=20) push({id:"calls1c",label:`Calls · ${gap} min`,tag:"Pre-Meeting 2",type:"calls",dur:gap,scoreLabel:null,desc:"Calling window before second meeting."});
+        if(gap>=20) push({id:"calls1c",label:`Calls \xb7 ${gap} min`,tag:"Pre-Meeting 2",type:"calls",dur:gap,scoreLabel:null,desc:"Calling window before second meeting."});
         else cur=meeting2Mins;
       }
-      // if meeting2Mins <= cur, just place it at cur — never rewind
       push({id:"meeting2",label:"2nd In-Person Meeting",tag:"Scheduled",type:"meeting",dur:(meeting2DurMins||60)+tb2,scoreLabel:"2nd meeting completed",desc:`Second meeting + ${tb2} min travel buffer.`});
-      push({id:"calls1d",label:"Calls · 30 min",tag:"Post-Meeting 2",type:"calls",dur:30,scoreLabel:null,desc:"Back to outbound after second meeting."});
+      push({id:"calls1d",label:"Calls \xb7 30 min",tag:"Post-Meeting 2",type:"calls",dur:30,scoreLabel:null,desc:"Back to outbound after second meeting."});
     }
   } else {
-    push({id:"deals",label:`Deal Pipeline Review · ${dd} min`,tag:mode==="on"?"Tight Cap":"Full Review",type:"deals",dur:dd,scoreLabel:"Deal pipeline reviewed",desc:mode==="on"?"8-10 min per deal. One action, move.":"10-15 min per deal, soonest close first."});
-    push({id:"warmup",label:"Warm-Up Call · 15 min",tag:"Non-Negotiable",type:"warmup",dur:15,scoreLabel:"Warm-up call made",desc:"Easiest warm call in your list. Bridges desk work into phone mode."});
+    push({id:"deals",label:`Deal Pipeline Review \xb7 ${dd} min`,tag:mode==="on"?"Tight Cap":"Full Review",type:"deals",dur:dd,scoreLabel:"Deal pipeline reviewed",desc:mode==="on"?"8-10 min per deal. One action, move.":"10-15 min per deal, soonest close first."});
+    push({id:"warmup",label:"Warm-Up Call \xb7 15 min",tag:"Non-Negotiable",type:"warmup",dur:15,scoreLabel:"Warm-up call made",desc:"Easiest warm call in your list. Bridges desk work into phone mode."});
     const cb1=mode==="on"?90:75;
-    push({id:"calls1",label:`Prospecting Calls — Block 1 · ${cb1} min`,tag:mode==="on"?"Primary":"Non-Neg Targets",type:"calls",dur:cb1,scoreLabel:"Call Block 1 hit",desc:"Agent outreach, buyer follow-up, referral touches."});
+    push({id:"calls1",label:`Prospecting Calls — Block 1 \xb7 ${cb1} min`,tag:mode==="on"?"Primary":"Non-Neg Targets",type:"calls",dur:cb1,scoreLabel:"Call Block 1 hit",desc:"Agent outreach, buyer follow-up, referral touches."});
   }
-  push({id:"lunch",label:`Lunch · ${lunchMins} min`,tag:"Screen Closed",type:"break",dur:lunchMins,scoreLabel:null,desc:"Laptop closed. Actual food."});
-  push({id:"react1",label:"Reactivity Window #1 · 45 min",tag:"Email Unlocked",type:"reactive",dur:45,scoreLabel:null,desc:"First email open. Triage inbox."});
+  push({id:"lunch",label:`Lunch \xb7 ${lunchMins} min`,tag:"Screen Closed",type:"break",dur:lunchMins,scoreLabel:null,desc:"Laptop closed. Actual food."});
+  push({id:"react1",label:"Reactivity Window #1 \xb7 45 min",tag:"Email Unlocked",type:"reactive",dur:45,scoreLabel:null,desc:"First email open. Triage inbox."});
   const dbMins=DM[dealLoad]||0, cb2=Math.max(20,120-dbMins);
   if(dbMins>0) {
-    const lbls={light:"Deal Build · 40 min",medium:"Deal Build · 70 min",heavy:"Deal Build · 100 min"};
+    const lbls={light:"Deal Build \xb7 40 min",medium:"Deal Build \xb7 70 min",heavy:"Deal Build \xb7 100 min"};
     push({id:"dealwork",label:lbls[dealLoad],tag:"Protected",type:"dealwork",dur:dbMins,scoreLabel:"Deal build done",desc:"One file at a time. No calls, no email."});
   }
-  push({id:"calls2",label:`Prospecting Calls — Block 2 · ${cb2} min`,tag:dbMins>0?"Compressed":"Heaviest",type:"calls",dur:cb2,scoreLabel:"Call Block 2 hit",desc:"Heaviest call block."});
-  push({id:"react2",label:"Reactivity Window #2 · 45 min",tag:"Email Unlocked",type:"reactive",dur:45,scoreLabel:null,desc:"Second and final email open."});
-  push({id:"calls3",label:"Evening Call Block · 60 min",tag:"W-2 Window",type:"calls",dur:60,scoreLabel:"Evening calls done",desc:"Peak window for W-2 buyers."});
-  push({id:"study",label:mode==="on"?"System Building · 30 min":"Training & Development · 30 min",tag:"Get Unlocked",type:"study",dur:30,scoreLabel:mode==="on"?"System output done":"Training done",desc:mode==="on"?"Build a system, write a post, document a process. Also your window to watch Get Unlocked training videos, work on outbound call approach, or develop IOI content.":"Watch a Get Unlocked training video, work on outbound call scripts, review loan products, or develop your prospecting approach. One topic. Write one insight down."});
-  push({id:"close",label:"Day Close · 15 min",tag:"",type:"buffer",dur:15,scoreLabel:"Scorecard logged",desc:"Log scorecard. Send daily report. Done."});
+  push({id:"calls2",label:`Prospecting Calls — Block 2 \xb7 ${cb2} min`,tag:dbMins>0?"Compressed":"Heaviest",type:"calls",dur:cb2,scoreLabel:"Call Block 2 hit",desc:"Heaviest call block."});
+  push({id:"react2",label:"Reactivity Window #2 \xb7 45 min",tag:"Email Unlocked",type:"reactive",dur:45,scoreLabel:null,desc:"Second and final email open."});
+  push({id:"calls3",label:"Evening Call Block \xb7 60 min",tag:"W-2 Window",type:"calls",dur:60,scoreLabel:"Evening calls done",desc:"Peak window for W-2 buyers."});
+  push({id:"study",label:mode==="on"?"System Building \xb7 30 min":"Training & Development \xb7 30 min",tag:"Get Unlocked",type:"study",dur:30,scoreLabel:mode==="on"?"System output done":"Training done",desc:mode==="on"?"Build a system, write a post, document a process. Also your window to watch Get Unlocked training videos, work on outbound call approach, or develop IOI content.":"Watch a Get Unlocked training video, work on outbound call scripts, review loan products, or develop your prospecting approach. One topic. Write one insight down."});
+  push({id:"close",label:"Day Close \xb7 15 min",tag:"",type:"buffer",dur:15,scoreLabel:"Scorecard logged",desc:"Log scorecard. Send daily report. Done."});
   if(hardStopMins&&cur>hardStopMins) {
     const drop=["study","calls3","react2","calls2","dealwork","react1"], dropped=[];
     for(const id of drop) {
@@ -139,15 +131,16 @@ function buildSched({startHour,mode,hasMeeting,meetingMins,meetingDurMins,meetin
   }
   return {blocks,warnings,endTime:cur};
 }
+
 const PRIMARY = {id:"conversations",label:"Phone Conversations (2+ min)",goal:5,sub:"The money metric. Everything else exists to create this."};
 const APPS_ACT = {id:"apps",label:"Applications Taken",goal:1,sub:"Direct outcome of conversations"};
 const ACTS = [
-  {id:"database",   label:"Database / Reconnect Outreach", goal:10, sub:"Past clients, sphere — calls, texts, reach-outs",           section:"feed", wGoal:50},
-  {id:"realtor",    label:"Realtor Outreach",               goal:5,  sub:"Agent calls, texts, value-drops",                           section:"feed", wGoal:25},
-  {id:"socialPost", label:"IOI Post Published",             goal:1,  sub:"Facebook or Instagram — curiosity, no offer",               section:"feed", wGoal:5},
-  {id:"dms",        label:"DMs Sent",                       goal:5,  sub:"Follow-up DMs to post engagers",                            section:"feed", wGoal:25},
-  {id:"linkedin",   label:"LinkedIn Agent Adds",            goal:20, sub:"Connect with 20 agents daily",                             section:"feed", wGoal:100, special:"linkedin"},
-  {id:"notes",      label:"Handwritten Notes Mailed",       goal:3,  sub:"One per phone call — highest open rate",                    section:"feed", wGoal:15},
+  {id:"database",   label:"Database / Reconnect Outreach", goal:10, sub:"Past clients, sphere — calls, texts, reach-outs",           section:"feed"},
+  {id:"realtor",    label:"Realtor Outreach",               goal:5,  sub:"Agent calls, texts, value-drops",                           section:"feed"},
+  {id:"socialPost", label:"IOI Post Published",             goal:1,  sub:"Facebook or Instagram — curiosity, no offer",               section:"feed"},
+  {id:"dms",        label:"DMs Sent",                       goal:5,  sub:"Follow-up DMs to post engagers",                            section:"feed"},
+  {id:"linkedin",   label:"LinkedIn Agent Adds",            goal:20, sub:"Connect with 20 agents daily",                             section:"feed", special:"linkedin"},
+  {id:"notes",      label:"Handwritten Notes Mailed",       goal:3,  sub:"One per phone call — highest open rate",                    section:"feed"},
   {id:"preapprovals",label:"Pre-Approvals Issued",          goal:0,  sub:"Issued today",                                              section:"outcome"},
   {id:"closings",   label:"Closings",                       goal:0,  sub:"Files funded today",                                       section:"outcome"},
 ];
@@ -156,40 +149,23 @@ const btnP = {padding:"13px 24px",borderRadius:7,border:`1.5px solid ${C.green}`
 const btnS = {padding:"13px 24px",borderRadius:7,border:`1.5px solid ${C.rule}`,background:C.card,color:C.mid,fontFamily:F.cond,fontSize:15,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",cursor:"pointer"};
 
 function Label({ children, color = C.light }) {
-  return (
-    <div style={{fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.2em",textTransform:"uppercase",color,marginBottom:8}}>
-      {children}
-    </div>
-  );
+  return <div style={{fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.2em",textTransform:"uppercase",color,marginBottom:8}}>{children}</div>;
 }
-
 function Chip({ children, selected, onClick, color = C.green }) {
-  return (
-    <button onClick={onClick} style={{padding:"9px 14px",borderRadius:6,border:`1.5px solid ${selected?color:C.rule}`,background:selected?color:C.card,color:selected?"#fff":C.mid,fontFamily:F.mono,fontSize:11,cursor:"pointer"}}>
-      {children}
-    </button>
-  );
+  return <button onClick={onClick} style={{padding:"9px 14px",borderRadius:6,border:`1.5px solid ${selected?color:C.rule}`,background:selected?color:C.card,color:selected?"#fff":C.mid,fontFamily:F.mono,fontSize:11,cursor:"pointer"}}>{children}</button>;
 }
-
 function TSel({ value, onChange }) {
   const [h,m,ap] = value;
   const ss = {padding:"8px",borderRadius:5,border:`1px solid ${C.rule}`,background:C.card,color:C.ink,fontFamily:F.mono,fontSize:12,cursor:"pointer",outline:"none"};
   return (
     <div style={{display:"flex",alignItems:"center",gap:6}}>
-      <select value={h} onChange={e=>onChange([e.target.value,m,ap])} style={ss}>
-        {[1,2,3,4,5,6,7,8,9,10,11,12].map(v=><option key={v}>{v}</option>)}
-      </select>
+      <select value={h} onChange={e=>onChange([e.target.value,m,ap])} style={ss}>{[1,2,3,4,5,6,7,8,9,10,11,12].map(v=><option key={v}>{v}</option>)}</select>
       <span style={{color:C.light,fontWeight:700}}>:</span>
-      <select value={m} onChange={e=>onChange([h,e.target.value,ap])} style={ss}>
-        {["00","15","30","45"].map(v=><option key={v}>{v}</option>)}
-      </select>
-      <select value={ap} onChange={e=>onChange([h,m,e.target.value])} style={ss}>
-        {["AM","PM"].map(v=><option key={v}>{v}</option>)}
-      </select>
+      <select value={m} onChange={e=>onChange([h,e.target.value,ap])} style={ss}>{["00","15","30","45"].map(v=><option key={v}>{v}</option>)}</select>
+      <select value={ap} onChange={e=>onChange([h,m,e.target.value])} style={ss}>{["AM","PM"].map(v=><option key={v}>{v}</option>)}</select>
     </div>
   );
 }
-
 function BlockRow({ block, checked, onCheck }) {
   const s = BS[block.type] || BS.buffer;
   const [open, setOpen] = useState(false);
@@ -220,7 +196,6 @@ function BlockRow({ block, checked, onCheck }) {
     </div>
   );
 }
-
 function ActRow({ act, val, onSet }) {
   const done = act.goal > 0 && val >= act.goal;
   const isLI = act.special === "linkedin";
@@ -272,7 +247,6 @@ const SCRIPTS_DATA = {
     ]
   },
 };
-
 function ScriptsTab() {
   const [active, setActive] = useState("reconnect");
   const [scenario, setScenario] = useState(0);
@@ -281,22 +255,16 @@ function ScriptsTab() {
   const sc = s.scenarios[scenario] || s.scenarios[0];
   return (
     <div>
-      <div style={{fontFamily:F.mono,fontSize:10,color:C.mid,marginBottom:14,fontStyle:"italic",lineHeight:1.5}}>
-        Pick your scenario. Read it once. Put the phone down and talk like a human.
-      </div>
+      <div style={{fontFamily:F.mono,fontSize:10,color:C.mid,marginBottom:14,fontStyle:"italic",lineHeight:1.5}}>Pick your scenario. Read it once. Put the phone down and talk like a human.</div>
       <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:10}}>
         {Object.entries(SCRIPTS_DATA).map(([id,sc2]) => (
-          <button key={id} onClick={()=>{setActive(id);setScenario(0);setCopied(false);}} style={{padding:"8px 10px",borderRadius:6,border:`1.5px solid ${active===id?sc2.color:C.rule}`,background:active===id?sc2.color:C.card,color:active===id?"#fff":C.mid,fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.04em",textTransform:"uppercase",cursor:"pointer"}}>
-            {sc2.label}
-          </button>
+          <button key={id} onClick={()=>{setActive(id);setScenario(0);setCopied(false);}} style={{padding:"8px 10px",borderRadius:6,border:`1.5px solid ${active===id?sc2.color:C.rule}`,background:active===id?sc2.color:C.card,color:active===id?"#fff":C.mid,fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.04em",textTransform:"uppercase",cursor:"pointer"}}>{sc2.label}</button>
         ))}
       </div>
       {s.scenarios.length > 1 && (
         <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:12}}>
           {s.scenarios.map((sc2,i) => (
-            <button key={i} onClick={()=>{setScenario(i);setCopied(false);}} style={{padding:"5px 9px",borderRadius:5,border:`1px solid ${scenario===i?s.color:C.rule}`,background:scenario===i?s.color+"22":C.card,color:scenario===i?s.color:C.mid,fontFamily:F.mono,fontSize:9,cursor:"pointer"}}>
-              {sc2.label}
-            </button>
+            <button key={i} onClick={()=>{setScenario(i);setCopied(false);}} style={{padding:"5px 9px",borderRadius:5,border:`1px solid ${scenario===i?s.color:C.rule}`,background:scenario===i?s.color+"22":C.card,color:scenario===i?s.color:C.mid,fontFamily:F.mono,fontSize:9,cursor:"pointer"}}>{sc2.label}</button>
           ))}
         </div>
       )}
@@ -304,9 +272,7 @@ function ScriptsTab() {
         <div style={{fontFamily:F.cond,fontSize:15,fontWeight:800,color:s.color,marginBottom:2}}>{s.label}</div>
         <div style={{fontFamily:F.mono,fontSize:9,color:C.light,marginBottom:12}}>{sc.label}</div>
         <pre style={{fontFamily:F.mono,fontSize:11,color:C.mid,lineHeight:1.75,whiteSpace:"pre-wrap",background:C.bg,borderRadius:6,padding:12,border:`1px solid ${C.rule}`,marginBottom:12}}>{sc.content}</pre>
-        <button onClick={()=>navigator.clipboard.writeText(sc.content).then(()=>{setCopied(true);setTimeout(()=>setCopied(false),2000);})} style={{...btnP,background:copied?C.green:C.blue,borderColor:copied?C.green:C.blue}}>
-          {copied?"Copied":"Copy Script"}
-        </button>
+        <button onClick={()=>navigator.clipboard.writeText(sc.content).then(()=>{setCopied(true);setTimeout(()=>setCopied(false),2000);})} style={{...btnP,background:copied?C.green:C.blue,borderColor:copied?C.green:C.blue}}>{copied?"Copied":"Copy Script"}</button>
       </div>
     </div>
   );
@@ -337,7 +303,6 @@ const IOI_DATA = {
     ]
   },
 };
-
 function IOITab() {
   const [active, setActive] = useState("buyers");
   const [post, setPost] = useState(0);
@@ -346,42 +311,63 @@ function IOITab() {
   const item = p.items[post] || p.items[0];
   return (
     <div>
-      <div style={{fontFamily:F.mono,fontSize:10,color:C.mid,marginBottom:14,fontStyle:"italic",lineHeight:1.5}}>
-        No offer, no pitch, no yes/no choice. Curiosity, emotion, self-interest only.
-      </div>
+      <div style={{fontFamily:F.mono,fontSize:10,color:C.mid,marginBottom:14,fontStyle:"italic",lineHeight:1.5}}>No offer, no pitch, no yes/no choice. Curiosity, emotion, self-interest only.</div>
       <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:10}}>
         {Object.entries(IOI_DATA).map(([id,ps]) => (
-          <button key={id} onClick={()=>{setActive(id);setPost(0);setCopied(false);}} style={{padding:"8px 10px",borderRadius:6,border:`1.5px solid ${active===id?ps.color:C.rule}`,background:active===id?ps.color:C.card,color:active===id?"#fff":C.mid,fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.04em",textTransform:"uppercase",cursor:"pointer"}}>
-            {ps.label}
-          </button>
+          <button key={id} onClick={()=>{setActive(id);setPost(0);setCopied(false);}} style={{padding:"8px 10px",borderRadius:6,border:`1.5px solid ${active===id?ps.color:C.rule}`,background:active===id?ps.color:C.card,color:active===id?"#fff":C.mid,fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.04em",textTransform:"uppercase",cursor:"pointer"}}>{ps.label}</button>
         ))}
       </div>
       <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:14}}>
         {p.items.map((it,i) => (
-          <button key={i} onClick={()=>{setPost(i);setCopied(false);}} style={{padding:"5px 9px",borderRadius:5,border:`1px solid ${post===i?p.color:C.rule}`,background:post===i?p.color+"22":C.card,color:post===i?p.color:C.mid,fontFamily:F.mono,fontSize:9,cursor:"pointer"}}>
-            {it.title}
-          </button>
+          <button key={i} onClick={()=>{setPost(i);setCopied(false);}} style={{padding:"5px 9px",borderRadius:5,border:`1px solid ${post===i?p.color:C.rule}`,background:post===i?p.color+"22":C.card,color:post===i?p.color:C.mid,fontFamily:F.mono,fontSize:9,cursor:"pointer"}}>{it.title}</button>
         ))}
       </div>
       <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:10,padding:16}}>
         <div style={{fontFamily:F.cond,fontSize:15,fontWeight:800,color:p.color,marginBottom:12}}>{item.title}</div>
         <pre style={{fontFamily:F.mono,fontSize:11,color:C.mid,lineHeight:1.8,whiteSpace:"pre-wrap",background:C.bg,borderRadius:6,padding:12,border:`1px solid ${C.rule}`,marginBottom:12}}>{item.content}</pre>
-        <button onClick={()=>navigator.clipboard.writeText(item.content).then(()=>{setCopied(true);setTimeout(()=>setCopied(false),2000);})} style={{...btnP,background:copied?C.green:C.blue,borderColor:copied?C.green:C.blue}}>
-          {copied?"Copied":"Copy Post"}
-        </button>
+        <button onClick={()=>navigator.clipboard.writeText(item.content).then(()=>{setCopied(true);setTimeout(()=>setCopied(false),2000);})} style={{...btnP,background:copied?C.green:C.blue,borderColor:copied?C.green:C.blue}}>{copied?"Copied":"Copy Post"}</button>
       </div>
     </div>
   );
 }
 
-export default function App() {
-  const [screen, setScreen] = useState("boot");
-  const [tab, setTab] = useState("today");
-  const [profile, setProfile] = useState({name:"",pin:"",partnerName:"To be determined",partnerPhone:"",avgCommission:4000,baselineClosings:2});
-  const [pinEntry, setPinEntry] = useState("");
-  const [pinError, setPinError] = useState(false);
-  const [setupStep, setSetupStep] = useState(0);
+// CSV/TSV header → DB column mapping (supports legacy exports)
+const HEADER_MAP = {
+  "First Name":"first_name","Last Name":"last_name","Phone":"phone","Phone 2":"phone_2",
+  "Email":"email","Email 2":"email_2","Address":"address","City":"city","State":"state","Zip":"zip",
+  "Co-Borrower First":"co_borrower_first","Co-Borrower Last":"co_borrower_last",
+  "Co-Borrower Phone":"co_borrower_phone","Co-Borrower Email":"co_borrower_email",
+  "Source Category":"source_category","Source File":"source_file","Birthday":"birthday",
+  "Loan Amount":"loan_amount","Note Rate":"note_rate","Appraised Value":"appraised_value",
+  "Property Address":"property_address","Property City":"property_city",
+  "Property State":"property_state","Property Zip":"property_zip",
+  "Last Contacted":"last_contacted","Contact Note":"contact_note",
+};
 
+export default function App() {
+  // ── Auth ──────────────────────────────────────────────────────────────────────
+  const [user, setUser] = useState(null);
+  const [authReady, setAuthReady] = useState(false);
+  const [authMode, setAuthMode] = useState("signin");
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [authError, setAuthError] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
+  const [dataLoading, setDataLoading] = useState(false);
+  const userRef = useRef(null);
+
+  // ── Onboarding ───────────────────────────────────────────────────────────────
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [obName, setObName] = useState("");
+  const [obPartner, setObPartner] = useState("");
+  const [obPartnerPhone, setObPartnerPhone] = useState("");
+  const [obCommission, setObCommission] = useState("4000");
+  const [obClosings, setObClosings] = useState("2");
+  const [obSaving, setObSaving] = useState(false);
+
+  // ── App state ─────────────────────────────────────────────────────────────────
+  const [tab, setTab] = useState("today");
+  const [profile, setProfile] = useState({name:"",partnerName:"",partnerPhone:"",avgCommission:4000,baselineClosings:2});
   const [sqStep, setSqStep] = useState(0);
   const [startHour, setStartHour] = useState(10);
   const [mode, setMode] = useState(null);
@@ -401,7 +387,6 @@ export default function App() {
   const [subTab, setSubTab] = useState("schedule");
   const [schedChecked, setSchedChecked] = useState({});
   const [rebuildOk, setRebuildOk] = useState(false);
-
   const [counts, setCounts] = useState({});
   const [pb, setPb] = useState(false);
   const [tomorrow, setTomorrow] = useState(["","",""]);
@@ -409,120 +394,201 @@ export default function App() {
   const [streak, setStreak] = useState(0);
   const [history, setHistory] = useState([]);
   const [ydayP, setYdayP] = useState([]);
-
   const [contacts, setContacts] = useState([]);
   const [cFilter, setCFilter] = useState("all");
   const [cSearch, setCSearch] = useState("");
   const [selC, setSelC] = useState(null);
-  const [cLog, setCLog] = useState({});
+  const [uploadProgress, setUploadProgress] = useState(null);
   const fRef = useRef();
+
+  // ── PWA install ───────────────────────────────────────────────────────────────
+  const installPromptRef = useRef(null);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
 
   const today = todayKey();
   const now = new Date();
   const dateStr = now.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
 
+  // ── Auth listener ─────────────────────────────────────────────────────────────
   useEffect(() => {
-    const s = loadS();
-    if (s.profile?.name && s.profile?.pin) { setProfile(s.profile); setScreen("login"); }
-    else setScreen("setup");
-    if (s.contacts) setContacts(s.contacts);
-    if (s.cLog) setCLog(s.cLog);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const u = session?.user || null;
+      setUser(u); userRef.current = u;
+      if (u) loadUserData(u.id); else setAuthReady(true);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      const u = session?.user || null;
+      setUser(u); userRef.current = u;
+      if (event === "SIGNED_IN") loadUserData(u.id);
+      if (event === "SIGNED_OUT") { setAuthReady(true); setDataLoading(false); }
+    });
+    const handler = (e) => { e.preventDefault(); installPromptRef.current = e; };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => { subscription.unsubscribe(); window.removeEventListener("beforeinstallprompt", handler); };
   }, []);
 
-  function initDay() {
-    const s = loadS();
-    setStreak(s.streak||0);
-    setHistory(s.history||[]);
-    if (s.date === today) {
-      setCounts(s.counts||{});
-      setPb(s.pb||false);
-      setTomorrow(s.tomorrow||["","",""]);
-      setSchedChecked(s.schedChecked||{});
-      if (s.sched) {
-        setSched(s.sched);
-        setSchedWarn(s.schedWarn||[]);
-        if (s.accepted) { setAccepted(true); setSubTab(s.subTab||"scorecard"); }
+  // ── Load all user data ────────────────────────────────────────────────────────
+  async function loadUserData(userId) {
+    setDataLoading(true);
+    try {
+      const { data: pData } = await supabase.from("profiles").select("*").eq("id", userId).single();
+      if (pData) {
+        setProfile({ name:pData.name||"", partnerName:pData.partner_name||"", partnerPhone:pData.partner_phone||"", avgCommission:pData.avg_commission||4000, baselineClosings:pData.baseline_closings||2 });
+        setStreak(pData.streak||0);
+        if (!pData.name) setShowOnboarding(true);
+        if (!pData.install_dismissed) {
+          if (installPromptRef.current) setShowInstallBanner(true);
+          // also show banner on iOS where beforeinstallprompt doesn't fire
+          const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+          if (isIOS && !navigator.standalone) setShowInstallBanner(true);
+        }
       }
-    } else {
-      if (s.date && s.counts) {
-        const hist = s.history||[];
-        const entry = {date:s.date,counts:s.counts,pb:s.pb||false};
-        const newHist = [entry,...hist].slice(0,365);
-        const yp = (s.tomorrow||[]).filter(p=>p&&p.trim());
+      // Yesterday's priorities
+      const yd = new Date(); yd.setDate(yd.getDate()-1);
+      const ydStr = yd.toISOString().slice(0,10);
+      const { data: ydData } = await supabase.from("daily_logs").select("tomorrow").eq("user_id",userId).eq("date",ydStr).maybeSingle();
+      if (ydData?.tomorrow) {
+        const yp = (ydData.tomorrow||[]).filter(p=>p&&p.trim());
         if (yp.length) setYdayP(yp);
-        const prev = new Date(s.date), curr = new Date(today);
-        const diff = Math.round((curr-prev)/86400000);
-        const hit = [PRIMARY,APPS_ACT,...ACTS.filter(a=>a.goal>0)].every(a=>(s.counts?.[a.id]||0)>=a.goal) && s.pb;
-        const ns = (hit && diff===1) ? (s.streak||0)+1 : 0;
-        setStreak(ns); setHistory(newHist);
-        saveS({...s,history:newHist,streak:ns});
       }
-      setCounts({}); setPb(false); setTomorrow(["","",""]); setSchedChecked({});
-      setSched(null); setAccepted(false); setSubTab("schedule"); setSqStep(0);
-      setMode(null); setHasMeeting(null); setDealLoad(null); setHasHardStop(null);
-      setHasSecondMeeting(null); setMeeting2Time(["2","00","PM"]); setMeeting2Dur(60);
-    }
+      // Today's log
+      const { data: logData } = await supabase.from("daily_logs").select("*").eq("user_id",userId).eq("date",today).maybeSingle();
+      if (logData) {
+        setCounts(logData.counts||{});
+        setPb(logData.pb||false);
+        setTomorrow(logData.tomorrow||["","",""]);
+        if (logData.sched && logData.sched.blocks) {
+          const { _checked, ...actualSched } = logData.sched;
+          setSched(actualSched); setSchedWarn(actualSched.warnings||[]);
+          setSchedChecked(_checked||{});
+          if (logData.accepted) { setAccepted(true); setSubTab(logData.sub_tab||"scorecard"); }
+        }
+      }
+      // History (past days)
+      const { data: histData } = await supabase.from("daily_logs").select("date,counts,pb").eq("user_id",userId).neq("date",today).order("date",{ascending:false}).limit(90);
+      if (histData) setHistory(histData);
+      // Contacts
+      const { data: ctData } = await supabase.from("contacts").select("*").eq("user_id",userId).order("last_name");
+      if (ctData) setContacts(ctData);
+    } catch(e) { console.error("loadUserData:",e); }
+    finally { setDataLoading(false); setAuthReady(true); }
   }
 
-  const setCount = useCallback((id,val) => {
+  // ── Supabase save helpers ─────────────────────────────────────────────────────
+  const saveTimer = useRef(null);
+  function saveDailyLog(updates, immediate=false) {
+    if (!userRef.current) return;
+    const doSave = async () => {
+      try {
+        await supabase.from("daily_logs").upsert({ user_id:userRef.current.id, date:todayKey(), ...updates }, {onConflict:"user_id,date"});
+      } catch(e) { console.error("saveDailyLog:",e); }
+    };
+    if (immediate) { doSave(); return; }
+    clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(doSave, 500);
+  }
+
+  // ── Scoreboard callbacks ──────────────────────────────────────────────────────
+  const setCount = useCallback((id, val) => {
     setCounts(prev => {
       const next = {...prev,[id]:Math.max(0,val)};
-      saveS({...loadS(),date:today,counts:next});
+      if (userRef.current) supabase.from("daily_logs").upsert({user_id:userRef.current.id,date:todayKey(),counts:next},{onConflict:"user_id,date"}).then();
       return next;
     });
-  }, [today]);
+  }, []);
 
   const togglePB = useCallback(() => {
     setPb(prev => {
       const next = !prev;
-      saveS({...loadS(),date:today,pb:next});
+      if (userRef.current) supabase.from("daily_logs").upsert({user_id:userRef.current.id,date:todayKey(),pb:next},{onConflict:"user_id,date"}).then();
       return next;
     });
-  }, [today]);
+  }, []);
 
   const toggleSchedCheck = useCallback((id) => {
-    setSchedChecked(prev => {
-      const next = {...prev,[id]:!prev[id]};
-      saveS({...loadS(),schedChecked:next});
-      return next;
-    });
+    setSchedChecked(prev => { const next={...prev,[id]:!prev[id]}; return next; });
   }, []);
 
-  const setTom = useCallback((i,val) => {
+  // Save schedChecked into sched column whenever it changes
+  useEffect(() => {
+    if (!userRef.current || !sched) return;
+    const t = setTimeout(() => {
+      supabase.from("daily_logs").upsert({user_id:userRef.current.id,date:todayKey(),sched:{...sched,_checked:schedChecked}},{onConflict:"user_id,date"}).then();
+    }, 400);
+    return () => clearTimeout(t);
+  }, [schedChecked]);
+
+  const tomTimer = useRef(null);
+  const setTom = useCallback((i, val) => {
     setTomorrow(prev => {
-      const next = prev.map((v,j) => j===i?val:v);
-      saveS({...loadS(),tomorrow:next});
+      const next = prev.map((v,j)=>j===i?val:v);
+      clearTimeout(tomTimer.current);
+      tomTimer.current = setTimeout(() => {
+        if (userRef.current) supabase.from("daily_logs").upsert({user_id:userRef.current.id,date:todayKey(),tomorrow:next},{onConflict:"user_id,date"}).then();
+      }, 800);
       return next;
     });
   }, []);
 
+  // ── Schedule actions ──────────────────────────────────────────────────────────
   function buildAndSet() {
-    const mm = hasMeeting ? parse12(...meetingTime) : null;
-    const mm2 = hasSecondMeeting ? parse12(...meeting2Time) : null;
-    const hm = hasHardStop ? parse12(...hardStopTime) : null;
-    const result = buildSched({startHour,mode,hasMeeting,meetingMins:mm,meetingDurMins:meetingDur,meeting2Mins:mm2,meeting2DurMins:meeting2Dur,lunchMins:lunchDur,hardStopMins:hm,dealLoad});
+    const mm=hasMeeting?parse12(...meetingTime):null;
+    const mm2=hasSecondMeeting?parse12(...meeting2Time):null;
+    const hm=hasHardStop?parse12(...hardStopTime):null;
+    const result=buildSched({startHour,mode,hasMeeting,meetingMins:mm,meetingDurMins:meetingDur,meeting2Mins:mm2,meeting2DurMins:meeting2Dur,lunchMins:lunchDur,hardStopMins:hm,dealLoad});
     setSched(result); setSchedWarn(result.warnings); setSchedChecked({});
     setAccepted(false); setSubTab("schedule");
-    saveS({...loadS(),date:today,sched:result,schedWarn:result.warnings,schedChecked:{},accepted:false,subTab:"schedule"});
+    saveDailyLog({sched:result,accepted:false,sub_tab:"schedule"},true);
   }
-
-  function acceptSched() {
-    setAccepted(true); setSubTab("scorecard");
-    saveS({...loadS(),accepted:true,subTab:"scorecard"});
-  }
-
-  function switchSub(t) {
-    setSubTab(t);
-    saveS({...loadS(),subTab:t});
-  }
-
+  function acceptSched() { setAccepted(true); setSubTab("scorecard"); saveDailyLog({accepted:true,sub_tab:"scorecard"},true); }
+  function switchSub(t) { setSubTab(t); saveDailyLog({sub_tab:t}); }
   function doRebuild() {
     setSqStep(0); setSched(null); setAccepted(false); setSubTab("schedule");
     setMode(null); setHasMeeting(null); setDealLoad(null); setHasHardStop(null);
     setHasSecondMeeting(null); setRebuildOk(false);
-    saveS({...loadS(),sched:null,accepted:false,subTab:"schedule"});
+    saveDailyLog({sched:null,accepted:false,sub_tab:"schedule"},true);
   }
 
+  // ── ICS Calendar export ───────────────────────────────────────────────────────
+  function downloadICS() {
+    if (!sched?.blocks) return;
+    const d = today.replace(/-/g,"");
+    const lines = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Get Unlocked Producer//EN"];
+    sched.blocks.filter(b=>b.type!=="buffer"&&b.type!=="break").forEach(b=>{
+      const sh=String(Math.floor(b.start/60)).padStart(2,"0"), sm=String(b.start%60).padStart(2,"0");
+      const eh=String(Math.floor(b.end/60)).padStart(2,"0"),   em=String(b.end%60).padStart(2,"0");
+      lines.push("BEGIN:VEVENT",
+        `UID:${b.id}-${today}@getunlocked`,
+        `SUMMARY:${b.label}`,
+        `DTSTART;TZID=America/Denver:${d}T${sh}${sm}00`,
+        `DTEND;TZID=America/Denver:${d}T${eh}${em}00`,
+        `DESCRIPTION:${(b.desc||b.tag||"").replace(/\n/g,"\\n")}`,
+        "END:VEVENT");
+    });
+    lines.push("END:VCALENDAR");
+    const blob = new Blob([lines.join("\r\n")],{type:"text/calendar"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href=url; a.download=`GetUnlocked_${today}.ics`; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // ── PWA install ───────────────────────────────────────────────────────────────
+  async function dismissInstall() {
+    setShowInstallBanner(false);
+    if (userRef.current) await supabase.from("profiles").update({install_dismissed:true}).eq("id",userRef.current.id);
+  }
+  async function triggerInstall() {
+    if (installPromptRef.current) {
+      installPromptRef.current.prompt();
+      const { outcome } = await installPromptRef.current.userChoice;
+      installPromptRef.current = null;
+      if (outcome==="accepted") dismissInstall();
+    } else {
+      alert("To install: tap the Share button in your browser, then tap 'Add to Home Screen'.");
+    }
+  }
+
+  // ── Report / scorecard ────────────────────────────────────────────────────────
   const convos = counts.conversations||0;
   const dpc = profile.avgCommission ? Math.round(profile.avgCommission/20) : 0;
   const todayVal = convos*dpc;
@@ -540,47 +606,191 @@ export default function App() {
       "",
       `PHONE CONVERSATIONS:    ${String(convos).padStart(2)} / 5  ${convos>=5?"✓":""}`,
       `Apps Taken:             ${String(counts.apps||0).padStart(2)} / 1  ${(counts.apps||0)>=1?"✓":""}`,
-      "",
-      "--- Feeding Activities ---",
+      "","--- Feeding Activities ---",
       `Database Outreach:      ${String(counts.database||0).padStart(2)} / 10  ${(counts.database||0)>=10?"✓":""}`,
       `Realtor Outreach:       ${String(counts.realtor||0).padStart(2)} / 5   ${(counts.realtor||0)>=5?"✓":""}`,
       `IOI Post:               ${String(counts.socialPost||0).padStart(2)} / 1   ${(counts.socialPost||0)>=1?"✓":""}`,
       `DMs Sent:               ${String(counts.dms||0).padStart(2)} / 5   ${(counts.dms||0)>=5?"✓":""}`,
       `LinkedIn Agent Adds:    ${String(counts.linkedin||0).padStart(2)} / 20  ${(counts.linkedin||0)>=20?"✓":""}`,
       `Handwritten Notes:      ${String(counts.notes||0).padStart(2)} / 3   ${(counts.notes||0)>=3?"✓":""}`,
-      "",
-      `Power Block:            ${pb?"Complete":"Incomplete"}`,
-      "",
-      `Call Value Today:       $${todayVal.toLocaleString()}`,
-      "",
-      `Day ${streak} — ${allDone?"Non-negotiables hit":`${totalDone}/${totalGoals} complete`}`,
+      "",`Power Block:            ${pb?"Complete":"Incomplete"}`,
+      "",`Call Value Today:       $${todayVal.toLocaleString()}`,
+      "",`Day ${streak} — ${allDone?"Non-negotiables hit":`${totalDone}/${totalGoals} complete`}`,
     ].join("\n");
   }
-
-  function copyReport() {
-    navigator.clipboard.writeText(genReport()).then(() => { setCopied(true); setTimeout(()=>setCopied(false),2500); });
-  }
+  function copyReport() { navigator.clipboard.writeText(genReport()).then(()=>{setCopied(true);setTimeout(()=>setCopied(false),2500);}); }
 
   const phoneOk = (v) => /^\d{3}-\d{3}-\d{4}$/.test((v||"").trim());
-
   function formatPhone(raw) {
-    const digits = raw.replace(/\D/g,"").slice(0,10);
-    if (digits.length <= 3) return digits;
-    if (digits.length <= 6) return `${digits.slice(0,3)}-${digits.slice(3)}`;
-    return `${digits.slice(0,3)}-${digits.slice(3,6)}-${digits.slice(6)}`;
+    const d=raw.replace(/\D/g,"").slice(0,10);
+    if(d.length<=3) return d; if(d.length<=6) return `${d.slice(0,3)}-${d.slice(3)}`;
+    return `${d.slice(0,3)}-${d.slice(3,6)}-${d.slice(6)}`;
   }
-  const setupSteps = [
-    {label:"Your name",field:"name",placeholder:"First name",type:"text"},
-    {label:"4-digit PIN",field:"pin",placeholder:"0000",type:"number"},
-    {label:"Accountability partner name",field:"partnerName",placeholder:"Partner's first name",type:"text"},
-    {label:"Accountability partner phone",field:"partnerPhone",placeholder:"303-555-1234",type:"tel",validate:(v)=>phoneOk(v)?null:"Enter 10 digits — dashes fill in automatically"},
-    {label:"Average commission per closing ($)",field:"avgCommission",placeholder:"4000",type:"number"},
-    {label:"Baseline closings per month (before Get Unlocked)",field:"baselineClosings",placeholder:"2",type:"number",sub:"Your honest average before this program"},
-  ];
 
-  if (screen==="setup") {
-    const step = setupSteps[setupStep], isLast = setupStep===setupSteps.length-1;
-    const fv = String(profile[step.field]||""), err = step.validate?step.validate(fv):null, ok = fv.trim().length>0&&!err;
+  // ── Contacts helpers ──────────────────────────────────────────────────────────
+  function parseCSVLine(line) {
+    const result=[]; let cur="", inQ=false;
+    for(let i=0;i<line.length;i++){
+      const c=line[i];
+      if(c==='"'&&!inQ){inQ=true;}
+      else if(c==='"'&&inQ&&line[i+1]==='"'){cur+='"';i++;}
+      else if(c==='"'&&inQ){inQ=false;}
+      else if(c===','&&!inQ){result.push(cur);cur="";}
+      else cur+=c;
+    }
+    result.push(cur); return result;
+  }
+  function parseFile(text, filename) {
+    const isCSV=(filename||"").toLowerCase().endsWith(".csv");
+    const sep=isCSV?",":"\t";
+    const lines=text.trim().split("\n").map(l=>l.replace(/\r$/,""));
+    const rawH=lines[0].split(sep).map(h=>h.trim().replace(/^"|"$/g,""));
+    const headers=rawH.map(h=>HEADER_MAP[h]||(h.toLowerCase().replace(/\s+/g,"_")));
+    return lines.slice(1).filter(l=>l.trim()).map(line=>{
+      const vals=isCSV?parseCSVLine(line):line.split("\t");
+      const obj={};
+      headers.forEach((h,i)=>{ if(h) obj[h]=(vals[i]||"").trim().replace(/^"|"$/g,""); });
+      return obj;
+    });
+  }
+  async function handleFile(e) {
+    const file=e.target.files[0]; if(!file||!userRef.current) return;
+    const text=await file.text();
+    const rows=parseFile(text,file.name).slice(0,5000);
+    const batchSize=100, totalBatches=Math.ceil(rows.length/batchSize);
+    setUploadProgress({current:0,total:totalBatches,done:false,errors:0});
+    let errors=0;
+    await supabase.from("contacts").delete().eq("user_id",userRef.current.id);
+    for(let i=0;i<totalBatches;i++){
+      const batch=rows.slice(i*batchSize,(i+1)*batchSize).map(r=>({...r,user_id:userRef.current.id}));
+      const {error}=await supabase.from("contacts").insert(batch);
+      if(error) errors++;
+      setUploadProgress({current:i+1,total:totalBatches,done:false,errors});
+    }
+    const {data:ctData}=await supabase.from("contacts").select("*").eq("user_id",userRef.current.id).order("last_name");
+    if(ctData) setContacts(ctData);
+    setUploadProgress({current:totalBatches,total:totalBatches,done:true,errors});
+    setTimeout(()=>setUploadProgress(null),3000);
+    e.target.value="";
+  }
+  async function logC(c) {
+    if(!userRef.current||!c.id) return;
+    const {error}=await supabase.from("contacts").update({last_contacted:today}).eq("id",c.id);
+    if(!error) setContacts(prev=>prev.map(ct=>ct.id===c.id?{...ct,last_contacted:today}:ct));
+  }
+  function cStatus(c) {
+    const d=c.last_contacted; if(!d) return "never";
+    const days=Math.round((new Date(today)-new Date(d))/86400000);
+    if(isNaN(days)) return "never";
+    return days<=30?"recent":days<=90?"warm":"cold";
+  }
+  function rFlag(c) { const r=parseFloat(c.note_rate); if(!r) return null; return r>=6.5?"high":r>=5.5?"mid":"low"; }
+  const filtC=contacts.filter(c=>{
+    const search=cSearch.toLowerCase(), name=`${c.first_name||""} ${c.last_name||""}`.toLowerCase();
+    const ms=!search||name.includes(search)||(c.phone||"").includes(search);
+    if(!ms) return false;
+    if(cFilter==="never") return cStatus(c)==="never";
+    if(cFilter==="cold") return cStatus(c)==="cold";
+    if(cFilter==="highrate") return rFlag(c)==="high";
+    return true;
+  });
+  const sColors={never:C.red,cold:C.amber,warm:C.mid,recent:C.green};
+  const sLabels={never:"Never",cold:"90+ days",warm:"Warm",recent:"Recent"};
+
+  // ── Chart ─────────────────────────────────────────────────────────────────────
+  function buildChart() {
+    const months={};
+    history.forEach(e=>{const mo=e.date.slice(0,7);if(!months[mo])months[mo]={month:mo,closings:0};months[mo].closings+=e.counts?.closings||0;});
+    return Object.values(months).sort((a,b)=>a.month.localeCompare(b.month)).map(m=>({...m,label:new Date(m.month+"-01").toLocaleDateString("en-US",{month:"short",year:"2-digit"})}));
+  }
+  const chartData=buildChart();
+  const totDays=history.length;
+  const compDays=history.filter(e=>ACTS.filter(a=>a.goal>0).every(a=>(e.counts?.[a.id]||0)>=a.goal)&&e.pb).length;
+  const compRate=totDays>0?Math.round((compDays/totDays)*100):0;
+
+  // ── Onboarding save ───────────────────────────────────────────────────────────
+  async function saveOnboarding() {
+    if(!obName.trim()||!userRef.current) return;
+    setObSaving(true);
+    try {
+      await supabase.from("profiles").update({
+        name:obName.trim(), partner_name:obPartner.trim(),
+        partner_phone:obPartnerPhone.trim(), avg_commission:parseInt(obCommission)||4000,
+        baseline_closings:parseInt(obClosings)||2,
+      }).eq("id",userRef.current.id);
+      setProfile({name:obName.trim(),partnerName:obPartner.trim(),partnerPhone:obPartnerPhone.trim(),avgCommission:parseInt(obCommission)||4000,baselineClosings:parseInt(obClosings)||2});
+      setShowOnboarding(false);
+    } catch(e){console.error(e);}
+    finally{setObSaving(false);}
+  }
+
+  // ── Auth action ───────────────────────────────────────────────────────────────
+  async function handleAuth() {
+    setAuthLoading(true); setAuthError("");
+    try {
+      if(authMode==="signup") {
+        const {error}=await supabase.auth.signUp({email:authEmail,password:authPassword});
+        if(error) throw error;
+      } else {
+        const {error}=await supabase.auth.signInWithPassword({email:authEmail,password:authPassword});
+        if(error) throw error;
+      }
+    } catch(e) { setAuthError(e.message||"Authentication failed"); }
+    finally { setAuthLoading(false); }
+  }
+  async function signOut() { await supabase.auth.signOut(); setContacts([]); setHistory([]); setProfile({name:"",partnerName:"",partnerPhone:"",avgCommission:4000,baselineClosings:2}); setCounts({}); setPb(false); setSched(null); setAccepted(false); }
+
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // RENDER
+  // ════════════════════════════════════════════════════════════════════════════
+
+  // Loading spinner
+  if (!authReady || dataLoading) {
+    return (
+      <div style={{background:C.bg,minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:F.mono,color:C.mid,fontSize:12}}>
+        <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"/>
+        Loading...
+      </div>
+    );
+  }
+
+  // ── Auth screen ───────────────────────────────────────────────────────────────
+  if (!user) {
+    return (
+      <div style={{background:C.bg,minHeight:"100vh",padding:"40px 20px",fontFamily:F.body}}>
+        <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"/>
+        <div style={{maxWidth:400,margin:"0 auto"}}>
+          <div style={{fontFamily:F.cond,fontSize:11,fontWeight:600,letterSpacing:"0.2em",textTransform:"uppercase",color:C.light,marginBottom:6}}>Get Unlocked Producer</div>
+          <div style={{fontFamily:F.cond,fontSize:28,fontWeight:800,color:C.ink,marginBottom:28,lineHeight:1}}>
+            {authMode==="signin"?"WELCOME":"CREATE"} <span style={{color:C.green}}>{authMode==="signin"?"BACK":"ACCOUNT"}</span>
+          </div>
+          <div style={{background:C.card,borderRadius:10,border:`1px solid ${C.rule}`,padding:"24px 20px"}}>
+            <Label>Email</Label>
+            <input type="email" placeholder="you@email.com" value={authEmail} onChange={e=>{setAuthEmail(e.target.value);setAuthError("");}}
+              style={{width:"100%",padding:"12px 14px",borderRadius:7,border:`1px solid ${C.rule}`,background:C.bg,fontFamily:F.body,fontSize:14,color:C.ink,outline:"none",marginBottom:16,boxSizing:"border-box"}}/>
+            <Label>Password</Label>
+            <input type="password" placeholder={authMode==="signup"?"6+ characters":"••••••••"} value={authPassword} onChange={e=>{setAuthPassword(e.target.value);setAuthError("");}}
+              style={{width:"100%",padding:"12px 14px",borderRadius:7,border:`1px solid ${authError?C.red:C.rule}`,background:C.bg,fontFamily:F.body,fontSize:14,color:C.ink,outline:"none",marginBottom:authError?8:20,boxSizing:"border-box"}}/>
+            {authError && <div style={{fontFamily:F.mono,fontSize:10,color:C.red,marginBottom:14}}>{authError}</div>}
+            <button onClick={handleAuth} disabled={authLoading||!authEmail||!authPassword}
+              style={{...btnP,opacity:(authLoading||!authEmail||!authPassword)?0.4:1}}>
+              {authLoading?"...":(authMode==="signin"?"Sign In →":"Create Account →")}
+            </button>
+            <div style={{textAlign:"center",marginTop:16,fontFamily:F.mono,fontSize:10,color:C.light}}>
+              {authMode==="signin"?"Don't have an account?":"Already have an account?"}{" "}
+              <span onClick={()=>{setAuthMode(authMode==="signin"?"signup":"signin");setAuthError("");}} style={{color:C.green,cursor:"pointer",textDecoration:"underline"}}>
+                {authMode==="signin"?"Create one":"Sign in"}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Onboarding screen ─────────────────────────────────────────────────────────
+  if (showOnboarding) {
     return (
       <div style={{background:C.bg,minHeight:"100vh",padding:"40px 20px",fontFamily:F.body}}>
         <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"/>
@@ -588,46 +798,22 @@ export default function App() {
           <div style={{fontFamily:F.cond,fontSize:11,fontWeight:600,letterSpacing:"0.2em",textTransform:"uppercase",color:C.light,marginBottom:6}}>Get Unlocked Producer</div>
           <div style={{fontFamily:F.cond,fontSize:28,fontWeight:800,color:C.ink,marginBottom:28,lineHeight:1}}>PRODUCER <span style={{color:C.green}}>SETUP</span></div>
           <div style={{background:C.card,borderRadius:10,border:`1px solid ${C.rule}`,padding:"24px 20px"}}>
-            <Label>{step.label}</Label>
-            {step.sub && <div style={{fontFamily:F.mono,fontSize:10,color:C.light,marginBottom:8}}>{step.sub}</div>}
-            <input type={step.type} placeholder={step.placeholder} value={fv}
-              onChange={e => {
-                const val = step.field==="partnerPhone" ? formatPhone(e.target.value) : e.target.value;
-                setProfile(p=>({...p,[step.field]:val}));
-              }}
-              style={{width:"100%",padding:"12px 14px",borderRadius:7,border:`1px solid ${fv&&err?C.red:C.rule}`,background:C.bg,fontFamily:F.body,fontSize:14,color:C.ink,outline:"none",marginBottom:fv&&err?6:20,boxSizing:"border-box"}}/>
-            {fv&&err && <div style={{fontFamily:F.mono,fontSize:10,color:C.red,marginBottom:14}}>{err}</div>}
-            <div style={{display:"flex",gap:10}}>
-              {setupStep>0 && <button style={{...btnS,flex:1,width:"auto"}} onClick={()=>setSetupStep(s=>s-1)}>← Back</button>}
-              <button style={{...btnP,flex:2,opacity:ok?1:0.35,pointerEvents:ok?"auto":"none"}}
-                onClick={()=>{ if(isLast){saveS({...loadS(),profile});initDay();setScreen("app");}else setSetupStep(s=>s+1); }}>
-                {isLast?"Start →":"Next →"}
-              </button>
-            </div>
-            <div style={{fontFamily:F.mono,fontSize:10,color:C.light,textAlign:"center",marginTop:14}}>{setupStep+1} of {setupSteps.length}</div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (screen==="login") {
-    return (
-      <div style={{background:C.bg,minHeight:"100vh",padding:"40px 20px",fontFamily:F.body}}>
-        <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"/>
-        <div style={{maxWidth:400,margin:"0 auto"}}>
-          <div style={{fontFamily:F.cond,fontSize:11,fontWeight:600,letterSpacing:"0.2em",textTransform:"uppercase",color:C.light,marginBottom:6}}>Get Unlocked Producer</div>
-          <div style={{fontFamily:F.cond,fontSize:28,fontWeight:800,color:C.ink,marginBottom:8,lineHeight:1}}>WELCOME <span style={{color:C.green}}>BACK</span></div>
-          <div style={{fontFamily:F.mono,fontSize:11,color:C.mid,marginBottom:28}}>{profile.name}</div>
-          <div style={{background:C.card,borderRadius:10,border:`1px solid ${C.rule}`,padding:"24px 20px"}}>
-            <Label>Enter your PIN</Label>
-            <input type="password" inputMode="numeric" maxLength={4} placeholder="••••" value={pinEntry}
-              onChange={e=>{setPinEntry(e.target.value);setPinError(false);}}
-              style={{width:"100%",padding:14,borderRadius:7,border:`1px solid ${pinError?C.red:C.rule}`,background:C.bg,fontFamily:F.mono,fontSize:22,letterSpacing:"0.3em",textAlign:"center",color:C.ink,outline:"none",marginBottom:8,boxSizing:"border-box"}}/>
-            {pinError && <div style={{fontFamily:F.mono,fontSize:10,color:C.red,marginBottom:12}}>Incorrect PIN.</div>}
-            <button style={{...btnP,marginTop:8}}
-              onClick={()=>{ if(pinEntry===String(profile.pin)){initDay();setScreen("app");}else{setPinError(true);setPinEntry("");} }}>
-              Unlock →
+            {[
+              {label:"Your first name",val:obName,set:setObName,placeholder:"Joshua",type:"text"},
+              {label:"Accountability partner name",val:obPartner,set:setObPartner,placeholder:"Partner's first name",type:"text"},
+              {label:"Accountability partner phone",val:obPartnerPhone,set:v=>setObPartnerPhone(formatPhone(v)),placeholder:"303-555-1234",type:"tel"},
+              {label:"Average commission per closing ($)",val:obCommission,set:setObCommission,placeholder:"4000",type:"number"},
+              {label:"Baseline closings / month (before Get Unlocked)",val:obClosings,set:setObClosings,placeholder:"2",type:"number"},
+            ].map(({label,val,set,placeholder,type})=>(
+              <div key={label} style={{marginBottom:16}}>
+                <Label>{label}</Label>
+                <input type={type} placeholder={placeholder} value={val} onChange={e=>set(e.target.value)}
+                  style={{width:"100%",padding:"12px 14px",borderRadius:7,border:`1px solid ${C.rule}`,background:C.bg,fontFamily:F.body,fontSize:14,color:C.ink,outline:"none",boxSizing:"border-box"}}/>
+              </div>
+            ))}
+            <button onClick={saveOnboarding} disabled={!obName.trim()||obSaving}
+              style={{...btnP,opacity:(!obName.trim()||obSaving)?0.4:1}}>
+              {obSaving?"Saving...":"Get Started →"}
             </button>
           </div>
         </div>
@@ -635,19 +821,17 @@ export default function App() {
     );
   }
 
-  if (screen!=="app") return null;
-
-  const view = !sched ? "build" : !accepted ? "preview" : subTab==="scorecard" ? "scorecard" : "schedule";
+  // ── Main app ──────────────────────────────────────────────────────────────────
+  const view = !sched?"build":!accepted?"preview":subTab==="scorecard"?"scorecard":"schedule";
   const secSt = {display:"flex",alignItems:"center",gap:10,margin:"16px 0 7px"};
   const secLn = {flex:1,height:1,background:C.rule};
   const secTx = {fontFamily:F.mono,fontSize:9,letterSpacing:"0.2em",textTransform:"uppercase",color:C.light,whiteSpace:"nowrap"};
 
   function renderBlocks() {
-    let ls = null;
-    return sched.blocks.map(b => {
-      const sec = SM[b.id] ?? null;
-      const show = sec && sec!==ls;
-      if (sec) ls = sec;
+    let ls=null;
+    return sched.blocks.map(b=>{
+      const sec=SM[b.id]??null, show=sec&&sec!==ls;
+      if(sec) ls=sec;
       return (
         <div key={b.id}>
           {show && <div style={secSt}><span style={secTx}>{sec}</span><div style={secLn}/></div>}
@@ -657,57 +841,20 @@ export default function App() {
     });
   }
 
-  function parseCSV(text) {
-    const lines = text.trim().split("\n");
-    const headers = lines[0].split("\t").map(h=>h.trim());
-    return lines.slice(1).map(line => {
-      const vals = line.split("\t"), obj = {};
-      headers.forEach((h,i) => { obj[h]=(vals[i]||"").trim(); });
-      return obj;
-    });
-  }
-  function handleFile(e) {
-    const file = e.target.files[0]; if(!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => { const parsed=parseCSV(ev.target.result); setContacts(parsed); saveS({...loadS(),contacts:parsed}); };
-    reader.readAsText(file);
-  }
-  function logC(c) { const k=`${c["First Name"]}_${c["Phone"]}`; const next={...cLog,[k]:{date:today}}; setCLog(next); saveS({...loadS(),cLog:next}); }
-  function cStatus(c) {
-    const k=`${c["First Name"]}_${c["Phone"]}`;
-    const lg=cLog[k];
-    if(!lg||!lg.date) return "never";
-    const days=Math.round((new Date(today)-new Date(lg.date))/86400000);
-    if(isNaN(days)) return "never";
-    return days<=30?"recent":days<=90?"warm":"cold";
-  }
-  function rFlag(c) { const r=parseFloat(c["Note Rate"]); if(!r) return null; return r>=6.5?"high":r>=5.5?"mid":"low"; }
-  const filtC = contacts.filter(c => {
-    const search=cSearch.toLowerCase(), name=`${c["First Name"]} ${c["Last Name"]}`.toLowerCase();
-    const ms=!search||name.includes(search)||(c["Phone"]||"").includes(search);
-    if(!ms) return false;
-    if(cFilter==="never") return cStatus(c)==="never";
-    if(cFilter==="cold") return cStatus(c)==="cold";
-    if(cFilter==="highrate") return rFlag(c)==="high";
-    return true;
-  });
-  const sColors = {never:C.red,cold:C.amber,warm:C.mid,recent:C.green};
-  const sLabels = {never:"Never",cold:"90+ days",warm:"Warm",recent:"Recent"};
-
-  function buildChart() {
-    const months = {};
-    history.forEach(e => { const mo=e.date.slice(0,7); if(!months[mo]) months[mo]={month:mo,closings:0}; months[mo].closings+=e.counts?.closings||0; });
-    return Object.values(months).sort((a,b)=>a.month.localeCompare(b.month)).map(m => ({...m,label:new Date(m.month+"-01").toLocaleDateString("en-US",{month:"short",year:"2-digit"})}));
-  }
-  const chartData = buildChart();
-  const totDays = history.length;
-  const compDays = history.filter(e=>ACTS.filter(a=>a.goal>0).every(a=>(e.counts?.[a.id]||0)>=a.goal)&&e.pb).length;
-  const compRate = totDays>0 ? Math.round((compDays/totDays)*100) : 0;
-
   return (
     <div style={{background:C.bg,minHeight:"100vh",padding:"24px 16px 80px",fontFamily:F.body,maxWidth:520,margin:"0 auto"}}>
       <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"/>
 
+      {/* PWA Install Banner */}
+      {showInstallBanner && (
+        <div style={{position:"fixed",bottom:0,left:0,right:0,background:C.green,color:"#fff",padding:"14px 16px",display:"flex",alignItems:"center",gap:10,zIndex:999,boxShadow:"0 -2px 12px rgba(0,0,0,0.15)"}}>
+          <div style={{flex:1,fontFamily:F.body,fontSize:13,lineHeight:1.4}}>📲 Add Get Unlocked to your home screen for the best experience</div>
+          <button onClick={triggerInstall} style={{background:"rgba(255,255,255,0.2)",border:"1.5px solid rgba(255,255,255,0.5)",color:"#fff",fontFamily:F.cond,fontSize:12,fontWeight:700,padding:"6px 10px",borderRadius:6,cursor:"pointer",whiteSpace:"nowrap"}}>Add</button>
+          <button onClick={dismissInstall} style={{background:"transparent",border:"none",color:"rgba(255,255,255,0.7)",fontSize:18,cursor:"pointer",padding:"0 4px",lineHeight:1}}>✕</button>
+        </div>
+      )}
+
+      {/* Header */}
       <div style={{borderBottom:`2px solid ${C.ink}`,paddingBottom:12,marginBottom:20}}>
         <div style={{fontFamily:F.cond,fontSize:10,fontWeight:600,letterSpacing:"0.2em",textTransform:"uppercase",color:C.light,marginBottom:3}}>Get Unlocked Producer</div>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end"}}>
@@ -721,37 +868,35 @@ export default function App() {
         </div>
       </div>
 
+      {/* Nav tabs */}
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr 1fr 1fr",gap:3,marginBottom:20,background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:4}}>
-        {[["today","Today"],["contacts","Contacts"],["scripts","Scripts"],["ioi","IOI"],["history","History"],["team","Team"]].map(([id,lbl]) => (
-          <button key={id} onClick={()=>{setTab(id);setRebuildOk(false);}} style={{padding:"8px 2px",borderRadius:6,border:"none",background:tab===id?C.green:"transparent",color:tab===id?"#fff":C.mid,fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.03em",textTransform:"uppercase",cursor:"pointer",transition:"all 0.15s"}}>
-            {lbl}
-          </button>
+        {[["today","Today"],["contacts","Contacts"],["scripts","Scripts"],["ioi","IOI"],["history","History"],["team","Team"]].map(([id,lbl])=>(
+          <button key={id} onClick={()=>{setTab(id);setRebuildOk(false);}} style={{padding:"8px 2px",borderRadius:6,border:"none",background:tab===id?C.green:"transparent",color:tab===id?"#fff":C.mid,fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.03em",textTransform:"uppercase",cursor:"pointer",transition:"all 0.15s"}}>{lbl}</button>
         ))}
       </div>
 
+      {/* TODAY tab */}
       {tab==="today" && (
         <div>
           {ydayP.length>0 && (
             <div style={{background:C.amberBg,border:`1px solid ${C.amberBd}`,borderRadius:8,padding:"12px 16px",marginBottom:16}}>
               <div style={{fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.15em",textTransform:"uppercase",color:C.amber,marginBottom:8}}>From yesterday</div>
-              {ydayP.map((p,i) => (
+              {ydayP.map((p,i)=>(
                 <div key={i} style={{display:"flex",gap:8,marginBottom:4,fontSize:13,color:C.ink}}>
                   <span style={{fontFamily:F.mono,fontSize:10,color:C.amber,marginTop:2}}>{i+1}.</span><span>{p}</span>
                 </div>
               ))}
             </div>
           )}
-
           {(view==="schedule"||view==="scorecard") && (
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:4,marginBottom:16,background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:4}}>
-              {[["schedule","Schedule"],["scorecard","Scorecard"]].map(([id,lbl]) => (
-                <button key={id} onClick={()=>switchSub(id)} style={{padding:"10px",borderRadius:6,border:"none",background:subTab===id?C.green:"transparent",color:subTab===id?"#fff":C.mid,fontFamily:F.cond,fontSize:14,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer",transition:"all 0.15s"}}>
-                  {lbl}
-                </button>
+              {[["schedule","Schedule"],["scorecard","Scorecard"]].map(([id,lbl])=>(
+                <button key={id} onClick={()=>switchSub(id)} style={{padding:"10px",borderRadius:6,border:"none",background:subTab===id?C.green:"transparent",color:subTab===id?"#fff":C.mid,fontFamily:F.cond,fontSize:14,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer",transition:"all 0.15s"}}>{lbl}</button>
               ))}
             </div>
           )}
 
+          {/* BUILD view */}
           {view==="build" && (
             <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:10,padding:"20px 16px"}}>
               {sqStep===0 && (
@@ -773,7 +918,7 @@ export default function App() {
                     {[
                       {val:"in",title:"IN the Business",color:C.amber,bg:C.amberBg,desc:"Deals, quotes, applications. Full 90-min deal review."},
                       {val:"on",title:"ON the Business",color:C.green,bg:C.greenBg,desc:"Prospecting, systems, lead gen. Deal review capped tight."},
-                    ].map(opt => (
+                    ].map(opt=>(
                       <button key={opt.val} onClick={()=>setMode(opt.val)} style={{padding:"12px 14px",borderRadius:8,textAlign:"left",cursor:"pointer",border:`2px solid ${mode===opt.val?opt.color:C.rule}`,background:mode===opt.val?opt.bg:C.card}}>
                         <div style={{fontFamily:F.cond,fontSize:14,fontWeight:700,color:mode===opt.val?opt.color:C.ink,marginBottom:2}}>{opt.title}</div>
                         <div style={{fontSize:12,color:C.mid}}>{opt.desc}</div>
@@ -799,7 +944,7 @@ export default function App() {
                       <div style={{marginBottom:12}}><Label>Meeting time</Label><TSel value={meetingTime} onChange={setMeetingTime}/></div>
                       <Label>Duration</Label>
                       <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:14}}>
-                        {[["30 min",30],["45 min",45],["1 hour",60],["1.5 hrs",90]].map(([l,v]) => (
+                        {[["30 min",30],["45 min",45],["1 hour",60],["1.5 hrs",90]].map(([l,v])=>(
                           <Chip key={v} selected={meetingDur===v} onClick={()=>setMeetingDur(v)} color={C.olive}>{l}</Chip>
                         ))}
                       </div>
@@ -813,7 +958,7 @@ export default function App() {
                           <div style={{marginBottom:12}}><Label>2nd meeting time</Label><TSel value={meeting2Time} onChange={setMeeting2Time}/></div>
                           <Label>Duration</Label>
                           <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-                            {[["30 min",30],["45 min",45],["1 hour",60],["1.5 hrs",90]].map(([l,v]) => (
+                            {[["30 min",30],["45 min",45],["1 hour",60],["1.5 hrs",90]].map(([l,v])=>(
                               <Chip key={v} selected={meeting2Dur===v} onClick={()=>setMeeting2Dur(v)} color={C.olive}>{l}</Chip>
                             ))}
                           </div>
@@ -844,7 +989,7 @@ export default function App() {
                       {val:"light",label:"1-2 deals · 40 min",sub:"40 min carved from CB2",color:C.teal,bg:C.tealBg},
                       {val:"medium",label:"3-4 deals · 70 min",sub:"70 min carved from CB2",color:C.amber,bg:C.amberBg},
                       {val:"heavy",label:"4+ deals · 100 min",sub:"100 min carved, 20 min calling kept",color:C.red,bg:C.redBg},
-                    ].map(opt => (
+                    ].map(opt=>(
                       <button key={opt.val} onClick={()=>setDealLoad(opt.val)} style={{padding:"10px 14px",borderRadius:8,textAlign:"left",cursor:"pointer",border:`2px solid ${dealLoad===opt.val?opt.color:C.rule}`,background:dealLoad===opt.val?opt.bg:C.card}}>
                         <div style={{fontFamily:F.cond,fontSize:14,fontWeight:700,color:dealLoad===opt.val?opt.color:C.ink,marginBottom:1}}>{opt.label}</div>
                         <div style={{fontSize:11,color:C.mid}}>{opt.sub}</div>
@@ -867,8 +1012,7 @@ export default function App() {
                   </div>
                   {hasHardStop && (
                     <div style={{background:C.redBg,border:`1px solid ${C.redBd}`,borderRadius:8,padding:14,marginBottom:14}}>
-                      <Label>Leave by</Label>
-                      <TSel value={hardStopTime} onChange={setHardStopTime}/>
+                      <Label>Leave by</Label><TSel value={hardStopTime} onChange={setHardStopTime}/>
                     </div>
                   )}
                   <div style={{display:"flex",gap:8}}>
@@ -880,47 +1024,53 @@ export default function App() {
             </div>
           )}
 
+          {/* PREVIEW view */}
           {view==="preview" && (
             <div>
               <div style={{background:C.greenBg,border:`1px solid ${C.greenBd}`,borderRadius:8,padding:"14px 16px",marginBottom:14}}>
                 <div style={{fontFamily:F.cond,fontSize:15,fontWeight:700,color:C.green,marginBottom:4}}>Your day is built — done by {fmt(sched.endTime)}</div>
                 <div style={{fontFamily:F.mono,fontSize:10,color:C.mid,marginBottom:14}}>Review your schedule below, then tap Accept. You won't be asked these questions again today.</div>
-                <div style={{display:"flex",gap:8}}>
+                <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
                   <button onClick={acceptSched} style={{...btnP,flex:2}}>Accept Schedule</button>
-                  {rebuildOk ? (
+                  {rebuildOk?(
                     <div style={{flex:1,display:"flex",gap:4}}>
                       <button onClick={doRebuild} style={{...btnS,flex:1,fontSize:11,padding:"10px 4px",borderColor:C.red,color:C.red,width:"auto"}}>Yes</button>
                       <button onClick={()=>setRebuildOk(false)} style={{...btnS,flex:1,fontSize:11,padding:"10px 4px",width:"auto"}}>No</button>
                     </div>
-                  ) : (
+                  ):(
                     <button onClick={()=>setRebuildOk(true)} style={{...btnS,flex:1,width:"auto"}}>Rebuild</button>
                   )}
                 </div>
               </div>
-              {schedWarn.map((w,i) => <div key={i} style={{background:C.redBg,border:`1px solid ${C.redBd}`,borderRadius:6,padding:"8px 12px",marginBottom:8,fontSize:11,color:C.red}}>⚠ {w}</div>)}
+              {schedWarn.map((w,i)=><div key={i} style={{background:C.redBg,border:`1px solid ${C.redBd}`,borderRadius:6,padding:"8px 12px",marginBottom:8,fontSize:11,color:C.red}}>⚠ {w}</div>)}
               {renderBlocks()}
             </div>
           )}
 
+          {/* SCHEDULE view (after acceptance) */}
           {view==="schedule" && (
             <div>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-                <div style={{fontFamily:F.mono,fontSize:10,color:C.mid}}>Done by {fmt(sched.endTime)}</div>
-                {rebuildOk ? (
+                <div style={{display:"flex",alignItems:"center",gap:10}}>
+                  <div style={{fontFamily:F.mono,fontSize:10,color:C.mid}}>Done by {fmt(sched.endTime)}</div>
+                  <button onClick={downloadICS} style={{fontFamily:F.mono,fontSize:9,padding:"4px 8px",borderRadius:4,border:`1px solid ${C.greenBd}`,background:C.greenBg,color:C.green,cursor:"pointer"}}>📅 Calendar</button>
+                </div>
+                {rebuildOk?(
                   <div style={{display:"flex",gap:6,alignItems:"center"}}>
                     <span style={{fontFamily:F.mono,fontSize:9,color:C.red}}>Clears scorecard.</span>
                     <button onClick={doRebuild} style={{fontFamily:F.mono,fontSize:9,padding:"5px 8px",borderRadius:4,border:`1.5px solid ${C.red}`,background:C.redBg,color:C.red,cursor:"pointer"}}>Yes</button>
                     <button onClick={()=>setRebuildOk(false)} style={{fontFamily:F.mono,fontSize:9,padding:"5px 8px",borderRadius:4,border:`1px solid ${C.rule}`,background:C.card,color:C.mid,cursor:"pointer"}}>Cancel</button>
                   </div>
-                ) : (
+                ):(
                   <button onClick={()=>setRebuildOk(true)} style={{fontFamily:F.mono,fontSize:9,letterSpacing:"0.08em",textTransform:"uppercase",padding:"4px 8px",borderRadius:4,border:`1px solid ${C.rule}`,background:C.card,color:C.mid,cursor:"pointer"}}>Rebuild Day</button>
                 )}
               </div>
-              {schedWarn.map((w,i) => <div key={i} style={{background:C.redBg,border:`1px solid ${C.redBd}`,borderRadius:6,padding:"8px 12px",marginBottom:8,fontSize:11,color:C.red}}>⚠ {w}</div>)}
+              {schedWarn.map((w,i)=><div key={i} style={{background:C.redBg,border:`1px solid ${C.redBd}`,borderRadius:6,padding:"8px 12px",marginBottom:8,fontSize:11,color:C.red}}>⚠ {w}</div>)}
               {renderBlocks()}
             </div>
           )}
 
+          {/* SCORECARD view */}
           {view==="scorecard" && (
             <div>
               <div style={{background:C.card,border:`1px solid ${allDone?C.greenBd:C.rule}`,borderRadius:8,padding:"12px 16px",marginBottom:14,display:"flex",alignItems:"center",gap:12}}>
@@ -930,7 +1080,6 @@ export default function App() {
                 </div>
                 <span style={{fontFamily:F.mono,fontSize:11,color:allDone?C.green:C.mid,whiteSpace:"nowrap",fontWeight:allDone?600:400}}>{allDone?"All done":`${totalDone} / ${totalGoals}`}</span>
               </div>
-
               {dpc>0 && (
                 <div style={{background:C.greenBg,border:`1px solid ${C.greenBd}`,borderRadius:8,padding:"10px 14px",marginBottom:14,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                   <div>
@@ -940,25 +1089,21 @@ export default function App() {
                   <div style={{fontFamily:F.cond,fontSize:24,fontWeight:800,color:C.green}}>${todayVal.toLocaleString()}</div>
                 </div>
               )}
-
               <div style={secSt}><span style={secTx}>Primary Metric</span><div style={secLn}/></div>
               <div style={{background:C.blueBg,border:`1px solid ${C.blueBd}`,borderRadius:8,padding:"10px 12px",marginBottom:5}}>
                 <div style={{fontFamily:F.mono,fontSize:9,color:C.blue,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:6}}>The money metric — everything else exists to create this</div>
                 <ActRow act={PRIMARY} val={counts[PRIMARY.id]||0} onSet={v=>setCount(PRIMARY.id,v)}/>
                 <ActRow act={APPS_ACT} val={counts[APPS_ACT.id]||0} onSet={v=>setCount(APPS_ACT.id,v)}/>
               </div>
-
               <div style={secSt}><span style={secTx}>Feeding Activities</span><div style={secLn}/></div>
               <div style={{fontFamily:F.mono,fontSize:9,color:C.light,marginBottom:8,fontStyle:"italic"}}>These exist to create phone conversations. They don't pay you — conversations do.</div>
-              {ACTS.filter(a=>a.section==="feed").map(act => (
+              {ACTS.filter(a=>a.section==="feed").map(act=>(
                 <ActRow key={act.id} act={act} val={counts[act.id]||0} onSet={v=>setCount(act.id,v)}/>
               ))}
-
               <div style={secSt}><span style={secTx}>Outcomes</span><div style={secLn}/></div>
-              {ACTS.filter(a=>a.section==="outcome").map(act => (
+              {ACTS.filter(a=>a.section==="outcome").map(act=>(
                 <ActRow key={act.id} act={act} val={counts[act.id]||0} onSet={v=>setCount(act.id,v)}/>
               ))}
-
               <div style={secSt}><span style={secTx}>Power Block</span><div style={secLn}/></div>
               <div onClick={togglePB} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:pb?C.greenBg:C.purpleBg,border:`1px solid ${pb?C.greenBd:C.purpleBd}`,borderRadius:8,padding:"12px 14px",marginBottom:5,cursor:"pointer"}}>
                 <div>
@@ -969,11 +1114,10 @@ export default function App() {
                   {pb && <span style={{color:"#fff",fontSize:13,fontWeight:900,lineHeight:1}}>✓</span>}
                 </div>
               </div>
-
               <div style={secSt}><span style={secTx}>Tomorrow</span><div style={secLn}/></div>
               <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:"14px 16px",marginBottom:16}}>
                 <div style={{fontFamily:F.mono,fontSize:9,color:C.light,marginBottom:12}}>These appear when you open the app tomorrow morning.</div>
-                {tomorrow.map((val,i) => (
+                {tomorrow.map((val,i)=>(
                   <div key={i} style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
                     <span style={{fontFamily:F.mono,fontSize:10,color:C.light,width:16,textAlign:"right",flexShrink:0}}>{i+1}.</span>
                     <input value={val} onChange={e=>setTom(i,e.target.value)}
@@ -982,72 +1126,82 @@ export default function App() {
                   </div>
                 ))}
               </div>
-
               <div style={secSt}><span style={secTx}>Daily Report</span><div style={secLn}/></div>
               <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:"14px 16px",marginBottom:8}}>
                 <div style={{fontFamily:F.mono,fontSize:9,color:C.light,marginBottom:12}}>Send to {profile.partnerName||"your accountability partner"} before you close out.</div>
                 <pre style={{fontFamily:F.mono,fontSize:10,color:C.mid,lineHeight:1.7,whiteSpace:"pre-wrap",background:C.bg,borderRadius:6,padding:12,border:`1px solid ${C.rule}`,marginBottom:12,overflowX:"auto"}}>{genReport()}</pre>
-                <button onClick={copyReport} style={{...btnP,background:copied?C.green:C.blue,borderColor:copied?C.green:C.blue}}>
-                  {copied?"Copied to Clipboard":"Copy Report"}
-                </button>
+                <button onClick={copyReport} style={{...btnP,background:copied?C.green:C.blue,borderColor:copied?C.green:C.blue}}>{copied?"Copied to Clipboard":"Copy Report"}</button>
               </div>
             </div>
           )}
         </div>
       )}
 
+      {/* CONTACTS tab */}
       {tab==="contacts" && (
         <div>
           <div style={{marginBottom:14}}>
             <input value={cSearch} onChange={e=>setCSearch(e.target.value)} placeholder="Search by name or phone..."
               style={{width:"100%",padding:"11px 14px",borderRadius:7,border:`1px solid ${C.rule}`,background:C.card,fontFamily:F.body,fontSize:13,color:C.ink,outline:"none",boxSizing:"border-box",marginBottom:10}}/>
             <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-              {[["all","All"],["never","Never Contacted"],["cold","90+ Days"],["highrate","High Rate"]].map(([id,lbl]) => (
+              {[["all","All"],["never","Never Contacted"],["cold","90+ Days"],["highrate","High Rate"]].map(([id,lbl])=>(
                 <Chip key={id} selected={cFilter===id} onClick={()=>setCFilter(id)} color={C.blue}>{lbl}</Chip>
               ))}
             </div>
           </div>
+          {/* Upload progress bar */}
+          {uploadProgress && (
+            <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:"12px 14px",marginBottom:14}}>
+              <div style={{fontFamily:F.cond,fontSize:11,fontWeight:700,color:uploadProgress.done?C.green:C.ink,marginBottom:8}}>
+                {uploadProgress.done?`Upload complete — ${contacts.length} contacts loaded`:`Uploading… batch ${uploadProgress.current} of ${uploadProgress.total}`}
+              </div>
+              <div style={{height:6,borderRadius:3,background:C.rule,overflow:"hidden"}}>
+                <div style={{height:"100%",borderRadius:3,background:uploadProgress.done?C.green:C.blue,width:`${Math.round((uploadProgress.current/uploadProgress.total)*100)}%`,transition:"width 0.2s"}}/>
+              </div>
+              {uploadProgress.errors>0 && <div style={{fontFamily:F.mono,fontSize:9,color:C.red,marginTop:6}}>{uploadProgress.errors} batch{uploadProgress.errors>1?"es":""} had errors</div>}
+            </div>
+          )}
           {contacts.length===0 ? (
             <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:10,padding:"32px 20px",textAlign:"center"}}>
               <div style={{fontFamily:F.cond,fontSize:16,fontWeight:700,color:C.mid,marginBottom:8}}>No Contacts Loaded</div>
-              <div style={{fontFamily:F.mono,fontSize:10,color:C.light,marginBottom:20}}>Upload your tab-delimited export to get started.</div>
+              <div style={{fontFamily:F.mono,fontSize:10,color:C.light,marginBottom:20}}>Upload a CSV or tab-delimited file. Headers map to: first_name, last_name, phone, email, note_rate, etc. Legacy headers (First Name, Last Name…) also supported. Up to 5,000 rows.</div>
               <input ref={fRef} type="file" accept=".csv,.txt,.tsv" onChange={handleFile} style={{display:"none"}}/>
               <button onClick={()=>fRef.current?.click()} style={{...btnP,maxWidth:240,margin:"0 auto"}}>Upload Contact File</button>
             </div>
           ) : (
             <div>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-                <span style={{fontFamily:F.mono,fontSize:10,color:C.mid}}>{filtC.length} contacts</span>
+                <span style={{fontFamily:F.mono,fontSize:10,color:C.mid}}>{filtC.length} of {contacts.length} contacts</span>
                 <button onClick={()=>fRef.current?.click()} style={{fontFamily:F.mono,fontSize:9,padding:"4px 8px",borderRadius:4,border:`1px solid ${C.rule}`,background:C.card,color:C.mid,cursor:"pointer"}}>Replace</button>
                 <input ref={fRef} type="file" accept=".csv,.txt,.tsv" onChange={handleFile} style={{display:"none"}}/>
               </div>
               {selC ? (
                 <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:10,padding:"18px 16px"}}>
                   <button onClick={()=>setSelC(null)} style={{fontFamily:F.mono,fontSize:9,padding:"4px 8px",borderRadius:4,border:`1px solid ${C.rule}`,background:C.bg,color:C.mid,cursor:"pointer",marginBottom:14}}>← Back</button>
-                  <div style={{fontFamily:F.cond,fontSize:22,fontWeight:800,color:C.ink,marginBottom:4}}>{selC["First Name"]} {selC["Last Name"]}</div>
-                  {selC["Co-Borrower First"] && <div style={{fontFamily:F.mono,fontSize:10,color:C.mid,marginBottom:12}}>Co-borrower: {selC["Co-Borrower First"]} {selC["Co-Borrower Last"]}</div>}
+                  <div style={{fontFamily:F.cond,fontSize:22,fontWeight:800,color:C.ink,marginBottom:4}}>{selC.first_name} {selC.last_name}</div>
+                  {selC.co_borrower_first && <div style={{fontFamily:F.mono,fontSize:10,color:C.mid,marginBottom:12}}>Co-borrower: {selC.co_borrower_first} {selC.co_borrower_last}</div>}
                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:16}}>
                     {[
-                      ["Note Rate", selC["Note Rate"]?`${selC["Note Rate"]}%`:"—"],
-                      ["Loan Amount", selC["Loan Amount"]?`$${Number(selC["Loan Amount"]).toLocaleString()}`:"—"],
-                      ["Appraised Value", selC["Appraised Value"]?`$${Number(selC["Appraised Value"]).toLocaleString()}`:"—"],
-                      ["Birthday", selC["Birthday"]||"—"],
-                      ["Source", selC["Source Category"]||"—"],
+                      ["Note Rate", selC.note_rate?`${selC.note_rate}%`:"—"],
+                      ["Loan Amount", selC.loan_amount?`$${Number(selC.loan_amount).toLocaleString()}`:"—"],
+                      ["Appraised Value", selC.appraised_value?`$${Number(selC.appraised_value).toLocaleString()}`:"—"],
+                      ["Birthday", selC.birthday||"—"],
+                      ["Source", selC.source_category||"—"],
                       ["Last Contact", sLabels[cStatus(selC)]],
-                    ].map(([k,v]) => (
+                    ].map(([k,v])=>(
                       <div key={k} style={{background:C.bg,border:`1px solid ${C.rule}`,borderRadius:6,padding:"8px 10px"}}>
                         <div style={{fontFamily:F.mono,fontSize:9,color:C.light,marginBottom:2}}>{k}</div>
                         <div style={{fontFamily:F.cond,fontSize:14,fontWeight:700,color:C.ink}}>{v}</div>
                       </div>
                     ))}
                   </div>
-                  <div style={{fontFamily:F.mono,fontSize:9,color:C.light,marginBottom:12}}>{selC["Property Address"]}, {selC["Property City"]}, {selC["Property State"]}</div>
+                  <div style={{fontFamily:F.mono,fontSize:9,color:C.light,marginBottom:12}}>{selC.property_address}{selC.property_city?`, ${selC.property_city}`:""}{selC.property_state?`, ${selC.property_state}`:""}</div>
                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:14}}>
                     {[
-                      ["Call", `tel:${selC["Phone"]}`],
-                      ["Text", `sms:${selC["Phone"]}?body=Hi ${selC["First Name"]}, this is ${profile.name}. Just checking in.`],
-                      ["Email", `mailto:${selC["Email"]}?subject=Checking in&body=Hi ${selC["First Name"]},\n\n${profile.name} here.\n\nBest,\n${profile.name}`],
-                    ].map(([lbl,href]) => (
+                      ["Call", `tel:${selC.phone}`],
+                      ["Text", `sms:${selC.phone}?body=Hi ${selC.first_name}, this is ${profile.name}. Just checking in.`],
+                      ["Email", `mailto:${selC.email}?subject=Checking in`],
+                    ].map(([lbl,href])=>(
                       <a key={lbl} href={href} style={{display:"block",padding:"10px 0",textAlign:"center",borderRadius:6,border:`1.5px solid ${C.green}`,background:C.greenBg,color:C.green,fontFamily:F.cond,fontSize:13,fontWeight:700,textDecoration:"none"}}>{lbl}</a>
                     ))}
                   </div>
@@ -1055,16 +1209,16 @@ export default function App() {
                 </div>
               ) : (
                 <div>
-                  {filtC.slice(0,50).map((c,i) => {
+                  {filtC.slice(0,50).map((c,i)=>{
                     const st=cStatus(c), rf=rFlag(c);
                     return (
-                      <div key={i} onClick={()=>setSelC(c)} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:"11px 14px",marginBottom:5,cursor:"pointer"}}>
+                      <div key={c.id||i} onClick={()=>setSelC(c)} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:"11px 14px",marginBottom:5,cursor:"pointer"}}>
                         <div>
-                          <div style={{fontFamily:F.cond,fontSize:14,fontWeight:700,color:C.ink}}>{c["First Name"]} {c["Last Name"]}</div>
-                          <div style={{fontFamily:F.mono,fontSize:9,color:C.light,marginTop:2}}>{c["Phone"]} · {c["Source Category"]||"—"}</div>
+                          <div style={{fontFamily:F.cond,fontSize:14,fontWeight:700,color:C.ink}}>{c.first_name} {c.last_name}</div>
+                          <div style={{fontFamily:F.mono,fontSize:9,color:C.light,marginTop:2}}>{c.phone} · {c.source_category||"—"}</div>
                         </div>
                         <div style={{display:"flex",gap:6,alignItems:"center"}}>
-                          {c["Note Rate"] && <span style={{fontFamily:F.mono,fontSize:10,padding:"2px 6px",borderRadius:3,background:rf==="high"?C.redBg:C.stoneBg,color:rf==="high"?C.red:C.stone}}>{c["Note Rate"]}%</span>}
+                          {c.note_rate && <span style={{fontFamily:F.mono,fontSize:10,padding:"2px 6px",borderRadius:3,background:rf==="high"?C.redBg:C.stoneBg,color:rf==="high"?C.red:C.stone}}>{c.note_rate}%</span>}
                           <span style={{fontFamily:F.mono,fontSize:9,padding:"2px 6px",borderRadius:3,background:C.stoneBg,color:sColors[st]}}>{sLabels[st]}</span>
                         </div>
                       </div>
@@ -1081,10 +1235,11 @@ export default function App() {
       {tab==="scripts" && <ScriptsTab/>}
       {tab==="ioi" && <IOITab/>}
 
+      {/* HISTORY tab */}
       {tab==="history" && (
         <div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:8,marginBottom:16}}>
-            {[["Streak",`${streak}d`],["Total",totDays],["Complete",compDays],["Rate",`${compRate}%`]].map(([lbl,val]) => (
+            {[["Streak",`${streak}d`],["Total",totDays],["Complete",compDays],["Rate",`${compRate}%`]].map(([lbl,val])=>(
               <div key={lbl} style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:"10px 8px",textAlign:"center"}}>
                 <div style={{fontFamily:F.mono,fontSize:8,color:C.light,marginBottom:4,letterSpacing:"0.08em",textTransform:"uppercase"}}>{lbl}</div>
                 <div style={{fontFamily:F.cond,fontSize:20,fontWeight:800,color:C.green}}>{val}</div>
@@ -1108,11 +1263,9 @@ export default function App() {
           )}
           <div style={{fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.15em",textTransform:"uppercase",color:C.mid,marginBottom:10}}>Daily Log</div>
           {history.length===0 ? (
-            <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:"24px 16px",textAlign:"center",fontFamily:F.mono,fontSize:11,color:C.light}}>
-              No history yet. Complete your first day to start the log.
-            </div>
-          ) : history.slice(0,30).map((entry,i) => {
-            const hit = ACTS.filter(a=>a.goal>0).every(a=>(entry.counts?.[a.id]||0)>=a.goal) && entry.pb;
+            <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:"24px 16px",textAlign:"center",fontFamily:F.mono,fontSize:11,color:C.light}}>No history yet. Complete your first day to start the log.</div>
+          ) : history.slice(0,30).map((entry,i)=>{
+            const hit=ACTS.filter(a=>a.goal>0).every(a=>(entry.counts?.[a.id]||0)>=a.goal)&&entry.pb;
             return (
               <div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:hit?C.greenBg:C.card,border:`1px solid ${hit?C.greenBd:C.rule}`,borderRadius:8,padding:"10px 14px",marginBottom:5}}>
                 <div>
@@ -1129,6 +1282,7 @@ export default function App() {
         </div>
       )}
 
+      {/* TEAM tab */}
       {tab==="team" && (
         <div>
           <div style={{background:C.amberBg,border:`1px solid ${C.amberBd}`,borderRadius:8,padding:"12px 14px",marginBottom:16}}>
@@ -1143,7 +1297,7 @@ export default function App() {
               ["Avg Commission",`$${Number(profile.avgCommission||0).toLocaleString()}`],
               ["Baseline Closings/Mo",profile.baselineClosings],
               ["Dollar Per Conversation",`$${dpc.toLocaleString()}`],
-            ].map(([k,v]) => (
+            ].map(([k,v])=>(
               <div key={k} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:`1px solid ${C.rule}`}}>
                 <span style={{fontFamily:F.mono,fontSize:11,color:C.light}}>{k}</span>
                 <span style={{fontFamily:F.cond,fontSize:13,fontWeight:700,color:C.ink}}>{v}</span>
@@ -1153,8 +1307,10 @@ export default function App() {
         </div>
       )}
 
-      <div style={{marginTop:28,paddingTop:14,borderTop:`1px solid ${C.rule}`,display:"flex",justifyContent:"space-between"}}>
+      {/* Footer */}
+      <div style={{marginTop:28,paddingTop:14,borderTop:`1px solid ${C.rule}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
         <span style={{fontFamily:F.mono,fontSize:9,color:C.light,letterSpacing:"0.1em"}}>GET UNLOCKED PRODUCER</span>
+        <button onClick={signOut} style={{fontFamily:F.mono,fontSize:9,color:C.light,background:"transparent",border:"none",cursor:"pointer",letterSpacing:"0.05em",padding:0}}>Sign Out</button>
         <span style={{fontFamily:F.mono,fontSize:9,color:C.mid,letterSpacing:"0.1em"}}>GRAHAM FINANCIAL</span>
       </div>
     </div>
