@@ -436,7 +436,7 @@ export default function App() {
     try {
       const { data: pData } = await supabase.from("profiles").select("*").eq("id", userId).single();
       if (pData) {
-        setProfile({ name:pData.name||"", partnerName:pData.partner_name||"", partnerPhone:pData.partner_phone||"", avgCommission:pData.avg_commission||4000, baselineClosings:pData.baseline_closings||2 });
+        setProfile({ name:pData.name||"", partnerName:pData.partner_name||"", partnerPhone:pData.partner_phone||"", avgCommission:pData.avg_commission||4000, baselineClosings:pData.baseline_closings||2, is_admin:pData.is_admin||false });
         setStreak(pData.streak||0);
         if (!pData.name) setShowOnboarding(true);
         if (!pData.install_dismissed) {
