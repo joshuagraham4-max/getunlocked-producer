@@ -137,7 +137,7 @@ const APPS_ACT = {id:"apps",label:"Applications Taken",goal:1,sub:"Direct outcom
 const ACTS = [
   {id:"database",   label:"Database / Reconnect Outreach", goal:10, sub:"Past clients, sphere — calls, texts, reach-outs",           section:"feed"},
   {id:"realtor",    label:"Realtor Outreach",               goal:5,  sub:"Agent calls, texts, value-drops",                           section:"feed"},
-  {id:"socialPost", label:"IOI Post Published",             goal:1,  sub:"Facebook or Instagram — curiosity, no offer",               section:"feed"},
+  {id:"ioi_posts",  label:"IOI Post Published",             goal:1,  sub:"Facebook or Instagram — curiosity, no offer",               section:"feed"},
   {id:"dms",        label:"DMs Sent",                       goal:5,  sub:"Follow-up DMs to post engagers",                            section:"feed"},
   {id:"linkedin",   label:"LinkedIn Agent Adds",            goal:20, sub:"Connect with 20 agents daily",                             section:"feed", special:"linkedin"},
   {id:"notes",      label:"Handwritten Notes Mailed",       goal:3,  sub:"One per phone call — highest open rate",                    section:"feed"},
@@ -355,8 +355,11 @@ export default function App() {
   const [authLoading, setAuthLoading] = useState(false);
   const [authNewPassword, setAuthNewPassword] = useState("");
   const [authResetSent, setAuthResetSent] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [pendingUploadFile, setPendingUploadFile] = useState(null);
   const [isRecovering, setIsRecovering] = useState(false);
   const [dataLoading, setDataLoading] = useState(false);
+  const [isWide, setIsWide] = useState(typeof window !== "undefined" && window.innerWidth > 900);
   const userRef = useRef(null);
 
   // ── Onboarding ───────────────────────────────────────────────────────────────
@@ -437,6 +440,12 @@ export default function App() {
     return () => { subscription.unsubscribe(); window.removeEventListener("beforeinstallprompt", handler); };
   }, []);
 
+  useEffect(() => {
+    const onResize = () => setIsWide(window.innerWidth > 900);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
   // ── Load all user data ────────────────────────────────────────────────────────
   async function loadUserData(userId) {
     setDataLoading(true);
@@ -454,13 +463,23 @@ export default function App() {
           if (isIOS && !navigator.standalone) setShowInstallBanner(true);
         }
       }
-      // Yesterday's priorities
+      // Yesterday's priorities + streak check
       const yd = new Date(); yd.setDate(yd.getDate()-1);
       const ydStr = yd.toISOString().slice(0,10);
-      const { data: ydData } = await supabase.from("daily_logs").select("tomorrow").eq("user_id",userId).eq("date",ydStr).maybeSingle();
+      const { data: ydData } = await supabase.from("daily_logs").select("tomorrow,counts,pb").eq("user_id",userId).eq("date",ydStr).maybeSingle();
       if (ydData?.tomorrow) {
         const yp = Array.isArray(ydData.tomorrow) ? ydData.tomorrow.filter(p=>p&&p.trim()) : [];
         if (yp.length) setYdayP(yp);
+      }
+      // Increment streak if yesterday was a complete day and we haven't logged today yet
+      if (ydData) {
+        const ydHit = [PRIMARY,APPS_ACT,...ACTS.filter(a=>a.goal>0)].every(a=>(ydData.counts?.[a.id]||0)>=a.goal) && ydData.pb;
+        const { data: todayCheck } = await supabase.from("daily_logs").select("id").eq("user_id",userId).eq("date",today).maybeSingle();
+        if (ydHit && !todayCheck) {
+          const newStreak = (pData?.streak||0) + 1;
+          setStreak(newStreak);
+          await supabase.from("profiles").update({streak: newStreak}).eq("id", userId);
+        }
       }
       // Today's log
       const { data: logData } = await supabase.from("daily_logs").select("*").eq("user_id",userId).eq("date",today).maybeSingle();
@@ -646,7 +665,7 @@ export default function App() {
       "","--- Feeding Activities ---",
       `Database Outreach:      ${String(counts.database||0).padStart(2)} / 10  ${(counts.database||0)>=10?"✓":""}`,
       `Realtor Outreach:       ${String(counts.realtor||0).padStart(2)} / 5   ${(counts.realtor||0)>=5?"✓":""}`,
-      `IOI Post:               ${String(counts.socialPost||0).padStart(2)} / 1   ${(counts.socialPost||0)>=1?"✓":""}`,
+      `IOI Post:               ${String(counts.ioi_posts||counts.socialPost||0).padStart(2)} / 1   ${((counts.ioi_posts||counts.socialPost||0)>=1?"✓":"")}`,
       `DMs Sent:               ${String(counts.dms||0).padStart(2)} / 5   ${(counts.dms||0)>=5?"✓":""}`,
       `LinkedIn Agent Adds:    ${String(counts.linkedin||0).padStart(2)} / 20  ${(counts.linkedin||0)>=20?"✓":""}`,
       `Handwritten Notes:      ${String(counts.notes||0).padStart(2)} / 3   ${(counts.notes||0)>=3?"✓":""}`,
@@ -690,14 +709,22 @@ export default function App() {
       return obj;
     });
   }
-  async function handleFile(e) {
-    const file=e.target.files[0]; if(!file||!userRef.current) return;
+  function handleFileSelect(e) {
+    const file=e.target.files[0]; if(!file) return;
+    e.target.value="";
+    setPendingUploadFile(file);
+    setShowUploadModal(true);
+  }
+
+  async function doUpload(file, replaceAll) {
+    if(!file||!userRef.current) return;
+    setShowUploadModal(false); setPendingUploadFile(null);
     const text=await file.text();
-    const rows=parseFile(text,file.name).slice(0,5000);
+    const rows=parseFile(text,file.name).slice(0,15000);
     const batchSize=100, totalBatches=Math.ceil(rows.length/batchSize);
     setUploadProgress({current:0,total:totalBatches,done:false,errors:0});
     let errors=0;
-    await supabase.from("contacts").delete().eq("user_id",userRef.current.id);
+    if(replaceAll) await supabase.from("contacts").delete().eq("user_id",userRef.current.id);
     for(let i=0;i<totalBatches;i++){
       const batch=rows.slice(i*batchSize,(i+1)*batchSize).map(r=>({...r,user_id:userRef.current.id}));
       const {error}=await supabase.from("contacts").insert(batch);
@@ -708,7 +735,6 @@ export default function App() {
     if(ctData) setContacts(ctData);
     setUploadProgress({current:totalBatches,total:totalBatches,done:true,errors});
     setTimeout(()=>setUploadProgress(null),3000);
-    e.target.value="";
   }
   async function logC(c) {
     if(!userRef.current||!c.id) return;
@@ -956,7 +982,7 @@ export default function App() {
   }
 
   return (
-    <div style={{background:C.bg,minHeight:"100vh",padding:"24px 16px 80px",fontFamily:F.body,maxWidth:520,margin:"0 auto"}}>
+    <div style={{background:C.bg,minHeight:"100vh",fontFamily:F.body}}>
       <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"/>
 
       {/* PWA Install Banner */}
@@ -968,26 +994,75 @@ export default function App() {
         </div>
       )}
 
-      {/* Header */}
-      <div style={{borderBottom:`2px solid ${C.ink}`,paddingBottom:12,marginBottom:20}}>
-        <div style={{fontFamily:F.cond,fontSize:10,fontWeight:600,letterSpacing:"0.2em",textTransform:"uppercase",color:C.light,marginBottom:3}}>Get Unlocked Producer</div>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end"}}>
-          <div style={{fontFamily:F.cond,fontSize:22,fontWeight:800,color:C.ink,lineHeight:1}}>
-            {profile.name?.toUpperCase()} <span style={{color:C.green}}>— {tab==="today"?"TODAY":tab==="contacts"?"CONTACTS":tab==="scripts"?"SCRIPTS":tab==="ioi"?"IOI":tab==="history"?"HISTORY":"TEAM"}</span>
-          </div>
-          <div style={{textAlign:"right"}}>
-            <div style={{fontFamily:F.mono,fontSize:10,color:C.mid}}>{dateStr}</div>
-            {streak>0 && <div style={{fontFamily:F.mono,fontSize:10,color:C.green,fontWeight:600,marginTop:2}}>Day {streak}</div>}
+      {/* Upload modal */}
+      {showUploadModal && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.45)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000,padding:"0 20px"}}>
+          <div style={{background:C.card,borderRadius:12,border:`1px solid ${C.rule}`,padding:"28px 24px",maxWidth:360,width:"100%",boxShadow:"0 8px 32px rgba(0,0,0,0.18)"}}>
+            <div style={{fontFamily:F.cond,fontSize:18,fontWeight:800,color:C.ink,marginBottom:8}}>Upload Contacts</div>
+            <div style={{fontFamily:F.mono,fontSize:11,color:C.mid,marginBottom:24,lineHeight:1.6}}>What would you like to do with your existing contacts?</div>
+            <button onClick={()=>doUpload(pendingUploadFile,true)} style={{...btnP,marginBottom:10}}>Replace All</button>
+            <button onClick={()=>doUpload(pendingUploadFile,false)} style={{...btnP,background:"transparent",border:`1px solid ${C.green}`,color:C.green,marginBottom:16}}>Add to Existing</button>
+            <div style={{textAlign:"center"}}>
+              <span onClick={()=>{setShowUploadModal(false);setPendingUploadFile(null);}} style={{fontFamily:F.mono,fontSize:10,color:C.light,cursor:"pointer",textDecoration:"underline"}}>Cancel</span>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Nav tabs */}
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr 1fr 1fr",gap:3,marginBottom:20,background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:4}}>
-        {[["today","Today"],["contacts","Contacts"],["scripts","Scripts"],["ioi","IOI"],["history","History"],["team","Team"]].map(([id,lbl])=>(
-          <button key={id} onClick={()=>{setTab(id);setRebuildOk(false);}} style={{padding:"8px 2px",borderRadius:6,border:"none",background:tab===id?C.green:"transparent",color:tab===id?"#fff":C.mid,fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.03em",textTransform:"uppercase",cursor:"pointer",transition:"all 0.15s"}}>{lbl}</button>
-        ))}
-      </div>
+      {/* Layout: two-col desktop / single-col mobile */}
+      <div style={isWide
+        ? {maxWidth:1100,margin:"0 auto",display:"flex",minHeight:"100vh"}
+        : {maxWidth:520,margin:"0 auto",padding:"24px 16px 80px"}
+      }>
+
+        {/* Desktop sidebar */}
+        {isWide && (
+          <div style={{width:240,flexShrink:0,background:C.card,borderRight:`1px solid ${C.rule}`,padding:"28px 20px",display:"flex",flexDirection:"column",position:"sticky",top:0,height:"100vh",overflowY:"auto"}}>
+            <div style={{fontFamily:F.cond,fontSize:10,fontWeight:600,letterSpacing:"0.2em",textTransform:"uppercase",color:C.light,marginBottom:16}}>Get Unlocked Producer</div>
+            <div style={{fontFamily:F.cond,fontSize:20,fontWeight:800,color:C.ink,lineHeight:1.1,marginBottom:4}}>{profile.name?.toUpperCase()}</div>
+            <div style={{fontFamily:F.mono,fontSize:10,color:C.mid,marginBottom:streak>0?2:20}}>{dateStr}</div>
+            {streak>0 && <div style={{fontFamily:F.mono,fontSize:10,color:C.green,fontWeight:600,marginBottom:20}}>Day {streak}</div>}
+            <div style={{display:"flex",flexDirection:"column",gap:2,flex:1}}>
+              {[["today","Today"],["contacts","Contacts"],["scripts","Scripts"],["ioi","IOI"],["history","History"],["team","Team"]].map(([id,lbl])=>(
+                <button key={id} onClick={()=>{setTab(id);setRebuildOk(false);}} style={{padding:"10px 14px",borderRadius:8,border:"none",background:tab===id?C.green:"transparent",color:tab===id?"#fff":C.mid,fontFamily:F.cond,fontSize:14,fontWeight:700,letterSpacing:"0.05em",textTransform:"uppercase",cursor:"pointer",textAlign:"left",transition:"all 0.15s"}}>
+                  {lbl}
+                </button>
+              ))}
+            </div>
+            <div style={{paddingTop:20,borderTop:`1px solid ${C.rule}`}}>
+              <div style={{fontFamily:F.mono,fontSize:9,color:C.mid,letterSpacing:"0.1em",marginBottom:8}}>GRAHAM FINANCIAL</div>
+              <button onClick={signOut} style={{fontFamily:F.mono,fontSize:9,color:C.light,background:"transparent",border:"none",cursor:"pointer",letterSpacing:"0.05em",padding:0}}>Sign Out</button>
+            </div>
+          </div>
+        )}
+
+        {/* Main content */}
+        <div style={isWide?{flex:1,maxWidth:760,padding:"28px 32px 80px",minWidth:0}:{}}>
+
+        {/* Mobile header */}
+        {!isWide && (
+          <div style={{borderBottom:`2px solid ${C.ink}`,paddingBottom:12,marginBottom:20}}>
+            <div style={{fontFamily:F.cond,fontSize:10,fontWeight:600,letterSpacing:"0.2em",textTransform:"uppercase",color:C.light,marginBottom:3}}>Get Unlocked Producer</div>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end"}}>
+              <div style={{fontFamily:F.cond,fontSize:22,fontWeight:800,color:C.ink,lineHeight:1}}>
+                {profile.name?.toUpperCase()} <span style={{color:C.green}}>— {tab==="today"?"TODAY":tab==="contacts"?"CONTACTS":tab==="scripts"?"SCRIPTS":tab==="ioi"?"IOI":tab==="history"?"HISTORY":"TEAM"}</span>
+              </div>
+              <div style={{textAlign:"right"}}>
+                <div style={{fontFamily:F.mono,fontSize:10,color:C.mid}}>{dateStr}</div>
+                {streak>0 && <div style={{fontFamily:F.mono,fontSize:10,color:C.green,fontWeight:600,marginTop:2}}>Day {streak}</div>}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Mobile nav tabs */}
+        {!isWide && (
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr 1fr 1fr",gap:3,marginBottom:20,background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:4}}>
+            {[["today","Today"],["contacts","Contacts"],["scripts","Scripts"],["ioi","IOI"],["history","History"],["team","Team"]].map(([id,lbl])=>(
+              <button key={id} onClick={()=>{setTab(id);setRebuildOk(false);}} style={{padding:"8px 2px",borderRadius:6,border:"none",background:tab===id?C.green:"transparent",color:tab===id?"#fff":C.mid,fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.03em",textTransform:"uppercase",cursor:"pointer",transition:"all 0.15s"}}>{lbl}</button>
+            ))}
+          </div>
+        )}
 
       {/* TODAY tab */}
       {tab==="today" && (
@@ -1279,7 +1354,7 @@ export default function App() {
             <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:10,padding:"32px 20px",textAlign:"center"}}>
               <div style={{fontFamily:F.cond,fontSize:16,fontWeight:700,color:C.mid,marginBottom:8}}>No Contacts Loaded</div>
               <div style={{fontFamily:F.mono,fontSize:10,color:C.light,marginBottom:20}}>Upload a CSV or tab-delimited file. Headers map to: first_name, last_name, phone, email, note_rate, etc. Legacy headers (First Name, Last Name…) also supported. Up to 5,000 rows.</div>
-              <input ref={fRef} type="file" accept=".csv,.txt,.tsv" onChange={handleFile} style={{display:"none"}}/>
+              <input ref={fRef} type="file" accept=".csv,.txt,.tsv" onChange={handleFileSelect} style={{display:"none"}}/>
               <button onClick={()=>fRef.current?.click()} style={{...btnP,maxWidth:240,margin:"0 auto"}}>Upload Contact File</button>
             </div>
           ) : (
@@ -1287,7 +1362,7 @@ export default function App() {
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
                 <span style={{fontFamily:F.mono,fontSize:10,color:C.mid}}>{filtC.length} of {contacts.length} contacts</span>
                 <button onClick={()=>fRef.current?.click()} style={{fontFamily:F.mono,fontSize:9,padding:"4px 8px",borderRadius:4,border:`1px solid ${C.rule}`,background:C.card,color:C.mid,cursor:"pointer"}}>Replace</button>
-                <input ref={fRef} type="file" accept=".csv,.txt,.tsv" onChange={handleFile} style={{display:"none"}}/>
+                <input ref={fRef} type="file" accept=".csv,.txt,.tsv" onChange={handleFileSelect} style={{display:"none"}}/>
               </div>
               {selC ? (
                 <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:10,padding:"18px 16px"}}>
@@ -1379,7 +1454,7 @@ export default function App() {
           {history.length===0 ? (
             <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:"24px 16px",textAlign:"center",fontFamily:F.mono,fontSize:11,color:C.light}}>No history yet. Complete your first day to start the log.</div>
           ) : history.slice(0,30).map((entry,i)=>{
-            const hit=ACTS.filter(a=>a.goal>0).every(a=>(entry.counts?.[a.id]||0)>=a.goal)&&entry.pb;
+            const hit=[PRIMARY,APPS_ACT,...ACTS.filter(a=>a.goal>0)].every(a=>(entry.counts?.[a.id]||0)>=a.goal)&&entry.pb;
             return (
               <div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:hit?C.greenBg:C.card,border:`1px solid ${hit?C.greenBd:C.rule}`,borderRadius:8,padding:"10px 14px",marginBottom:5}}>
                 <div>
@@ -1531,12 +1606,16 @@ export default function App() {
         </div>
       )}
 
-      {/* Footer */}
-      <div style={{marginTop:28,paddingTop:14,borderTop:`1px solid ${C.rule}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-        <span style={{fontFamily:F.mono,fontSize:9,color:C.light,letterSpacing:"0.1em"}}>GET UNLOCKED PRODUCER</span>
-        <button onClick={signOut} style={{fontFamily:F.mono,fontSize:9,color:C.light,background:"transparent",border:"none",cursor:"pointer",letterSpacing:"0.05em",padding:0}}>Sign Out</button>
-        <span style={{fontFamily:F.mono,fontSize:9,color:C.mid,letterSpacing:"0.1em"}}>GRAHAM FINANCIAL</span>
-      </div>
+      {/* Footer — mobile only */}
+      {!isWide && (
+        <div style={{marginTop:28,paddingTop:14,borderTop:`1px solid ${C.rule}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <span style={{fontFamily:F.mono,fontSize:9,color:C.light,letterSpacing:"0.1em"}}>GET UNLOCKED PRODUCER</span>
+          <button onClick={signOut} style={{fontFamily:F.mono,fontSize:9,color:C.light,background:"transparent",border:"none",cursor:"pointer",letterSpacing:"0.05em",padding:0}}>Sign Out</button>
+          <span style={{fontFamily:F.mono,fontSize:9,color:C.mid,letterSpacing:"0.1em"}}>GRAHAM FINANCIAL</span>
+        </div>
+      )}
+        </div>{/* /main content */}
+      </div>{/* /layout wrapper */}
     </div>
   );
 }
