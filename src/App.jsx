@@ -353,6 +353,9 @@ export default function App() {
   const [authPassword, setAuthPassword] = useState("");
   const [authError, setAuthError] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
+  const [authNewPassword, setAuthNewPassword] = useState("");
+  const [authResetSent, setAuthResetSent] = useState(false);
+  const [isRecovering, setIsRecovering] = useState(false);
   const [dataLoading, setDataLoading] = useState(false);
   const userRef = useRef(null);
 
@@ -425,8 +428,9 @@ export default function App() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       const u = session?.user || null;
       setUser(u); userRef.current = u;
+      if (event === "PASSWORD_RECOVERY") { setIsRecovering(true); setDataLoading(false); setAuthReady(true); return; }
       if (event === "SIGNED_IN") loadUserData(u.id);
-      if (event === "SIGNED_OUT") { setAuthReady(true); setDataLoading(false); }
+      if (event === "SIGNED_OUT") { setAuthReady(true); setDataLoading(false); setIsRecovering(false); }
     });
     const handler = (e) => { e.preventDefault(); installPromptRef.current = e; };
     window.addEventListener("beforeinstallprompt", handler);
@@ -758,6 +762,26 @@ export default function App() {
   }
 
   // ── Auth action ───────────────────────────────────────────────────────────────
+  async function handleResetRequest() {
+    setAuthLoading(true); setAuthError("");
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(authEmail, { redirectTo: "https://getunlocked-producer.vercel.app" });
+      if (error) throw error;
+      setAuthResetSent(true);
+    } catch(e) { setAuthError(e.message || "Failed to send reset email"); }
+    finally { setAuthLoading(false); }
+  }
+  async function handleSetNewPassword() {
+    if (authNewPassword.length < 6) { setAuthError("Password must be at least 6 characters"); return; }
+    setAuthLoading(true); setAuthError("");
+    try {
+      const { error } = await supabase.auth.updateUser({ password: authNewPassword });
+      if (error) throw error;
+      setIsRecovering(false); setAuthNewPassword(""); setAuthError("");
+      if (userRef.current) loadUserData(userRef.current.id);
+    } catch(e) { setAuthError(e.message || "Failed to update password"); }
+    finally { setAuthLoading(false); }
+  }
   async function handleAuth() {
     setAuthLoading(true); setAuthError("");
     try {
@@ -771,7 +795,7 @@ export default function App() {
     } catch(e) { setAuthError(e.message||"Authentication failed"); }
     finally { setAuthLoading(false); }
   }
-  async function signOut() { await supabase.auth.signOut(); setContacts([]); setHistory([]); setProfile({name:"",partnerName:"",partnerPhone:"",avgCommission:4000,baselineClosings:2}); setIsAdmin(false); setCounts({}); setPb(false); setSched(null); setAccepted(false); setLoTabs({}); setLoExpanded({}); }
+  async function signOut() { await supabase.auth.signOut(); setContacts([]); setHistory([]); setProfile({name:"",partnerName:"",partnerPhone:"",avgCommission:4000,baselineClosings:2}); setIsAdmin(false); setCounts({}); setPb(false); setSched(null); setAccepted(false); setLoTabs({}); setLoExpanded({}); setIsRecovering(false); }
 
 
   // ════════════════════════════════════════════════════════════════════════════
@@ -788,6 +812,31 @@ export default function App() {
     );
   }
 
+  // ── Recover screen (password reset link clicked) ─────────────────────────────
+  if (isRecovering) {
+    return (
+      <div style={{background:C.bg,minHeight:"100vh",padding:"40px 20px",fontFamily:F.body}}>
+        <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"/>
+        <div style={{maxWidth:400,margin:"0 auto"}}>
+          <div style={{fontFamily:F.cond,fontSize:11,fontWeight:600,letterSpacing:"0.2em",textTransform:"uppercase",color:C.light,marginBottom:6}}>Get Unlocked Producer</div>
+          <div style={{fontFamily:F.cond,fontSize:28,fontWeight:800,color:C.ink,marginBottom:28,lineHeight:1}}>
+            SET <span style={{color:C.green}}>PASSWORD</span>
+          </div>
+          <div style={{background:C.card,borderRadius:10,border:`1px solid ${C.rule}`,padding:"24px 20px"}}>
+            <Label>New Password</Label>
+            <input type="password" placeholder="6+ characters" value={authNewPassword} onChange={e=>{setAuthNewPassword(e.target.value);setAuthError("");}}
+              style={{width:"100%",padding:"12px 14px",borderRadius:7,border:`1px solid ${authError?C.red:C.rule}`,background:C.bg,fontFamily:F.body,fontSize:14,color:C.ink,outline:"none",marginBottom:authError?8:20,boxSizing:"border-box"}}/>
+            {authError && <div style={{fontFamily:F.mono,fontSize:10,color:C.red,marginBottom:14}}>{authError}</div>}
+            <button onClick={handleSetNewPassword} disabled={authLoading||authNewPassword.length<6}
+              style={{...btnP,opacity:(authLoading||authNewPassword.length<6)?0.4:1}}>
+              {authLoading?"...":"Set Password →"}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // ── Auth screen ───────────────────────────────────────────────────────────────
   if (!user) {
     return (
@@ -796,26 +845,57 @@ export default function App() {
         <div style={{maxWidth:400,margin:"0 auto"}}>
           <div style={{fontFamily:F.cond,fontSize:11,fontWeight:600,letterSpacing:"0.2em",textTransform:"uppercase",color:C.light,marginBottom:6}}>Get Unlocked Producer</div>
           <div style={{fontFamily:F.cond,fontSize:28,fontWeight:800,color:C.ink,marginBottom:28,lineHeight:1}}>
-            {authMode==="signin"?"WELCOME":"CREATE"} <span style={{color:C.green}}>{authMode==="signin"?"BACK":"ACCOUNT"}</span>
+            {authMode==="reset"?"FORGOT":(authMode==="signin"?"WELCOME":"CREATE")} <span style={{color:C.green}}>{authMode==="reset"?"PASSWORD":(authMode==="signin"?"BACK":"ACCOUNT")}</span>
           </div>
           <div style={{background:C.card,borderRadius:10,border:`1px solid ${C.rule}`,padding:"24px 20px"}}>
-            <Label>Email</Label>
-            <input type="email" placeholder="you@email.com" value={authEmail} onChange={e=>{setAuthEmail(e.target.value);setAuthError("");}}
-              style={{width:"100%",padding:"12px 14px",borderRadius:7,border:`1px solid ${C.rule}`,background:C.bg,fontFamily:F.body,fontSize:14,color:C.ink,outline:"none",marginBottom:16,boxSizing:"border-box"}}/>
-            <Label>Password</Label>
-            <input type="password" placeholder={authMode==="signup"?"6+ characters":"••••••••"} value={authPassword} onChange={e=>{setAuthPassword(e.target.value);setAuthError("");}}
-              style={{width:"100%",padding:"12px 14px",borderRadius:7,border:`1px solid ${authError?C.red:C.rule}`,background:C.bg,fontFamily:F.body,fontSize:14,color:C.ink,outline:"none",marginBottom:authError?8:20,boxSizing:"border-box"}}/>
-            {authError && <div style={{fontFamily:F.mono,fontSize:10,color:C.red,marginBottom:14}}>{authError}</div>}
-            <button onClick={handleAuth} disabled={authLoading||!authEmail||!authPassword}
-              style={{...btnP,opacity:(authLoading||!authEmail||!authPassword)?0.4:1}}>
-              {authLoading?"...":(authMode==="signin"?"Sign In →":"Create Account →")}
-            </button>
-            <div style={{textAlign:"center",marginTop:16,fontFamily:F.mono,fontSize:10,color:C.light}}>
-              {authMode==="signin"?"Don't have an account?":"Already have an account?"}{" "}
-              <span onClick={()=>{setAuthMode(authMode==="signin"?"signup":"signin");setAuthError("");}} style={{color:C.green,cursor:"pointer",textDecoration:"underline"}}>
-                {authMode==="signin"?"Create one":"Sign in"}
-              </span>
-            </div>
+            {authMode==="reset" ? (
+              authResetSent ? (
+                <div>
+                  <div style={{fontFamily:F.mono,fontSize:11,color:C.green,marginBottom:10}}>✓ Reset email sent!</div>
+                  <div style={{fontFamily:F.mono,fontSize:10,color:C.mid,marginBottom:20}}>Check your inbox and click the link to set a new password.</div>
+                  <span onClick={()=>{setAuthMode("signin");setAuthResetSent(false);setAuthError("");}} style={{fontFamily:F.mono,fontSize:10,color:C.green,cursor:"pointer",textDecoration:"underline"}}>← Back to Sign In</span>
+                </div>
+              ) : (
+                <div>
+                  <Label>Email</Label>
+                  <input type="email" placeholder="you@email.com" value={authEmail} onChange={e=>{setAuthEmail(e.target.value);setAuthError("");}}
+                    style={{width:"100%",padding:"12px 14px",borderRadius:7,border:`1px solid ${authError?C.red:C.rule}`,background:C.bg,fontFamily:F.body,fontSize:14,color:C.ink,outline:"none",marginBottom:authError?8:20,boxSizing:"border-box"}}/>
+                  {authError && <div style={{fontFamily:F.mono,fontSize:10,color:C.red,marginBottom:14}}>{authError}</div>}
+                  <button onClick={handleResetRequest} disabled={authLoading||!authEmail}
+                    style={{...btnP,opacity:(authLoading||!authEmail)?0.4:1}}>
+                    {authLoading?"...":"Send Reset Email →"}
+                  </button>
+                  <div style={{textAlign:"center",marginTop:16,fontFamily:F.mono,fontSize:10,color:C.light}}>
+                    <span onClick={()=>{setAuthMode("signin");setAuthError("");}} style={{color:C.green,cursor:"pointer",textDecoration:"underline"}}>← Back to Sign In</span>
+                  </div>
+                </div>
+              )
+            ) : (
+              <div>
+                <Label>Email</Label>
+                <input type="email" placeholder="you@email.com" value={authEmail} onChange={e=>{setAuthEmail(e.target.value);setAuthError("");}}
+                  style={{width:"100%",padding:"12px 14px",borderRadius:7,border:`1px solid ${C.rule}`,background:C.bg,fontFamily:F.body,fontSize:14,color:C.ink,outline:"none",marginBottom:16,boxSizing:"border-box"}}/>
+                <Label>Password</Label>
+                <input type="password" placeholder={authMode==="signup"?"6+ characters":"••••••••"} value={authPassword} onChange={e=>{setAuthPassword(e.target.value);setAuthError("");}}
+                  style={{width:"100%",padding:"12px 14px",borderRadius:7,border:`1px solid ${authError?C.red:C.rule}`,background:C.bg,fontFamily:F.body,fontSize:14,color:C.ink,outline:"none",marginBottom:authError?8:20,boxSizing:"border-box"}}/>
+                {authError && <div style={{fontFamily:F.mono,fontSize:10,color:C.red,marginBottom:14}}>{authError}</div>}
+                <button onClick={handleAuth} disabled={authLoading||!authEmail||!authPassword}
+                  style={{...btnP,opacity:(authLoading||!authEmail||!authPassword)?0.4:1}}>
+                  {authLoading?"...":(authMode==="signin"?"Sign In →":"Create Account →")}
+                </button>
+                {authMode==="signin" && (
+                  <div style={{textAlign:"center",marginTop:12,fontFamily:F.mono,fontSize:10}}>
+                    <span onClick={()=>{setAuthMode("reset");setAuthError("");}} style={{color:C.light,cursor:"pointer",textDecoration:"underline"}}>Forgot password?</span>
+                  </div>
+                )}
+                <div style={{textAlign:"center",marginTop:12,fontFamily:F.mono,fontSize:10,color:C.light}}>
+                  {authMode==="signin"?"Don't have an account?":"Already have an account?"}{" "}
+                  <span onClick={()=>{setAuthMode(authMode==="signin"?"signup":"signin");setAuthError("");}} style={{color:C.green,cursor:"pointer",textDecoration:"underline"}}>
+                    {authMode==="signin"?"Create one":"Sign in"}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
