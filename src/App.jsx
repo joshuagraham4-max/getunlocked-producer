@@ -455,7 +455,7 @@ export default function App() {
       const ydStr = yd.toISOString().slice(0,10);
       const { data: ydData } = await supabase.from("daily_logs").select("tomorrow").eq("user_id",userId).eq("date",ydStr).maybeSingle();
       if (ydData?.tomorrow) {
-        const yp = (ydData.tomorrow||[]).filter(p=>p&&p.trim());
+        const yp = Array.isArray(ydData.tomorrow) ? ydData.tomorrow.filter(p=>p&&p.trim()) : [];
         if (yp.length) setYdayP(yp);
       }
       // Today's log
