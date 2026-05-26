@@ -404,6 +404,8 @@ export default function App() {
   const [teamLoading, setTeamLoading] = useState(false);
   const [inviteCopied, setInviteCopied] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [loTabs, setLoTabs] = useState({});       // per-card Today/MTD/YTD tab
+  const [loExpanded, setLoExpanded] = useState({}); // per-card expand/collapse
 
   // ── PWA install ───────────────────────────────────────────────────────────────
   const installPromptRef = useRef(null);
@@ -531,13 +533,15 @@ export default function App() {
       const { data: logs } = await supabase.from("daily_logs").select("user_id,date,counts,pb");
       const todayStr = todayKey();
       const monthStart = todayStr.slice(0,7) + "-01";
+      const yearStart  = todayStr.slice(0,4) + "-01-01";
+      const METRICS = ["conversations","apps","closings","preapprovals","database","realtor","ioi_posts","dms","linkedin","handwritten_notes"];
+      const sumMetrics = (logsArr) => Object.fromEntries(METRICS.map(k => [k, logsArr.reduce((s,l) => s + (l.counts?.[k]||0), 0)]));
       const team = (profiles||[]).map(p => {
         const userLogs = (logs||[]).filter(l => l.user_id === p.id);
         const todayLog = userLogs.find(l => l.date === todayStr) || {};
-        const monthClosings = userLogs.filter(l => l.date >= monthStart).reduce((s,l) => s + (l.counts?.closings||0), 0);
-        const allTimeCalls = userLogs.reduce((s,l) => s + (l.counts?.conversations||0), 0);
-        const allTimeClosings = userLogs.reduce((s,l) => s + (l.counts?.closings||0), 0);
-        return { ...p, todayLog, monthClosings, allTimeCalls, allTimeClosings };
+        const mtd = sumMetrics(userLogs.filter(l => l.date >= monthStart));
+        const ytd = sumMetrics(userLogs.filter(l => l.date >= yearStart));
+        return { ...p, todayLog, mtd, ytd };
       });
       setTeamData(team);
     } finally {
@@ -767,7 +771,7 @@ export default function App() {
     } catch(e) { setAuthError(e.message||"Authentication failed"); }
     finally { setAuthLoading(false); }
   }
-  async function signOut() { await supabase.auth.signOut(); setContacts([]); setHistory([]); setProfile({name:"",partnerName:"",partnerPhone:"",avgCommission:4000,baselineClosings:2}); setIsAdmin(false); setCounts({}); setPb(false); setSched(null); setAccepted(false); }
+  async function signOut() { await supabase.auth.signOut(); setContacts([]); setHistory([]); setProfile({name:"",partnerName:"",partnerPhone:"",avgCommission:4000,baselineClosings:2}); setIsAdmin(false); setCounts({}); setPb(false); setSched(null); setAccepted(false); setLoTabs({}); setLoExpanded({}); }
 
 
   // ════════════════════════════════════════════════════════════════════════════
@@ -1338,46 +1342,83 @@ export default function App() {
                 <div style={{textAlign:"center",padding:32,fontFamily:F.mono,fontSize:11,color:C.light}}>No LO accounts yet. Share the invite link above.</div>
               ) : (
                 teamData.map(lo => {
-                  const c = lo.todayLog?.counts || {};
-                  const convos = c.conversations||0;
-                  const apps   = c.apps||0;
-                  const closes = c.closings||0;
-                  const preapp = c.preapprovals||0;
-                  const dbOut  = c.database||0;
-                  const rtOut  = c.realtor||0;
-                  const hasPB  = lo.todayLog?.pb;
-                  const statRow = (label, val, goal) => (
-                    <div key={label} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"5px 0",borderBottom:`1px solid ${C.rule}`}}>
-                      <span style={{fontFamily:F.mono,fontSize:10,color:C.light}}>{label}</span>
-                      <span style={{fontFamily:F.cond,fontSize:13,fontWeight:700,color:goal&&val>=goal?C.green:C.ink}}>{val}{goal?` / ${goal}`:""}</span>
-                    </div>
+                  const activeLoTab = loTabs[lo.id] || "today";
+                  const isExpanded  = loExpanded[lo.id] || false;
+                  const setLoTab    = (t) => setLoTabs(prev => ({...prev, [lo.id]: t}));
+                  const toggleExp   = () => setLoExpanded(prev => ({...prev, [lo.id]: !prev[lo.id]}));
+
+                  // Pick data source based on active tab
+                  const c = activeLoTab === "today"
+                    ? (lo.todayLog?.counts || {})
+                    : activeLoTab === "mtd" ? (lo.mtd || {}) : (lo.ytd || {});
+                  const hasPB = lo.todayLog?.pb;
+
+                  // Metric definitions: [label, key, goal (today only)]
+                  const CORE = [
+                    ["Phone Conversations", "conversations", 5],
+                    ["Applications Taken",  "apps",          1],
+                    ["Closings",            "closings",      0],
+                    ["Pre-Approvals",       "preapprovals",  0],
+                  ];
+                  const MORE = [
+                    ["Database Outreach",   "database",         10],
+                    ["Realtor Outreach",    "realtor",          5],
+                    ["IOI Posts",           "ioi_posts",        0],
+                    ["DMs",                 "dms",              0],
+                    ["LinkedIn",            "linkedin",         0],
+                    ["Handwritten Notes",   "handwritten_notes",0],
+                  ];
+
+                  const statRow = (label, key, goal) => {
+                    const val = c[key] || 0;
+                    const showGoal = activeLoTab === "today" && goal > 0;
+                    return (
+                      <div key={label} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"5px 0",borderBottom:`1px solid ${C.rule}`}}>
+                        <span style={{fontFamily:F.mono,fontSize:10,color:C.light}}>{label}</span>
+                        <span style={{fontFamily:F.cond,fontSize:13,fontWeight:700,color:showGoal&&val>=goal?C.green:C.ink}}>{val}{showGoal?` / ${goal}`:""}</span>
+                      </div>
+                    );
+                  };
+
+                  const tabBtn = (label, key) => (
+                    <button key={key} onClick={()=>setLoTab(key)} style={{fontFamily:F.mono,fontSize:10,letterSpacing:"0.06em",padding:"4px 10px",borderRadius:4,border:`1px solid ${activeLoTab===key?C.green:C.rule}`,background:activeLoTab===key?C.greenBg||"#eef6f1":"transparent",color:activeLoTab===key?C.green:C.light,cursor:"pointer"}}>
+                      {label}
+                    </button>
                   );
+
                   return (
                     <div key={lo.id} style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:10,padding:"16px",marginBottom:14}}>
                       {/* LO header */}
-                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:12,paddingBottom:10,borderBottom:`2px solid ${C.rule}`}}>
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:10,paddingBottom:10,borderBottom:`2px solid ${C.rule}`}}>
                         <div style={{fontFamily:F.cond,fontSize:16,fontWeight:700,color:C.ink,letterSpacing:"0.05em",textTransform:"uppercase"}}>{lo.name||lo.email}</div>
                         {lo.is_admin && <span style={{fontFamily:F.mono,fontSize:9,color:C.green,background:C.greenBg||"#eef6f1",padding:"2px 6px",borderRadius:4}}>ADMIN</span>}
                       </div>
 
-                      {/* TODAY section */}
-                      <div style={{fontFamily:F.cond,fontSize:10,fontWeight:700,letterSpacing:"0.15em",textTransform:"uppercase",color:C.green,marginBottom:6}}>Today</div>
-                      {statRow("Phone Conversations", convos, 5)}
-                      {statRow("Applications Taken",  apps,   1)}
-                      {statRow("Database Outreach",   dbOut,  10)}
-                      {statRow("Realtor Outreach",    rtOut,  5)}
-                      {statRow("Closings Today",      closes, 0)}
-                      {statRow("Pre-Approvals",       preapp, 0)}
-                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"5px 0",borderBottom:`1px solid ${C.rule}`}}>
-                        <span style={{fontFamily:F.mono,fontSize:10,color:C.light}}>Power Blocks Done</span>
-                        <span style={{fontFamily:F.cond,fontSize:13,fontWeight:700,color:hasPB?C.green:C.ink}}>{hasPB?"✓ Yes":"—"}</span>
+                      {/* Period tabs */}
+                      <div style={{display:"flex",gap:6,marginBottom:12}}>
+                        {tabBtn("Today","today")}
+                        {tabBtn("MTD","mtd")}
+                        {tabBtn("YTD","ytd")}
                       </div>
 
-                      {/* MONTH & ALL-TIME */}
-                      <div style={{fontFamily:F.cond,fontSize:10,fontWeight:700,letterSpacing:"0.15em",textTransform:"uppercase",color:C.green,marginTop:12,marginBottom:6}}>Month &amp; All-Time</div>
-                      {statRow("Closings This Month",  lo.monthClosings, 0)}
-                      {statRow("All-Time Closings",    lo.allTimeClosings, 0)}
-                      {statRow("All-Time Conversations", lo.allTimeCalls, 0)}
+                      {/* Core 4 metrics */}
+                      {CORE.map(([label, key, goal]) => statRow(label, key, goal))}
+
+                      {/* Power Blocks (Today only) */}
+                      {activeLoTab === "today" && (
+                        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"5px 0",borderBottom:`1px solid ${C.rule}`}}>
+                          <span style={{fontFamily:F.mono,fontSize:10,color:C.light}}>Power Blocks Done</span>
+                          <span style={{fontFamily:F.cond,fontSize:13,fontWeight:700,color:hasPB?C.green:C.ink}}>{hasPB?"✓ Yes":"—"}</span>
+                        </div>
+                      )}
+
+                      {/* Expanded metrics */}
+                      {isExpanded && MORE.map(([label, key, goal]) => statRow(label, key, goal))}
+
+                      {/* More / Less toggle */}
+                      <button onClick={toggleExp} style={{marginTop:8,fontFamily:F.mono,fontSize:10,color:C.light,background:"transparent",border:"none",cursor:"pointer",padding:"4px 0",letterSpacing:"0.05em"}}>
+                        {isExpanded ? "▲ Less" : "▼ More metrics"}
+                      </button>
                     </div>
                   );
                 })
