@@ -141,8 +141,10 @@ const ACTS = [
   {id:"dms",        label:"DMs Sent",                       goal:5,  sub:"Follow-up DMs to post engagers",                            section:"feed"},
   {id:"linkedin",   label:"LinkedIn Agent Adds",            goal:20, sub:"Connect with 20 agents daily",                             section:"feed", special:"linkedin"},
   {id:"notes",      label:"Handwritten Notes Mailed",       goal:3,  sub:"One per phone call — highest open rate",                    section:"feed"},
-  {id:"preapprovals",label:"Pre-Approvals Issued",          goal:0,  sub:"Issued today",                                              section:"outcome"},
-  {id:"closings",   label:"Closings",                       goal:0,  sub:"Files funded today",                                       section:"outcome"},
+  {id:"preapprovals", label:"Pre-Approvals Issued",          goal:0, sub:"Issued today",                   section:"outcome"},
+  {id:"closings",     label:"Closings",                       goal:0, sub:"Files funded today",             section:"outcome"},
+  {id:"locked",       label:"Loans Locked",                   goal:0, sub:"Loans locked today — accounts for time off phones", section:"outcome"},
+  {id:"submitted",    label:"Submitted to Processing",        goal:0, sub:"Files turned in today — accounts for time off phones", section:"outcome"},
 ];
 
 const btnP = {padding:"13px 24px",borderRadius:7,border:`1.5px solid ${C.green}`,background:C.green,color:"#fff",fontFamily:F.cond,fontSize:15,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",cursor:"pointer",width:"100%"};
@@ -219,34 +221,76 @@ function ActRow({ act, val, onSet }) {
 
 const SCRIPTS_DATA = {
   reconnect: {
-    label:"Database Reconnect", sub:"Past client or sphere", color:C.green,
+    label:"Database Reconnect", sub:"Past clients & sphere", color:C.green,
     scenarios:[
-      {label:"Number update opener", content:"Hey [name] — been a minute. Just updated my number and wanted to make sure you still had it.\n\n[If they respond] — How's everything going with the house?\n\n[Natural] — Are you or anyone you know thinking about buying, selling, or doing anything with real estate in the next little while?\n\nNOTES: Lead with the number update — nobody screens that. Don't pitch."},
-      {label:"Rate / equity check-in", content:"Hey [name] — [your name] here. Quick question — do you remember what rate you locked in on your loan?\n\nI'm checking in with a few past clients whose situations have changed. Not a pitch — just a 5-minute numbers conversation.\n\nNOTES: You have their file. This is genuine value."},
+      {label:"Number update opener", content:"Hey [name] — been a minute. Just updated my number and wanted to make sure you still had it. I'm still doing loans here in Colorado — a lot going on in the market right now most people don't know about.\n\n[If they respond] — How's everything going with the house? You still in [city]?\n\n[Natural] — Are you or anyone you know thinking about buying, selling, or doing anything with real estate in the next little while?\n\nNOTES: Nobody screens a number update text. Don't pitch anything. Just reconnect. The question comes naturally after they respond."},
+      {label:"Rate check-in", content:"Hey [name] — [your name] here. Quick question — do you remember what rate you locked in on your loan?\n\nI'm pulling up a few past clients this week whose situations have changed and I want to make sure you're not leaving money on the table.\n\nNot a pitch — just a 5-minute numbers conversation. Worth a look?\n\nNOTES: You have their file. You know their rate. This is genuine value. If they're at 6.5%+ or have high-interest debt, the math often surprises them."},
+      {label:"Birthday touch", content:"Hey [name] — [your name]. Just wanted to say happy birthday — hope you're doing something good today.\n\nNOTES: That's it. No ask. No mortgage mention. This is a human touch. If they respond and ask how you are, it becomes a natural conversation. Never force a mortgage angle on a birthday text."},
+      {label:"Market update", content:"Hey [name] — [your name] here. Quick heads up — rates actually moved in an interesting direction this week. Wanted to make sure you had the real picture, not what the news is saying.\n\nGot 5 minutes this week to chat?\n\nNOTES: Only send this when there's actually something worth talking about. Specificity and honesty are what make this land."},
     ]
   },
   agentStuck: {
     label:"Agent — Stuck Loan", sub:"Deal in trouble or fell apart", color:C.amber,
     scenarios:[
-      {label:"Cold opener", content:"Hey [agent name] — [your name]. Heard you had a deal fall apart recently. That's brutal.\n\nQuick question — was it a lender problem or a borrower problem?\n\n[Lender] — That's my specialty. Complex files, self-employed income, VA loans, credit challenges — the stuff most lenders send back. What happened?\n\n[Borrower] — Is the buyer still motivated? There might be a path.\n\nNOTES: Don't pitch. Ask what happened. Let them vent."},
-      {label:"Active deal in trouble", content:"Hey [agent name] — [your name]. I specialize in rescuing files that other lenders can't close.\n\nDo you have a file right now that's in trouble?\n\nBecause that's exactly what I do.\n\nNOTES: Be direct. You're offering a lifeline."},
+      {label:"Deal fell apart", content:"Hey [agent name] — [your name]. Heard you had a deal fall apart recently. That's brutal, I'm sorry.\n\nQuick question — was it a lender problem or a borrower problem?\n\n[Lender] — That's actually my specialty. Complex files, self-employed income, VA loans, credit challenges — the stuff most lenders send back. What happened with the file?\n\n[Borrower] — Got it. Is the buyer still motivated? There might be a path to get them there faster than you think.\n\nNOTES: Don't pitch. Ask what happened. Let them vent — that's where the opening is."},
+      {label:"Active deal in trouble", content:"Hey [agent name] — [your name]. I specialize in rescuing files that other lenders can't close. Self-employed, VA, credit challenges, complex income.\n\nI'm not trying to take your lender relationship. I'm asking: do you have a file right now that's in trouble?\n\nBecause that's exactly what I do.\n\nNOTES: Agents with a deal in danger are in pain. You're offering a lifeline. Be direct and calm."},
+      {label:"Close call follow-up", content:"Hey [agent name] — [your name]. I heard your deal almost didn't make it — glad it closed.\n\nQuestion for you: what would have happened to your commission if it had fallen through 3 days before closing?\n\nI work with agents who've been in that position. I'm usually the guy they call when there's no backup plan.\n\nWorth a 10-minute conversation?\n\nNOTES: The near-miss is the hook. They know exactly how that felt."},
+      {label:"Referral from title", content:"Hey [agent name] — [your name] here. [Title rep name] mentioned you had a tough file close recently and you might be open to talking to a lender who handles the hard ones.\n\nI specialize in the deals most people pass on.\n\nGot 10 minutes this week?\n\nNOTES: Warm intro from title or escrow is gold. Name-drop the referral source in the first sentence."},
     ]
   },
   agentNew: {
-    label:"Agent — New Partner", sub:"Cold or warm outreach", color:C.blue,
+    label:"Agent — New Partner", sub:"Building new agent relationships", color:C.blue,
     scenarios:[
-      {label:"Cold outreach", content:"Hey [agent name] — [your name] here. I've been in Colorado mortgages 25 years. I specialize in the files most lenders won't touch.\n\nI'm looking for two or three agents who want a consistent pipeline of pre-qualified buyers sent their direction.\n\nAre you mostly working with buyers right now, or listings?\n\nNOTES: One question, then stop."},
-      {label:"LinkedIn follow-up", content:"Hey [name] — thanks for connecting.\n\nI send pre-qualified buyers to agent partners. No leads to chase — just buyers who are ready.\n\nWorth a 10-minute call?\n\nNOTES: Short. Specific. One ask."},
+      {label:"Cold call opener", content:"Hey [agent name] — [your name] here. I'm a local lender, been in Colorado mortgages 25 years. I specialize in the files most lenders won't touch — VA, self-employed, credit challenges, complex income.\n\nI'm not calling to replace whoever you're working with. I'm looking for two or three agents who want a consistent pipeline of pre-qualified buyers sent their direction. No cost to them.\n\nOne question — are you mostly working with buyers right now, or listings?\n\nNOTES: One question then stop. Don't explain the program. Let them ask."},
+      {label:"LinkedIn follow-up", content:"Hey [name] — thanks for connecting. I see you're in [area] real estate.\n\nI do something a little different — I send pre-qualified buyers to agent partners. No leads to chase, no unqualified tire-kickers. Just buyers who are ready.\n\nWorth a 10-minute call?\n\nNOTES: Short. Specific. One ask. Don't explain more than this in writing."},
+      {label:"Open house follow-up", content:"Hey [agent name] — [your name]. Stopped by your open house at [address] on [day]. Nice property.\n\nQuick question — how many of the people who came through were pre-approved?\n\nI ask because I work with a lot of buyers in that price range. If you ever have serious buyers who need a lender who can actually close, I'd be glad to help.\n\nNOTES: Specific to something they just did. The pre-approval question is genuine — most open house visitors aren't pre-approved."},
+      {label:"After a referral closes", content:"Hey [agent name] — [your name]. Just wanted to say thanks — [buyer name]'s loan closed clean. They're great people.\n\nI always try to close the way I'd want someone to close a loan for my own family. Hoping we can do more together.\n\nAnything in your pipeline right now that I can help with?\n\nNOTES: Always follow up after a deal closes. This is how you become their first call next time."},
     ]
   },
   va: {
-    label:"VA Buyer", sub:"Veteran thinking about buying", color:C.purple,
+    label:"VA Buyer", sub:"Veterans & active military", color:C.purple,
     scenarios:[
-      {label:"First-time benefit", content:"Hey [name] — [your name], I specialize in VA loans here in Colorado.\n\nHave you ever used your VA home loan benefit before?\n\n[No] — Most veterans don't realize what they have. Zero down, no PMI, competitive rates. What's been holding you back from buying?\n\nNOTES: Ask what's in the way. Usually it's the down payment myth."},
-      {label:"Re-use benefit", content:"Hey [name] — quick question — did you use your VA benefit on your current home?\n\n[Yes] — A lot of veterans don't realize the benefit can be used again. Takes me five minutes to look up what you've got available. Want me to pull that up?\n\nNOTES: Most vets think it's one-time. Busting that myth is genuine value."},
+      {label:"First-time benefit", content:"Hey [name] — [your name], I specialize in VA loans here in Colorado. Someone mentioned you might be thinking about buying.\n\nQuick question — have you ever used your VA home loan benefit before?\n\n[No] — Most veterans don't realize what they actually have. Zero down payment, no PMI, competitive rates, and the government backs the loan. It's genuinely the best loan product available. What's been holding you back from buying?\n\nNOTES: Don't pitch features. Ask what's in the way. Usually it's down payment — and that's the myth you get to bust."},
+      {label:"Re-use benefit", content:"Hey [name] — [your name] here, I do VA loans in Colorado. Quick question — did you use your VA benefit on your current home?\n\n[Yes] — A lot of veterans don't realize the benefit can be used again. If you sold that home or paid it off, your entitlement may be restored. Takes me about five minutes to look up exactly what you've got available. Want me to pull that up?\n\nNOTES: Most vets think the benefit is one-time. Busting that myth is genuine value."},
+      {label:"Active duty PCS move", content:"Hey [name] — [your name]. I heard you might be PCS-ing to [location] soon. I specialize in VA loans and I work with a lot of active duty families going through this exact situation.\n\nA few things most people don't know about buying during a PCS that can save you significant money. Worth a quick call?\n\nNOTES: PCS timelines are stressful. Position yourself as the expert who's done this before."},
+      {label:"Surviving spouse", content:"Hey [name] — [your name] here. I work with VA loans and someone mentioned you might be eligible for a VA home loan benefit through your spouse's service.\n\nI don't want to assume anything, but if that's the case, the benefit is significant and most people in your situation don't know they qualify.\n\nWould it be okay if I explained what you might be entitled to?\n\nNOTES: Be respectful and direct. Lead with information, not a sales pitch."},
+    ]
+  },
+  selfEmployed: {
+    label:"Self-Employed", sub:"1099, business owners, complex income", color:C.teal,
+    scenarios:[
+      {label:"Turned down elsewhere", content:"Hey [name] — [your name] here. I heard you were looking at buying but ran into some roadblocks with your income documentation.\n\nQuick question — were you told you don't qualify, or just that it was complicated?\n\nBecause those are two very different things. I specialize in self-employed borrowers — 1099 income, business owners, complex tax returns. Most of my clients were told no somewhere else first.\n\nGot 10 minutes?\n\nNOTES: The distinction between 'don't qualify' and 'complicated' is the opening. You solve complicated."},
+      {label:"Business owner outreach", content:"Hey [name] — [your name]. I work primarily with business owners and self-employed buyers in Colorado — the ones whose income doesn't fit a standard pay stub.\n\nMost lenders see a business owner's tax return and check out. I've spent 25 years learning how to read them the right way.\n\nAre you currently renting, or do you own?\n\nNOTES: Business owners get rejected constantly by lenders who don't understand their income. You're the exception. Lead with that."},
+      {label:"Bank statement program", content:"Hey [name] — [your name]. Quick question — have you ever heard of a bank statement loan?\n\nFor self-employed borrowers, instead of using tax returns, we can qualify based on 12-24 months of bank deposits. For a lot of business owners, this changes everything.\n\nIs that something you'd want to know more about?\n\nNOTES: Many self-employed buyers have never heard of this product. The question creates curiosity without being a pitch."},
+    ]
+  },
+  refi: {
+    label:"Refi Conversation", sub:"Past clients with rate or equity opportunity", color:C.red,
+    scenarios:[
+      {label:"High rate past client", content:"Hey [name] — [your name] here. I was going through my files this week and I noticed you locked in at [rate]%.\n\nWith where things are right now, I want to run some numbers with you — not because I'm pitching a refinance, but because I want to make sure you actually know your options.\n\nGot 10 minutes this week?\n\nNOTES: You have their rate. This is specific and credible. 'I was going through my files' signals you're paying attention, not mass-texting."},
+      {label:"Equity opportunity", content:"Hey [name] — [your name]. Quick question — do you have any idea what your home is worth right now versus what you paid?\n\nColorado values have moved significantly. A lot of people are sitting on equity they don't even realize they have, and there are ways to put that to work without touching your rate.\n\nWorth a 10-minute conversation?\n\nNOTES: Don't say 'cash-out refi' — that sounds like debt. Say 'put that equity to work.' Very different emotional response."},
+      {label:"Debt consolidation", content:"Hey [name] — [your name]. I'm going to ask you a weird question: what's your total monthly minimum payment on everything except your mortgage?\n\nCredit cards, car loans, student loans — add it up in your head.\n\nI ask because I've been working with homeowners lately who are doing something really smart with their equity that cuts that number significantly. And it's not what most people think.\n\nGot 10 minutes?\n\nNOTES: This is the blended rate conversation. Don't explain it in the opener — the mystery is the hook."},
+      {label:"Rate drop alert", content:"Hey [name] — [your name]. Rates moved this week in a way I don't see very often. I'm reaching out to a handful of past clients specifically because of where your current rate is.\n\nI'm not saying refinance — I'm saying let me run the numbers and show you what it looks like. You decide if it makes sense.\n\nGot 10 minutes?\n\nNOTES: Only send this when rates have actually moved meaningfully. Specificity and honesty are what make this land."},
+    ]
+  },
+  buyer: {
+    label:"First-Time Buyer", sub:"Renters & first-timers", color:C.olive,
+    scenarios:[
+      {label:"Renter outreach", content:"Hey [name] — [your name] here. Quick question — how long have you been renting your current place?\n\nI ask because depending on your income and credit, you might be a lot closer to owning than you think. And there are programs in Colorado specifically for first-time buyers that most people don't know exist.\n\nWould it be okay if I ran some quick numbers with you?\n\nNOTES: Don't assume they want to buy. Ask how long they've been renting — that tells you everything. Urgency comes from the math, not from pressure."},
+      {label:"Down payment concern", content:"Hey [name] — [your name]. I know saving for a down payment is one of the biggest things keeping people from buying right now.\n\nI want to show you something — there are programs in Colorado where the down payment is either very small or covered entirely. Most people don't know they qualify.\n\nGot 10 minutes this week?\n\nNOTES: Meet them where they are. The down payment is almost always the stated objection. Address it directly."},
+      {label:"Credit concern", content:"Hey [name] — [your name] here. I work with a lot of first-time buyers who think their credit isn't good enough to buy a home.\n\nMost of the time they're wrong — or they're closer than they think. And even when they're not, there's usually a 60-90 day path to get there.\n\nWould you be open to a quick conversation? No application, no commitment — just a real picture of where you stand.\n\nNOTES: 'No application, no commitment' removes the fear. People avoid lenders because they think it'll hurt their credit or lock them in. Bust that myth immediately."},
+    ]
+  },
+  dpa: {
+    label:"DPA / Assistance", sub:"CHFA, Heroes, Metro DPA", color:C.stone,
+    scenarios:[
+      {label:"CHFA intro", content:"Hey [name] — [your name] here. Have you ever heard of CHFA?\n\nIt's a Colorado program that helps first-time buyers with either a grant toward down payment or a silent second loan you don't have to pay back for years. A lot of people who use it didn't think they could buy.\n\nWould you want me to check if you qualify?\n\nNOTES: Keep it simple — don't explain all the details upfront. Just ask if they want to see if they qualify."},
+      {label:"Colorado Heroes", content:"Hey [name] — [your name]. Are you a teacher, nurse, firefighter, police officer, or military?\n\nThere's a Colorado program called Heroes that gives buyers in public service roles significant down payment assistance. It's one of the best programs in the state and most people who qualify don't know it exists.\n\nWant me to check if you qualify?\n\nNOTES: Lead with the profession list — it creates instant recognition. Short, specific, one ask."},
+      {label:"Metro DPA", content:"Hey [name] — [your name] here. Quick question — do you live or work in the Denver metro area?\n\nThere's a program called Metro DPA that provides down payment assistance — no first-time buyer requirement, and it forgives the assistance after 3 years.\n\nA lot of people think they don't have options. This is one they don't know about.\n\nWant me to see if you qualify?\n\nNOTES: 'No first-time buyer requirement' is the hook — it opens the door to move-up buyers and people who owned before."},
     ]
   },
 };
+
 function ScriptsTab() {
   const [active, setActive] = useState("reconnect");
   const [scenario, setScenario] = useState(0);
@@ -285,6 +329,9 @@ const IOI_DATA = {
       {title:"The Waiting Trap", content:"She called me last week and said she was going to wait another two years to buy.\n\nI asked her one question.\n\nShe called me back the next day ready to go.\n\nWhat's the one thing that keeps people from buying when they're actually ready?\n\n(It's not what you think.)"},
       {title:"The Payment Surprise", content:"Couple in [city]. Combined income $95K. Paying $2,200 in rent.\n\nThey thought buying was years away.\n\nIt wasn't.\n\nTheir mortgage payment ended up being less than their rent.\n\nHow many people are renting right now and don't know this?"},
       {title:"The 20% Myth", content:"Most people think they need 20% down to buy a house.\n\nThat number hasn't been required for decades.\n\nThere are programs in Colorado right now that require less than you probably spend on groceries in a month.\n\nAre you one of the people waiting on 20%?"},
+      {title:"The Credit Excuse", content:"He told me his credit wasn't good enough to buy.\n\nI pulled his scores.\n\nHe was 11 points away.\n\n60 days later he had keys.\n\nHow many people are renting right now because of a number that's closer than they think?"},
+      {title:"The Rent Receipt", content:"Every month you pay rent, you're paying someone else's mortgage.\n\nBuilding their equity.\n\nFunding their retirement.\n\nNot yours.\n\nAt what point does that math start bothering you?"},
+      {title:"The Rate Myth", content:"Everyone's waiting for rates to drop before they buy.\n\nHere's what they don't tell you: when rates drop, prices go up.\n\nThe people who bought while everyone else was waiting?\n\nThey refinance. The people who waited?\n\nThey compete against more buyers at higher prices.\n\nWhat are you actually waiting for?"},
     ]
   },
   agents: {
@@ -293,6 +340,9 @@ const IOI_DATA = {
       {title:"47 Days", content:"Agent called me Friday afternoon. Deal was supposed to close Monday.\n\nTheir lender had been \"working on it\" for 47 days.\n\nWe closed it in 9.\n\nWhat's a deal worth to an agent when it actually closes on time?"},
       {title:"71% Close Zero", content:"71% of real estate agents close zero deals in a year.\n\nThat's not a skill problem.\n\nThat's a pipeline problem.\n\nWhat would one pre-qualified buyer per month change for an agent who closed zero last year?"},
       {title:"The File Nobody Wants", content:"Self-employed. 1099 income. Just changed jobs. Credit not perfect.\n\nMost lenders see that and send them away.\n\nI see that and call them back.\n\nDo you have buyers who got turned down somewhere else?"},
+      {title:"The Call Back", content:"She had a buyer lose a deal at the 11th hour.\n\nLender couldn't perform.\n\nBuyer walked.\n\nShe called me 3 days later with another buyer in a similar situation.\n\nThat one closed.\n\nShe said: I just needed to know someone could actually do it.\n\nDo you have a lender you call when you need it to close?"},
+      {title:"The Commission Math", content:"What does a fallen deal cost you?\n\nNot just the commission. The time. The showings. The negotiation. The inspection. The relationship.\n\nI don't prevent every deal from falling. But I save a lot of them.\n\nWhat's that worth to you annually?"},
+      {title:"The Pre-Qual Problem", content:"Most lenders pre-qualify buyers in 10 minutes over the phone.\n\nThen the deal falls apart in underwriting.\n\nBecause pre-qualified isn't the same as pre-approved.\n\nThe agents who never have that problem have a different kind of lender.\n\nWhich one do you have?"},
     ]
   },
   homeowners: {
@@ -300,9 +350,34 @@ const IOI_DATA = {
     items:[
       {title:"The Rate Trap", content:"Woman called me last week. 2.75% mortgage.\n\nAlso paying $1,100/month in credit card interest.\n\nShe thought protecting her rate was the smart move.\n\nI showed her the math.\n\nAre you protecting a low rate while losing more somewhere else every month?"},
       {title:"Sitting On It", content:"Colorado home values are significantly higher than they were a few years ago.\n\nMost homeowners have no idea how much equity they're sitting on.\n\nThat equity is either working for you or it's just sitting there.\n\nDo you know what your home is worth today?"},
+      {title:"The Invisible Payment", content:"He was paying $1,400/month in minimums on credit cards.\n\nHe had $180,000 in equity.\n\nAfter we talked, his total debt payment dropped by $900/month.\n\nHe said: I didn't know that was possible.\n\nWhat's your equity doing right now?"},
+      {title:"The Second Job", content:"Most people work a second job to pay off debt.\n\nSome people use their house.\n\nSame result. Very different amount of effort.\n\nDoes your home know how hard it could be working for you?"},
+      {title:"The Renovation Trap", content:"They pulled $50,000 out of savings to remodel the kitchen.\n\nI asked them one question.\n\nThey wish they'd called me first.\n\nAre you about to spend money on your home that your home could actually be paying for?"},
+      {title:"The 3 AM Number", content:"You know that number you add up in your head at 3 AM?\n\nCredit cards. Car payment. Student loans.\n\nThe one that keeps you up.\n\nSome homeowners have figured out how to make that number disappear.\n\nNot by making more money. By asking a different question.\n\nWhat's your 3 AM number?"},
+    ]
+  },
+  selfEmployed: {
+    label:"Self-Employed", color:C.teal,
+    items:[
+      {title:"The Tax Return Problem", content:"He made $280,000 last year.\n\nHis tax return showed $47,000.\n\nEvery lender he talked to turned him down.\n\nI didn't.\n\nAre you self-employed and being told your income doesn't qualify?"},
+      {title:"The Write-Off Trap", content:"The best thing about being self-employed is writing everything off.\n\nThe worst thing about being self-employed is writing everything off.\n\nThere's a way to buy a home that doesn't punish you for being good at running a business.\n\nDo you know what it is?"},
+      {title:"The Bank Statement", content:"12 months of bank deposits.\n\nNo tax returns. No W-2s. No explanation of why your schedule C looks the way it does.\n\nJust the actual money that actually moved through your actual account.\n\nSelf-employed buyers: have you heard of a bank statement loan?"},
+      {title:"The Underwriter Question", content:"Most lenders hand your file to an underwriter who has never run a business.\n\nThey don't understand how business owners get paid.\n\nThey don't understand retained earnings or distributions or depreciation.\n\nI've spent 25 years learning how to translate your income into a language underwriters approve.\n\nAre you working with a lender who actually understands your business?"},
+      {title:"The Rejection Story", content:"He'd been turned down by 3 lenders.\n\nEach one told him his income was \"too complicated.\"\n\nI spent 45 minutes with his tax returns and found a path all three had missed.\n\nHe closed 8 weeks later.\n\nComplicated isn't the same as unqualified. Do you know the difference?"},
+    ]
+  },
+  veterans: {
+    label:"Veterans", color:C.purple,
+    items:[
+      {title:"The Benefit Nobody Uses", content:"230,000 veterans in Colorado are eligible for a VA home loan.\n\nLess than 10% of them have ever used it.\n\nZero down. No PMI. Competitive rates. Government-backed.\n\nIt's the best loan product available to anyone.\n\nAre you one of the 90%?"},
+      {title:"The One-Time Myth", content:"Most veterans think they can only use their VA benefit once.\n\nThey used it on their first home.\n\nNow they think it's gone.\n\nFor most of them, it isn't.\n\nIf you've used your VA benefit before, when's the last time someone looked up exactly what you still have available?"},
+      {title:"The PCS Move", content:"PCS orders are stressful enough without a complicated mortgage.\n\nI've helped a lot of active duty families close in 30 days or less.\n\nSometimes 21.\n\nIf you're moving to or from Colorado, what does your timeline actually look like?"},
+      {title:"The Funding Fee Myth", content:"A lot of veterans avoid VA loans because of the funding fee.\n\nThey don't realize:\n\n— Veterans with a 10%+ disability rating: $0 funding fee.\n— Surviving spouses: often exempt.\n— Purple Heart recipients: exempt.\n\nAnd even for those who do pay it: no PMI saves more over the life of the loan.\n\nDo you know your actual VA benefit status?"},
+      {title:"The Side-By-Side", content:"I ran a side-by-side comparison for a veteran last week.\n\nConventional loan with 5% down vs. VA loan with 0% down.\n\nSame purchase price. Same rate.\n\nVA won by $340/month.\n\nHe'd been avoiding it because he thought conventional was simpler.\n\nAre you leaving $340/month on the table?"},
     ]
   },
 };
+
 function IOITab() {
   const [active, setActive] = useState("buyers");
   const [post, setPost] = useState(0);
@@ -355,11 +430,8 @@ export default function App() {
   const [authLoading, setAuthLoading] = useState(false);
   const [authNewPassword, setAuthNewPassword] = useState("");
   const [authResetSent, setAuthResetSent] = useState(false);
-  const [showUploadModal, setShowUploadModal] = useState(false);
-  const [pendingUploadFile, setPendingUploadFile] = useState(null);
   const [isRecovering, setIsRecovering] = useState(false);
   const [dataLoading, setDataLoading] = useState(false);
-  const [isWide, setIsWide] = useState(typeof window !== "undefined" && window.innerWidth > 900);
   const userRef = useRef(null);
 
   // ── Onboarding ───────────────────────────────────────────────────────────────
@@ -438,12 +510,6 @@ export default function App() {
     const handler = (e) => { e.preventDefault(); installPromptRef.current = e; };
     window.addEventListener("beforeinstallprompt", handler);
     return () => { subscription.unsubscribe(); window.removeEventListener("beforeinstallprompt", handler); };
-  }, []);
-
-  useEffect(() => {
-    const onResize = () => setIsWide(window.innerWidth > 900);
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
   }, []);
 
   // ── Load all user data ────────────────────────────────────────────────────────
@@ -599,10 +665,11 @@ export default function App() {
   function acceptSched() { setAccepted(true); setSubTab("scorecard"); saveDailyLog({accepted:true,sub_tab:"scorecard"},true); }
   function switchSub(t) { setSubTab(t); saveDailyLog({sub_tab:t}); }
   function doRebuild() {
+    // Rebuild schedule only — never touch counts, pb, or tomorrow notes
     setSqStep(0); setSched(null); setAccepted(false); setSubTab("schedule");
     setMode(null); setHasMeeting(null); setDealLoad(null); setHasHardStop(null);
-    setHasSecondMeeting(null); setRebuildOk(false);
-    saveDailyLog({sched:null,accepted:false,sub_tab:"schedule"},true);
+    setHasSecondMeeting(null); setSchedChecked({}); setRebuildOk(false);
+    saveDailyLog({sched:null,accepted:false,sub_tab:"schedule",sched_checked:{}},true);
   }
 
   // ── ICS Calendar export ───────────────────────────────────────────────────────
@@ -709,22 +776,14 @@ export default function App() {
       return obj;
     });
   }
-  function handleFileSelect(e) {
-    const file=e.target.files[0]; if(!file) return;
-    e.target.value="";
-    setPendingUploadFile(file);
-    setShowUploadModal(true);
-  }
-
-  async function doUpload(file, replaceAll) {
-    if(!file||!userRef.current) return;
-    setShowUploadModal(false); setPendingUploadFile(null);
+  async function handleFile(e) {
+    const file=e.target.files[0]; if(!file||!userRef.current) return;
     const text=await file.text();
     const rows=parseFile(text,file.name).slice(0,15000);
     const batchSize=100, totalBatches=Math.ceil(rows.length/batchSize);
     setUploadProgress({current:0,total:totalBatches,done:false,errors:0});
     let errors=0;
-    if(replaceAll) await supabase.from("contacts").delete().eq("user_id",userRef.current.id);
+    await supabase.from("contacts").delete().eq("user_id",userRef.current.id);
     for(let i=0;i<totalBatches;i++){
       const batch=rows.slice(i*batchSize,(i+1)*batchSize).map(r=>({...r,user_id:userRef.current.id}));
       const {error}=await supabase.from("contacts").insert(batch);
@@ -735,6 +794,7 @@ export default function App() {
     if(ctData) setContacts(ctData);
     setUploadProgress({current:totalBatches,total:totalBatches,done:true,errors});
     setTimeout(()=>setUploadProgress(null),3000);
+    e.target.value="";
   }
   async function logC(c) {
     if(!userRef.current||!c.id) return;
@@ -982,7 +1042,7 @@ export default function App() {
   }
 
   return (
-    <div style={{background:C.bg,minHeight:"100vh",fontFamily:F.body}}>
+    <div style={{background:C.bg,minHeight:"100vh",padding:"24px 16px 80px",fontFamily:F.body,maxWidth:520,margin:"0 auto"}}>
       <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"/>
 
       {/* PWA Install Banner */}
@@ -994,75 +1054,26 @@ export default function App() {
         </div>
       )}
 
-      {/* Upload modal */}
-      {showUploadModal && (
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.45)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000,padding:"0 20px"}}>
-          <div style={{background:C.card,borderRadius:12,border:`1px solid ${C.rule}`,padding:"28px 24px",maxWidth:360,width:"100%",boxShadow:"0 8px 32px rgba(0,0,0,0.18)"}}>
-            <div style={{fontFamily:F.cond,fontSize:18,fontWeight:800,color:C.ink,marginBottom:8}}>Upload Contacts</div>
-            <div style={{fontFamily:F.mono,fontSize:11,color:C.mid,marginBottom:24,lineHeight:1.6}}>What would you like to do with your existing contacts?</div>
-            <button onClick={()=>doUpload(pendingUploadFile,true)} style={{...btnP,marginBottom:10}}>Replace All</button>
-            <button onClick={()=>doUpload(pendingUploadFile,false)} style={{...btnP,background:"transparent",border:`1px solid ${C.green}`,color:C.green,marginBottom:16}}>Add to Existing</button>
-            <div style={{textAlign:"center"}}>
-              <span onClick={()=>{setShowUploadModal(false);setPendingUploadFile(null);}} style={{fontFamily:F.mono,fontSize:10,color:C.light,cursor:"pointer",textDecoration:"underline"}}>Cancel</span>
-            </div>
+      {/* Header */}
+      <div style={{borderBottom:`2px solid ${C.ink}`,paddingBottom:12,marginBottom:20}}>
+        <div style={{fontFamily:F.cond,fontSize:10,fontWeight:600,letterSpacing:"0.2em",textTransform:"uppercase",color:C.light,marginBottom:3}}>Get Unlocked Producer</div>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end"}}>
+          <div style={{fontFamily:F.cond,fontSize:22,fontWeight:800,color:C.ink,lineHeight:1}}>
+            {profile.name?.toUpperCase()} <span style={{color:C.green}}>— {tab==="today"?"TODAY":tab==="contacts"?"CONTACTS":tab==="scripts"?"SCRIPTS":tab==="ioi"?"IOI":tab==="history"?"HISTORY":"TEAM"}</span>
+          </div>
+          <div style={{textAlign:"right"}}>
+            <div style={{fontFamily:F.mono,fontSize:10,color:C.mid}}>{dateStr}</div>
+            {streak>0 && <div style={{fontFamily:F.mono,fontSize:10,color:C.green,fontWeight:600,marginTop:2}}>Day {streak}</div>}
           </div>
         </div>
-      )}
+      </div>
 
-      {/* Layout: two-col desktop / single-col mobile */}
-      <div style={isWide
-        ? {maxWidth:1100,margin:"0 auto",display:"flex",minHeight:"100vh"}
-        : {maxWidth:520,margin:"0 auto",padding:"24px 16px 80px"}
-      }>
-
-        {/* Desktop sidebar */}
-        {isWide && (
-          <div style={{width:240,flexShrink:0,background:C.card,borderRight:`1px solid ${C.rule}`,padding:"28px 20px",display:"flex",flexDirection:"column",position:"sticky",top:0,height:"100vh",overflowY:"auto"}}>
-            <div style={{fontFamily:F.cond,fontSize:10,fontWeight:600,letterSpacing:"0.2em",textTransform:"uppercase",color:C.light,marginBottom:16}}>Get Unlocked Producer</div>
-            <div style={{fontFamily:F.cond,fontSize:20,fontWeight:800,color:C.ink,lineHeight:1.1,marginBottom:4}}>{profile.name?.toUpperCase()}</div>
-            <div style={{fontFamily:F.mono,fontSize:10,color:C.mid,marginBottom:streak>0?2:20}}>{dateStr}</div>
-            {streak>0 && <div style={{fontFamily:F.mono,fontSize:10,color:C.green,fontWeight:600,marginBottom:20}}>Day {streak}</div>}
-            <div style={{display:"flex",flexDirection:"column",gap:2,flex:1}}>
-              {[["today","Today"],["contacts","Contacts"],["scripts","Scripts"],["ioi","IOI"],["history","History"],["team","Team"]].map(([id,lbl])=>(
-                <button key={id} onClick={()=>{setTab(id);setRebuildOk(false);}} style={{padding:"10px 14px",borderRadius:8,border:"none",background:tab===id?C.green:"transparent",color:tab===id?"#fff":C.mid,fontFamily:F.cond,fontSize:14,fontWeight:700,letterSpacing:"0.05em",textTransform:"uppercase",cursor:"pointer",textAlign:"left",transition:"all 0.15s"}}>
-                  {lbl}
-                </button>
-              ))}
-            </div>
-            <div style={{paddingTop:20,borderTop:`1px solid ${C.rule}`}}>
-              <div style={{fontFamily:F.mono,fontSize:9,color:C.mid,letterSpacing:"0.1em",marginBottom:8}}>GRAHAM FINANCIAL</div>
-              <button onClick={signOut} style={{fontFamily:F.mono,fontSize:9,color:C.light,background:"transparent",border:"none",cursor:"pointer",letterSpacing:"0.05em",padding:0}}>Sign Out</button>
-            </div>
-          </div>
-        )}
-
-        {/* Main content */}
-        <div style={isWide?{flex:1,maxWidth:760,padding:"28px 32px 80px",minWidth:0}:{}}>
-
-        {/* Mobile header */}
-        {!isWide && (
-          <div style={{borderBottom:`2px solid ${C.ink}`,paddingBottom:12,marginBottom:20}}>
-            <div style={{fontFamily:F.cond,fontSize:10,fontWeight:600,letterSpacing:"0.2em",textTransform:"uppercase",color:C.light,marginBottom:3}}>Get Unlocked Producer</div>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end"}}>
-              <div style={{fontFamily:F.cond,fontSize:22,fontWeight:800,color:C.ink,lineHeight:1}}>
-                {profile.name?.toUpperCase()} <span style={{color:C.green}}>— {tab==="today"?"TODAY":tab==="contacts"?"CONTACTS":tab==="scripts"?"SCRIPTS":tab==="ioi"?"IOI":tab==="history"?"HISTORY":"TEAM"}</span>
-              </div>
-              <div style={{textAlign:"right"}}>
-                <div style={{fontFamily:F.mono,fontSize:10,color:C.mid}}>{dateStr}</div>
-                {streak>0 && <div style={{fontFamily:F.mono,fontSize:10,color:C.green,fontWeight:600,marginTop:2}}>Day {streak}</div>}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Mobile nav tabs */}
-        {!isWide && (
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr 1fr 1fr",gap:3,marginBottom:20,background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:4}}>
-            {[["today","Today"],["contacts","Contacts"],["scripts","Scripts"],["ioi","IOI"],["history","History"],["team","Team"]].map(([id,lbl])=>(
-              <button key={id} onClick={()=>{setTab(id);setRebuildOk(false);}} style={{padding:"8px 2px",borderRadius:6,border:"none",background:tab===id?C.green:"transparent",color:tab===id?"#fff":C.mid,fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.03em",textTransform:"uppercase",cursor:"pointer",transition:"all 0.15s"}}>{lbl}</button>
-            ))}
-          </div>
-        )}
+      {/* Nav tabs */}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr 1fr 1fr",gap:3,marginBottom:20,background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:4}}>
+        {[["today","Today"],["contacts","Contacts"],["scripts","Scripts"],["ioi","IOI"],["history","History"],["team","Team"]].map(([id,lbl])=>(
+          <button key={id} onClick={()=>{setTab(id);setRebuildOk(false);}} style={{padding:"8px 2px",borderRadius:6,border:"none",background:tab===id?C.green:"transparent",color:tab===id?"#fff":C.mid,fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.03em",textTransform:"uppercase",cursor:"pointer",transition:"all 0.15s"}}>{lbl}</button>
+        ))}
+      </div>
 
       {/* TODAY tab */}
       {tab==="today" && (
@@ -1087,6 +1098,14 @@ export default function App() {
 
           {/* BUILD view */}
           {view==="build" && (
+            <div>
+              <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:"12px 16px",marginBottom:12,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
+                <div style={{fontFamily:F.mono,fontSize:10,color:C.mid}}>Want to skip the schedule and just track your day?</div>
+                <button onClick={()=>{setAccepted(true);setSubTab("scorecard");saveDailyLog({accepted:true,sub_tab:"scorecard"},true);}}
+                  style={{padding:"8px 14px",borderRadius:6,border:`1.5px solid ${C.rule}`,background:C.bg,color:C.mid,fontFamily:F.cond,fontSize:12,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer",whiteSpace:"nowrap"}}>
+                  Skip to Scorecard
+                </button>
+              </div>
             <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:10,padding:"20px 16px"}}>
               {sqStep===0 && (
                 <div>
@@ -1211,6 +1230,7 @@ export default function App() {
                 </div>
               )}
             </div>
+            </div>
           )}
 
           {/* PREVIEW view */}
@@ -1246,7 +1266,7 @@ export default function App() {
                 </div>
                 {rebuildOk?(
                   <div style={{display:"flex",gap:6,alignItems:"center"}}>
-                    <span style={{fontFamily:F.mono,fontSize:9,color:C.red}}>Clears scorecard.</span>
+                    <span style={{fontFamily:F.mono,fontSize:9,color:C.red}}>Rebuild your schedule?</span>
                     <button onClick={doRebuild} style={{fontFamily:F.mono,fontSize:9,padding:"5px 8px",borderRadius:4,border:`1.5px solid ${C.red}`,background:C.redBg,color:C.red,cursor:"pointer"}}>Yes</button>
                     <button onClick={()=>setRebuildOk(false)} style={{fontFamily:F.mono,fontSize:9,padding:"5px 8px",borderRadius:4,border:`1px solid ${C.rule}`,background:C.card,color:C.mid,cursor:"pointer"}}>Cancel</button>
                   </div>
@@ -1354,7 +1374,7 @@ export default function App() {
             <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:10,padding:"32px 20px",textAlign:"center"}}>
               <div style={{fontFamily:F.cond,fontSize:16,fontWeight:700,color:C.mid,marginBottom:8}}>No Contacts Loaded</div>
               <div style={{fontFamily:F.mono,fontSize:10,color:C.light,marginBottom:20}}>Upload a CSV or tab-delimited file. Headers map to: first_name, last_name, phone, email, note_rate, etc. Legacy headers (First Name, Last Name…) also supported. Up to 5,000 rows.</div>
-              <input ref={fRef} type="file" accept=".csv,.txt,.tsv" onChange={handleFileSelect} style={{display:"none"}}/>
+              <input ref={fRef} type="file" accept=".csv,.txt,.tsv" onChange={handleFile} style={{display:"none"}}/>
               <button onClick={()=>fRef.current?.click()} style={{...btnP,maxWidth:240,margin:"0 auto"}}>Upload Contact File</button>
             </div>
           ) : (
@@ -1362,7 +1382,7 @@ export default function App() {
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
                 <span style={{fontFamily:F.mono,fontSize:10,color:C.mid}}>{filtC.length} of {contacts.length} contacts</span>
                 <button onClick={()=>fRef.current?.click()} style={{fontFamily:F.mono,fontSize:9,padding:"4px 8px",borderRadius:4,border:`1px solid ${C.rule}`,background:C.card,color:C.mid,cursor:"pointer"}}>Replace</button>
-                <input ref={fRef} type="file" accept=".csv,.txt,.tsv" onChange={handleFileSelect} style={{display:"none"}}/>
+                <input ref={fRef} type="file" accept=".csv,.txt,.tsv" onChange={handleFile} style={{display:"none"}}/>
               </div>
               {selC ? (
                 <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:10,padding:"18px 16px"}}>
@@ -1606,16 +1626,12 @@ export default function App() {
         </div>
       )}
 
-      {/* Footer — mobile only */}
-      {!isWide && (
-        <div style={{marginTop:28,paddingTop:14,borderTop:`1px solid ${C.rule}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-          <span style={{fontFamily:F.mono,fontSize:9,color:C.light,letterSpacing:"0.1em"}}>GET UNLOCKED PRODUCER</span>
-          <button onClick={signOut} style={{fontFamily:F.mono,fontSize:9,color:C.light,background:"transparent",border:"none",cursor:"pointer",letterSpacing:"0.05em",padding:0}}>Sign Out</button>
-          <span style={{fontFamily:F.mono,fontSize:9,color:C.mid,letterSpacing:"0.1em"}}>GRAHAM FINANCIAL</span>
-        </div>
-      )}
-        </div>{/* /main content */}
-      </div>{/* /layout wrapper */}
+      {/* Footer */}
+      <div style={{marginTop:28,paddingTop:14,borderTop:`1px solid ${C.rule}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <span style={{fontFamily:F.mono,fontSize:9,color:C.light,letterSpacing:"0.1em"}}>GET UNLOCKED PRODUCER</span>
+        <button onClick={signOut} style={{fontFamily:F.mono,fontSize:9,color:C.light,background:"transparent",border:"none",cursor:"pointer",letterSpacing:"0.05em",padding:0}}>Sign Out</button>
+        <span style={{fontFamily:F.mono,fontSize:9,color:C.mid,letterSpacing:"0.1em"}}>GRAHAM FINANCIAL</span>
+      </div>
     </div>
   );
 }
