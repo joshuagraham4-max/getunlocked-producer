@@ -1040,7 +1040,7 @@ export default function App() {
   }
 
   // ── Main app ──────────────────────────────────────────────────────────────────
-  const view = !sched?"build":!accepted?"preview":subTab==="scorecard"?"scorecard":"schedule";
+  const view = accepted?(subTab==="scorecard"?"scorecard":"schedule"):!sched?"build":"preview";
   const secSt = {display:"flex",alignItems:"center",gap:10,margin:"16px 0 7px"};
   const secLn = {flex:1,height:1,background:C.rule};
   const secTx = {fontFamily:F.mono,fontSize:9,letterSpacing:"0.2em",textTransform:"uppercase",color:C.light,whiteSpace:"nowrap"};
