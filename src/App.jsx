@@ -489,10 +489,17 @@ export default function App() {
   // ── PWA install ───────────────────────────────────────────────────────────────
   const installPromptRef = useRef(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
+  const [isWide, setIsWide] = useState(window.innerWidth >= 900);
 
   const today = todayKey();
   const now = new Date();
   const dateStr = now.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
+
+  useEffect(() => {
+    const handleResize = () => setIsWide(window.innerWidth >= 900);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // ── Auth listener ─────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -1054,7 +1061,7 @@ export default function App() {
   }
 
   return (
-    <div style={{background:C.bg,minHeight:"100vh",padding:"24px 16px 80px",fontFamily:F.body,maxWidth:520,margin:"0 auto"}}>
+    <div style={{background:C.bg,minHeight:"100vh",fontFamily:F.body,display:isWide?"flex":"block"}}>
       <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"/>
 
       {/* PWA Install Banner */}
@@ -1066,30 +1073,66 @@ export default function App() {
         </div>
       )}
 
-      {/* Header */}
-      <div style={{borderBottom:`2px solid ${C.ink}`,paddingBottom:12,marginBottom:20}}>
-        <div style={{fontFamily:F.cond,fontSize:10,fontWeight:600,letterSpacing:"0.2em",textTransform:"uppercase",color:C.light,marginBottom:3}}>Get Unlocked Producer</div>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end"}}>
-          <div style={{fontFamily:F.cond,fontSize:22,fontWeight:800,color:C.ink,lineHeight:1}}>
-            {profile.name?.toUpperCase()} <span style={{color:C.green}}>— {tab==="today"?"TODAY":tab==="contacts"?"CONTACTS":tab==="scripts"?"SCRIPTS":tab==="ioi"?"IOI":tab==="history"?"HISTORY":"TEAM"}</span>
+      {/* DESKTOP SIDEBAR */}
+      {isWide && (
+        <div style={{width:220,minHeight:"100vh",background:C.ink,padding:"28px 0",display:"flex",flexDirection:"column",position:"sticky",top:0,flexShrink:0}}>
+          <div style={{padding:"0 20px 24px",borderBottom:"1px solid #333"}}>
+            <div style={{fontFamily:F.cond,fontSize:9,fontWeight:600,letterSpacing:"0.2em",textTransform:"uppercase",color:C.green,marginBottom:4}}>Get Unlocked</div>
+            <div style={{fontFamily:F.cond,fontSize:18,fontWeight:800,color:"#fff",lineHeight:1,marginBottom:6}}>{profile.name?.toUpperCase()}</div>
+            {streak>0 && <div style={{fontFamily:F.mono,fontSize:10,color:C.green,fontWeight:600}}>Day {streak} 🔥</div>}
+            <div style={{fontFamily:F.mono,fontSize:9,color:"#666",marginTop:4}}>{dateStr}</div>
           </div>
-          <div style={{textAlign:"right"}}>
-            <div style={{fontFamily:F.mono,fontSize:10,color:C.mid}}>{dateStr}</div>
-            {streak>0 && <div style={{fontFamily:F.mono,fontSize:10,color:C.green,fontWeight:600,marginTop:2}}>Day {streak}</div>}
+          <nav style={{padding:"16px 0",flex:1}}>
+            {[["today","Today"],["contacts","Contacts"],["scripts","Scripts"],["ioi","IOI"],["history","History"],["team","Team"]].map(([id,lbl])=>(
+              <button key={id} onClick={()=>{setTab(id);setRebuildOk(false);}}
+                style={{display:"block",width:"100%",padding:"11px 20px",border:"none",textAlign:"left",background:tab===id?C.green:"transparent",color:tab===id?"#fff":"#888",fontFamily:F.cond,fontSize:14,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer",transition:"all 0.15s",borderLeft:tab===id?`3px solid #fff`:"3px solid transparent"}}>
+                {lbl}
+              </button>
+            ))}
+          </nav>
+          <div style={{padding:"16px 20px",borderTop:"1px solid #333"}}>
+            <button onClick={()=>supabase.auth.signOut()} style={{fontFamily:F.mono,fontSize:9,color:"#666",background:"transparent",border:"none",cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase"}}>Sign Out</button>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Nav tabs */}
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr 1fr 1fr",gap:3,marginBottom:12,background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:4}}>
-        {[["today","Today"],["contacts","Contacts"],["scripts","Scripts"],["ioi","IOI"],["history","History"],["team","Team"]].map(([id,lbl])=>(
-          <button key={id} onClick={()=>{setTab(id);setRebuildOk(false);}} style={{padding:"8px 2px",borderRadius:6,border:"none",background:tab===id?C.green:"transparent",color:tab===id?"#fff":C.mid,fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.03em",textTransform:"uppercase",cursor:"pointer",transition:"all 0.15s"}}>{lbl}</button>
-        ))}
-      </div>
-      <a href="https://getunlocked-producer.vercel.app/GetUnlocked_Scripts.html" target="_blank" rel="noreferrer"
-        style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:20,padding:"10px 16px",borderRadius:8,border:`1.5px solid ${C.blue}`,background:C.blueBg,color:C.blue,fontFamily:F.cond,fontSize:13,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",textDecoration:"none"}}>
-        <span>📋</span> Script + IOI Library
-      </a>
+      {/* MAIN CONTENT */}
+      <div style={{flex:1,padding:isWide?"32px 40px 80px":"24px 16px 80px",maxWidth:isWide?"none":"520px",margin:isWide?"0":"0 auto",minWidth:0}}>
+
+      {/* Header — mobile only */}
+      {!isWide && (
+        <div style={{borderBottom:`2px solid ${C.ink}`,paddingBottom:12,marginBottom:20}}>
+          <div style={{fontFamily:F.cond,fontSize:10,fontWeight:600,letterSpacing:"0.2em",textTransform:"uppercase",color:C.light,marginBottom:3}}>Get Unlocked Producer</div>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end"}}>
+            <div style={{fontFamily:F.cond,fontSize:22,fontWeight:800,color:C.ink,lineHeight:1}}>
+              {profile.name?.toUpperCase()} <span style={{color:C.green}}>— {tab==="today"?"TODAY":tab==="contacts"?"CONTACTS":tab==="scripts"?"SCRIPTS":tab==="ioi"?"IOI":tab==="history"?"HISTORY":"TEAM"}</span>
+            </div>
+            <div style={{textAlign:"right"}}>
+              <div style={{fontFamily:F.mono,fontSize:10,color:C.mid}}>{dateStr}</div>
+              {streak>0 && <div style={{fontFamily:F.mono,fontSize:10,color:C.green,fontWeight:600,marginTop:2}}>Day {streak}</div>}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Desktop page title */}
+      {isWide && (
+        <div style={{marginBottom:28}}>
+          <div style={{fontFamily:F.cond,fontSize:32,fontWeight:900,color:C.ink,lineHeight:1}}>
+            {tab==="today"?"TODAY":tab==="contacts"?"CONTACTS":tab==="scripts"?"SCRIPTS":tab==="ioi"?"IOI POSTS":tab==="history"?"HISTORY":"TEAM"}
+          </div>
+          <div style={{fontFamily:F.mono,fontSize:10,color:C.light,marginTop:4}}>{dateStr}</div>
+        </div>
+      )}
+
+      {/* Nav tabs — mobile only */}
+      {!isWide && (
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr 1fr 1fr",gap:3,marginBottom:20,background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:4}}>
+          {[["today","Today"],["contacts","Contacts"],["scripts","Scripts"],["ioi","IOI"],["history","History"],["team","Team"]].map(([id,lbl])=>(
+            <button key={id} onClick={()=>{setTab(id);setRebuildOk(false);}} style={{padding:"8px 2px",borderRadius:6,border:"none",background:tab===id?C.green:"transparent",color:tab===id?"#fff":C.mid,fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.03em",textTransform:"uppercase",cursor:"pointer",transition:"all 0.15s"}}>{lbl}</button>
+          ))}
+        </div>
+      )}
 
       {/* TODAY tab */}
       {tab==="today" && (
@@ -1472,7 +1515,19 @@ export default function App() {
         </div>
       )}
 
-      {tab==="scripts" && <ScriptsTab/>}
+      {tab==="scripts" && (
+        <div>
+          <a href="https://getunlocked-producer.vercel.app/GetUnlocked_Scripts.html" target="_blank" rel="noreferrer"
+            style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14,padding:"12px 16px",borderRadius:8,background:C.card,border:`1px solid ${C.rule}`,textDecoration:"none"}}>
+            <div>
+              <div style={{fontFamily:F.cond,fontSize:13,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",color:C.ink}}>Script + IOI Library</div>
+              <div style={{fontFamily:F.mono,fontSize:9,color:C.light,marginTop:2}}>Full library with copy buttons — opens in new tab</div>
+            </div>
+            <span style={{fontFamily:F.mono,fontSize:12,color:C.mid}}>→</span>
+          </a>
+          <ScriptsTab/>
+        </div>
+      )}
       {tab==="ioi" && <IOITab/>}
 
       {/* HISTORY tab */}
@@ -1660,8 +1715,9 @@ export default function App() {
       {/* Footer */}
       <div style={{marginTop:28,paddingTop:14,borderTop:`1px solid ${C.rule}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
         <span style={{fontFamily:F.mono,fontSize:9,color:C.light,letterSpacing:"0.1em"}}>GET UNLOCKED PRODUCER</span>
-        <button onClick={signOut} style={{fontFamily:F.mono,fontSize:9,color:C.light,background:"transparent",border:"none",cursor:"pointer",letterSpacing:"0.05em",padding:0}}>Sign Out</button>
+        {!isWide && <button onClick={signOut} style={{fontFamily:F.mono,fontSize:9,color:C.light,background:"transparent",border:"none",cursor:"pointer",letterSpacing:"0.05em",padding:0}}>Sign Out</button>}
         <span style={{fontFamily:F.mono,fontSize:9,color:C.mid,letterSpacing:"0.1em"}}>GRAHAM FINANCIAL</span>
+      </div>
       </div>
     </div>
   );
