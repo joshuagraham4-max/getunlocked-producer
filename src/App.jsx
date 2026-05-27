@@ -433,6 +433,7 @@ export default function App() {
   const [isRecovering, setIsRecovering] = useState(false);
   const [dataLoading, setDataLoading] = useState(false);
   const [isWide, setIsWide] = useState(window.innerWidth >= 900);
+  const [lastSaved, setLastSaved] = useState(null);
   const userRef = useRef(null);
 
   // ── Responsive layout ────────────────────────────────────────────────────────
@@ -585,6 +586,7 @@ export default function App() {
     const doSave = async () => {
       try {
         await supabase.from("daily_logs").upsert({ user_id:userRef.current.id, date:todayKey(), ...updates }, {onConflict:"user_id,date"});
+        setLastSaved(new Date());
       } catch(e) { console.error("saveDailyLog:",e); }
     };
     if (immediate) { doSave(); return; }
@@ -596,7 +598,7 @@ export default function App() {
   const setCount = useCallback((id, val) => {
     setCounts(prev => {
       const next = {...prev,[id]:Math.max(0,val)};
-      if (userRef.current) supabase.from("daily_logs").upsert({user_id:userRef.current.id,date:todayKey(),counts:next},{onConflict:"user_id,date"}).then();
+      if (userRef.current) supabase.from("daily_logs").upsert({user_id:userRef.current.id,date:todayKey(),counts:next},{onConflict:"user_id,date"}).then(()=>setLastSaved(new Date()));
       return next;
     });
   }, []);
@@ -604,7 +606,7 @@ export default function App() {
   const togglePB = useCallback(() => {
     setPb(prev => {
       const next = !prev;
-      if (userRef.current) supabase.from("daily_logs").upsert({user_id:userRef.current.id,date:todayKey(),pb:next},{onConflict:"user_id,date"}).then();
+      if (userRef.current) supabase.from("daily_logs").upsert({user_id:userRef.current.id,date:todayKey(),pb:next},{onConflict:"user_id,date"}).then(()=>setLastSaved(new Date()));
       return next;
     });
   }, []);
@@ -617,7 +619,7 @@ export default function App() {
   useEffect(() => {
     if (!userRef.current || !sched) return;
     const t = setTimeout(() => {
-      supabase.from("daily_logs").upsert({user_id:userRef.current.id,date:todayKey(),sched:{...sched,_checked:schedChecked}},{onConflict:"user_id,date"}).then();
+      supabase.from("daily_logs").upsert({user_id:userRef.current.id,date:todayKey(),sched:{...sched,_checked:schedChecked}},{onConflict:"user_id,date"}).then(()=>setLastSaved(new Date()));
     }, 400);
     return () => clearTimeout(t);
   }, [schedChecked]);
@@ -654,7 +656,7 @@ export default function App() {
       const next = prev.map((v,j)=>j===i?val:v);
       clearTimeout(tomTimer.current);
       tomTimer.current = setTimeout(() => {
-        if (userRef.current) supabase.from("daily_logs").upsert({user_id:userRef.current.id,date:todayKey(),tomorrow:next},{onConflict:"user_id,date"}).then();
+        if (userRef.current) supabase.from("daily_logs").upsert({user_id:userRef.current.id,date:todayKey(),tomorrow:next},{onConflict:"user_id,date"}).then(()=>setLastSaved(new Date()));
       }, 800);
       return next;
     });
@@ -1121,6 +1123,13 @@ export default function App() {
             </div>
             <div style={{fontFamily:F.mono,fontSize:10,color:C.mid}}>{dateStr}</div>
           </div>
+        </div>
+      )}
+
+      {/* Last saved indicator */}
+      {lastSaved && (
+        <div style={{fontFamily:"'DM Mono',monospace",fontSize:9,color:"#a89e92",letterSpacing:"0.08em",marginBottom:10,textAlign:"right"}}>
+          logged {lastSaved.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})}
         </div>
       )}
 
