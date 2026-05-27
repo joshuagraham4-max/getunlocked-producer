@@ -432,16 +432,7 @@ export default function App() {
   const [authResetSent, setAuthResetSent] = useState(false);
   const [isRecovering, setIsRecovering] = useState(false);
   const [dataLoading, setDataLoading] = useState(false);
-  const [isWide, setIsWide] = useState(window.innerWidth >= 900);
-  const [lastSaved, setLastSaved] = useState(null);
   const userRef = useRef(null);
-
-  // ── Responsive layout ────────────────────────────────────────────────────────
-  useEffect(() => {
-    const onResize = () => setIsWide(window.innerWidth >= 900);
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
 
   // ── Onboarding ───────────────────────────────────────────────────────────────
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -486,6 +477,7 @@ export default function App() {
   const [cSearch, setCSearch] = useState("");
   const [selC, setSelC] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(null);
+  const [uploadPending, setUploadPending] = useState(null);
   const fRef = useRef();
   const [teamData, setTeamData] = useState([]);
   const [teamLoading, setTeamLoading] = useState(false);
@@ -586,7 +578,6 @@ export default function App() {
     const doSave = async () => {
       try {
         await supabase.from("daily_logs").upsert({ user_id:userRef.current.id, date:todayKey(), ...updates }, {onConflict:"user_id,date"});
-        setLastSaved(new Date());
       } catch(e) { console.error("saveDailyLog:",e); }
     };
     if (immediate) { doSave(); return; }
@@ -598,7 +589,7 @@ export default function App() {
   const setCount = useCallback((id, val) => {
     setCounts(prev => {
       const next = {...prev,[id]:Math.max(0,val)};
-      if (userRef.current) supabase.from("daily_logs").upsert({user_id:userRef.current.id,date:todayKey(),counts:next},{onConflict:"user_id,date"}).then(()=>setLastSaved(new Date()));
+      if (userRef.current) supabase.from("daily_logs").upsert({user_id:userRef.current.id,date:todayKey(),counts:next},{onConflict:"user_id,date"}).then();
       return next;
     });
   }, []);
@@ -606,7 +597,7 @@ export default function App() {
   const togglePB = useCallback(() => {
     setPb(prev => {
       const next = !prev;
-      if (userRef.current) supabase.from("daily_logs").upsert({user_id:userRef.current.id,date:todayKey(),pb:next},{onConflict:"user_id,date"}).then(()=>setLastSaved(new Date()));
+      if (userRef.current) supabase.from("daily_logs").upsert({user_id:userRef.current.id,date:todayKey(),pb:next},{onConflict:"user_id,date"}).then();
       return next;
     });
   }, []);
@@ -619,7 +610,7 @@ export default function App() {
   useEffect(() => {
     if (!userRef.current || !sched) return;
     const t = setTimeout(() => {
-      supabase.from("daily_logs").upsert({user_id:userRef.current.id,date:todayKey(),sched:{...sched,_checked:schedChecked}},{onConflict:"user_id,date"}).then(()=>setLastSaved(new Date()));
+      supabase.from("daily_logs").upsert({user_id:userRef.current.id,date:todayKey(),sched:{...sched,_checked:schedChecked}},{onConflict:"user_id,date"}).then();
     }, 400);
     return () => clearTimeout(t);
   }, [schedChecked]);
@@ -656,7 +647,7 @@ export default function App() {
       const next = prev.map((v,j)=>j===i?val:v);
       clearTimeout(tomTimer.current);
       tomTimer.current = setTimeout(() => {
-        if (userRef.current) supabase.from("daily_logs").upsert({user_id:userRef.current.id,date:todayKey(),tomorrow:next},{onConflict:"user_id,date"}).then(()=>setLastSaved(new Date()));
+        if (userRef.current) supabase.from("daily_logs").upsert({user_id:userRef.current.id,date:todayKey(),tomorrow:next},{onConflict:"user_id,date"}).then();
       }, 800);
       return next;
     });
@@ -790,10 +781,22 @@ export default function App() {
     const file=e.target.files[0]; if(!file||!userRef.current) return;
     const text=await file.text();
     const rows=parseFile(text,file.name).slice(0,15000);
+    e.target.value="";
+    if(contacts.length>0) {
+      // contacts already exist — ask replace or add
+      setUploadPending(rows);
+      return;
+    }
+    await doUpload(rows, true);
+  }
+
+  async function doUpload(rows, replace) {
+    if(!userRef.current) return;
     const batchSize=100, totalBatches=Math.ceil(rows.length/batchSize);
     setUploadProgress({current:0,total:totalBatches,done:false,errors:0});
+    setUploadPending(null);
     let errors=0;
-    await supabase.from("contacts").delete().eq("user_id",userRef.current.id);
+    if(replace) await supabase.from("contacts").delete().eq("user_id",userRef.current.id);
     for(let i=0;i<totalBatches;i++){
       const batch=rows.slice(i*batchSize,(i+1)*batchSize).map(r=>({...r,user_id:userRef.current.id}));
       const {error}=await supabase.from("contacts").insert(batch);
@@ -804,7 +807,6 @@ export default function App() {
     if(ctData) setContacts(ctData);
     setUploadProgress({current:totalBatches,total:totalBatches,done:true,errors});
     setTimeout(()=>setUploadProgress(null),3000);
-    e.target.value="";
   }
   async function logC(c) {
     if(!userRef.current||!c.id) return;
@@ -1052,33 +1054,8 @@ export default function App() {
   }
 
   return (
-    <div style={{background:C.bg,minHeight:"100vh",fontFamily:F.body,display:"flex",flexDirection:"row"}}>
+    <div style={{background:C.bg,minHeight:"100vh",padding:"24px 16px 80px",fontFamily:F.body,maxWidth:520,margin:"0 auto"}}>
       <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"/>
-
-      {/* ── Desktop Sidebar ── */}
-      {isWide && (
-        <div style={{width:220,flexShrink:0,background:"#1c1a17",minHeight:"100vh",display:"flex",flexDirection:"column",padding:"28px 0 24px"}}>
-          {/* Brand */}
-          <div style={{padding:"0 20px 24px",borderBottom:"1px solid rgba(255,255,255,0.08)"}}>
-            <div style={{fontFamily:F.cond,fontSize:9,fontWeight:600,letterSpacing:"0.25em",textTransform:"uppercase",color:"rgba(255,255,255,0.4)",marginBottom:4}}>Get Unlocked</div>
-            <div style={{fontFamily:F.cond,fontSize:18,fontWeight:800,color:"#fff",lineHeight:1.1}}>{profile.name?.toUpperCase()}</div>
-            {streak>0 && <div style={{fontFamily:F.mono,fontSize:10,color:C.green,marginTop:4}}>Day {streak} 🔥</div>}
-          </div>
-          {/* Vertical Nav */}
-          <div style={{flex:1,padding:"16px 12px"}}>
-            {[["today","Today"],["contacts","Contacts"],["scripts","Scripts"],["ioi","IOI"],["history","History"],["team","Team"]].map(([id,lbl])=>(
-              <button key={id} onClick={()=>{setTab(id);setRebuildOk(false);}} style={{display:"block",width:"100%",textAlign:"left",padding:"10px 12px",borderRadius:6,border:"none",background:tab===id?C.green:"transparent",color:tab===id?"#fff":"rgba(255,255,255,0.55)",fontFamily:F.cond,fontSize:14,fontWeight:700,letterSpacing:"0.05em",textTransform:"uppercase",cursor:"pointer",marginBottom:4,transition:"all 0.15s"}}>{lbl}</button>
-            ))}
-          </div>
-          {/* Sign Out */}
-          <div style={{padding:"16px 20px",borderTop:"1px solid rgba(255,255,255,0.08)"}}>
-            <button onClick={signOut} style={{fontFamily:F.mono,fontSize:9,color:"rgba(255,255,255,0.35)",background:"transparent",border:"none",cursor:"pointer",letterSpacing:"0.05em",padding:0}}>Sign Out</button>
-          </div>
-        </div>
-      )}
-
-      {/* ── Main Content Area ── */}
-      <div style={isWide ? {flex:1,maxWidth:800,padding:"28px 32px 60px",overflowY:"auto"} : {flex:1,padding:"24px 16px 80px",maxWidth:520,margin:"0 auto",width:"100%"}}>
 
       {/* PWA Install Banner */}
       {showInstallBanner && (
@@ -1089,49 +1066,30 @@ export default function App() {
         </div>
       )}
 
-      {/* Header — mobile only */}
-      {!isWide && (
-        <div style={{borderBottom:`2px solid ${C.ink}`,paddingBottom:12,marginBottom:20}}>
-          <div style={{fontFamily:F.cond,fontSize:10,fontWeight:600,letterSpacing:"0.2em",textTransform:"uppercase",color:C.light,marginBottom:3}}>Get Unlocked Producer</div>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end"}}>
-            <div style={{fontFamily:F.cond,fontSize:22,fontWeight:800,color:C.ink,lineHeight:1}}>
-              {profile.name?.toUpperCase()} <span style={{color:C.green}}>— {tab==="today"?"TODAY":tab==="contacts"?"CONTACTS":tab==="scripts"?"SCRIPTS":tab==="ioi"?"IOI":tab==="history"?"HISTORY":"TEAM"}</span>
-            </div>
-            <div style={{textAlign:"right"}}>
-              <div style={{fontFamily:F.mono,fontSize:10,color:C.mid}}>{dateStr}</div>
-              {streak>0 && <div style={{fontFamily:F.mono,fontSize:10,color:C.green,fontWeight:600,marginTop:2}}>Day {streak}</div>}
-            </div>
+      {/* Header */}
+      <div style={{borderBottom:`2px solid ${C.ink}`,paddingBottom:12,marginBottom:20}}>
+        <div style={{fontFamily:F.cond,fontSize:10,fontWeight:600,letterSpacing:"0.2em",textTransform:"uppercase",color:C.light,marginBottom:3}}>Get Unlocked Producer</div>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end"}}>
+          <div style={{fontFamily:F.cond,fontSize:22,fontWeight:800,color:C.ink,lineHeight:1}}>
+            {profile.name?.toUpperCase()} <span style={{color:C.green}}>— {tab==="today"?"TODAY":tab==="contacts"?"CONTACTS":tab==="scripts"?"SCRIPTS":tab==="ioi"?"IOI":tab==="history"?"HISTORY":"TEAM"}</span>
           </div>
-        </div>
-      )}
-
-      {/* Nav tabs — mobile only */}
-      {!isWide && (
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr 1fr 1fr",gap:3,marginBottom:20,background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:4}}>
-          {[["today","Today"],["contacts","Contacts"],["scripts","Scripts"],["ioi","IOI"],["history","History"],["team","Team"]].map(([id,lbl])=>(
-            <button key={id} onClick={()=>{setTab(id);setRebuildOk(false);}} style={{padding:"8px 2px",borderRadius:6,border:"none",background:tab===id?C.green:"transparent",color:tab===id?"#fff":C.mid,fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.03em",textTransform:"uppercase",cursor:"pointer",transition:"all 0.15s"}}>{lbl}</button>
-          ))}
-        </div>
-      )}
-
-      {/* Desktop page header (no nav bar) */}
-      {isWide && (
-        <div style={{marginBottom:20,borderBottom:`2px solid ${C.ink}`,paddingBottom:12}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end"}}>
-            <div style={{fontFamily:F.cond,fontSize:24,fontWeight:800,color:C.ink,lineHeight:1}}>
-              <span style={{color:C.green}}>{tab==="today"?"TODAY":tab==="contacts"?"CONTACTS":tab==="scripts"?"SCRIPTS":tab==="ioi"?"IOI":tab==="history"?"HISTORY":"TEAM"}</span>
-            </div>
+          <div style={{textAlign:"right"}}>
             <div style={{fontFamily:F.mono,fontSize:10,color:C.mid}}>{dateStr}</div>
+            {streak>0 && <div style={{fontFamily:F.mono,fontSize:10,color:C.green,fontWeight:600,marginTop:2}}>Day {streak}</div>}
           </div>
         </div>
-      )}
+      </div>
 
-      {/* Last saved indicator */}
-      {lastSaved && (
-        <div style={{fontFamily:"'DM Mono',monospace",fontSize:9,color:"#a89e92",letterSpacing:"0.08em",marginBottom:10,textAlign:"right"}}>
-          logged {lastSaved.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})}
-        </div>
-      )}
+      {/* Nav tabs */}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr 1fr 1fr",gap:3,marginBottom:12,background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:4}}>
+        {[["today","Today"],["contacts","Contacts"],["scripts","Scripts"],["ioi","IOI"],["history","History"],["team","Team"]].map(([id,lbl])=>(
+          <button key={id} onClick={()=>{setTab(id);setRebuildOk(false);}} style={{padding:"8px 2px",borderRadius:6,border:"none",background:tab===id?C.green:"transparent",color:tab===id?"#fff":C.mid,fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.03em",textTransform:"uppercase",cursor:"pointer",transition:"all 0.15s"}}>{lbl}</button>
+        ))}
+      </div>
+      <a href="https://getunlocked-producer.vercel.app/GetUnlocked_Scripts.html" target="_blank" rel="noreferrer"
+        style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:20,padding:"10px 16px",borderRadius:8,border:`1.5px solid ${C.blue}`,background:C.blueBg,color:C.blue,fontFamily:F.cond,fontSize:13,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",textDecoration:"none"}}>
+        <span>📋</span> Script + IOI Library
+      </a>
 
       {/* TODAY tab */}
       {tab==="today" && (
@@ -1405,6 +1363,21 @@ export default function App() {
       )}
 
       {/* CONTACTS tab */}
+      {/* Replace vs Add modal */}
+      {uploadPending && (
+        <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.5)",zIndex:999,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
+          <div style={{background:C.card,borderRadius:12,padding:"24px 20px",maxWidth:360,width:"100%",border:`1px solid ${C.rule}`}}>
+            <div style={{fontFamily:F.cond,fontSize:18,fontWeight:800,color:C.ink,marginBottom:8}}>Upload {uploadPending.length.toLocaleString()} contacts</div>
+            <div style={{fontFamily:F.mono,fontSize:10,color:C.mid,marginBottom:20,lineHeight:1.6}}>You already have {contacts.length.toLocaleString()} contacts loaded. Do you want to replace them all or add these to your existing list?</div>
+            <div style={{display:"flex",flexDirection:"column",gap:10}}>
+              <button onClick={()=>doUpload(uploadPending,true)} style={{...btnP,background:C.red,borderColor:C.red}}>Replace All — delete existing first</button>
+              <button onClick={()=>doUpload(uploadPending,false)} style={{...btnP}}>Add to Existing</button>
+              <button onClick={()=>setUploadPending(null)} style={{...btnS,width:"100%"}}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {tab==="contacts" && (
         <div>
           <div style={{marginBottom:14}}>
@@ -1684,15 +1657,12 @@ export default function App() {
         </div>
       )}
 
-      {/* Footer — mobile only */}
-      {!isWide && (
-        <div style={{marginTop:28,paddingTop:14,borderTop:`1px solid ${C.rule}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-          <span style={{fontFamily:F.mono,fontSize:9,color:C.light,letterSpacing:"0.1em"}}>GET UNLOCKED PRODUCER</span>
-          <button onClick={signOut} style={{fontFamily:F.mono,fontSize:9,color:C.light,background:"transparent",border:"none",cursor:"pointer",letterSpacing:"0.05em",padding:0}}>Sign Out</button>
-          <span style={{fontFamily:F.mono,fontSize:9,color:C.mid,letterSpacing:"0.1em"}}>GRAHAM FINANCIAL</span>
-        </div>
-      )}
-      </div>{/* end main content area */}
+      {/* Footer */}
+      <div style={{marginTop:28,paddingTop:14,borderTop:`1px solid ${C.rule}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <span style={{fontFamily:F.mono,fontSize:9,color:C.light,letterSpacing:"0.1em"}}>GET UNLOCKED PRODUCER</span>
+        <button onClick={signOut} style={{fontFamily:F.mono,fontSize:9,color:C.light,background:"transparent",border:"none",cursor:"pointer",letterSpacing:"0.05em",padding:0}}>Sign Out</button>
+        <span style={{fontFamily:F.mono,fontSize:9,color:C.mid,letterSpacing:"0.1em"}}>GRAHAM FINANCIAL</span>
+      </div>
     </div>
   );
 }
