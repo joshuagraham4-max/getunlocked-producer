@@ -432,7 +432,15 @@ export default function App() {
   const [authResetSent, setAuthResetSent] = useState(false);
   const [isRecovering, setIsRecovering] = useState(false);
   const [dataLoading, setDataLoading] = useState(false);
+  const [isWide, setIsWide] = useState(window.innerWidth >= 900);
   const userRef = useRef(null);
+
+  // ── Responsive layout ────────────────────────────────────────────────────────
+  useEffect(() => {
+    const onResize = () => setIsWide(window.innerWidth >= 900);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   // ── Onboarding ───────────────────────────────────────────────────────────────
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -1042,8 +1050,33 @@ export default function App() {
   }
 
   return (
-    <div style={{background:C.bg,minHeight:"100vh",padding:"24px 16px 80px",fontFamily:F.body,maxWidth:520,margin:"0 auto"}}>
+    <div style={{background:C.bg,minHeight:"100vh",fontFamily:F.body,display:"flex",flexDirection:"row"}}>
       <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"/>
+
+      {/* ── Desktop Sidebar ── */}
+      {isWide && (
+        <div style={{width:220,flexShrink:0,background:"#1c1a17",minHeight:"100vh",display:"flex",flexDirection:"column",padding:"28px 0 24px"}}>
+          {/* Brand */}
+          <div style={{padding:"0 20px 24px",borderBottom:"1px solid rgba(255,255,255,0.08)"}}>
+            <div style={{fontFamily:F.cond,fontSize:9,fontWeight:600,letterSpacing:"0.25em",textTransform:"uppercase",color:"rgba(255,255,255,0.4)",marginBottom:4}}>Get Unlocked</div>
+            <div style={{fontFamily:F.cond,fontSize:18,fontWeight:800,color:"#fff",lineHeight:1.1}}>{profile.name?.toUpperCase()}</div>
+            {streak>0 && <div style={{fontFamily:F.mono,fontSize:10,color:C.green,marginTop:4}}>Day {streak} 🔥</div>}
+          </div>
+          {/* Vertical Nav */}
+          <div style={{flex:1,padding:"16px 12px"}}>
+            {[["today","Today"],["contacts","Contacts"],["scripts","Scripts"],["ioi","IOI"],["history","History"],["team","Team"]].map(([id,lbl])=>(
+              <button key={id} onClick={()=>{setTab(id);setRebuildOk(false);}} style={{display:"block",width:"100%",textAlign:"left",padding:"10px 12px",borderRadius:6,border:"none",background:tab===id?C.green:"transparent",color:tab===id?"#fff":"rgba(255,255,255,0.55)",fontFamily:F.cond,fontSize:14,fontWeight:700,letterSpacing:"0.05em",textTransform:"uppercase",cursor:"pointer",marginBottom:4,transition:"all 0.15s"}}>{lbl}</button>
+            ))}
+          </div>
+          {/* Sign Out */}
+          <div style={{padding:"16px 20px",borderTop:"1px solid rgba(255,255,255,0.08)"}}>
+            <button onClick={signOut} style={{fontFamily:F.mono,fontSize:9,color:"rgba(255,255,255,0.35)",background:"transparent",border:"none",cursor:"pointer",letterSpacing:"0.05em",padding:0}}>Sign Out</button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Main Content Area ── */}
+      <div style={isWide ? {flex:1,maxWidth:800,padding:"28px 32px 60px",overflowY:"auto"} : {flex:1,padding:"24px 16px 80px",maxWidth:520,margin:"0 auto",width:"100%"}}>
 
       {/* PWA Install Banner */}
       {showInstallBanner && (
@@ -1054,26 +1087,42 @@ export default function App() {
         </div>
       )}
 
-      {/* Header */}
-      <div style={{borderBottom:`2px solid ${C.ink}`,paddingBottom:12,marginBottom:20}}>
-        <div style={{fontFamily:F.cond,fontSize:10,fontWeight:600,letterSpacing:"0.2em",textTransform:"uppercase",color:C.light,marginBottom:3}}>Get Unlocked Producer</div>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end"}}>
-          <div style={{fontFamily:F.cond,fontSize:22,fontWeight:800,color:C.ink,lineHeight:1}}>
-            {profile.name?.toUpperCase()} <span style={{color:C.green}}>— {tab==="today"?"TODAY":tab==="contacts"?"CONTACTS":tab==="scripts"?"SCRIPTS":tab==="ioi"?"IOI":tab==="history"?"HISTORY":"TEAM"}</span>
-          </div>
-          <div style={{textAlign:"right"}}>
-            <div style={{fontFamily:F.mono,fontSize:10,color:C.mid}}>{dateStr}</div>
-            {streak>0 && <div style={{fontFamily:F.mono,fontSize:10,color:C.green,fontWeight:600,marginTop:2}}>Day {streak}</div>}
+      {/* Header — mobile only */}
+      {!isWide && (
+        <div style={{borderBottom:`2px solid ${C.ink}`,paddingBottom:12,marginBottom:20}}>
+          <div style={{fontFamily:F.cond,fontSize:10,fontWeight:600,letterSpacing:"0.2em",textTransform:"uppercase",color:C.light,marginBottom:3}}>Get Unlocked Producer</div>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end"}}>
+            <div style={{fontFamily:F.cond,fontSize:22,fontWeight:800,color:C.ink,lineHeight:1}}>
+              {profile.name?.toUpperCase()} <span style={{color:C.green}}>— {tab==="today"?"TODAY":tab==="contacts"?"CONTACTS":tab==="scripts"?"SCRIPTS":tab==="ioi"?"IOI":tab==="history"?"HISTORY":"TEAM"}</span>
+            </div>
+            <div style={{textAlign:"right"}}>
+              <div style={{fontFamily:F.mono,fontSize:10,color:C.mid}}>{dateStr}</div>
+              {streak>0 && <div style={{fontFamily:F.mono,fontSize:10,color:C.green,fontWeight:600,marginTop:2}}>Day {streak}</div>}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Nav tabs */}
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr 1fr 1fr",gap:3,marginBottom:20,background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:4}}>
-        {[["today","Today"],["contacts","Contacts"],["scripts","Scripts"],["ioi","IOI"],["history","History"],["team","Team"]].map(([id,lbl])=>(
-          <button key={id} onClick={()=>{setTab(id);setRebuildOk(false);}} style={{padding:"8px 2px",borderRadius:6,border:"none",background:tab===id?C.green:"transparent",color:tab===id?"#fff":C.mid,fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.03em",textTransform:"uppercase",cursor:"pointer",transition:"all 0.15s"}}>{lbl}</button>
-        ))}
-      </div>
+      {/* Nav tabs — mobile only */}
+      {!isWide && (
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr 1fr 1fr",gap:3,marginBottom:20,background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:4}}>
+          {[["today","Today"],["contacts","Contacts"],["scripts","Scripts"],["ioi","IOI"],["history","History"],["team","Team"]].map(([id,lbl])=>(
+            <button key={id} onClick={()=>{setTab(id);setRebuildOk(false);}} style={{padding:"8px 2px",borderRadius:6,border:"none",background:tab===id?C.green:"transparent",color:tab===id?"#fff":C.mid,fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.03em",textTransform:"uppercase",cursor:"pointer",transition:"all 0.15s"}}>{lbl}</button>
+          ))}
+        </div>
+      )}
+
+      {/* Desktop page header (no nav bar) */}
+      {isWide && (
+        <div style={{marginBottom:20,borderBottom:`2px solid ${C.ink}`,paddingBottom:12}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end"}}>
+            <div style={{fontFamily:F.cond,fontSize:24,fontWeight:800,color:C.ink,lineHeight:1}}>
+              <span style={{color:C.green}}>{tab==="today"?"TODAY":tab==="contacts"?"CONTACTS":tab==="scripts"?"SCRIPTS":tab==="ioi"?"IOI":tab==="history"?"HISTORY":"TEAM"}</span>
+            </div>
+            <div style={{fontFamily:F.mono,fontSize:10,color:C.mid}}>{dateStr}</div>
+          </div>
+        </div>
+      )}
 
       {/* TODAY tab */}
       {tab==="today" && (
@@ -1626,12 +1675,15 @@ export default function App() {
         </div>
       )}
 
-      {/* Footer */}
-      <div style={{marginTop:28,paddingTop:14,borderTop:`1px solid ${C.rule}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-        <span style={{fontFamily:F.mono,fontSize:9,color:C.light,letterSpacing:"0.1em"}}>GET UNLOCKED PRODUCER</span>
-        <button onClick={signOut} style={{fontFamily:F.mono,fontSize:9,color:C.light,background:"transparent",border:"none",cursor:"pointer",letterSpacing:"0.05em",padding:0}}>Sign Out</button>
-        <span style={{fontFamily:F.mono,fontSize:9,color:C.mid,letterSpacing:"0.1em"}}>GRAHAM FINANCIAL</span>
-      </div>
+      {/* Footer — mobile only */}
+      {!isWide && (
+        <div style={{marginTop:28,paddingTop:14,borderTop:`1px solid ${C.rule}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <span style={{fontFamily:F.mono,fontSize:9,color:C.light,letterSpacing:"0.1em"}}>GET UNLOCKED PRODUCER</span>
+          <button onClick={signOut} style={{fontFamily:F.mono,fontSize:9,color:C.light,background:"transparent",border:"none",cursor:"pointer",letterSpacing:"0.05em",padding:0}}>Sign Out</button>
+          <span style={{fontFamily:F.mono,fontSize:9,color:C.mid,letterSpacing:"0.1em"}}>GRAHAM FINANCIAL</span>
+        </div>
+      )}
+      </div>{/* end main content area */}
     </div>
   );
 }
