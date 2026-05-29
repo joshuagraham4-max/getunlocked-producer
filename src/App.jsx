@@ -1056,7 +1056,7 @@ export default function App() {
     });
   }
 
-  return (
+  return (<>
     <div style={{background:C.bg,minHeight:"100vh",padding:"24px 16px 80px",fontFamily:F.body,maxWidth:520,margin:"0 auto"}}>
       <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"/>
 
@@ -1686,5 +1686,5 @@ export default function App() {
         }, { onConflict: "user_id,date" }).then();
       }
     }} />
-  );
+  </>);
 }
