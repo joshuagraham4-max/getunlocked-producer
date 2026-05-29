@@ -1089,10 +1089,12 @@ export default function App() {
           <button key={id} onClick={()=>{setTab(id);setRebuildOk(false);}} style={{padding:"8px 2px",borderRadius:6,border:"none",background:tab===id?C.green:"transparent",color:tab===id?"#fff":C.mid,fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.03em",textTransform:"uppercase",cursor:"pointer",transition:"all 0.15s"}}>{lbl}</button>
         ))}
       </div>
+      {(tab==="scripts"||tab==="ioi") && (
       <a href="https://getunlocked-producer.vercel.app/GetUnlocked_Scripts.html" target="_blank" rel="noreferrer"
         style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:20,padding:"10px 16px",borderRadius:8,border:`1.5px solid ${C.blue}`,background:C.blueBg,color:C.blue,fontFamily:F.cond,fontSize:13,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",textDecoration:"none"}}>
-        <span>📋</span> Script + IOI Library
+        Script + IOI Library
       </a>
+      )}
 
       {/* TODAY tab */}
       {tab==="today" && (
