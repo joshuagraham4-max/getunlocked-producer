@@ -6,7 +6,7 @@
 <title>Get Unlocked — Content Library</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"/>
 <style>
-:root {
+:root{
   --bg:#f5f0e8;--card:#faf7f2;--ink:#1c1a17;--mid:#6b6358;--light:#a89e92;--rule:#e0d8cc;
   --green:#1e6e4a;--green-bg:#e8f4ee;--green-bd:#b8dece;
   --amber:#b05e0d;--amber-bg:#fdf0e0;--amber-bd:#ecd4a8;
@@ -16,37 +16,30 @@
   --teal:#1a6570;--teal-bg:#e4f2f4;--teal-bd:#a8d8de;
   --stone:#8a8077;--stone-bg:#f0ece5;--stone-bd:#d4cec6;
   --olive:#7a6a1e;--olive-bg:#f8f4e3;--olive-bd:#dcd890;
+  --rose:#8a2040;--rose-bg:#f8e8ec;--rose-bd:#e8b8c4;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;min-height:100vh;}
-
 .header{background:var(--ink);color:#fff;padding:18px 20px 14px;position:sticky;top:0;z-index:100;border-bottom:3px solid var(--green);}
 .header-eyebrow{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--green);margin-bottom:3px;}
 .header-title{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;letter-spacing:0.02em;line-height:1;}
 .header-title span{color:var(--green);}
 .header-sub{font-family:'DM Mono',monospace;font-size:10px;color:#888;margin-top:5px;}
-
 .section-toggle{display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:10px 16px;background:var(--ink);border-bottom:1px solid #333;}
 .section-btn{padding:10px;border-radius:6px;border:none;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.15s;background:#2a2825;color:#888;}
 .section-btn.active{background:var(--green);color:#fff;}
-
 .cat-nav{display:flex;gap:6px;padding:12px 16px;overflow-x:auto;background:var(--card);border-bottom:1px solid var(--rule);scrollbar-width:none;position:sticky;top:131px;z-index:99;}
 .cat-nav::-webkit-scrollbar{display:none;}
 .cat-btn{padding:6px 12px;border-radius:5px;border:1.5px solid var(--rule);font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap;transition:all 0.15s;background:var(--bg);color:var(--mid);}
 .cat-btn.active{color:#fff;}
-
 .main{padding:16px;max-width:640px;margin:0 auto;}
 .section-panel{display:none;}.section-panel.visible{display:block;}
-.category{display:none;}.category.visible{display:block;}
-
 .cat-header{display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--ink);}
 .cat-label{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;letter-spacing:0.03em;text-transform:uppercase;}
 .cat-sub{font-family:'DM Mono',monospace;font-size:10px;color:var(--mid);margin-top:2px;}
 .cat-count{font-family:'DM Mono',monospace;font-size:10px;padding:3px 8px;border-radius:4px;margin-left:auto;white-space:nowrap;}
-
 .tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px;}
 .tab-btn{padding:6px 11px;border-radius:5px;border:1.5px solid var(--rule);background:var(--card);color:var(--mid);font-family:'DM Mono',monospace;font-size:9px;cursor:pointer;transition:all 0.15s;}
-
 .content-card{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:18px 16px;margin-bottom:8px;}
 .content-title{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:4px;}
 .content-badge{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:0.12em;text-transform:uppercase;padding:2px 7px;border-radius:3px;display:inline-block;margin-bottom:14px;}
@@ -54,19 +47,15 @@ body{background:var(--bg);color:var(--ink);font-family:'Barlow',sans-serif;min-h
 .content-notes{font-family:'DM Mono',monospace;font-size:9px;color:var(--light);line-height:1.6;font-style:italic;border-left:2px solid var(--rule);padding-left:10px;margin-bottom:14px;}
 .copy-btn{width:100%;padding:12px;border-radius:7px;border:1.5px solid var(--blue);background:var(--blue);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
 .copy-btn.copied{background:var(--green);border-color:var(--green);}
-
 .framework-note{background:var(--ink);color:#ccc;border-radius:8px;padding:14px 16px;margin-bottom:20px;font-family:'DM Mono',monospace;font-size:10px;line-height:1.7;}
 .framework-note strong{color:var(--green);font-weight:500;}
-
 .strategy-block{background:var(--green-bg);border:1px solid var(--green-bd);border-radius:10px;padding:18px 16px;margin-bottom:16px;}
 .strategy-title{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;color:var(--green);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;}
 .strategy-body{font-family:'DM Mono',monospace;font-size:11px;color:var(--mid);line-height:1.8;}
-
 footer{text-align:center;padding:28px 16px;font-family:'DM Mono',monospace;font-size:9px;color:var(--light);letter-spacing:0.15em;text-transform:uppercase;border-top:1px solid var(--rule);margin-top:20px;}
 </style>
 </head>
 <body>
-
 <div class="header">
   <div class="header-eyebrow">Get Unlocked Producer</div>
   <div style="display:flex;justify-content:space-between;align-items:flex-end;">
@@ -76,769 +65,255 @@ footer{text-align:center;padding:28px 16px;font-family:'DM Mono',monospace;font-
     </div>
   </div>
 </div>
-
 <div class="section-toggle">
-  <button class="section-btn active" id="btnScripts" onclick="showSection('scripts')">📞 Scripts</button>
-  <button class="section-btn" id="btnIOI" onclick="showSection('ioi')">📣 IOI Posts</button>
+  <button class="section-btn active" id="btnScripts" onclick="showSection('scripts')">Scripts</button>
+  <button class="section-btn" id="btnIOI" onclick="showSection('ioi')">IOI Posts</button>
 </div>
-
 <div class="cat-nav" id="catNav"></div>
 <div class="main" id="main">
   <div class="section-panel visible" id="panel-scripts"></div>
   <div class="section-panel" id="panel-ioi"></div>
 </div>
-
 <footer>Graham Financial · Get Unlocked Producer · Content Library</footer>
-
 <script>
-// ─── DATA ──────────────────────────────────────────────────────────────────
-
-const SCRIPTS = [
-  {
-    id:"database", label:"Past Client / Database", sub:"Reconnect calls — lead with value, listen first",
-    color:"var(--green)", bg:"var(--green-bg)", bd:"var(--green-bd)",
-    scenarios:[
-      {
-        label:"The Check-In", tag:"Opening call",
-        body:`Hey [name], it's [your name] — just checking in, it's been a little while since we connected. What's changed?
-
-[Listen. Let them talk. Whatever they say is your opening.]
-
-You know I always try to stay ahead of things for you — market moves, rate shifts, whatever might affect your situation. I just want to make sure my data on you is current so if something changes out there I can reach out before it becomes a thing.
-
-[Natural pause]
-
-And hey — I love helping people when the timing is right. Who do you know right now that's thinking about buying, selling, or doing anything with their home? Even if it's just a conversation.`,
-        notes:`"What's changed?" assumes something HAS changed — they fill in the blank. Don't pitch anything until they've talked for at least 60 seconds. The referral ask comes naturally after a real conversation.`
-      },
-      {
-        label:"The Home Value Opener", tag:"Opening call",
-        body:`Hey [name], [your name] here — quick question for you. Have you done anything to the house since we closed?
-
-[Listen — upgrades, renovations, additions, even just landscaping.]
-
-Nice. You know values in your area have shifted pretty significantly. With what you've done to the place, I'd be curious what it's actually worth right now. You want me to pull a quick number for you?
-
-[If yes — now you have a reason to follow up with real data.]
-[If no — "That's fair, I'll just keep an eye on it for you."]`,
-        notes:`Everyone wants to know what their house is worth. The upgrade question first makes them feel heard. This call always has a natural follow-up.`
-      },
-      {
-        label:"The Success Story Touch", tag:"Opening call",
-        body:`Hey [name], [your name] — I was actually thinking about you this week. I just helped a client in a really similar situation to yours and I wanted to share something quick.
-
-[30-second story — specific, real, relatable to their situation.]
-
-Anyway — just wanted to reach out. How are things going on your end? Anything changed with the house or the family situation?`,
-        notes:`Lead with the story, not with yourself. 30 seconds max. It makes them curious — "why were you thinking about me?" — then flip it back to them and listen.`
-      }
-    ]
-  },
-  {
-    id:"agentNew", label:"Agent — New Partner", sub:"We send them buyers — we don't ask for referrals",
-    color:"var(--blue)", bg:"var(--blue-bg)", bd:"var(--blue-bd)",
-    scenarios:[
-      {
-        label:"The Market Survey", tag:"Cold outreach",
-        body:`Hey [agent name], it's Joshua Graham over at Graham Financial — I don't think we've crossed paths on any deals yet.
-
-I'm actually putting together a quick survey — I'm trying to get a real read on what agents are seeing out there right now. Qualification challenges, market conditions, what's actually happening on the ground versus what the news is saying.
-
-Are you still active in real estate?
-
-[Yes — great.]
-
-How are things going? Are you seeing a lot of qualification issues with your buyers or is most of your business clean conventional stuff?
-
-[Listen. This is where the real conversation starts.]`,
-        notes:`The survey framing positions you as gathering intel, not pitching a product. You're asking THEM for their expertise. Once they start talking about challenges, you're already in the conversation.`
-      },
-      {
-        label:"The Lead Flip", tag:"Cold outreach",
-        body:`Hey [agent name] — Joshua Graham. I'll be straight with you — I'm not calling because I need referrals from agents.
-
-I'm actually calling because I'm looking for two or three agents in [area] who want us to send them pre-qualified buyers. We generate our own buyer leads upstream before they ever talk to an agent.
-
-I just want to make sure when those buyers need an agent, they're going to someone good.
-
-Are you taking on new buyer clients right now?`,
-        notes:`"I'm not calling because I need referrals" is a pattern interrupt — the opposite of what every other lender says. It flips the power dynamic immediately.`
-      },
-      {
-        label:"Open House Follow-Up", tag:"Warm outreach",
-        body:`Hey [agent name] — [your name]. Stopped by your open house at [address] on [day]. Nice property.
-
-Quick question — how many of the people who came through were pre-approved?
-
-I ask because I work with a lot of buyers in that price range. If you ever have serious buyers who need a lender who can actually close, I'd be glad to help.`,
-        notes:`Specific to something they just did. The pre-approval question is genuine — most open house visitors aren't pre-approved.`
-      },
-      {
-        label:"After a Referral Closes", tag:"Relationship building",
-        body:`Hey [agent name] — [your name]. Just wanted to say thanks — [buyer name]'s loan closed clean. They're great people.
-
-I always try to close the way I'd want someone to close a loan for my own family. Hoping we can do more together.
-
-Anything in your pipeline right now that I can help with?`,
-        notes:`Always follow up after a deal closes. This is how you become their first call next time — not by pitching, but by showing how you operate.`
-      }
-    ]
-  },
-  {
-    id:"agentStuck", label:"Agent — Stuck Loan", sub:"Deal in trouble or fell apart",
-    color:"var(--amber)", bg:"var(--amber-bg)", bd:"var(--amber-bd)",
-    scenarios:[
-      {
-        label:"Deal Fell Apart", tag:"Cold outreach",
-        body:`Hey [agent name] — [your name]. Heard you had a deal fall apart recently. That's brutal, I'm sorry.
-
-Quick question — was it a lender problem or a borrower problem?
-
-[Lender] — That's actually my specialty. Complex files, self-employed income, VA loans, credit challenges — the stuff most lenders send back. What happened with the file?
-
-[Borrower] — Got it. Is the buyer still motivated? There might be a path to get them there faster than you think.`,
-        notes:`Don't pitch. Ask what happened. Let them vent — that's where the opening is.`
-      },
-      {
-        label:"Active Deal in Trouble", tag:"Cold outreach",
-        body:`Hey [agent name] — [your name]. I specialize in rescuing files that other lenders can't close. Self-employed, VA, credit challenges, complex income.
-
-I'm not trying to take your lender relationship. I'm asking: do you have a file right now that's in trouble?
-
-Because that's exactly what I do.`,
-        notes:`Agents with a deal in danger are in pain. You're offering a lifeline. Be direct and calm. The shorter this script, the better.`
-      }
-    ]
-  },
-  {
-    id:"referral", label:"Referral Partner", sub:"Upstream positioning — you control buyer flow",
-    color:"var(--teal)", bg:"var(--teal-bg)", bd:"var(--teal-bd)",
-    scenarios:[
-      {
-        label:"The Upstream Conversation", tag:"Cold outreach",
-        body:`Hey [name] — Joshua Graham. Quick question — how are you currently getting your buyers before they find an agent?
-
-[Listen.]
-
-I ask because we've built a system where we're capturing buyers upstream — before they're in the market, before they're on Zillow, before they've talked to anyone. By the time they're ready we already know their payment, their cash to close, and their timeline.
-
-I'm looking for a couple of partners who want first access to those buyers when they're ready to move.
-
-Is that something worth a 10-minute conversation?`,
-        notes:`The first question does all the work. Most partners don't have a real upstream answer — and that pause is the opening. You're pitching a lead flow, not a mortgage product.`
-      }
-    ]
-  },
-  {
-    id:"va", label:"VA Buyer", sub:"Veterans & active military",
-    color:"var(--purple)", bg:"var(--purple-bg)", bd:"var(--purple-bd)",
-    scenarios:[
-      {
-        label:"First-Time Benefit", tag:"Buyer outreach",
-        body:`Hey [name] — [your name], I specialize in VA loans here in Colorado. Someone mentioned you might be thinking about buying.
-
-Quick question — have you ever used your VA home loan benefit before?
-
-[No] — Most veterans don't realize what they actually have. Zero down payment, no PMI, competitive rates, and the government backs the loan. It's genuinely the best loan product available. What's been holding you back from buying?`,
-        notes:`Don't pitch features. Ask what's in the way. Usually it's down payment — that's the myth you get to bust.`
-      },
-      {
-        label:"Re-Use Benefit", tag:"Past client",
-        body:`Hey [name] — [your name] here, I do VA loans in Colorado. Quick question — did you use your VA benefit on your current home?
-
-[Yes] — A lot of veterans don't realize the benefit can be used again. If you sold that home or paid it off, your entitlement may be restored. Takes me about five minutes to look up exactly what you've got available. Want me to pull that up?`,
-        notes:`Most vets think the benefit is one-time. Busting that myth is genuine value — not a pitch.`
-      },
-      {
-        label:"Active Duty PCS Move", tag:"Buyer outreach",
-        body:`Hey [name] — [your name]. I heard you might be PCS-ing to [location] soon. I specialize in VA loans and I work with a lot of active duty families going through this exact situation.
-
-A few things most people don't know about buying during a PCS that can save you significant money. Worth a quick call?`,
-        notes:`PCS timelines are stressful. Position yourself as the expert who has done this before.`
-      },
-      {
-        label:"Surviving Spouse", tag:"Buyer outreach",
-        body:`Hey [name] — [your name] here. I work with VA loans and someone mentioned you might be eligible for a VA home loan benefit through your spouse's service.
-
-I don't want to assume anything, but if that's the case, the benefit is significant and most people in your situation don't know they qualify.
-
-Would it be okay if I explained what you might be entitled to?`,
-        notes:`Be respectful and direct. Lead with information, not a sales pitch.`
-      }
-    ]
-  },
-  {
-    id:"selfEmployed", label:"Self-Employed", sub:"1099, business owners, complex income",
-    color:"var(--teal)", bg:"var(--teal-bg)", bd:"var(--teal-bd)",
-    scenarios:[
-      {
-        label:"Turned Down Elsewhere", tag:"Cold outreach",
-        body:`Hey [name] — [your name] here. I heard you were looking at buying but ran into some roadblocks with your income documentation.
-
-Quick question — were you told you don't qualify, or just that it was complicated?
-
-Because those are two very different things. I specialize in self-employed borrowers — 1099 income, business owners, complex tax returns. Most of my clients were told no somewhere else first.
-
-Got 10 minutes?`,
-        notes:`The distinction between "don't qualify" and "complicated" is the opening. You solve complicated.`
-      },
-      {
-        label:"Business Owner Outreach", tag:"Cold outreach",
-        body:`Hey [name] — [your name]. I work primarily with business owners and self-employed buyers in Colorado — the ones whose income doesn't fit a standard pay stub.
-
-Most lenders see a business owner's tax return and check out. I've spent 25 years learning how to read them the right way.
-
-Are you currently renting, or do you own?`,
-        notes:`Business owners get rejected constantly by lenders who don't understand their income. You're the exception.`
-      },
-      {
-        label:"Bank Statement Program", tag:"Cold outreach",
-        body:`Hey [name] — [your name]. Quick question — have you ever heard of a bank statement loan?
-
-For self-employed borrowers, instead of using tax returns, we can qualify based on 12-24 months of bank deposits. For a lot of business owners, this changes everything.
-
-Is that something you'd want to know more about?`,
-        notes:`Many self-employed buyers have never heard of this product. The question creates curiosity without being a pitch.`
-      }
-    ]
-  },
-  {
-    id:"refi", label:"Refi Conversation", sub:"Past clients with rate or equity opportunity",
-    color:"var(--red)", bg:"var(--red-bg)", bd:"var(--red-bd)",
-    scenarios:[
-      {
-        label:"High Rate Past Client", tag:"Past client",
-        body:`Hey [name] — [your name] here. I was going through my files this week and I noticed you locked in at [rate]%.
-
-With where things are right now, I want to run some numbers with you — not because I'm pitching a refinance, but because I want to make sure you actually know your options.
-
-Got 10 minutes this week?`,
-        notes:`"I was going through my files" signals you're paying attention, not mass-texting. Never send this unless you've actually looked at their rate.`
-      },
-      {
-        label:"Equity Opportunity", tag:"Past client",
-        body:`Hey [name] — [your name]. Quick question — do you have any idea what your home is worth right now versus what you paid?
-
-Colorado values have moved significantly. A lot of people are sitting on equity they don't even realize they have, and there are ways to put that to work without touching your rate.
-
-Worth a 10-minute conversation?`,
-        notes:`Don't say "cash-out refi" — say "put that equity to work." Very different emotional response.`
-      },
-      {
-        label:"Debt Consolidation", tag:"Past client",
-        body:`Hey [name] — [your name]. I'm going to ask you a weird question: what's your total monthly minimum payment on everything except your mortgage?
-
-Credit cards, car loans, student loans — add it up in your head.
-
-I ask because I've been working with homeowners lately who are doing something really smart with their equity that cuts that number significantly. And it's not what most people think.
-
-Got 10 minutes?`,
-        notes:`Don't explain it in the opener — the mystery is the hook. "I'm going to ask you a weird question" disarms them before you ask.`
-      },
-      {
-        label:"Rate Drop Alert", tag:"Past client",
-        body:`Hey [name] — [your name]. Rates moved this week in a way I don't see very often. I'm reaching out to a handful of past clients specifically because of where your current rate is.
-
-I'm not saying refinance — I'm saying let me run the numbers and show you what it looks like. You decide if it makes sense.
-
-Got 10 minutes?`,
-        notes:`Only send this when rates have actually moved meaningfully. "A handful of past clients" makes them feel specifically chosen.`
-      }
-    ]
-  },
-  {
-    id:"buyer", label:"First-Time Buyer", sub:"Renters & first-timers",
-    color:"var(--olive)", bg:"var(--olive-bg)", bd:"var(--olive-bd)",
-    scenarios:[
-      {
-        label:"Renter Outreach", tag:"Cold outreach",
-        body:`Hey [name] — [your name] here. Quick question — how long have you been renting your current place?
-
-I ask because depending on your income and credit, you might be a lot closer to owning than you think. And there are programs in Colorado specifically for first-time buyers that most people don't know exist.
-
-Would it be okay if I ran some quick numbers with you?`,
-        notes:`Don't assume they want to buy. Ask how long they've been renting — that tells you everything. Urgency comes from the math, not from pressure.`
-      },
-      {
-        label:"Down Payment Concern", tag:"Buyer outreach",
-        body:`Hey [name] — [your name]. I know saving for a down payment is one of the biggest things keeping people from buying right now.
-
-There are programs in Colorado where the down payment is either very small or covered entirely. Most people don't know they qualify.
-
-Got 10 minutes this week?`,
-        notes:`The down payment is almost always the stated objection. Address it directly.`
-      },
-      {
-        label:"Credit Concern", tag:"Buyer outreach",
-        body:`Hey [name] — [your name] here. I work with a lot of first-time buyers who think their credit isn't good enough to buy a home.
-
-Most of the time they're wrong — or they're closer than they think. And even when they're not, there's usually a 60-90 day path to get there.
-
-Would you be open to a quick conversation? No application, no commitment — just a real picture of where you stand.`,
-        notes:`"No application, no commitment" removes the fear. People avoid lenders because they think it'll hurt their credit. Bust that myth immediately.`
-      }
-    ]
-  },
-  {
-    id:"dpa", label:"DPA / Assistance", sub:"CHFA, Heroes, Metro DPA",
-    color:"var(--stone)", bg:"var(--stone-bg)", bd:"var(--stone-bd)",
-    scenarios:[
-      {
-        label:"CHFA Intro", tag:"Buyer outreach",
-        body:`Hey [name] — [your name] here. Have you ever heard of CHFA?
-
-It's a Colorado program that helps first-time buyers with either a grant toward down payment or a silent second loan you don't have to pay back for years. A lot of people who use it didn't think they could buy.
-
-Would you want me to check if you qualify?`,
-        notes:`Keep it simple — don't explain all the details upfront. The only ask is whether they want to know if they qualify. That's a very easy yes.`
-      },
-      {
-        label:"Colorado Heroes", tag:"Buyer outreach",
-        body:`Hey [name] — [your name]. Are you a teacher, nurse, firefighter, police officer, or military?
-
-There's a Colorado program called Heroes that gives buyers in public service roles significant down payment assistance. It's one of the best programs in the state and most people who qualify don't know it exists.
-
-Want me to check if you qualify?`,
-        notes:`Lead with the profession list — instant recognition. Short, specific, one ask.`
-      },
-      {
-        label:"Metro DPA", tag:"Buyer outreach",
-        body:`Hey [name] — [your name] here. Quick question — do you live or work in the Denver metro area?
-
-There's a program called Metro DPA that provides down payment assistance — no first-time buyer requirement, and it forgives the assistance after 3 years.
-
-A lot of people think they don't have options. This is one they don't know about.
-
-Want me to see if you qualify?`,
-        notes:`"No first-time buyer requirement" opens the door to move-up buyers and people who owned before.`
-      }
-    ]
-  }
+const SCRIPTS=[
+  {id:"database",label:"Past Client / Database",sub:"Reconnect calls — lead with value, listen first",color:"var(--green)",bg:"var(--green-bg)",bd:"var(--green-bd)",scenarios:[
+    {label:"The Check-In",tag:"Opening call",body:`Hey [name], it's [your name] — just checking in, it's been a little while since we connected. What's changed?\n\n[Listen. Let them talk. Whatever they say is your opening.]\n\nYou know I always try to stay ahead of things for you — market moves, rate shifts, whatever might affect your situation. I just want to make sure my data on you is current so if something changes out there I can reach out before it becomes a thing.\n\n[Natural pause]\n\nAnd hey — I love helping people when the timing is right. Who do you know right now that's thinking about buying, selling, or doing anything with their home? Even if it's just a conversation.`,notes:`"What's changed?" assumes something HAS changed — they just fill in the blank. Don't pitch anything until they've talked for at least 60 seconds.`},
+    {label:"The Home Value Opener",tag:"Opening call",body:`Hey [name], [your name] here — quick question for you. Have you done anything to the house since we closed?\n\n[Listen — upgrades, renovations, additions, even just landscaping.]\n\nNice. You know values in your area have shifted pretty significantly. With what you've done to the place, I'd be curious what it's actually worth right now. You want me to pull a quick number for you?\n\n[If yes — now you have a reason to follow up with real data.]\n[If no — "That's fair, I'll just keep an eye on it for you."]`,notes:`Everyone wants to know what their house is worth. The upgrade question first makes them feel heard. This call always has a natural follow-up.`},
+    {label:"The Success Story Touch",tag:"Opening call",body:`Hey [name], [your name] — I was actually thinking about you this week. I just helped a client in a really similar situation to yours and I wanted to share something quick.\n\n[30-second story — specific, real, relatable to their situation.]\n\nAnyway — just wanted to reach out. How are things going on your end? Anything changed with the house or the family situation?`,notes:`Lead with the story, not with yourself. 30 seconds max. Then flip it back to them and listen.`},
+    {label:"The Birthday Call",tag:"Relationship touch",body:`Hey [name] — [your name] here. Just wanted to call and say happy birthday. Hope you're doing something good today.\n\n[That's it. Stop there. Let them respond.]\n\n[If they ask how you are — "Doing great, staying busy. How's everything going with you guys? How's the house treating you?"]`,notes:`No mortgage mention unless they bring it up. This is a human call. The fact that you remembered their birthday does more for the relationship than any pitch ever could. Keep it under 2 minutes unless they want to talk.`},
+    {label:"The Rate Alert",tag:"Opening call",body:`Hey [name] — [your name]. Quick call — rates actually did something interesting this week and I wanted to make sure you heard it from me before the news spun it.\n\nNothing dramatic, just worth knowing. Got 5 minutes?\n\n[If yes — share the real picture. What moved, what it means for someone in their situation specifically.]`,notes:`Only make this call when something actually happened worth talking about. Your credibility depends on not crying wolf. When you do call, be specific — "rates moved about a quarter point this week" is more credible than vague urgency.`},
+    {label:"The Neighborhood Move",tag:"Opening call",body:`Hey [name] — [your name] here. Quick question — did you see that house on [street or general area] just sold?\n\n[Let them respond — they either know or they don't.]\n\nYeah — it went for [price if you know it, or "more than people expected"]. Values in your area have been moving in a way a lot of people aren't tracking. With what you've got going on over there, I'd be curious what yours would appraise at right now.\n\nWant me to pull a quick number for you?`,notes:`This works whether they saw it or not. If they did, you're having a conversation they're already thinking about. If they didn't, you just gave them something interesting. Either way you've created a reason to talk about their home's value.`},
+    {label:"The Life Event",tag:"Opening call",body:`Hey [name] — [your name]. Hey I heard [congratulations on the new job / congratulations on the baby / sounds like things are busy with the move] — wanted to reach out.\n\nHow's everything going?\n\n[Listen. Let them share. Don't rush it.]\n\n[Natural — "With everything changing for you guys, has any of it made you think differently about the house situation?"]`,notes:`Major life changes almost always have a housing component people haven't fully thought through yet. New job means new income, new qualification picture. New baby means space. Kid leaving for college means empty rooms and equity sitting idle. You're not pitching — you're asking a relevant question at a relevant moment.`},
+    {label:"The Long Lost",tag:"Opening call",body:`Hey [name] — this is [your name], I helped you with your loan back in [year]. It's been a while — I hope things have been good.\n\nI was actually going through some old files this week and I thought about you. Just wanted to reach out and see how things have been going.\n\n[Listen. Give them a second — they may not remember you immediately.]\n\n[If they warm up — "How has the house been? You still in [city]?"]`,notes:`Don't apologize for the gap or over-explain why you're calling after years. Just be natural. The line "I was going through old files" is honest and signals you're attentive, not random. Keep the first call short — just reopen the door.`},
+    {label:"The Holiday Touch",tag:"Relationship touch",body:`Hey [name] — [your name] here. Just wanted to reach out around [holiday] and say I hope you and the family have a great one.\n\n[That's it. Genuinely — that's the whole call.]\n\n[If they want to chat — great. If not — "Enjoy it, talk soon."]`,notes:`The holidays people remember are the ones where someone called just to say that and nothing else. No ask. No pitch. No "while I have you." If they bring up their house or finances — that's their invitation. If they don't — you just made a deposit in the relationship that pays interest for years.`}
+  ]},
+  {id:"agentNew",label:"Agent — New Partner",sub:"We send them buyers — not the other way around",color:"var(--blue)",bg:"var(--blue-bg)",bd:"var(--blue-bd)",scenarios:[
+    {label:"The Market Survey",tag:"Cold outreach",body:`Hey [agent name], it's Joshua Graham over at Graham Financial — I don't think we've crossed paths on any deals yet.\n\nI'm actually putting together a quick survey — I'm trying to get a real read on what agents are seeing out there right now. Qualification challenges, market conditions, what's actually happening on the ground versus what the news is saying.\n\nAre you still active in real estate?\n\n[Yes — great.]\n\nHow are things going? Are you seeing a lot of qualification issues with your buyers or is most of your business clean conventional stuff?\n\n[Listen. This is where the real conversation starts.]`,notes:`The survey framing positions you as gathering intel, not pitching. You're asking THEM for their expertise. Once they start talking about challenges, you're in the conversation.`},
+    {label:"The Lead Flip",tag:"Cold outreach",body:`Hey [agent name] — Joshua Graham. I'll be straight with you — I'm not calling because I need referrals from agents.\n\nI'm actually calling because I'm looking for two or three agents in [area] who want us to send them pre-qualified buyers. We generate our own buyer leads upstream before they ever talk to an agent.\n\nI just want to make sure when those buyers need an agent, they're going to someone good.\n\nAre you taking on new buyer clients right now?`,notes:`"I'm not calling because I need referrals" is a pattern interrupt. It flips the power dynamic immediately.`},
+    {label:"Open House Follow-Up",tag:"Warm outreach",body:`Hey [agent name] — [your name]. Stopped by your open house at [address] on [day]. Nice property.\n\nQuick question — how many of the people who came through were pre-approved?\n\nI ask because I work with a lot of buyers in that price range. If you ever have serious buyers who need a lender who can actually close, I'd be glad to help.`,notes:`Specific to something they just did. The pre-approval question is genuine — most open house visitors aren't pre-approved.`},
+    {label:"After a Referral Closes",tag:"Relationship building",body:`Hey [agent name] — [your name]. Just wanted to say thanks — [buyer name]'s loan closed clean. They're great people.\n\nI always try to close the way I'd want someone to close a loan for my own family. Hoping we can do more together.\n\nAnything in your pipeline right now that I can help with?`,notes:`Always follow up after a deal closes. This is how you become their first call next time.`}
+  ]},
+  {id:"agentStuck",label:"Agent — Stuck Loan",sub:"Deal in trouble or fell apart",color:"var(--amber)",bg:"var(--amber-bg)",bd:"var(--amber-bd)",scenarios:[
+    {label:"Deal Fell Apart",tag:"Cold outreach",body:`Hey [agent name] — [your name]. Heard you had a deal fall apart recently. That's brutal, I'm sorry.\n\nQuick question — was it a lender problem or a borrower problem?\n\n[Lender] — That's actually my specialty. Complex files, self-employed income, VA loans, credit challenges — the stuff most lenders send back. What happened with the file?\n\n[Borrower] — Got it. Is the buyer still motivated? There might be a path to get them there faster than you think.`,notes:`Don't pitch. Ask what happened. Let them vent — that's where the opening is.`},
+    {label:"Active Deal in Trouble",tag:"Cold outreach",body:`Hey [agent name] — [your name]. I specialize in rescuing files that other lenders can't close. Self-employed, VA, credit challenges, complex income.\n\nI'm not trying to take your lender relationship. I'm asking: do you have a file right now that's in trouble?\n\nBecause that's exactly what I do.`,notes:`Agents with a deal in danger are in pain. You're offering a lifeline. Be direct and calm.`}
+  ]},
+  {id:"referral",label:"Referral Partner",sub:"Upstream positioning — you control buyer flow",color:"var(--teal)",bg:"var(--teal-bg)",bd:"var(--teal-bd)",scenarios:[
+    {label:"The Upstream Conversation",tag:"Cold outreach",body:`Hey [name] — Joshua Graham. Quick question — how are you currently getting your buyers before they find an agent?\n\n[Listen.]\n\nI ask because we've built a system where we're capturing buyers upstream — before they're in the market, before they're on Zillow, before they've talked to anyone. By the time they're ready we already know their payment, their cash to close, and their timeline.\n\nI'm looking for a couple of partners who want first access to those buyers when they're ready to move.\n\nIs that something worth a 10-minute conversation?`,notes:`The first question does all the work. Most partners don't have a real upstream answer — and that pause is the opening.`}
+  ]},
+  {id:"va",label:"VA Buyer",sub:"Veterans and active military",color:"var(--purple)",bg:"var(--purple-bg)",bd:"var(--purple-bd)",scenarios:[
+    {label:"First-Time Benefit",tag:"Buyer outreach",body:`Hey [name] — [your name], I specialize in VA loans here in Colorado. Someone mentioned you might be thinking about buying.\n\nQuick question — have you ever used your VA home loan benefit before?\n\n[No] — Most veterans don't realize what they actually have. Zero down payment, no PMI, competitive rates, and the government backs the loan. It's genuinely the best loan product available. What's been holding you back from buying?`,notes:`Don't pitch features. Ask what's in the way. Usually it's down payment — that's the myth you get to bust.`},
+    {label:"Re-Use Benefit",tag:"Past client",body:`Hey [name] — [your name] here, I do VA loans in Colorado. Quick question — did you use your VA benefit on your current home?\n\n[Yes] — A lot of veterans don't realize the benefit can be used again. If you sold that home or paid it off, your entitlement may be restored. Takes me about five minutes to look up exactly what you've got available. Want me to pull that up?`,notes:`Most vets think the benefit is one-time. Busting that myth is genuine value.`},
+    {label:"Active Duty PCS Move",tag:"Buyer outreach",body:`Hey [name] — [your name]. I heard you might be PCS-ing to [location] soon. I specialize in VA loans and I work with a lot of active duty families going through this exact situation.\n\nA few things most people don't know about buying during a PCS that can save you significant money. Worth a quick call?`,notes:`PCS timelines are stressful. Position yourself as the expert who has done this before.`},
+    {label:"Surviving Spouse",tag:"Buyer outreach",body:`Hey [name] — [your name] here. I work with VA loans and someone mentioned you might be eligible for a VA home loan benefit through your spouse's service.\n\nI don't want to assume anything, but if that's the case, the benefit is significant and most people in your situation don't know they qualify.\n\nWould it be okay if I explained what you might be entitled to?`,notes:`Be respectful and direct. Lead with information, not a sales pitch.`}
+  ]},
+  {id:"selfEmployed",label:"Self-Employed",sub:"1099, business owners, complex income",color:"var(--teal)",bg:"var(--teal-bg)",bd:"var(--teal-bd)",scenarios:[
+    {label:"Turned Down Elsewhere",tag:"Cold outreach",body:`Hey [name] — [your name] here. I heard you were looking at buying but ran into some roadblocks with your income documentation.\n\nQuick question — were you told you don't qualify, or just that it was complicated?\n\nBecause those are two very different things. I specialize in self-employed borrowers — 1099 income, business owners, complex tax returns. Most of my clients were told no somewhere else first.\n\nGot 10 minutes?`,notes:`The distinction between "don't qualify" and "complicated" is the opening. You solve complicated.`},
+    {label:"Business Owner Outreach",tag:"Cold outreach",body:`Hey [name] — [your name]. I work primarily with business owners and self-employed buyers in Colorado — the ones whose income doesn't fit a standard pay stub.\n\nMost lenders see a business owner's tax return and check out. I've spent 25 years learning how to read them the right way.\n\nAre you currently renting, or do you own?`,notes:`Business owners get rejected constantly by lenders who don't understand their income. You're the exception.`},
+    {label:"Bank Statement Program",tag:"Cold outreach",body:`Hey [name] — [your name]. Quick question — have you ever heard of a bank statement loan?\n\nFor self-employed borrowers, instead of using tax returns, we can qualify based on 12-24 months of bank deposits. For a lot of business owners, this changes everything.\n\nIs that something you'd want to know more about?`,notes:`Many self-employed buyers have never heard of this product. The question creates curiosity without being a pitch.`}
+  ]},
+  {id:"refi",label:"Refi Conversation",sub:"Past clients with rate or equity opportunity",color:"var(--red)",bg:"var(--red-bg)",bd:"var(--red-bd)",scenarios:[
+    {label:"High Rate Past Client",tag:"Past client",body:`Hey [name] — [your name] here. I was going through my files this week and I noticed you locked in at [rate]%.\n\nWith where things are right now, I want to run some numbers with you — not because I'm pitching a refinance, but because I want to make sure you actually know your options.\n\nGot 10 minutes this week?`,notes:`"I was going through my files" signals you're paying attention, not mass-texting.`},
+    {label:"Equity Opportunity",tag:"Past client",body:`Hey [name] — [your name]. Quick question — do you have any idea what your home is worth right now versus what you paid?\n\nColorado values have moved significantly. A lot of people are sitting on equity they don't even realize they have, and there are ways to put that to work without touching your rate.\n\nWorth a 10-minute conversation?`,notes:`Don't say "cash-out refi" — say "put that equity to work." Very different emotional response.`},
+    {label:"Debt Consolidation",tag:"Past client",body:`Hey [name] — [your name]. I'm going to ask you a weird question: what's your total monthly minimum payment on everything except your mortgage?\n\nCredit cards, car loans, student loans — add it up in your head.\n\nI ask because I've been working with homeowners lately who are doing something really smart with their equity that cuts that number significantly. And it's not what most people think.\n\nGot 10 minutes?`,notes:`Don't explain it in the opener — the mystery is the hook.`},
+    {label:"Rate Drop Alert",tag:"Past client",body:`Hey [name] — [your name]. Rates moved this week in a way I don't see very often. I'm reaching out to a handful of past clients specifically because of where your current rate is.\n\nI'm not saying refinance — I'm saying let me run the numbers and show you what it looks like. You decide if it makes sense.\n\nGot 10 minutes?`,notes:`Only send this when rates have actually moved meaningfully.`}
+  ]},
+  {id:"buyer",label:"First-Time Buyer",sub:"Renters and first-timers",color:"var(--olive)",bg:"var(--olive-bg)",bd:"var(--olive-bd)",scenarios:[
+    {label:"Renter Outreach",tag:"Cold outreach",body:`Hey [name] — [your name] here. Quick question — how long have you been renting your current place?\n\nI ask because depending on your income and credit, you might be a lot closer to owning than you think. And there are programs in Colorado specifically for first-time buyers that most people don't know exist.\n\nWould it be okay if I ran some quick numbers with you?`,notes:`Don't assume they want to buy. Urgency comes from the math, not from pressure.`},
+    {label:"Down Payment Concern",tag:"Buyer outreach",body:`Hey [name] — [your name]. I know saving for a down payment is one of the biggest things keeping people from buying right now.\n\nThere are programs in Colorado where the down payment is either very small or covered entirely. Most people don't know they qualify.\n\nGot 10 minutes this week?`,notes:`The down payment is almost always the stated objection. Address it directly.`},
+    {label:"Credit Concern",tag:"Buyer outreach",body:`Hey [name] — [your name] here. I work with a lot of first-time buyers who think their credit isn't good enough to buy a home.\n\nMost of the time they're wrong — or they're closer than they think. And even when they're not, there's usually a 60-90 day path to get there.\n\nWould you be open to a quick conversation? No application, no commitment — just a real picture of where you stand.`,notes:`"No application, no commitment" removes the fear immediately.`}
+  ]},
+  {id:"dpa",label:"DPA / Assistance",sub:"CHFA, Heroes, Metro DPA",color:"var(--stone)",bg:"var(--stone-bg)",bd:"var(--stone-bd)",scenarios:[
+    {label:"CHFA Intro",tag:"Buyer outreach",body:`Hey [name] — [your name] here. Have you ever heard of CHFA?\n\nIt's a Colorado program that helps first-time buyers with either a grant toward down payment or a silent second loan you don't have to pay back for years. A lot of people who use it didn't think they could buy.\n\nWould you want me to check if you qualify?`,notes:`Keep it simple — don't explain all the details upfront.`},
+    {label:"Colorado Heroes",tag:"Buyer outreach",body:`Hey [name] — [your name]. Are you a teacher, nurse, firefighter, police officer, or military?\n\nThere's a Colorado program called Heroes that gives buyers in public service roles significant down payment assistance. Most people who qualify don't know it exists.\n\nWant me to check if you qualify?`,notes:`Lead with the profession list — instant recognition.`},
+    {label:"Metro DPA",tag:"Buyer outreach",body:`Hey [name] — [your name] here. Quick question — do you live or work in the Denver metro area?\n\nThere's a program called Metro DPA that provides down payment assistance — no first-time buyer requirement, and it forgives the assistance after 3 years.\n\nWant me to see if you qualify?`,notes:`"No first-time buyer requirement" opens the door to move-up buyers.`}
+  ]}
 ];
 
-const IOI = [
-  {
-    id:"buyers", label:"Buyers", sub:"Renters, first-timers, people sitting on the fence",
-    color:"var(--green)", bg:"var(--green-bg)", bd:"var(--green-bd)",
-    posts:[
-      {title:"The Waiting Trap", content:`She called me last week and said she was going to wait another two years to buy.
-
-I asked her one question.
-
-She called me back the next day ready to go.
-
-What's the one thing that keeps people from buying when they're actually ready?
-
-(It's not what you think.)`},
-      {title:"The Payment Surprise", content:`Couple in [city]. Combined income $95K. Paying $2,200 in rent.
-
-They thought buying was years away.
-
-It wasn't.
-
-Their mortgage payment ended up being less than their rent.
-
-How many people are renting right now and don't know this?`},
-      {title:"The 20% Myth", content:`Most people think they need 20% down to buy a house.
-
-That number hasn't been required for decades.
-
-There are programs in Colorado right now that require less than you probably spend on groceries in a month.
-
-Are you one of the people waiting on 20%?`},
-      {title:"The Credit Excuse", content:`He told me his credit wasn't good enough to buy.
-
-I pulled his scores.
-
-He was 11 points away.
-
-60 days later he had keys.
-
-How many people are renting right now because of a number that's closer than they think?`},
-      {title:"The Rent Receipt", content:`Every month you pay rent, you're paying someone else's mortgage.
-
-Building their equity.
-
-Funding their retirement.
-
-Not yours.
-
-At what point does that math start bothering you?`},
-      {title:"The Rate Myth", content:`Everyone's waiting for rates to drop before they buy.
-
-Here's what they don't tell you: when rates drop, prices go up.
-
-The people who bought while everyone else was waiting?
-
-They refinance. The people who waited?
-
-They compete against more buyers at higher prices.
-
-What are you actually waiting for?`}
-    ]
-  },
-  {
-    id:"agents", label:"Agents", sub:"The 71% who need leads — and the ones who need a better lender",
-    color:"var(--amber)", bg:"var(--amber-bg)", bd:"var(--amber-bd)",
-    posts:[
-      {title:"The Reversal", content:`Most lenders call agents asking for referrals.
-
-I do the opposite.
-
-I generate the buyers. I pre-qualify them. I educate them on CHFA, Colorado Heroes, Metro DPA.
-
-Then I hand them to my agent partners — warm, ready, and motivated.
-
-Agent shows houses. Closes deals. Gets paid.
-
-I close the loans.
-
-Three agents I work with went from zero closings to 8+ deals in 4 months.
-
-Is that backwards from what you're used to?`},
-      {title:"The 71% Problem", content:`71% of licensed real estate agents in Colorado closed zero deals last year.
-
-Not because they're bad agents.
-
-Because nobody was sending them buyers.
-
-The agents who are closing deals consistently all have one thing in common.
-
-It's not their marketing. It's not their brokerage. It's not their years of experience.
-
-What do you think it is?`},
-      {title:"The First Deal in 7 Days", content:`An agent called me last year. She hadn't closed a deal in 6 months.
-
-She was about to quit.
-
-I sent her one pre-qualified buyer.
-
-She had a contract in 4 days.
-
-She closed 11 deals that year.
-
-What would one buyer — right now, ready to go — change for your business?`},
-      {title:"The File Nobody Wants", content:`Self-employed. 1099 income. Just changed jobs. Credit not perfect.
-
-Most lenders see that file and send it back.
-
-Their agent loses the deal. Their commission disappears. The relationship gets damaged.
-
-I see that file and call the agent back with a plan.
-
-Do you have a lender you call when the deal looks impossible?`},
-      {title:"The 47 Days", content:`Agent called me Friday. Deal was supposed to close Monday.
-
-Their lender had been "working on it" for 47 days.
-
-We closed it in 9.
-
-She asked me: why didn't I call you first?
-
-What's a fallen deal actually cost you? Not just the commission — the time, the relationship, the referrals that never came from that client.`},
-      {title:"The Backup Plan", content:`Every agent has a preferred lender.
-
-Until that lender can't perform.
-
-The agents who never panic when a deal goes sideways all have the same thing — a second number in their phone. Someone who closes the hard files.
-
-Self-employed income. VA benefits. Credit challenges. Complex situations.
-
-When's the last time your lender saved a deal that was already dead?`},
-      {title:"The Commission Math", content:`Most agents I talk to have lost at least 2-3 deals this year to lender issues.
-
-At an average commission of $12,000 per deal — that's $24,000-$36,000 that walked out the door.
-
-Not because the buyer wasn't qualified.
-
-Because the lender couldn't close.
-
-What would you do differently if you knew your next deal was guaranteed to close?`},
-      {title:"The Upstream Problem", content:`Here's what most agents don't realize:
-
-By the time a buyer calls you, they've already decided their price range, their timeline, and half the time — their lender.
-
-The agents getting the most referrals aren't chasing buyers.
-
-They're getting sent buyers who are already pre-qualified, already educated, and already ready.
-
-How are buyers finding you right now — before they find an agent?`}
-    ]
-  },
-  {
-    id:"homeowners", label:"Homeowners", sub:"Equity conversations and rate trap math",
-    color:"var(--blue)", bg:"var(--blue-bg)", bd:"var(--blue-bd)",
-    posts:[
-      {title:"The Rate Trap", content:`Woman called me last week. 2.75% mortgage.
-
-Also paying $1,100/month in credit card interest.
-
-She thought protecting her rate was the smart move.
-
-I showed her the math.
-
-Are you protecting a low rate while losing more somewhere else every month?`},
-      {title:"Sitting On It", content:`Colorado home values are significantly higher than they were a few years ago.
-
-Most homeowners have no idea how much equity they're sitting on.
-
-That equity is either working for you or it's just sitting there.
-
-Do you know what your home is worth today?`},
-      {title:"The Invisible Payment", content:`He was paying $1,400/month in minimums on credit cards.
-
-He had $180,000 in equity.
-
-After we talked, his total debt payment dropped by $900/month.
-
-He said: I didn't know that was possible.
-
-What's your equity doing right now?`},
-      {title:"The Second Job", content:`Most people work a second job to pay off debt.
-
-Some people use their house.
-
-Same result. Very different amount of effort.
-
-Does your home know how hard it could be working for you?`},
-      {title:"The Renovation Trap", content:`They pulled $50,000 out of savings to remodel the kitchen.
-
-I asked them one question.
-
-They wish they'd called me first.
-
-Are you about to spend money on your home that your home could actually be paying for?`},
-      {title:"The 3 AM Number", content:`You know that number you add up in your head at 3 AM?
-
-Credit cards. Car payment. Student loans.
-
-The one that keeps you up.
-
-Some homeowners have figured out how to make that number disappear.
-
-Not by making more money. By asking a different question.
-
-What's your 3 AM number?`}
-    ]
-  },
-  {
-    id:"selfEmployed", label:"Self-Employed", sub:"Business owners being told no everywhere else",
-    color:"var(--teal)", bg:"var(--teal-bg)", bd:"var(--teal-bd)",
-    posts:[
-      {title:"The Tax Return Problem", content:`He made $280,000 last year.
-
-His tax return showed $47,000.
-
-Every lender he talked to turned him down.
-
-I didn't.
-
-Are you self-employed and being told your income doesn't qualify?`},
-      {title:"The Write-Off Trap", content:`The best thing about being self-employed is writing everything off.
-
-The worst thing about being self-employed is writing everything off.
-
-There's a way to buy a home that doesn't punish you for being good at running a business.
-
-Do you know what it is?`},
-      {title:"The Bank Statement", content:`12 months of bank deposits.
-
-No tax returns. No W-2s. No explanation of why your schedule C looks the way it does.
-
-Just the actual money that actually moved through your actual account.
-
-Self-employed buyers: have you heard of a bank statement loan?`},
-      {title:"The Underwriter Question", content:`Most lenders hand your file to an underwriter who has never run a business.
-
-They don't understand how business owners get paid.
-
-They don't understand retained earnings or distributions or depreciation.
-
-I've spent 25 years learning how to translate your income into a language underwriters approve.
-
-Are you working with a lender who actually understands your business?`},
-      {title:"The Rejection Story", content:`He'd been turned down by 3 lenders.
-
-Each one told him his income was "too complicated."
-
-I spent 45 minutes with his tax returns and found a path all three had missed.
-
-He closed 8 weeks later.
-
-Complicated isn't the same as unqualified. Do you know the difference?`}
-    ]
-  },
-  {
-    id:"veterans", label:"Veterans", sub:"The benefit most vets don't know they have",
-    color:"var(--purple)", bg:"var(--purple-bg)", bd:"var(--purple-bd)",
-    posts:[
-      {title:"The Benefit Nobody Uses", content:`230,000 veterans in Colorado are eligible for a VA home loan.
-
-Less than 10% of them have ever used it.
-
-Zero down. No PMI. Competitive rates. Government-backed.
-
-It's the best loan product available to anyone.
-
-Are you one of the 90%?`},
-      {title:"The One-Time Myth", content:`Most veterans think they can only use their VA benefit once.
-
-They used it on their first home.
-
-Now they think it's gone.
-
-For most of them, it isn't.
-
-If you've used your VA benefit before, when's the last time someone looked up exactly what you still have available?`},
-      {title:"The PCS Move", content:`PCS orders are stressful enough without a complicated mortgage.
-
-I've helped a lot of active duty families close in 30 days or less.
-
-Sometimes 21.
-
-If you're moving to or from Colorado, what does your timeline actually look like?`},
-      {title:"The Funding Fee Myth", content:`A lot of veterans avoid VA loans because of the funding fee.
-
-They don't realize:
-
-— Veterans with a 10%+ disability rating: $0 funding fee.
-— Surviving spouses: often exempt.
-— Purple Heart recipients: exempt.
-
-And even for those who do pay it: no PMI saves more over the life of the loan.
-
-Do you know your actual VA benefit status?`},
-      {title:"The Side-By-Side", content:`I ran a side-by-side comparison for a veteran last week.
-
-Conventional loan with 5% down vs. VA loan with 0% down.
-
-Same purchase price. Same rate.
-
-VA won by $340/month.
-
-He'd been avoiding it because he thought conventional was simpler.
-
-Are you leaving $340/month on the table?`}
-    ]
-  }
+const IOI=[
+  {id:"buyers",label:"Buyers",sub:"Renters, first-timers, people sitting on the fence",color:"var(--green)",bg:"var(--green-bg)",bd:"var(--green-bd)",posts:[
+    {title:"The Waiting Trap",content:`She called me last week and said she was going to wait another two years to buy.\n\nI asked her one question.\n\nShe called me back the next day ready to go.\n\nWhat's the one thing that keeps people from buying when they're actually ready?\n\n(It's not what you think.)`},
+    {title:"The Payment Surprise",content:`Couple in [city]. Combined income $95K. Paying $2,200 in rent.\n\nThey thought buying was years away.\n\nIt wasn't.\n\nTheir mortgage payment ended up being less than their rent.\n\nHow many people are renting right now and don't know this?`},
+    {title:"The 20% Myth",content:`Most people think they need 20% down to buy a house.\n\nThat number hasn't been required for decades.\n\nThere are programs in Colorado right now that require less than you probably spend on groceries in a month.\n\nAre you one of the people waiting on 20%?`},
+    {title:"The Credit Excuse",content:`He told me his credit wasn't good enough to buy.\n\nI pulled his scores.\n\nHe was 11 points away.\n\n60 days later he had keys.\n\nHow many people are renting right now because of a number that's closer than they think?`},
+    {title:"The Rent Receipt",content:`Every month you pay rent, you're paying someone else's mortgage.\n\nBuilding their equity.\n\nFunding their retirement.\n\nNot yours.\n\nAt what point does that math start bothering you?`},
+    {title:"The Rate Myth",content:`Everyone's waiting for rates to drop before they buy.\n\nHere's what they don't tell you: when rates drop, prices go up.\n\nThe people who bought while everyone else was waiting?\n\nThey refinance. The people who waited?\n\nThey compete against more buyers at higher prices.\n\nWhat are you actually waiting for?`},
+    {title:"The Appreciation Math",content:`She waited two years for rates to drop.\n\nRates dropped half a point.\n\nThe house she wanted went up $47,000.\n\nShe saved $80/month by waiting.\n\nShe paid $220/month more because of appreciation.\n\nNet result: she lost.\n\nAt what point does waiting for a better rate start costing you more than the rate itself?`},
+    {title:"The Rent Math",content:`$2,200/month in rent for 5 years.\n\n$132,000 gone.\n\nZero equity. Zero appreciation. Zero tax deduction.\n\nThe house she could have bought in year one is worth $58,000 more today.\n\nHow much longer are you going to pay someone else's mortgage?`},
+    {title:"The Pre-Approval Call",content:`She called three lenders.\n\nAll three told her the same thing: here's what you qualify for.\n\nNone of them asked her what she actually wanted to pay.\n\nI asked her two questions.\n\nWhat monthly payment feels comfortable to you — and what do you have available to close?\n\nThat conversation takes 10 minutes.\n\nIt changes everything.\n\nHave you had that conversation with your lender?`},
+    {title:"The Qualification Gap",content:`He made $85,000 a year.\n\nHe had $12,000 saved.\n\nHe thought he needed twice that to buy.\n\nHe didn't.\n\nBetween an FHA loan and a Colorado DPA program, his out-of-pocket was $4,200.\n\nThe gap between what you think you need and what you actually need is usually smaller than you think.\n\nDo you know your actual number?`},
+    {title:"The Rate Lock Regret",content:`They locked their rate on a Tuesday.\n\nRates dropped Thursday.\n\nThey called me in a panic.\n\nWe floated down their rate — a feature most buyers don't know to ask for when they lock.\n\nSaved $145/month.\n\nDo you know if your rate lock has a float-down option?`},
+    {title:"The Rent vs Own Crossover",content:`There's a specific moment for every renter.\n\nThe month where the mortgage payment on a comparable home drops below their rent.\n\nFor some people that moment was two years ago.\n\nFor others it's now.\n\nFor others it's 18 months away.\n\nDo you know when your crossover date is?`},
+    {title:"The Second Income",content:`They qualified on one income.\n\nBut they had two.\n\nTheir lender only counted the primary.\n\nThe second income — even part-time, even inconsistent — could have changed the purchase price they qualified for by $40,000.\n\nThere are ways to document non-traditional income that most lenders never mention.\n\nDo you know all the income sources that count toward your qualification?`},
+    {title:"The First Phone Call",content:`Most people wait until they're "ready" to call a lender.\n\nReady meaning: credit is perfect, down payment is saved, they've been at their job for years.\n\nBut the first call isn't the closing call.\n\nThe first call is the map call.\n\nYou find out where you are, what needs to happen, and how long it takes to get there.\n\nHalf the people who think they're years away are actually 90 days away.\n\nWhat's actually keeping you from making that first call?`}
+  ]},
+  {id:"agents",label:"Agents",sub:"The 71% who need leads — and the ones who need a better lender",color:"var(--amber)",bg:"var(--amber-bg)",bd:"var(--amber-bd)",posts:[
+    {title:"The Reversal",content:`Most lenders call agents asking for referrals.\n\nI do the opposite.\n\nI generate the buyers. I pre-qualify them. I educate them on CHFA, Colorado Heroes, Metro DPA.\n\nThen I hand them to my agent partners — warm, ready, and motivated.\n\nAgent shows houses. Closes deals. Gets paid.\n\nI close the loans.\n\nThree agents I work with went from zero closings to 8+ deals in 4 months.\n\nIs that backwards from what you're used to?`},
+    {title:"The 71% Problem",content:`71% of licensed real estate agents in Colorado closed zero deals last year.\n\nNot because they're bad agents.\n\nBecause nobody was sending them buyers.\n\nThe agents who are closing deals consistently all have one thing in common.\n\nIt's not their marketing. It's not their brokerage. It's not their years of experience.\n\nWhat do you think it is?`},
+    {title:"The First Deal in 7 Days",content:`An agent called me last year. She hadn't closed a deal in 6 months.\n\nShe was about to quit.\n\nI sent her one pre-qualified buyer.\n\nShe had a contract in 4 days.\n\nShe closed 11 deals that year.\n\nWhat would one buyer — right now, ready to go — change for your business?`},
+    {title:"The File Nobody Wants",content:`Self-employed. 1099 income. Just changed jobs. Credit not perfect.\n\nMost lenders see that file and send it back.\n\nTheir agent loses the deal. Their commission disappears. The relationship gets damaged.\n\nI see that file and call the agent back with a plan.\n\nDo you have a lender you call when the deal looks impossible?`},
+    {title:"The 47 Days",content:`Agent called me Friday. Deal was supposed to close Monday.\n\nTheir lender had been "working on it" for 47 days.\n\nWe closed it in 9.\n\nShe asked me: why didn't I call you first?\n\nWhat's a fallen deal actually cost you? Not just the commission — the time, the relationship, the referrals that never came from that client.`},
+    {title:"The Backup Plan",content:`Every agent has a preferred lender.\n\nUntil that lender can't perform.\n\nThe agents who never panic when a deal goes sideways all have the same thing — a second number in their phone. Someone who closes the hard files.\n\nSelf-employed income. VA benefits. Credit challenges. Complex situations.\n\nWhen's the last time your lender saved a deal that was already dead?`},
+    {title:"The Commission Math",content:`Most agents I talk to have lost at least 2-3 deals this year to lender issues.\n\nAt an average commission of $12,000 per deal — that's $24,000-$36,000 that walked out the door.\n\nNot because the buyer wasn't qualified.\n\nBecause the lender couldn't close.\n\nWhat would you do differently if you knew your next deal was guaranteed to close?`},
+    {title:"The Upstream Problem",content:`Here's what most agents don't realize:\n\nBy the time a buyer calls you, they've already decided their price range, their timeline, and half the time — their lender.\n\nThe agents getting the most referrals aren't chasing buyers.\n\nThey're getting sent buyers who are already pre-qualified, already educated, and already ready.\n\nHow are buyers finding you right now — before they find an agent?`},
+    {title:"The Certification",content:`She hadn't closed a deal in 4 months.\n\nI asked her: how are you finding buyers before they find an agent?\n\nShe didn't have an answer.\n\nNeither do most agents.\n\nWe fixed that in one afternoon.\n\nTwo weeks later she had her first pre-qualified buyer from our partnership.\n\nHow are you finding buyers before they find a realtor?`},
+    {title:"The Listing Advantage",content:`Most lenders work with buyers.\n\nI also work with your listings.\n\nWhen your seller's home is listed, I can pre-qualify every serious inquiry before they waste your time on a showing.\n\nI can also connect your sellers with buyers from my pipeline who are already looking in that price range.\n\nYour listings get more activity. I get to help more buyers.\n\nIs your lender doing this for your listings?`},
+    {title:"The Referral Drain",content:`She sent me three referrals last year.\n\nI closed all three.\n\nShe made nothing on those referrals.\n\nHer lender isn't set up to pay her for co-marketing.\n\nThere's a legal, W-2 structure that allows agents to earn income from their lender partnership — for legitimate marketing services.\n\nDoes your lender know how to do this?`},
+    {title:"The Stat Nobody Talks About",content:`The average real estate agent in Colorado earns $47,000 a year.\n\nThe average agent in our partnership earned more than that in 6 months.\n\nNot because they worked twice as hard.\n\nBecause they stopped generating leads from scratch every month.\n\nWhat would a consistent pipeline of pre-qualified buyers change about your annual income?`},
+    {title:"The Showing Problem",content:`She was spending 15-20 hours per week on showings.\n\nHalf of those buyers weren't pre-approved.\n\nThey were curious, not ready.\n\nHer time was being spent on people who couldn't close.\n\nEvery buyer I send is pre-qualified before the first showing.\n\nHow much of your time is going to buyers who can't actually close?`},
+    {title:"The Follow-Up File",content:`She had 47 leads in her CRM that had gone cold.\n\nMost agents call those dead.\n\nI ran them through our pre-qualification process.\n\n11 of them were ready to buy within 90 days.\n\nShe hadn't talked to them in 8 months.\n\nHow many buyers do you have in your database right now who think they can't qualify — and have never been told differently?`}
+  ]},
+  {id:"homeowners",label:"Homeowners",sub:"Equity conversations and rate trap math",color:"var(--blue)",bg:"var(--blue-bg)",bd:"var(--blue-bd)",posts:[
+    {title:"The Rate Trap",content:`Woman called me last week. 2.75% mortgage.\n\nAlso paying $1,100/month in credit card interest.\n\nShe thought protecting her rate was the smart move.\n\nI showed her the math.\n\nAre you protecting a low rate while losing more somewhere else every month?`},
+    {title:"Sitting On It",content:`Colorado home values are significantly higher than they were a few years ago.\n\nMost homeowners have no idea how much equity they're sitting on.\n\nThat equity is either working for you or it's just sitting there.\n\nDo you know what your home is worth today?`},
+    {title:"The Invisible Payment",content:`He was paying $1,400/month in minimums on credit cards.\n\nHe had $180,000 in equity.\n\nAfter we talked, his total debt payment dropped by $900/month.\n\nHe said: I didn't know that was possible.\n\nWhat's your equity doing right now?`},
+    {title:"The Second Job",content:`Most people work a second job to pay off debt.\n\nSome people use their house.\n\nSame result. Very different amount of effort.\n\nDoes your home know how hard it could be working for you?`},
+    {title:"The Renovation Trap",content:`They pulled $50,000 out of savings to remodel the kitchen.\n\nI asked them one question.\n\nThey wish they'd called me first.\n\nAre you about to spend money on your home that your home could actually be paying for?`},
+    {title:"The 3 AM Number",content:`You know that number you add up in your head at 3 AM?\n\nCredit cards. Car payment. Student loans.\n\nThe one that keeps you up.\n\nSome homeowners have figured out how to make that number disappear.\n\nNot by making more money. By asking a different question.\n\nWhat's your 3 AM number?`},
+    {title:"The HELOC Trap",content:`He took out a HELOC to consolidate debt.\n\nSmart move. Low rate. Interest only for 10 years.\n\nThen year 11 hit.\n\nPrincipal and interest. Payment went from $340/month to $1,100.\n\nHe didn't see it coming.\n\nNobody explained what happens at the end of the draw period.\n\nDo you know what your HELOC payment looks like after year 10?`},
+    {title:"The Insurance Bonus",content:`She refinanced and paid off two credit cards.\n\nHer credit score went up 44 points.\n\nShe called her insurance company six months later.\n\nHer auto and homeowner premiums dropped $1,100/year.\n\nThe refinance paid for itself twice.\n\nHave you looked at what happens to your insurance rates when your debt goes down and your score goes up?`},
+    {title:"The Equity Clock",content:`Colorado homeowners who bought in 2019 are sitting on an average of $140,000 in equity.\n\nSome of them are using it.\n\nMost of them are watching it sit there while they pay 24% on credit cards.\n\nEquity doesn't earn interest.\n\nDebt costs it every single month.\n\nDo you know what your equity is actually costing you by sitting still?`},
+    {title:"The Remodel Question",content:`They were going to pull $60,000 out of savings to remodel.\n\nI asked them one question first.\n\nWhat's your current equity position?\n\n$210,000 in equity. 4.1% mortgage.\n\nWe structured a HELOC at 8.5% on just the remodel amount — preserving the first mortgage completely.\n\nTheir savings stayed in savings.\n\nBefore you pull cash for a major home project, do you know if your equity would work harder?`},
+    {title:"The Tax Write-Off",content:`Mortgage interest is tax deductible.\n\nMost homeowners know that.\n\nWhat most don't know: if you use a cash-out refinance to fund a home improvement, that interest is also deductible.\n\nUsing your equity to build a garage, add a bedroom, or renovate a kitchen — and deducting the interest — is one of the most underused tax strategies in real estate.\n\nDoes your accountant know how your equity is being deployed?`},
+    {title:"The Debt Avalanche",content:`He had six debts.\n\nStudent loans at 7%. Car at 9%. Three credit cards at 19-24%. Medical bill at 0%.\n\nHe was paying them randomly — whatever felt right each month.\n\nWe mapped the true cost of each one and restructured two of them using equity.\n\nHis total monthly payment dropped $730.\n\nHe's debt-free in 6 years instead of 14.\n\nDo you know the actual sequence your debts should be paid off in?`},
+    {title:"The Invisible Wealth",content:`Most people know their income to the dollar.\n\nMost people know their credit card balance to the dollar.\n\nAlmost nobody knows their net worth to the dollar.\n\nFor homeowners, real net worth includes equity — which changes every month as the market moves and the principal pays down.\n\nThe people who build real wealth track both.\n\nDo you know what your net worth actually is right now?`}
+  ]},
+  {id:"selfEmployed",label:"Self-Employed",sub:"Business owners being told no everywhere else",color:"var(--teal)",bg:"var(--teal-bg)",bd:"var(--teal-bd)",posts:[
+    {title:"The Tax Return Problem",content:`He made $280,000 last year.\n\nHis tax return showed $47,000.\n\nEvery lender he talked to turned him down.\n\nI didn't.\n\nAre you self-employed and being told your income doesn't qualify?`},
+    {title:"The Write-Off Trap",content:`The best thing about being self-employed is writing everything off.\n\nThe worst thing about being self-employed is writing everything off.\n\nThere's a way to buy a home that doesn't punish you for being good at running a business.\n\nDo you know what it is?`},
+    {title:"The Bank Statement",content:`12 months of bank deposits.\n\nNo tax returns. No W-2s. No explanation of why your schedule C looks the way it does.\n\nJust the actual money that actually moved through your actual account.\n\nSelf-employed buyers: have you heard of a bank statement loan?`},
+    {title:"The Underwriter Question",content:`Most lenders hand your file to an underwriter who has never run a business.\n\nThey don't understand how business owners get paid.\n\nThey don't understand retained earnings or distributions or depreciation.\n\nI've spent 25 years learning how to translate your income into a language underwriters approve.\n\nAre you working with a lender who actually understands your business?`},
+    {title:"The Rejection Story",content:`He'd been turned down by 3 lenders.\n\nEach one told him his income was "too complicated."\n\nI spent 45 minutes with his tax returns and found a path all three had missed.\n\nHe closed 8 weeks later.\n\nComplicated isn't the same as unqualified. Do you know the difference?`}
+  ]},
+  {id:"veterans",label:"Veterans",sub:"The benefit most vets don't know they have",color:"var(--purple)",bg:"var(--purple-bg)",bd:"var(--purple-bd)",posts:[
+    {title:"The Benefit Nobody Uses",content:`230,000 veterans in Colorado are eligible for a VA home loan.\n\nLess than 10% of them have ever used it.\n\nZero down. No PMI. Competitive rates. Government-backed.\n\nIt's the best loan product available to anyone.\n\nAre you one of the 90%?`},
+    {title:"The One-Time Myth",content:`Most veterans think they can only use their VA benefit once.\n\nThey used it on their first home.\n\nNow they think it's gone.\n\nFor most of them, it isn't.\n\nIf you've used your VA benefit before, when's the last time someone looked up exactly what you still have available?`},
+    {title:"The PCS Move",content:`PCS orders are stressful enough without a complicated mortgage.\n\nI've helped a lot of active duty families close in 30 days or less.\n\nSometimes 21.\n\nIf you're moving to or from Colorado, what does your timeline actually look like?`},
+    {title:"The Funding Fee Myth",content:`A lot of veterans avoid VA loans because of the funding fee.\n\nThey don't realize:\n\n— Veterans with a 10%+ disability rating: $0 funding fee.\n— Surviving spouses: often exempt.\n— Purple Heart recipients: exempt.\n\nAnd even for those who do pay it: no PMI saves more over the life of the loan.\n\nDo you know your actual VA benefit status?`},
+    {title:"The Side-By-Side",content:`I ran a side-by-side comparison for a veteran last week.\n\nConventional loan with 5% down vs. VA loan with 0% down.\n\nSame purchase price. Same rate.\n\nVA won by $340/month.\n\nHe'd been avoiding it because he thought conventional was simpler.\n\nAre you leaving $340/month on the table?`}
+  ]},
+  {id:"divorce",label:"Divorce",sub:"The house is usually the hardest part",color:"var(--rose)",bg:"var(--rose-bg)",bd:"var(--rose-bd)",posts:[
+    {title:"The House in Limbo",content:`They both agreed on everything.\n\nExcept the house.\n\nShe wanted to keep it. He wanted to sell it.\n\nTheir attorney said: figure out the financing first.\n\nMost lenders told her she couldn't qualify on one income.\n\nI found a way she could.\n\nDo you know what your options actually are when the house is part of a divorce settlement?`},
+    {title:"The Retainer Problem",content:`She needed an attorney.\n\nThe attorney needed a retainer.\n\nAll her money was tied up in the house she couldn't sell yet.\n\nShe thought she was stuck.\n\nShe wasn't.\n\nThere's equity in a marital home that most people don't realize they can access before a divorce is finalized.\n\nAre you or someone you know trying to figure out how to pay for a divorce when everything is tied up in real estate?`},
+    {title:"Can She Qualify",content:`Her income for the last two years looked like a married person's income.\n\nNow she's on her own.\n\nMost lenders looked at her file and said no.\n\nI looked at it differently.\n\nChild support counts as income. Alimony counts as income. There are programs specifically designed for this exact transition.\n\nShe closed on her own home 90 days after her divorce was final.\n\nDo you know what actually counts as qualifying income after a split?`},
+    {title:"The Buyout",content:`He wanted to keep the house.\n\nHis wife agreed — if he could buy out her half of the equity.\n\nThe problem: he didn't have $80,000 sitting in a bank account.\n\nThe solution was already inside the house.\n\nA cash-out refinance structured during the divorce proceedings — while both incomes still counted — covered the buyout completely.\n\nHe kept the house. She got her equity. The case settled.\n\nDo you know how a buyout actually works when one spouse wants to stay?`},
+    {title:"The New Chapter",content:`Divorce was final.\n\nShe had a settlement, a fresh start, and absolutely no idea if she could buy her own home.\n\nTwo years of combined tax returns. One year of being self-employed to supplement income. Credit that had taken a hit.\n\nIt took 60 days and a little creative documentation.\n\nShe has her own place now.\n\nWhat's actually possible in the year after a divorce might surprise you.`},
+    {title:"The Split Decision",content:`When a marriage ends, the house usually becomes the hardest part.\n\nSell it and split the equity — clean but emotional.\n\nOne person keeps it and refinances — complicated but possible.\n\nRent it out and split the income — an option most people never consider.\n\nThe right answer depends on the numbers, not the feelings.\n\nDo you know which option actually makes the most financial sense in your situation?`}
+  ]},
+  {id:"creative",label:"Creative Financing",sub:"Rates below market, assumable loans, seller plays",color:"var(--olive)",bg:"var(--olive-bg)",bd:"var(--olive-bd)",posts:[
+    {title:"The Assumable Loan",content:`He bought a house last year.\n\nThe seller had a mortgage from 2021 at 3.1%.\n\nHe didn't get a new loan at today's rates.\n\nHe assumed the seller's.\n\nHis payment is $680/month less than his neighbor who bought the same month with a new loan.\n\nMost buyers have never heard of an assumable mortgage.\n\nDo you know if the house you're looking at has one?`},
+    {title:"The Buydown",content:`She didn't want today's rate.\n\nSo she didn't pay it.\n\nThe seller agreed to contribute $12,000 at closing — enough to buy her rate down by a full point for the life of the loan.\n\nHer payment is $210/month lower than the asking rate.\n\nOver 7 years: $17,640 in savings.\n\nDo you know how to negotiate a rate buydown into your purchase contract?`},
+    {title:"The Seller Play",content:`Most buyers go to the seller and ask for a price reduction.\n\nSmart buyers ask for something different.\n\n$15,000 in seller concessions applied to closing costs and a rate buydown.\n\nSame purchase price. Lower payment. More cash in your pocket at close.\n\nThe seller gets their number. You get a better loan.\n\nDo you know the difference between a price reduction and a seller concession — and which one actually saves you more?`},
+    {title:"The DSCR Loan",content:`He wanted to buy a rental property.\n\nHe had no W-2. No pay stubs. No traditional income documentation.\n\nHe had a property that cash-flowed.\n\nThat was enough.\n\nA DSCR loan qualifies based on the rental income the property generates — not yours.\n\nIf the rent covers the mortgage, you qualify.\n\nAre you an investor who's been told you don't qualify for a rental property loan?`},
+    {title:"The Bridge",content:`She found her next home before her current one sold.\n\nEvery lender told her she had to sell first.\n\nOne didn't.\n\nA bridge loan let her close on the new house, move in, then sell the old one without the pressure of a contingency.\n\nShe got the house she wanted and didn't lose it to another buyer while waiting.\n\nDo you know when a bridge loan makes more sense than a contingent offer?`},
+    {title:"The Blended Play",content:`He had a 3.25% mortgage.\n\nHe also had $45,000 in credit card debt at 24%.\n\nEvery lender told him not to touch his mortgage.\n\nI showed him his blended rate.\n\nBetween the mortgage and the credit cards, he was effectively paying 9.3% across all his debt.\n\nA cash-out refinance at 7% on everything — including paying off the cards — saved him $890/month and $190,000 in total interest over time.\n\nIs your low rate actually protecting you — or is it hiding a much bigger number?`}
+  ]},
+  {id:"investors",label:"Investors",sub:"DSCR, portfolio loans, equity strategy",color:"var(--stone)",bg:"var(--stone-bg)",bd:"var(--stone-bd)",posts:[
+    {title:"What DSCR Actually Means",content:`Debt Service Coverage Ratio.\n\nNobody explains it.\n\nHere's what it actually means: if your rental property brings in more than it costs to carry, you qualify for the loan.\n\n$1,200/month in rent. $900/month mortgage. DSCR of 1.33. You qualify.\n\nYour W-2 income. Your tax returns. Your day job.\n\nNone of it matters.\n\nAre you an investor who's been underqualified by lenders who don't understand this product?`},
+    {title:"Cash Flow vs Appreciation",content:`Most investors argue about this.\n\nWhich one matters more?\n\nHere's the honest answer: it depends on your timeline, your market, and what you need the property to do for you right now.\n\nBut here's what nobody tells you — you can structure the financing to optimize for either one.\n\nLower down payment, higher leverage = appreciation play.\nHigher down payment, lower payment = cash flow play.\n\nDo you know which one you're actually buying?`},
+    {title:"The Equity Harvest",content:`He bought a rental in 2019.\n\nIt's worth $180,000 more than he paid.\n\nThat equity is sitting there doing nothing.\n\nA cash-out refinance pulled $120,000 out — tax-free — which he used as down payments on two more properties.\n\nHe now has three rentals. One of them was free.\n\nIs your equity sitting in one property when it could be working across several?`},
+    {title:"The Delayed Exchange",content:`He sold a rental and owed $60,000 in capital gains taxes.\n\nThen he didn't.\n\nA 1031 exchange gave him 180 days to roll the proceeds into a new investment property — same money, no tax event, bigger asset.\n\nMost investors don't use this because they don't know the timeline or the rules.\n\nDo you know what happens to your gains if you sell an investment property without a 1031 in place?`},
+    {title:"The Portfolio Problem",content:`He had four rental properties.\n\nEach one had its own loan. Four separate lenders. Four separate payments. Four separate escrow accounts.\n\nHe came to me frustrated.\n\nWe consolidated three of the four into a portfolio loan — one payment, one lender, simplified.\n\nAnd because the combined LTV worked in his favor, his rate actually went down.\n\nAre you managing multiple rental properties on separate loans when one portfolio loan might be cleaner and cheaper?`}
+  ]}
 ];
 
-// ─── STATE ─────────────────────────────────────────────────────────────────
-let currentSection = 'scripts';
-let scriptCat = 0;
-let ioiCat = 0;
-let scriptScenario = 0;
-let ioiPost = 0;
+let currentSection='scripts',scriptCat=0,ioiCat=0,scriptScenario=0,ioiPost=0;
 
-// ─── RENDER ────────────────────────────────────────────────────────────────
-function showSection(sec) {
-  currentSection = sec;
-  document.getElementById('btnScripts').className = 'section-btn' + (sec==='scripts'?' active':'');
-  document.getElementById('btnIOI').className = 'section-btn' + (sec==='ioi'?' active':'');
-  document.getElementById('panel-scripts').className = 'section-panel' + (sec==='scripts'?' visible':'');
-  document.getElementById('panel-ioi').className = 'section-panel' + (sec==='ioi'?' visible':'');
+function showSection(sec){
+  currentSection=sec;
+  document.getElementById('btnScripts').className='section-btn'+(sec==='scripts'?' active':'');
+  document.getElementById('btnIOI').className='section-btn'+(sec==='ioi'?' active':'');
+  document.getElementById('panel-scripts').className='section-panel'+(sec==='scripts'?' visible':'');
+  document.getElementById('panel-ioi').className='section-panel'+(sec==='ioi'?' visible':'');
   renderNav();
-  if(sec==='scripts') renderScriptPanel();
-  else renderIOIPanel();
+  if(sec==='scripts')renderScriptPanel();else renderIOIPanel();
 }
 
-function renderNav() {
-  const nav = document.getElementById('catNav');
-  nav.innerHTML = '';
-  const data = currentSection==='scripts' ? SCRIPTS : IOI;
-  const activeIdx = currentSection==='scripts' ? scriptCat : ioiCat;
-  data.forEach((cat, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'cat-btn' + (i===activeIdx?' active':'');
-    btn.textContent = cat.label;
-    if(i===activeIdx){ btn.style.background=cat.color; btn.style.borderColor=cat.color; btn.style.color='#fff'; }
-    btn.onclick = () => {
-      if(currentSection==='scripts'){ scriptCat=i; scriptScenario=0; renderScriptPanel(); }
-      else { ioiCat=i; ioiPost=0; renderIOIPanel(); }
+function renderNav(){
+  const nav=document.getElementById('catNav');nav.innerHTML='';
+  const data=currentSection==='scripts'?SCRIPTS:IOI;
+  const activeIdx=currentSection==='scripts'?scriptCat:ioiCat;
+  data.forEach((cat,i)=>{
+    const btn=document.createElement('button');
+    btn.className='cat-btn'+(i===activeIdx?' active':'');
+    btn.textContent=cat.label;
+    if(i===activeIdx){btn.style.background=cat.color;btn.style.borderColor=cat.color;btn.style.color='#fff';}
+    btn.onclick=()=>{
+      if(currentSection==='scripts'){scriptCat=i;scriptScenario=0;renderScriptPanel();}
+      else{ioiCat=i;ioiPost=0;renderIOIPanel();}
       renderNav();
     };
     nav.appendChild(btn);
   });
 }
 
-function renderScriptPanel() {
-  const panel = document.getElementById('panel-scripts');
-  const cat = SCRIPTS[scriptCat];
-  const sc = cat.scenarios[scriptScenario];
-  panel.innerHTML = `
+function renderScriptPanel(){
+  const panel=document.getElementById('panel-scripts');
+  const cat=SCRIPTS[scriptCat];const sc=cat.scenarios[scriptScenario];
+  panel.innerHTML=`
     <div class="framework-note"><strong>The framework:</strong> Open with one question. Then stop talking. The gold is always in what they say next. No pitch until they've talked for at least 60 seconds.</div>
     <div class="cat-header">
       <div><div class="cat-label" style="color:${cat.color}">${cat.label}</div><div class="cat-sub">${cat.sub}</div></div>
       <div class="cat-count" style="background:${cat.bg};color:${cat.color}">${cat.scenarios.length} scenario${cat.scenarios.length>1?'s':''}</div>
     </div>
     <div class="tabs" id="scriptTabs"></div>
-    <div id="scriptCard"></div>
-  `;
-  const tabs = document.getElementById('scriptTabs');
-  cat.scenarios.forEach((s,i) => {
-    const btn = document.createElement('button');
-    btn.className = 'tab-btn' + (i===scriptScenario?' active':'');
-    btn.textContent = s.label;
-    if(i===scriptScenario){ btn.style.borderColor=cat.color; btn.style.background=cat.color+'22'; btn.style.color=cat.color; }
-    btn.onclick = () => { scriptScenario=i; renderScriptPanel(); };
+    <div id="scriptCard"></div>`;
+  const tabs=document.getElementById('scriptTabs');
+  cat.scenarios.forEach((s,i)=>{
+    const btn=document.createElement('button');
+    btn.className='tab-btn'+(i===scriptScenario?' active':'');
+    btn.textContent=s.label;
+    if(i===scriptScenario){btn.style.borderColor=cat.color;btn.style.background=cat.color+'22';btn.style.color=cat.color;}
+    btn.onclick=()=>{scriptScenario=i;renderScriptPanel();};
     tabs.appendChild(btn);
   });
-  document.getElementById('scriptCard').innerHTML = `
+  document.getElementById('scriptCard').innerHTML=`
     <div class="content-card" style="border-color:${cat.bd}">
       <div class="content-title" style="color:${cat.color}">${sc.label}</div>
       <div class="content-badge" style="background:${cat.bg};color:${cat.color}">${sc.tag}</div>
       <div class="content-body">${sc.body}</div>
       ${sc.notes?`<div class="content-notes">${sc.notes}</div>`:''}
-      <button class="copy-btn" id="copyScriptBtn" onclick="copyText('copyScriptBtn', \`${sc.body.replace(/`/g,'\\`').replace(/\\/g,'\\\\')}\`)">Copy Script</button>
-    </div>
-  `;
+      <button class="copy-btn" id="copyScriptBtn" onclick="copyText('copyScriptBtn',\`${sc.body.replace(/`/g,'\\`')}\`)">Copy Script</button>
+    </div>`;
 }
 
-function renderIOIPanel() {
-  const panel = document.getElementById('panel-ioi');
-  const cat = IOI[ioiCat];
-  const post = cat.posts[ioiPost];
-  panel.innerHTML = `
+function renderIOIPanel(){
+  const panel=document.getElementById('panel-ioi');
+  const cat=IOI[ioiCat];const post=cat.posts[ioiPost];
+  panel.innerHTML=`
     <div class="framework-note"><strong>IOI rules:</strong> No offer. No pitch. No yes/no choice. Curiosity + self-interest + emotion only. Post publicly. Pitch happens in DMs after they respond.</div>
+    ${ioiCat===1?`<div class="strategy-block"><div class="strategy-title">The Agent Strategy</div><div class="strategy-body">You generate buyer leads upstream through IOI content before buyers ever talk to an agent. You pre-qualify them using the two-question close: desired monthly payment and cash to close. Then you distribute those pre-qualified buyers to agent partners.\n\nAgents get buyers sent to them at no cost. They also earn W-2 marketing compensation (0.25-1% of loan amount) for co-marketing — paid twice on deals through the partnership.\n\nYou target the 71% who closed zero deals. They don't need more training. They need one deal. You give them that deal. They become believers. The flywheel starts.\n\nYou are not asking for referrals. You are offering leads. That is a completely different conversation.</div></div>`:''}
     <div class="cat-header">
       <div><div class="cat-label" style="color:${cat.color}">${cat.label}</div><div class="cat-sub">${cat.sub}</div></div>
       <div class="cat-count" style="background:${cat.bg};color:${cat.color}">${cat.posts.length} post${cat.posts.length>1?'s':''}</div>
     </div>
-    ${ioiCat===1?`<div class="strategy-block">
-      <div class="strategy-title">The Agent Strategy — How It Actually Works</div>
-      <div class="strategy-body">You generate buyer leads upstream through IOI content, social media, and education — before buyers ever talk to an agent. You pre-qualify them using the two-question close: desired monthly payment and cash to close. Then you distribute those pre-qualified buyers to agent partners.\n\nAgents get buyers sent to them at no cost. You close the loans. Agents also earn W-2 marketing compensation (0.25–1% of loan amount) for co-marketing — meaning they get paid twice on deals through the partnership.\n\nThe agents you target are the 71% who closed zero deals. They don't need more training. They need one deal. You give them that deal. They become believers. They refer their sphere. The flywheel starts.\n\nWhat makes this different from every other lender pitch: you're not asking for referrals. You're offering leads. That's a completely different conversation.</div>
-    </div>`:''}
     <div class="tabs" id="ioiTabs"></div>
-    <div id="ioiCard"></div>
-  `;
-  const tabs = document.getElementById('ioiTabs');
-  cat.posts.forEach((p,i) => {
-    const btn = document.createElement('button');
-    btn.className = 'tab-btn' + (i===ioiPost?' active':'');
-    btn.textContent = p.title;
-    if(i===ioiPost){ btn.style.borderColor=cat.color; btn.style.background=cat.color+'22'; btn.style.color=cat.color; }
-    btn.onclick = () => { ioiPost=i; renderIOIPanel(); };
+    <div id="ioiCard"></div>`;
+  const tabs=document.getElementById('ioiTabs');
+  cat.posts.forEach((p,i)=>{
+    const btn=document.createElement('button');
+    btn.className='tab-btn'+(i===ioiPost?' active':'');
+    btn.textContent=p.title;
+    if(i===ioiPost){btn.style.borderColor=cat.color;btn.style.background=cat.color+'22';btn.style.color=cat.color;}
+    btn.onclick=()=>{ioiPost=i;renderIOIPanel();};
     tabs.appendChild(btn);
   });
-  document.getElementById('ioiCard').innerHTML = `
+  document.getElementById('ioiCard').innerHTML=`
     <div class="content-card" style="border-color:${cat.bd}">
       <div class="content-title" style="color:${cat.color}">${post.title}</div>
       <div class="content-body">${post.content}</div>
-      <button class="copy-btn" id="copyIOIBtn" onclick="copyText('copyIOIBtn', \`${post.content.replace(/`/g,'\\`').replace(/\\/g,'\\\\')}\`)">Copy Post</button>
-    </div>
-  `;
+      <button class="copy-btn" id="copyIOIBtn" onclick="copyText('copyIOIBtn',\`${post.content.replace(/`/g,'\\`')}\`)">Copy Post</button>
+    </div>`;
 }
 
-function copyText(btnId, text) {
-  navigator.clipboard.writeText(text).then(() => {
-    const btn = document.getElementById(btnId);
-    if(btn){ btn.textContent='Copied!'; btn.classList.add('copied'); setTimeout(()=>{ btn.textContent=btnId==='copyScriptBtn'?'Copy Script':'Copy Post'; btn.classList.remove('copied'); },2000); }
+function copyText(btnId,text){
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn=document.getElementById(btnId);
+    if(btn){btn.textContent='Copied!';btn.classList.add('copied');setTimeout(()=>{btn.textContent=btnId==='copyScriptBtn'?'Copy Script':'Copy Post';btn.classList.remove('copied');},2000);}
   });
 }
 
-// ─── INIT ──────────────────────────────────────────────────────────────────
-renderNav();
-renderScriptPanel();
+renderNav();renderScriptPanel();
 </script>
 </body>
 </html>
