@@ -116,18 +116,16 @@ function buildSched({startHour,mode,hasMeeting,meetingMins,meetingDurMins,meetin
   push({id:"study",label:mode==="on"?"System Building \xb7 30 min":"Training & Development \xb7 30 min",tag:"Get Unlocked",type:"study",dur:30,scoreLabel:mode==="on"?"System output done":"Training done",desc:mode==="on"?"Build a system, write a post, document a process. Also your window to watch Get Unlocked training videos, work on outbound call approach, or develop IOI content.":"Watch a Get Unlocked training video, work on outbound call scripts, review loan products, or develop your prospecting approach. One topic. Write one insight down."});
   push({id:"close",label:"Day Close \xb7 15 min",tag:"",type:"buffer",dur:15,scoreLabel:"Scorecard logged",desc:"Log scorecard. Send daily report. Done."});
   if(hardStopMins&&cur>hardStopMins) {
-    const drop=["study","calls3","react2","calls2","dealwork","react1"], dropped=[];
+    const drop=["calls1c","meeting2","calls1d","study","calls3","react2","calls2","dealwork","react1"], dropped=[];
+    const recalc=()=>{ if(blocks.length>0){ let s=blocks[0].end; for(let i=1;i<blocks.length;i++){blocks[i].start=s;blocks[i].end=s+blocks[i].dur;s=blocks[i].end;} cur=blocks[blocks.length-1].end; } };
     for(const id of drop) {
       if(cur<=hardStopMins) break;
       const idx=blocks.findIndex(b=>b.id===id);
-      if(idx!==-1) {
-        dropped.push(blocks[idx].label); cur-=blocks[idx].dur; blocks.splice(idx,1);
-        if(blocks.length>0) {
-          let s=blocks[0].end; for(let i=1;i<blocks.length;i++){ blocks[i].start=s; blocks[i].end=s+blocks[i].dur; s=blocks[i].end; }
-          cur=blocks[blocks.length-1].end;
-        }
-      }
+      if(idx!==-1) { dropped.push(blocks[idx].label); cur-=blocks[idx].dur; blocks.splice(idx,1); recalc(); }
     }
+    // Catch-all: remove any remaining block that starts at or after the hard stop
+    let changed=true;
+    while(changed){ changed=false; for(let i=blocks.length-1;i>=0;i--){ if(blocks[i].start>=hardStopMins){ dropped.push(blocks[i].label); blocks.splice(i,1); changed=true; recalc(); break; } } }
     if(dropped.length) warnings.push(`Hard stop: removed ${dropped.join(", ")}.`);
   }
   return {blocks,warnings,endTime:cur};
@@ -1232,7 +1230,9 @@ export default function App() {
                       </div>
                       {hasSecondMeeting && (
                         <div style={{marginTop:12}}>
-                          <div style={{marginBottom:12}}><Label>2nd meeting time</Label><TSel value={meeting2Time} onChange={setMeeting2Time}/></div>
+                          <div style={{marginBottom:12}}><Label>2nd meeting time</Label><TSel value={meeting2Time} onChange={setMeeting2Time}/>
+                            {parse12(...meeting2Time)<8*60 && <div style={{marginTop:6,padding:"6px 10px",borderRadius:6,background:C.redBg,border:`1px solid ${C.redBd}`,fontFamily:F.mono,fontSize:10,color:C.red}}>⚠ Meeting set to {fmt(parse12(...meeting2Time))} — looks like AM. Did you mean PM?</div>}
+                          </div>
                           <Label>Duration</Label>
                           <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
                             {[["30 min",30],["45 min",45],["1 hour",60],["1.5 hrs",90]].map(([l,v])=>(
