@@ -1044,7 +1044,7 @@ export default function App() {
   }
 
   // ── Main app ──────────────────────────────────────────────────────────────────
-  const view = !accepted?"build":subTab==="scorecard"?"scorecard":sched?"schedule":"build";
+  const view = accepted?(subTab==="scorecard"?"scorecard":sched?"schedule":"scorecard"):sched?"preview":"build";
   const secSt = {display:"flex",alignItems:"center",gap:10,margin:"16px 0 7px"};
   const secLn = {flex:1,height:1,background:C.rule};
   const secTx = {fontFamily:F.mono,fontSize:9,letterSpacing:"0.2em",textTransform:"uppercase",color:C.light,whiteSpace:"nowrap"};
