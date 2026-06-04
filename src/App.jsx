@@ -1044,7 +1044,7 @@ export default function App() {
   }
 
   // ── Main app ──────────────────────────────────────────────────────────────────
-  const view = !sched?"build":!accepted?"preview":subTab==="scorecard"?"scorecard":"schedule";
+  const view = !accepted?"build":subTab==="scorecard"?"scorecard":sched?"schedule":"build";
   const secSt = {display:"flex",alignItems:"center",gap:10,margin:"16px 0 7px"};
   const secLn = {flex:1,height:1,background:C.rule};
   const secTx = {fontFamily:F.mono,fontSize:9,letterSpacing:"0.2em",textTransform:"uppercase",color:C.light,whiteSpace:"nowrap"};
@@ -1095,7 +1095,7 @@ export default function App() {
             ))}
           </nav>
           <div style={{padding:"16px 20px",borderTop:"1px solid #333"}}>
-            <button onClick={()=>supabase.auth.signOut()} style={{fontFamily:F.mono,fontSize:9,color:"#666",background:"transparent",border:"none",cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase"}}>Sign Out</button>
+            <button onClick={signOut} style={{fontFamily:F.mono,fontSize:9,color:"#666",background:"transparent",border:"none",cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase"}}>Sign Out</button>
           </div>
         </div>
       )}
