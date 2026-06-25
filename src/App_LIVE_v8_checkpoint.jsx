@@ -1,3 +1,7 @@
+https://raw.githubusercontent.com/joshuagraham4-max/getunlocked-producer/main/src/App.jsx
+→ https://raw.githubusercontent.com/joshuagraham4-max/getunlocked-producer/main/src/App.jsx
+Content-Type: text/plain; charset=utf-8
+
 import { useState, useEffect, useRef, useCallback } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { supabase } from "./supabase.js";
@@ -116,16 +120,18 @@ function buildSched({startHour,mode,hasMeeting,meetingMins,meetingDurMins,meetin
   push({id:"study",label:mode==="on"?"System Building \xb7 30 min":"Training & Development \xb7 30 min",tag:"Get Unlocked",type:"study",dur:30,scoreLabel:mode==="on"?"System output done":"Training done",desc:mode==="on"?"Build a system, write a post, document a process. Also your window to watch Get Unlocked training videos, work on outbound call approach, or develop IOI content.":"Watch a Get Unlocked training video, work on outbound call scripts, review loan products, or develop your prospecting approach. One topic. Write one insight down."});
   push({id:"close",label:"Day Close \xb7 15 min",tag:"",type:"buffer",dur:15,scoreLabel:"Scorecard logged",desc:"Log scorecard. Send daily report. Done."});
   if(hardStopMins&&cur>hardStopMins) {
-    const drop=["calls1c","meeting2","calls1d","study","calls3","react2","calls2","dealwork","react1"], dropped=[];
-    const recalc=()=>{ if(blocks.length>0){ let s=blocks[0].end; for(let i=1;i<blocks.length;i++){blocks[i].start=s;blocks[i].end=s+blocks[i].dur;s=blocks[i].end;} cur=blocks[blocks.length-1].end; } };
+    const drop=["study","calls3","react2","calls2","dealwork","react1"], dropped=[];
     for(const id of drop) {
       if(cur<=hardStopMins) break;
       const idx=blocks.findIndex(b=>b.id===id);
-      if(idx!==-1) { dropped.push(blocks[idx].label); cur-=blocks[idx].dur; blocks.splice(idx,1); recalc(); }
+      if(idx!==-1) {
+        dropped.push(blocks[idx].label); cur-=blocks[idx].dur; blocks.splice(idx,1);
+        if(blocks.length>0) {
+          let s=blocks[0].end; for(let i=1;i<blocks.length;i++){ blocks[i].start=s; blocks[i].end=s+blocks[i].dur; s=blocks[i].end; }
+          cur=blocks[blocks.length-1].end;
+        }
+      }
     }
-    // Catch-all: remove any remaining block that starts at or after the hard stop
-    let changed=true;
-    while(changed){ changed=false; for(let i=blocks.length-1;i>=0;i--){ if(blocks[i].start>=hardStopMins){ dropped.push(blocks[i].label); blocks.splice(i,1); changed=true; recalc(); break; } } }
     if(dropped.length) warnings.push(`Hard stop: removed ${dropped.join(", ")}.`);
   }
   return {blocks,warnings,endTime:cur};
@@ -454,7 +460,6 @@ export default function App() {
   const [hasSecondMeeting, setHasSecondMeeting] = useState(null);
   const [meeting2Time, setMeeting2Time] = useState(["2","00","PM"]);
   const [meeting2Dur, setMeeting2Dur] = useState(60);
-  const [meeting2WarnAcked, setMeeting2WarnAcked] = useState(false);
   const [lunchDur, setLunchDur] = useState(30);
   const [dealLoad, setDealLoad] = useState(null);
   const [hasHardStop, setHasHardStop] = useState(null);
@@ -492,17 +497,9 @@ export default function App() {
   const installPromptRef = useRef(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
 
-  const [isWide, setIsWide] = useState(window.innerWidth >= 900);
-
   const today = todayKey();
   const now = new Date();
   const dateStr = now.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
-
-  useEffect(() => {
-    const handleResize = () => setIsWide(window.innerWidth >= 900);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   // ── Auth listener ─────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -1043,7 +1040,7 @@ export default function App() {
   }
 
   // ── Main app ──────────────────────────────────────────────────────────────────
-  const view = accepted?(subTab==="scorecard"?"scorecard":sched?"schedule":"scorecard"):sched?"preview":"build";
+  const view = !sched?"build":!accepted?"preview":subTab==="scorecard"?"scorecard":"schedule";
   const secSt = {display:"flex",alignItems:"center",gap:10,margin:"16px 0 7px"};
   const secLn = {flex:1,height:1,background:C.rule};
   const secTx = {fontFamily:F.mono,fontSize:9,letterSpacing:"0.2em",textTransform:"uppercase",color:C.light,whiteSpace:"nowrap"};
@@ -1064,7 +1061,7 @@ export default function App() {
   }
 
   return (<>
-    <div style={{background:C.bg,minHeight:"100vh",fontFamily:F.body,display:isWide?"flex":"block"}}>
+    <div style={{background:C.bg,minHeight:"100vh",padding:"24px 16px 80px",fontFamily:F.body,maxWidth:520,margin:"0 auto"}}>
       <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"/>
 
       {/* PWA Install Banner */}
@@ -1076,34 +1073,7 @@ export default function App() {
         </div>
       )}
 
-      {/* DESKTOP SIDEBAR */}
-      {isWide && (
-        <div style={{width:220,minHeight:"100vh",background:C.ink,padding:"28px 0",display:"flex",flexDirection:"column",position:"sticky",top:0,flexShrink:0}}>
-          <div style={{padding:"0 20px 24px",borderBottom:"1px solid #333"}}>
-            <div style={{fontFamily:F.cond,fontSize:9,fontWeight:600,letterSpacing:"0.2em",textTransform:"uppercase",color:C.green,marginBottom:4}}>Get Unlocked</div>
-            <div style={{fontFamily:F.cond,fontSize:18,fontWeight:800,color:"#fff",lineHeight:1,marginBottom:6}}>{profile.name?.toUpperCase()}</div>
-            {streak>0 && <div style={{fontFamily:F.mono,fontSize:10,color:C.green,fontWeight:600}}>Day {streak} 🔥</div>}
-            <div style={{fontFamily:F.mono,fontSize:9,color:"#666",marginTop:4}}>{dateStr}</div>
-          </div>
-          <nav style={{padding:"16px 0",flex:1}}>
-            {[["today","Today"],["contacts","Contacts"],["scripts","Scripts"],["ioi","IOI"],["history","History"],["team","Team"]].map(([id,lbl])=>(
-              <button key={id} onClick={()=>{setTab(id);setRebuildOk(false);}}
-                style={{display:"block",width:"100%",padding:"11px 20px",border:"none",textAlign:"left",background:tab===id?C.green:"transparent",color:tab===id?"#fff":"#888",fontFamily:F.cond,fontSize:14,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer",transition:"all 0.15s",borderLeft:tab===id?"3px solid #fff":"3px solid transparent"}}>
-                {lbl}
-              </button>
-            ))}
-          </nav>
-          <div style={{padding:"16px 20px",borderTop:"1px solid #333"}}>
-            <button onClick={signOut} style={{fontFamily:F.mono,fontSize:9,color:"#666",background:"transparent",border:"none",cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase"}}>Sign Out</button>
-          </div>
-        </div>
-      )}
-
-      {/* MAIN CONTENT */}
-      <div style={{flex:1,padding:isWide?"32px 40px 80px":"24px 16px 80px",maxWidth:isWide?"none":"520px",margin:isWide?"0":"0 auto",minWidth:0}}>
-
-      {/* Header — mobile only */}
-      {!isWide && (
+      {/* Header */}
       <div style={{borderBottom:`2px solid ${C.ink}`,paddingBottom:12,marginBottom:20}}>
         <div style={{fontFamily:F.cond,fontSize:10,fontWeight:600,letterSpacing:"0.2em",textTransform:"uppercase",color:C.light,marginBottom:3}}>Get Unlocked Producer</div>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end"}}>
@@ -1116,26 +1086,13 @@ export default function App() {
           </div>
         </div>
       </div>
-      )}
 
-      {/* Desktop page title */}
-      {isWide && (
-        <div style={{marginBottom:28}}>
-          <div style={{fontFamily:F.cond,fontSize:32,fontWeight:900,color:C.ink,lineHeight:1}}>
-            {tab==="today"?"TODAY":tab==="contacts"?"CONTACTS":tab==="scripts"?"SCRIPTS":tab==="ioi"?"IOI POSTS":tab==="history"?"HISTORY":"TEAM"}
-          </div>
-          <div style={{fontFamily:F.mono,fontSize:10,color:C.light,marginTop:4}}>{dateStr}</div>
-        </div>
-      )}
-
-      {/* Nav tabs — mobile only */}
-      {!isWide && (
+      {/* Nav tabs */}
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr 1fr 1fr",gap:3,marginBottom:12,background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:4}}>
         {[["today","Today"],["contacts","Contacts"],["scripts","Scripts"],["ioi","IOI"],["history","History"],["team","Team"]].map(([id,lbl])=>(
           <button key={id} onClick={()=>{setTab(id);setRebuildOk(false);}} style={{padding:"8px 2px",borderRadius:6,border:"none",background:tab===id?C.green:"transparent",color:tab===id?"#fff":C.mid,fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.03em",textTransform:"uppercase",cursor:"pointer",transition:"all 0.15s"}}>{lbl}</button>
         ))}
       </div>
-      )}
       {(tab==="scripts"||tab==="ioi") && (
       <a href="https://getunlocked-producer.vercel.app/GetUnlocked_Scripts.html" target="_blank" rel="noreferrer"
         style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:20,padding:"10px 16px",borderRadius:8,border:`1.5px solid ${C.blue}`,background:C.blueBg,color:C.blue,fontFamily:F.cond,fontSize:13,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",textDecoration:"none"}}>
@@ -1231,518 +1188,4 @@ export default function App() {
                       </div>
                       {hasSecondMeeting && (
                         <div style={{marginTop:12}}>
-                          <div style={{marginBottom:12}}><Label>2nd meeting time</Label><TSel value={meeting2Time} onChange={setMeeting2Time}/>
-                            {parse12(...meeting2Time)<8*60 && <div style={{marginTop:6,padding:"6px 10px",borderRadius:6,background:C.redBg,border:`1px solid ${C.redBd}`,fontFamily:F.mono,fontSize:10,color:C.red}}>⚠ Meeting set to {fmt(parse12(...meeting2Time))} — looks like AM. Did you mean PM?</div>}
-                          </div>
-                          <Label>Duration</Label>
-                          <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-                            {[["30 min",30],["45 min",45],["1 hour",60],["1.5 hrs",90]].map(([l,v])=>(
-                              <Chip key={v} selected={meeting2Dur===v} onClick={()=>setMeeting2Dur(v)} color={C.olive}>{l}</Chip>
-                            ))}
-                          </div>
-                          {parse12(...meeting2Time)<480&&!meeting2WarnAcked&&(
-                            <div style={{marginTop:10,background:C.amberBg,border:`1px solid ${C.amberBd}`,borderRadius:6,padding:"8px 12px",fontSize:12,color:C.amber}}>
-                              ⚠ 2nd meeting is set to {fmt(parse12(...meeting2Time))} — is that right?
-                              <button onClick={()=>setMeeting2WarnAcked(true)} style={{marginLeft:10,fontSize:11,padding:"2px 8px",background:C.amber,color:"#fff",border:"none",borderRadius:4,cursor:"pointer"}}>Yes, confirm</button>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  <div style={{marginBottom:14}}>
-                    <Label>Lunch</Label>
-                    <div style={{display:"flex",gap:8}}>
-                      <Chip selected={lunchDur===30} onClick={()=>setLunchDur(30)} color={C.stone}>30 min</Chip>
-                      <Chip selected={lunchDur===60} onClick={()=>setLunchDur(60)} color={C.stone}>1 hour</Chip>
-                    </div>
-                  </div>
-                  <div style={{display:"flex",gap:8}}>
-                    <button style={{...btnS,flex:1,width:"auto"}} onClick={()=>setSqStep(1)}>← Back</button>
-                    <button style={{...btnP,flex:2,opacity:(hasMeeting!==null&&(hasMeeting===false||hasSecondMeeting!==null)&&!(hasSecondMeeting&&parse12(...meeting2Time)<480&&!meeting2WarnAcked))?1:0.35,pointerEvents:(hasMeeting!==null&&(hasMeeting===false||hasSecondMeeting!==null)&&!(hasSecondMeeting&&parse12(...meeting2Time)<480&&!meeting2WarnAcked))?"auto":"none"}} onClick={()=>setSqStep(3)}>Next →</button>
-                  </div>
-                </div>
-              )}
-              {sqStep===3 && (
-                <div>
-                  <Label>4 of 5 — Deal build</Label>
-                  <div style={{fontFamily:F.cond,fontSize:18,fontWeight:800,color:C.ink,marginBottom:14}}>New deals to build today?</div>
-                  <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:16}}>
-                    {[
-                      {val:"none",label:"No new deals",sub:"Call Block 2 runs full 2 hours",color:C.stone,bg:C.stoneBg},
-                      {val:"light",label:"1-2 deals · 40 min",sub:"40 min carved from CB2",color:C.teal,bg:C.tealBg},
-                      {val:"medium",label:"3-4 deals · 70 min",sub:"70 min carved from CB2",color:C.amber,bg:C.amberBg},
-                      {val:"heavy",label:"4+ deals · 100 min",sub:"100 min carved, 20 min calling kept",color:C.red,bg:C.redBg},
-                    ].map(opt=>(
-                      <button key={opt.val} onClick={()=>setDealLoad(opt.val)} style={{padding:"10px 14px",borderRadius:8,textAlign:"left",cursor:"pointer",border:`2px solid ${dealLoad===opt.val?opt.color:C.rule}`,background:dealLoad===opt.val?opt.bg:C.card}}>
-                        <div style={{fontFamily:F.cond,fontSize:14,fontWeight:700,color:dealLoad===opt.val?opt.color:C.ink,marginBottom:1}}>{opt.label}</div>
-                        <div style={{fontSize:11,color:C.mid}}>{opt.sub}</div>
-                      </button>
-                    ))}
-                  </div>
-                  <div style={{display:"flex",gap:8}}>
-                    <button style={{...btnS,flex:1,width:"auto"}} onClick={()=>setSqStep(2)}>← Back</button>
-                    <button style={{...btnP,flex:2,opacity:dealLoad?1:0.35,pointerEvents:dealLoad?"auto":"none"}} onClick={()=>setSqStep(4)}>Next →</button>
-                  </div>
-                </div>
-              )}
-              {sqStep===4 && (
-                <div>
-                  <Label>5 of 5 — Hard stop</Label>
-                  <div style={{fontFamily:F.cond,fontSize:18,fontWeight:800,color:C.ink,marginBottom:14}}>Need to leave by a certain time?</div>
-                  <div style={{display:"flex",gap:8,marginBottom:14}}>
-                    <Chip selected={hasHardStop===false} onClick={()=>setHasHardStop(false)} color={C.stone}>No hard stop</Chip>
-                    <Chip selected={hasHardStop===true} onClick={()=>setHasHardStop(true)} color={C.red}>Yes, leaving by…</Chip>
-                  </div>
-                  {hasHardStop && (
-                    <div style={{background:C.redBg,border:`1px solid ${C.redBd}`,borderRadius:8,padding:14,marginBottom:14}}>
-                      <Label>Leave by</Label><TSel value={hardStopTime} onChange={setHardStopTime}/>
-                    </div>
-                  )}
-                  <div style={{display:"flex",gap:8}}>
-                    <button style={{...btnS,flex:1,width:"auto"}} onClick={()=>setSqStep(3)}>← Back</button>
-                    <button style={{...btnP,flex:2,opacity:hasHardStop!==null?1:0.35,pointerEvents:hasHardStop!==null?"auto":"none"}} onClick={buildAndSet}>Build My Day →</button>
-                  </div>
-                </div>
-              )}
-            </div>
-            </div>
-          )}
-
-          {/* PREVIEW view */}
-          {view==="preview" && (
-            <div>
-              <div style={{background:C.greenBg,border:`1px solid ${C.greenBd}`,borderRadius:8,padding:"14px 16px",marginBottom:14}}>
-                <div style={{fontFamily:F.cond,fontSize:15,fontWeight:700,color:C.green,marginBottom:4}}>Your day is built — done by {fmt(sched.endTime)}</div>
-                <div style={{fontFamily:F.mono,fontSize:10,color:C.mid,marginBottom:14}}>Review your schedule below, then tap Accept. You won't be asked these questions again today.</div>
-                <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-                  <button onClick={acceptSched} style={{...btnP,flex:2}}>Accept Schedule</button>
-                  {rebuildOk?(
-                    <div style={{flex:1,display:"flex",gap:4}}>
-                      <button onClick={doRebuild} style={{...btnS,flex:1,fontSize:11,padding:"10px 4px",borderColor:C.red,color:C.red,width:"auto"}}>Yes</button>
-                      <button onClick={()=>setRebuildOk(false)} style={{...btnS,flex:1,fontSize:11,padding:"10px 4px",width:"auto"}}>No</button>
-                    </div>
-                  ):(
-                    <button onClick={()=>setRebuildOk(true)} style={{...btnS,flex:1,width:"auto"}}>Rebuild</button>
-                  )}
-                </div>
-              </div>
-              {schedWarn.map((w,i)=><div key={i} style={{background:C.redBg,border:`1px solid ${C.redBd}`,borderRadius:6,padding:"8px 12px",marginBottom:8,fontSize:11,color:C.red}}>⚠ {w}</div>)}
-              {renderBlocks()}
-            </div>
-          )}
-
-          {/* SCHEDULE view (after acceptance) */}
-          {view==="schedule" && (
-            <div>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-                <div style={{display:"flex",alignItems:"center",gap:10}}>
-                  <div style={{fontFamily:F.mono,fontSize:10,color:C.mid}}>Done by {fmt(sched.endTime)}</div>
-                  <button onClick={downloadICS} style={{fontFamily:F.mono,fontSize:9,padding:"4px 8px",borderRadius:4,border:`1px solid ${C.greenBd}`,background:C.greenBg,color:C.green,cursor:"pointer"}}>📅 Calendar</button>
-                </div>
-                {rebuildOk?(
-                  <div style={{display:"flex",gap:6,alignItems:"center"}}>
-                    <span style={{fontFamily:F.mono,fontSize:9,color:C.red}}>Rebuild your schedule?</span>
-                    <button onClick={doRebuild} style={{fontFamily:F.mono,fontSize:9,padding:"5px 8px",borderRadius:4,border:`1.5px solid ${C.red}`,background:C.redBg,color:C.red,cursor:"pointer"}}>Yes</button>
-                    <button onClick={()=>setRebuildOk(false)} style={{fontFamily:F.mono,fontSize:9,padding:"5px 8px",borderRadius:4,border:`1px solid ${C.rule}`,background:C.card,color:C.mid,cursor:"pointer"}}>Cancel</button>
-                  </div>
-                ):(
-                  <button onClick={()=>setRebuildOk(true)} style={{fontFamily:F.mono,fontSize:9,letterSpacing:"0.08em",textTransform:"uppercase",padding:"4px 8px",borderRadius:4,border:`1px solid ${C.rule}`,background:C.card,color:C.mid,cursor:"pointer"}}>Rebuild Day</button>
-                )}
-              </div>
-              {schedWarn.map((w,i)=><div key={i} style={{background:C.redBg,border:`1px solid ${C.redBd}`,borderRadius:6,padding:"8px 12px",marginBottom:8,fontSize:11,color:C.red}}>⚠ {w}</div>)}
-              {renderBlocks()}
-            </div>
-          )}
-
-          {/* SCORECARD view */}
-          {view==="scorecard" && (
-            <div>
-              <div style={{background:C.card,border:`1px solid ${allDone?C.greenBd:C.rule}`,borderRadius:8,padding:"12px 16px",marginBottom:14,display:"flex",alignItems:"center",gap:12}}>
-                <span style={{fontFamily:F.cond,fontSize:12,fontWeight:700,letterSpacing:"0.1em",textTransform:"uppercase",color:C.mid,whiteSpace:"nowrap"}}>Scorecard</span>
-                <div style={{flex:1,height:6,borderRadius:3,background:C.rule,overflow:"hidden"}}>
-                  <div style={{height:"100%",borderRadius:3,background:C.green,width:`${pct}%`,transition:"width 0.3s"}}/>
-                </div>
-                <span style={{fontFamily:F.mono,fontSize:11,color:allDone?C.green:C.mid,whiteSpace:"nowrap",fontWeight:allDone?600:400}}>{allDone?"All done":`${totalDone} / ${totalGoals}`}</span>
-              </div>
-              {dpc>0 && (
-                <div style={{background:C.greenBg,border:`1px solid ${C.greenBd}`,borderRadius:8,padding:"10px 14px",marginBottom:14,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                  <div>
-                    <div style={{fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.1em",textTransform:"uppercase",color:C.green}}>Today's Conversation Value</div>
-                    <div style={{fontFamily:F.mono,fontSize:10,color:C.mid,marginTop:1}}>{convos} convos × ${dpc.toLocaleString()} each</div>
-                  </div>
-                  <div style={{fontFamily:F.cond,fontSize:24,fontWeight:800,color:C.green}}>${todayVal.toLocaleString()}</div>
-                </div>
-              )}
-              <div style={secSt}><span style={secTx}>Primary Metric</span><div style={secLn}/></div>
-              <div style={{background:C.blueBg,border:`1px solid ${C.blueBd}`,borderRadius:8,padding:"10px 12px",marginBottom:5}}>
-                <div style={{fontFamily:F.mono,fontSize:9,color:C.blue,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:6}}>The money metric — everything else exists to create this</div>
-                <ActRow act={PRIMARY} val={counts[PRIMARY.id]||0} onSet={v=>setCount(PRIMARY.id,v)}/>
-                <ActRow act={APPS_ACT} val={counts[APPS_ACT.id]||0} onSet={v=>setCount(APPS_ACT.id,v)}/>
-              </div>
-              <div style={secSt}><span style={secTx}>Feeding Activities</span><div style={secLn}/></div>
-              <div style={{fontFamily:F.mono,fontSize:9,color:C.light,marginBottom:8,fontStyle:"italic"}}>These exist to create phone conversations. They don't pay you — conversations do.</div>
-              {ACTS.filter(a=>a.section==="feed").map(act=>(
-                <ActRow key={act.id} act={act} val={counts[act.id]||0} onSet={v=>setCount(act.id,v)}/>
-              ))}
-              <div style={secSt}><span style={secTx}>Outcomes</span><div style={secLn}/></div>
-              {ACTS.filter(a=>a.section==="outcome").map(act=>(
-                <ActRow key={act.id} act={act} val={counts[act.id]||0} onSet={v=>setCount(act.id,v)}/>
-              ))}
-              <div style={secSt}><span style={secTx}>Power Block</span><div style={secLn}/></div>
-              <div onClick={togglePB} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:pb?C.greenBg:C.purpleBg,border:`1px solid ${pb?C.greenBd:C.purpleBd}`,borderRadius:8,padding:"12px 14px",marginBottom:5,cursor:"pointer"}}>
-                <div>
-                  <div style={{fontFamily:F.cond,fontSize:13,fontWeight:700,letterSpacing:"0.03em",textTransform:"uppercase",color:pb?C.green:C.purple}}>Power Block Completed</div>
-                  <div style={{fontFamily:F.mono,fontSize:9,color:C.light,marginTop:2}}>60-min focused block — all non-negotiables in one uninterrupted session</div>
-                </div>
-                <div style={{width:24,height:24,borderRadius:6,border:`2px solid ${pb?C.green:C.purpleBd}`,background:pb?C.green:"transparent",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s",flexShrink:0}}>
-                  {pb && <span style={{color:"#fff",fontSize:13,fontWeight:900,lineHeight:1}}>✓</span>}
-                </div>
-              </div>
-              <div style={secSt}><span style={secTx}>Tomorrow</span><div style={secLn}/></div>
-              <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:"14px 16px",marginBottom:16}}>
-                <div style={{fontFamily:F.mono,fontSize:9,color:C.light,marginBottom:12}}>These appear when you open the app tomorrow morning.</div>
-                {tomorrow.map((val,i)=>(
-                  <div key={i} style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
-                    <span style={{fontFamily:F.mono,fontSize:10,color:C.light,width:16,textAlign:"right",flexShrink:0}}>{i+1}.</span>
-                    <input value={val} onChange={e=>setTom(i,e.target.value)}
-                      placeholder={["Most important call or follow-up","Deal or task that must move","Prospecting or system priority"][i]}
-                      style={{flex:1,padding:"9px 11px",borderRadius:6,border:`1px solid ${C.rule}`,background:C.bg,fontFamily:F.body,fontSize:12,color:C.ink,outline:"none"}}/>
-                  </div>
-                ))}
-              </div>
-              <div style={secSt}><span style={secTx}>Daily Report</span><div style={secLn}/></div>
-              <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:"14px 16px",marginBottom:8}}>
-                <div style={{fontFamily:F.mono,fontSize:9,color:C.light,marginBottom:12}}>Send to {profile.partnerName||"your accountability partner"} before you close out.</div>
-                <pre style={{fontFamily:F.mono,fontSize:10,color:C.mid,lineHeight:1.7,whiteSpace:"pre-wrap",background:C.bg,borderRadius:6,padding:12,border:`1px solid ${C.rule}`,marginBottom:12,overflowX:"auto"}}>{genReport()}</pre>
-                <button onClick={copyReport} style={{...btnP,background:copied?C.green:C.blue,borderColor:copied?C.green:C.blue}}>{copied?"Copied to Clipboard":"Copy Report"}</button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* CONTACTS tab */}
-      {/* Replace vs Add modal */}
-      {uploadPending && (
-        <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.5)",zIndex:999,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
-          <div style={{background:C.card,borderRadius:12,padding:"24px 20px",maxWidth:360,width:"100%",border:`1px solid ${C.rule}`}}>
-            <div style={{fontFamily:F.cond,fontSize:18,fontWeight:800,color:C.ink,marginBottom:8}}>Upload {uploadPending.length.toLocaleString()} contacts</div>
-            <div style={{fontFamily:F.mono,fontSize:10,color:C.mid,marginBottom:20,lineHeight:1.6}}>You already have {contacts.length.toLocaleString()} contacts loaded. Do you want to replace them all or add these to your existing list?</div>
-            <div style={{display:"flex",flexDirection:"column",gap:10}}>
-              <button onClick={()=>doUpload(uploadPending,true)} style={{...btnP,background:C.red,borderColor:C.red}}>Replace All — delete existing first</button>
-              <button onClick={()=>doUpload(uploadPending,false)} style={{...btnP}}>Add to Existing</button>
-              <button onClick={()=>setUploadPending(null)} style={{...btnS,width:"100%"}}>Cancel</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {tab==="contacts" && (
-        <div>
-          <div style={{marginBottom:14}}>
-            <input value={cSearch} onChange={e=>setCSearch(e.target.value)} placeholder="Search by name or phone..."
-              style={{width:"100%",padding:"11px 14px",borderRadius:7,border:`1px solid ${C.rule}`,background:C.card,fontFamily:F.body,fontSize:13,color:C.ink,outline:"none",boxSizing:"border-box",marginBottom:10}}/>
-            <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-              {[["all","All"],["never","Never Contacted"],["cold","90+ Days"],["highrate","High Rate"]].map(([id,lbl])=>(
-                <Chip key={id} selected={cFilter===id} onClick={()=>setCFilter(id)} color={C.blue}>{lbl}</Chip>
-              ))}
-            </div>
-          </div>
-          {/* Upload progress bar */}
-          {uploadProgress && (
-            <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:"12px 14px",marginBottom:14}}>
-              <div style={{fontFamily:F.cond,fontSize:11,fontWeight:700,color:uploadProgress.done?C.green:C.ink,marginBottom:8}}>
-                {uploadProgress.done?`Upload complete — ${contacts.length} contacts loaded`:`Uploading… batch ${uploadProgress.current} of ${uploadProgress.total}`}
-              </div>
-              <div style={{height:6,borderRadius:3,background:C.rule,overflow:"hidden"}}>
-                <div style={{height:"100%",borderRadius:3,background:uploadProgress.done?C.green:C.blue,width:`${Math.round((uploadProgress.current/uploadProgress.total)*100)}%`,transition:"width 0.2s"}}/>
-              </div>
-              {uploadProgress.errors>0 && <div style={{fontFamily:F.mono,fontSize:9,color:C.red,marginTop:6}}>{uploadProgress.errors} batch{uploadProgress.errors>1?"es":""} had errors</div>}
-            </div>
-          )}
-          {contacts.length===0 ? (
-            <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:10,padding:"32px 20px",textAlign:"center"}}>
-              <div style={{fontFamily:F.cond,fontSize:16,fontWeight:700,color:C.mid,marginBottom:8}}>No Contacts Loaded</div>
-              <div style={{fontFamily:F.mono,fontSize:10,color:C.light,marginBottom:20}}>Upload a CSV or tab-delimited file. Headers map to: first_name, last_name, phone, email, note_rate, etc. Legacy headers (First Name, Last Name…) also supported. Up to 5,000 rows.</div>
-              <input ref={fRef} type="file" accept=".csv,.txt,.tsv" onChange={handleFile} style={{display:"none"}}/>
-              <button onClick={()=>fRef.current?.click()} style={{...btnP,maxWidth:240,margin:"0 auto"}}>Upload Contact File</button>
-            </div>
-          ) : (
-            <div>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-                <span style={{fontFamily:F.mono,fontSize:10,color:C.mid}}>{filtC.length} of {contacts.length} contacts</span>
-                <button onClick={()=>fRef.current?.click()} style={{fontFamily:F.mono,fontSize:9,padding:"4px 8px",borderRadius:4,border:`1px solid ${C.rule}`,background:C.card,color:C.mid,cursor:"pointer"}}>Replace</button>
-                <input ref={fRef} type="file" accept=".csv,.txt,.tsv" onChange={handleFile} style={{display:"none"}}/>
-              </div>
-              {selC ? (
-                <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:10,padding:"18px 16px"}}>
-                  <button onClick={()=>setSelC(null)} style={{fontFamily:F.mono,fontSize:9,padding:"4px 8px",borderRadius:4,border:`1px solid ${C.rule}`,background:C.bg,color:C.mid,cursor:"pointer",marginBottom:14}}>← Back</button>
-                  <div style={{fontFamily:F.cond,fontSize:22,fontWeight:800,color:C.ink,marginBottom:4}}>{selC.first_name} {selC.last_name}</div>
-                  {selC.co_borrower_first && <div style={{fontFamily:F.mono,fontSize:10,color:C.mid,marginBottom:12}}>Co-borrower: {selC.co_borrower_first} {selC.co_borrower_last}</div>}
-                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:16}}>
-                    {[
-                      ["Note Rate", selC.note_rate?`${selC.note_rate}%`:"—"],
-                      ["Loan Amount", selC.loan_amount?`$${Number(selC.loan_amount).toLocaleString()}`:"—"],
-                      ["Appraised Value", selC.appraised_value?`$${Number(selC.appraised_value).toLocaleString()}`:"—"],
-                      ["Birthday", selC.birthday||"—"],
-                      ["Source", selC.source_category||"—"],
-                      ["Last Contact", sLabels[cStatus(selC)]],
-                    ].map(([k,v])=>(
-                      <div key={k} style={{background:C.bg,border:`1px solid ${C.rule}`,borderRadius:6,padding:"8px 10px"}}>
-                        <div style={{fontFamily:F.mono,fontSize:9,color:C.light,marginBottom:2}}>{k}</div>
-                        <div style={{fontFamily:F.cond,fontSize:14,fontWeight:700,color:C.ink}}>{v}</div>
-                      </div>
-                    ))}
-                  </div>
-                  <div style={{fontFamily:F.mono,fontSize:9,color:C.light,marginBottom:12}}>{selC.property_address}{selC.property_city?`, ${selC.property_city}`:""}{selC.property_state?`, ${selC.property_state}`:""}</div>
-                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:14}}>
-                    {[
-                      ["Call", `tel:${selC.phone}`],
-                      ["Text", `sms:${selC.phone}?body=Hi ${selC.first_name}, this is ${profile.name}. Just checking in.`],
-                      ["Email", `mailto:${selC.email}?subject=Checking in`],
-                    ].map(([lbl,href])=>(
-                      <a key={lbl} href={href} style={{display:"block",padding:"10px 0",textAlign:"center",borderRadius:6,border:`1.5px solid ${C.green}`,background:C.greenBg,color:C.green,fontFamily:F.cond,fontSize:13,fontWeight:700,textDecoration:"none"}}>{lbl}</a>
-                    ))}
-                  </div>
-                  <button onClick={()=>{logC(selC);setSelC(null);}} style={{...btnP,background:C.green}}>Mark as Contacted Today</button>
-                </div>
-              ) : (
-                <div>
-                  {filtC.slice(0,50).map((c,i)=>{
-                    const st=cStatus(c), rf=rFlag(c);
-                    return (
-                      <div key={c.id||i} onClick={()=>setSelC(c)} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:"11px 14px",marginBottom:5,cursor:"pointer"}}>
-                        <div>
-                          <div style={{fontFamily:F.cond,fontSize:14,fontWeight:700,color:C.ink}}>{c.first_name} {c.last_name}</div>
-                          <div style={{fontFamily:F.mono,fontSize:9,color:C.light,marginTop:2}}>{c.phone} · {c.source_category||"—"}</div>
-                        </div>
-                        <div style={{display:"flex",gap:6,alignItems:"center"}}>
-                          {c.note_rate && <span style={{fontFamily:F.mono,fontSize:10,padding:"2px 6px",borderRadius:3,background:rf==="high"?C.redBg:C.stoneBg,color:rf==="high"?C.red:C.stone}}>{c.note_rate}%</span>}
-                          <span style={{fontFamily:F.mono,fontSize:9,padding:"2px 6px",borderRadius:3,background:C.stoneBg,color:sColors[st]}}>{sLabels[st]}</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                  {filtC.length>50 && <div style={{fontFamily:F.mono,fontSize:10,color:C.light,textAlign:"center",marginTop:10}}>Showing 50 of {filtC.length} — use search to narrow</div>}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      )}
-
-      {tab==="scripts" && <ScriptsTab/>}
-      {tab==="ioi" && <IOITab/>}
-
-      {/* HISTORY tab */}
-      {tab==="history" && (
-        <div>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:8,marginBottom:16}}>
-            {[["Streak",`${streak}d`],["Total",totDays],["Complete",compDays],["Rate",`${compRate}%`]].map(([lbl,val])=>(
-              <div key={lbl} style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:"10px 8px",textAlign:"center"}}>
-                <div style={{fontFamily:F.mono,fontSize:8,color:C.light,marginBottom:4,letterSpacing:"0.08em",textTransform:"uppercase"}}>{lbl}</div>
-                <div style={{fontFamily:F.cond,fontSize:20,fontWeight:800,color:C.green}}>{val}</div>
-              </div>
-            ))}
-          </div>
-          {chartData.length>0 && (
-            <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:10,padding:"16px 12px",marginBottom:16}}>
-              <div style={{fontFamily:F.cond,fontSize:12,fontWeight:700,letterSpacing:"0.15em",textTransform:"uppercase",color:C.mid,marginBottom:14}}>Closings vs Baseline</div>
-              <ResponsiveContainer width="100%" height={160}>
-                <LineChart data={chartData} margin={{top:5,right:10,left:-20,bottom:5}}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={C.rule}/>
-                  <XAxis dataKey="label" tick={{fontFamily:F.mono,fontSize:9,fill:C.light}}/>
-                  <YAxis tick={{fontFamily:F.mono,fontSize:9,fill:C.light}}/>
-                  <Tooltip contentStyle={{fontFamily:F.mono,fontSize:10,background:C.card,border:`1px solid ${C.rule}`,borderRadius:6}}/>
-                  <ReferenceLine y={profile.baselineClosings} stroke={C.amber} strokeDasharray="4 4" label={{value:"Baseline",position:"right",fontFamily:F.mono,fontSize:9,fill:C.amber}}/>
-                  <Line type="monotone" dataKey="closings" stroke={C.green} strokeWidth={2} dot={{fill:C.green,r:3}} name="Closings"/>
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          )}
-          <div style={{fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.15em",textTransform:"uppercase",color:C.mid,marginBottom:10}}>Daily Log</div>
-          {history.length===0 ? (
-            <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:"24px 16px",textAlign:"center",fontFamily:F.mono,fontSize:11,color:C.light}}>No history yet. Complete your first day to start the log.</div>
-          ) : history.slice(0,30).map((entry,i)=>{
-            const hit=[PRIMARY,APPS_ACT,...ACTS.filter(a=>a.goal>0)].every(a=>(entry.counts?.[a.id]||0)>=a.goal)&&entry.pb;
-            return (
-              <div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:hit?C.greenBg:C.card,border:`1px solid ${hit?C.greenBd:C.rule}`,borderRadius:8,padding:"10px 14px",marginBottom:5}}>
-                <div>
-                  <div style={{fontFamily:F.cond,fontSize:13,fontWeight:700,color:hit?C.green:C.ink}}>{new Date(entry.date+"T12:00:00").toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"})}</div>
-                  <div style={{fontFamily:F.mono,fontSize:9,color:C.light,marginTop:2}}>Convos:{entry.counts?.conversations||0} DB:{entry.counts?.database||0} R:{entry.counts?.realtor||0}</div>
-                </div>
-                <div style={{textAlign:"right"}}>
-                  <div style={{fontFamily:F.cond,fontSize:13,fontWeight:700,color:hit?C.green:C.mid}}>{hit?"Complete":`${entry.counts?.conversations||0}/5`}</div>
-                  {(entry.counts?.closings||0)>0 && <div style={{fontFamily:F.mono,fontSize:9,color:C.amber}}>{entry.counts.closings} closing{entry.counts.closings>1?"s":""}</div>}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* TEAM tab */}
-      {tab==="team" && (
-        <div>
-          {isAdmin ? (
-            /* ── ADMIN VIEW ── */
-            <div>
-              {/* Invite banner */}
-              <div style={{background:C.greenBg||"#eef6f1",border:`1px solid ${C.green}`,borderRadius:8,padding:"12px 14px",marginBottom:16,display:"flex",alignItems:"center",gap:10}}>
-                <div style={{flex:1}}>
-                  <div style={{fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.12em",textTransform:"uppercase",color:C.green,marginBottom:3}}>Invite a Loan Officer</div>
-                  <div style={{fontFamily:F.mono,fontSize:10,color:C.mid}}>Share this link — they self-sign-up and appear here automatically</div>
-                  <div style={{fontFamily:F.mono,fontSize:11,color:C.ink,marginTop:4,wordBreak:"break-all"}}>getunlocked-producer.vercel.app</div>
-                </div>
-                <button onClick={()=>{navigator.clipboard.writeText("https://getunlocked-producer.vercel.app");setInviteCopied(true);setTimeout(()=>setInviteCopied(false),2000);}}
-                  style={{...btnP,width:"auto",padding:"8px 14px",fontSize:11,flexShrink:0}}>
-                  {inviteCopied?"Copied!":"Copy Link"}
-                </button>
-              </div>
-
-              {/* Team cards */}
-              {teamLoading ? (
-                <div style={{textAlign:"center",padding:32,fontFamily:F.mono,fontSize:11,color:C.light}}>Loading team data…</div>
-              ) : teamData.length === 0 ? (
-                <div style={{textAlign:"center",padding:32,fontFamily:F.mono,fontSize:11,color:C.light}}>No LO accounts yet. Share the invite link above.</div>
-              ) : (
-                teamData.map(lo => {
-                  const activeLoTab = loTabs[lo.id] || "today";
-                  const isExpanded  = loExpanded[lo.id] || false;
-                  const setLoTab    = (t) => setLoTabs(prev => ({...prev, [lo.id]: t}));
-                  const toggleExp   = () => setLoExpanded(prev => ({...prev, [lo.id]: !prev[lo.id]}));
-
-                  // Pick data source based on active tab
-                  const c = activeLoTab === "today"
-                    ? (lo.todayLog?.counts || {})
-                    : activeLoTab === "mtd" ? (lo.mtd || {}) : (lo.ytd || {});
-                  const hasPB = lo.todayLog?.pb;
-
-                  // Metric definitions: [label, key, goal (today only)]
-                  const CORE = [
-                    ["Phone Conversations", "conversations", 5],
-                    ["Applications Taken",  "apps",          1],
-                    ["Closings",            "closings",      0],
-                    ["Pre-Approvals",       "preapprovals",  0],
-                  ];
-                  const MORE = [
-                    ["Database Outreach",   "database",         10],
-                    ["Realtor Outreach",    "realtor",          5],
-                    ["IOI Posts",           "ioi_posts",        0],
-                    ["DMs",                 "dms",              0],
-                    ["LinkedIn",            "linkedin",         0],
-                    ["Handwritten Notes",   "handwritten_notes",0],
-                  ];
-
-                  const statRow = (label, key, goal) => {
-                    const val = c[key] || 0;
-                    const showGoal = activeLoTab === "today" && goal > 0;
-                    return (
-                      <div key={label} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"5px 0",borderBottom:`1px solid ${C.rule}`}}>
-                        <span style={{fontFamily:F.mono,fontSize:10,color:C.light}}>{label}</span>
-                        <span style={{fontFamily:F.cond,fontSize:13,fontWeight:700,color:showGoal&&val>=goal?C.green:C.ink}}>{val}{showGoal?` / ${goal}`:""}</span>
-                      </div>
-                    );
-                  };
-
-                  const tabBtn = (label, key) => (
-                    <button key={key} onClick={()=>setLoTab(key)} style={{fontFamily:F.mono,fontSize:10,letterSpacing:"0.06em",padding:"4px 10px",borderRadius:4,border:`1px solid ${activeLoTab===key?C.green:C.rule}`,background:activeLoTab===key?C.greenBg||"#eef6f1":"transparent",color:activeLoTab===key?C.green:C.light,cursor:"pointer"}}>
-                      {label}
-                    </button>
-                  );
-
-                  return (
-                    <div key={lo.id} style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:10,padding:"16px",marginBottom:14}}>
-                      {/* LO header */}
-                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:10,paddingBottom:10,borderBottom:`2px solid ${C.rule}`}}>
-                        <div style={{fontFamily:F.cond,fontSize:16,fontWeight:700,color:C.ink,letterSpacing:"0.05em",textTransform:"uppercase"}}>{lo.name||lo.email}</div>
-                        {lo.is_admin && <span style={{fontFamily:F.mono,fontSize:9,color:C.green,background:C.greenBg||"#eef6f1",padding:"2px 6px",borderRadius:4}}>ADMIN</span>}
-                      </div>
-
-                      {/* Period tabs */}
-                      <div style={{display:"flex",gap:6,marginBottom:12}}>
-                        {tabBtn("Today","today")}
-                        {tabBtn("MTD","mtd")}
-                        {tabBtn("YTD","ytd")}
-                      </div>
-
-                      {/* Core 4 metrics */}
-                      {CORE.map(([label, key, goal]) => statRow(label, key, goal))}
-
-                      {/* Power Blocks (Today only) */}
-                      {activeLoTab === "today" && (
-                        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"5px 0",borderBottom:`1px solid ${C.rule}`}}>
-                          <span style={{fontFamily:F.mono,fontSize:10,color:C.light}}>Power Blocks Done</span>
-                          <span style={{fontFamily:F.cond,fontSize:13,fontWeight:700,color:hasPB?C.green:C.ink}}>{hasPB?"✓ Yes":"—"}</span>
-                        </div>
-                      )}
-
-                      {/* Expanded metrics */}
-                      {isExpanded && MORE.map(([label, key, goal]) => statRow(label, key, goal))}
-
-                      {/* More / Less toggle */}
-                      <button onClick={toggleExp} style={{marginTop:8,fontFamily:F.mono,fontSize:10,color:C.light,background:"transparent",border:"none",cursor:"pointer",padding:"4px 0",letterSpacing:"0.05em"}}>
-                        {isExpanded ? "▲ Less" : "▼ More metrics"}
-                      </button>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          ) : (
-            /* ── LO VIEW: own profile only ── */
-            <div>
-              <div style={{background:C.amberBg,border:`1px solid ${C.amberBd}`,borderRadius:8,padding:"12px 14px",marginBottom:16}}>
-                <div style={{fontFamily:F.mono,fontSize:10,color:C.amber}}>Team view connects when LO accounts are live. Your stats are in History.</div>
-              </div>
-              <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:10,padding:"18px 16px"}}>
-                <div style={{fontFamily:F.cond,fontSize:13,fontWeight:700,letterSpacing:"0.1em",textTransform:"uppercase",color:C.mid,marginBottom:14}}>Your Profile</div>
-                {[
-                  ["Name",profile.name],
-                  ["Accountability Partner",profile.partnerName||"—"],
-                  ["Partner Phone",profile.partnerPhone||"—"],
-                  ["Avg Commission",`$${Number(profile.avgCommission||0).toLocaleString()}`],
-                  ["Baseline Closings/Mo",profile.baselineClosings],
-                  ["Dollar Per Conversation",`$${dpc.toLocaleString()}`],
-                ].map(([k,v])=>(
-                  <div key={k} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:`1px solid ${C.rule}`}}>
-                    <span style={{fontFamily:F.mono,fontSize:11,color:C.light}}>{k}</span>
-                    <span style={{fontFamily:F.cond,fontSize:13,fontWeight:700,color:C.ink}}>{v}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Footer */}
-      <div style={{marginTop:28,paddingTop:14,borderTop:`1px solid ${C.rule}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-        <span style={{fontFamily:F.mono,fontSize:9,color:C.light,letterSpacing:"0.1em"}}>GET UNLOCKED PRODUCER</span>
-        <button onClick={signOut} style={{fontFamily:F.mono,fontSize:9,color:C.light,background:"transparent",border:"none",cursor:"pointer",letterSpacing:"0.05em",padding:0}}>Sign Out</button>
-        <span style={{fontFamily:F.mono,fontSize:9,color:C.mid,letterSpacing:"0.1em"}}>GRAHAM FINANCIAL</span>
-      </div>
-      </div>
-    </div>
-
-    {/* ── FOCUS MODE — standalone floating panel ── */}
-    <FocusMode onLog={(session) => {
-      // Update local state
-      setFocusSessions(prev => prev + 1);
-      setFocusMins(prev => prev + session.actualMins);
-      // Save to Supabase daily log as focus_sessions / focus_mins keys in counts
-      if (userRef.current) {
-        supabase.from("daily_logs").upsert({
-          user_id: userRef.current.id,
-          date: todayKey(),
-          counts: {
-            ...counts,
-            focus_sessions: (counts.focus_sessions || 0) + 1,
-            focus_mins: (counts.focus_mins || 0) + session.actualMins,
-          }
-        }, { onConflict: "user_id,date" }).then();
-      }
-    }} />
-  </>);
-}
+                          <d
