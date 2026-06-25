@@ -485,6 +485,11 @@ export default function App() {
   const [teamLoading, setTeamLoading] = useState(false);
   const [inviteCopied, setInviteCopied] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [agreementChecked, setAgreementChecked] = useState(false);
+  const [agreementSigned, setAgreementSigned] = useState(false);
+  const [agreeNameInput, setAgreeNameInput] = useState("");
+  const [agreeChecked, setAgreeChecked] = useState(false);
+  const [agreeSubmitting, setAgreeSubmitting] = useState(false);
   const [loTabs, setLoTabs] = useState({});       // per-card Today/MTD/YTD tab
   const [loExpanded, setLoExpanded] = useState({}); // per-card expand/collapse
 
@@ -575,6 +580,14 @@ export default function App() {
       const { data: histData } = await supabase.from("daily_logs").select("date,counts,pb").eq("user_id",userId).neq("date",today).order("date",{ascending:false}).limit(90);
       if (histData) setHistory(histData);
       // Contacts
+      // Agreement check
+      const { data: existingAgreement } = await supabase
+        .from("agreements")
+        .select("id")
+        .eq("user_id", userId)
+        .maybeSingle();
+      setAgreementSigned(!!existingAgreement);
+      setAgreementChecked(true);
       const { data: ctData } = await supabase.from("contacts").select("*").eq("user_id",userId).order("last_name");
       if (ctData) setContacts(ctData);
     } catch(e) { console.error("loadUserData:",e); }
@@ -903,6 +916,21 @@ export default function App() {
     } catch(e) { setAuthError(e.message||"Authentication failed"); }
     finally { setAuthLoading(false); }
   }
+  async function handleAgreementSign() {
+    if (!agreeNameInput.trim() || !agreeChecked || agreeSubmitting) return;
+    setAgreeSubmitting(true);
+    const { error } = await supabase.from("agreements").insert({
+      user_id: user.id,
+      full_name: agreeNameInput.trim(),
+      email: user.email,
+    });
+    if (!error) {
+      setAgreementSigned(true);
+    } else {
+      alert("Something went wrong. Please try again.");
+    }
+    setAgreeSubmitting(false);
+  }
   async function signOut() { await supabase.auth.signOut(); setContacts([]); setHistory([]); setProfile({name:"",partnerName:"",partnerPhone:"",avgCommission:4000,baselineClosings:2}); setIsAdmin(false); setCounts({}); setPb(false); setSched(null); setAccepted(false); setLoTabs({}); setLoExpanded({}); setIsRecovering(false); }
 
 
@@ -1010,7 +1038,51 @@ export default function App() {
     );
   }
 
-  // ── Onboarding screen ─────────────────────────────────────────────────────────
+  // ── Agreement gate ────────────────────────────────────────────────
+  if (agreementChecked && !agreementSigned) {
+    return (
+      <div style={{minHeight:"100vh",background:C.bg,display:"flex",alignItems:"center",justifyContent:"center",padding:24,fontFamily:F.body}}>
+        <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"/>
+        <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:12,padding:"32px 28px",maxWidth:560,width:"100%"}}>
+          <div style={{fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.18em",textTransform:"uppercase",color:C.green,marginBottom:8}}>Get Unlocked Producer Program</div>
+          <div style={{fontFamily:F.cond,fontSize:22,fontWeight:800,color:C.ink,marginBottom:4}}>Confidentiality Agreement</div>
+          <div style={{fontFamily:F.mono,fontSize:11,color:C.mid,marginBottom:20,lineHeight:1.5}}>Required before accessing the program. Read the full agreement below and sign to continue.</div>
+          <div style={{background:C.bg,border:`1px solid ${C.rule}`,borderRadius:8,padding:"16px 18px",fontSize:12,color:C.ink,lineHeight:1.8,maxHeight:300,overflowY:"auto",marginBottom:20}}>
+            <p style={{marginTop:0,marginBottom:12}}><strong>This Confidentiality and Non-Solicitation Agreement</strong> is entered into between <strong>Joshua Graham, d/b/a Graham Financial</strong> ("Program Owner") and the undersigned participant ("Participant"), effective upon electronic acceptance below.</p>
+            <p style={{marginBottom:12}}><strong>1. Proprietary System.</strong> The Get Unlocked Producer Program, including its methodology, training content, activity frameworks, scoring systems, scripts, tools, and any associated software (collectively, the "System"), constitutes proprietary intellectual property owned exclusively by Joshua Graham d/b/a Graham Financial. Participant acknowledges that access to the System is a privilege granted solely for the purpose of production development within Graham Financial, powered by Zero Point Mortgage Services.</p>
+            <p style={{marginBottom:12}}><strong>2. Confidentiality.</strong> Participant agrees to hold all System materials in strict confidence and shall not disclose, share, reproduce, publish, or transmit any part of the System to any third party without prior written consent from the Program Owner. This obligation survives termination of Participant's access to the System.</p>
+            <p style={{marginBottom:12}}><strong>3. Non-Replication.</strong> For a period of twelve (12) months following Participant's departure from the Program or from Graham Financial / Zero Point Mortgage Services, whichever is later, Participant shall not develop, operate, teach, license, or participate in any program substantially similar to the System at any mortgage company operating in any state in which Zero Point Mortgage Services holds or held an active lending license at the time of Participant's enrollment or departure.</p>
+            <p style={{marginBottom:12}}><strong>4. Non-Solicitation.</strong> For a period of twelve (12) months following Participant's departure from the Program, Participant shall not directly or indirectly solicit, recruit, or contact any real estate agent partner, buyer lead, referral partner, or other business relationship that Participant was introduced to or became aware of through participation in the Program.</p>
+            <p style={{marginBottom:12}}><strong>5. Access Tied to Compliance.</strong> Participant's continued access to the System and its associated tools is conditioned upon compliance with this Agreement. Any breach may result in immediate revocation of access and may subject Participant to legal remedies available under applicable law, including injunctive relief and damages.</p>
+            <p style={{marginBottom:12}}><strong>6. Independent Employment.</strong> Nothing in this Agreement restricts Participant from working in the mortgage industry generally. The restrictions herein apply solely to the System and the specific business relationships described above.</p>
+            <p style={{marginBottom:0}}><strong>7. Governing Law.</strong> This Agreement shall be governed by the laws of the State of Colorado. Electronic acceptance constitutes a legally binding signature.</p>
+          </div>
+          <div style={{marginBottom:16}}>
+            <div style={{fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.1em",textTransform:"uppercase",color:C.mid,marginBottom:6}}>Type your full legal name to sign</div>
+            <input
+              value={agreeNameInput}
+              onChange={e=>setAgreeNameInput(e.target.value)}
+              placeholder="Full legal name"
+              style={{width:"100%",padding:"10px 12px",borderRadius:6,border:`1.5px solid ${agreeNameInput.trim()?C.green:C.rule}`,background:"#fff",fontFamily:F.body,fontSize:14,color:C.ink,outline:"none",boxSizing:"border-box"}}
+            />
+          </div>
+          <label style={{display:"flex",alignItems:"flex-start",gap:10,marginBottom:20,cursor:"pointer"}}>
+            <input type="checkbox" checked={agreeChecked} onChange={e=>setAgreeChecked(e.target.checked)} style={{marginTop:3,accentColor:C.green,width:16,height:16,flexShrink:0}}/>
+            <span style={{fontSize:12,color:C.ink,lineHeight:1.5}}>I have read and understand this Agreement in its entirety. I agree to be bound by its terms as a condition of accessing the Get Unlocked Producer Program.</span>
+          </label>
+          <button
+            onClick={handleAgreementSign}
+            disabled={!agreeNameInput.trim()||!agreeChecked||agreeSubmitting}
+            style={{width:"100%",padding:"13px",borderRadius:8,border:"none",background:(!agreeNameInput.trim()||!agreeChecked||agreeSubmitting)?C.rule:C.green,color:(!agreeNameInput.trim()||!agreeChecked||agreeSubmitting)?C.mid:"#fff",fontFamily:F.cond,fontSize:15,fontWeight:800,letterSpacing:"0.1em",textTransform:"uppercase",cursor:(!agreeNameInput.trim()||!agreeChecked||agreeSubmitting)?"not-allowed":"pointer",transition:"all 0.15s"}}>
+            {agreeSubmitting?"Recording...":"I Agree — Enter Program"}
+          </button>
+          <div style={{marginTop:12,fontFamily:F.mono,fontSize:10,color:C.light,textAlign:"center"}}>Your signature is recorded with a timestamp. A confirmation will be sent to your email on file.</div>
+        </div>
+      </div>
+    );
+  }
+
+    // ── Onboarding screen ─────────────────────────────────────────────────────────
   if (showOnboarding) {
     return (
       <div style={{background:C.bg,minHeight:"100vh",padding:"40px 20px",fontFamily:F.body}}>
