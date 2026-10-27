@@ -34,8 +34,8 @@ function Tag({ children, tone = "neutral" }) {
   const t = { neutral: [C.bg, C.muted], investor: ["#E3F0FA", C.blue], consumer: ["#E4F5EE", C.teal], warn: [C.warnBg, C.warn], good: [C.goodBg, C.good] }[tone];
   return <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase", background: t[0], color: t[1], borderRadius: 999, padding: "3px 9px", whiteSpace: "nowrap" }}>{children}</span>;
 }
-const audTag = (c) => c.audience === "intro" ? <Tag tone="neutral">Intro · post once per group</Tag> : <Tag tone={c.audience}>{c.audience === "investor" ? "Investor" : "Consumer"}</Tag>;
-const licTag = (c) => c.audience === "intro" ? null : c.license === "none" ? <Tag tone="good">No license needed · FL OK</Tag> : <Tag tone="warn">License required · CO only</Tag>;
+const audTag = (c) => c.audience === "intro" ? <Tag tone="neutral">Intro · post once per group</Tag> : c.audience === "agent" ? <Tag tone="neutral">Real estate agents</Tag> : <Tag tone={c.audience}>{c.audience === "investor" ? "Investor" : "Consumer"}</Tag>;
+const licTag = (c) => (c.audience === "intro" || c.audience === "agent") ? null : c.license === "none" ? <Tag tone="good">No license needed · FL OK</Tag> : <Tag tone="warn">License required · CO only</Tag>;
 
 function Flyer({ card, size = "100%" }) {
   if (card.flyer) return <img src={card.flyer} alt={`${card.ref} flyer`} style={{ width: size, maxWidth: "100%", aspectRatio: "1/1", objectFit: "cover", borderRadius: 10, display: "block", border: `1px solid ${C.line}` }} />;
