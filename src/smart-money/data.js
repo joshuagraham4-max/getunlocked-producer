@@ -325,13 +325,13 @@ Educated buyers are smart money. Jump in a class with us and let us show you how
     ref: "EQ-01", bank: "equity", name: "Buy Before You Sell", lender: "HomeLight BBYS (internal)",
     audience: "consumer", license: "required", flyer: "/smart-money/flyers/EQ-01.png", footer: "consumer",
     painPoints: ["move-up"], magnet: "equity-unlock", skool: "Homebuyers",
-    highlights: ["Current equity funds your next purchase", "Old mortgage comes off your debt load", "No home-sale contingency", "Backstop: purchased if unsold in 120 days", "Move once"],
-    notes: "HomeLight: list within 21 days; if unsold by day 120 HomeLight buys at LOAN PAYOFF VALUE (not market). Fee 2.4% of sale (2.9% FL). Never say 'no risk'; never name partner or fee in public copy. Equity goes toward the new purchase; for paying off other debts use a HELOC/cash-out strategy instead.",
+    highlights: ["Unlock equity before you sell", "Pay off debt, fund the next home, or both", "Old mortgage comes off your debt load", "No home-sale contingency", "Backstop: purchased if unsold in 120 days", "Move once"],
+    notes: "HomeLight: list within 21 days; if unsold by day 120 HomeLight buys at LOAN PAYOFF VALUE (not market). Fee 2.4% of sale (2.9% FL). Never say 'no risk'; never name partner or fee in public copy. Equity unlock is a no-payment advance (per Joshua) usable to pay off debt and/or fund the purchase; confirm terms in the partner agreement. Don't advertise 'no payments' in public copy (payment = Reg Z trigger term).",
     short: `Found the one, but your house hasn't sold yet?
 
-Smart money moves first. Put your current home's equity to work: fund your next purchase, take the old mortgage off your plate, and make an offer with no home-sale contingency.
+Smart money moves first. Unlock your current home's equity before you sell: pay off debt, fund your next purchase, or both, and make an offer with no home-sale contingency.
 
-✔ Your equity funds the next home
+✔ Use your equity to pay off debt, buy next, or both
 ✔ Your old mortgage comes off your debt load
 ✔ Built-in backstop: if it hasn't sold in 120 days, it's purchased
 ✔ Move once, and skip the temporary rental
@@ -341,7 +341,7 @@ Want the move-up playbook? Tap "Show me how" 👇`,
 
 So they make a contingent offer that loses to a cleaner one, or they sell first and end up in a short-term rental with their stuff in storage.
 
-There's a smarter order of operations. Buy-before-you-sell puts the equity in your current home to work on your next one, and takes that old mortgage off your debt load so you qualify the way you should. No home-sale contingency, and you sell on your schedule.
+There's a smarter order of operations. Buy-before-you-sell unlocks the equity in your current home before it sells. Use it to pay off debt, fund your next purchase, or both, and that old mortgage comes off your debt load so you qualify the way you should. No home-sale contingency, and you sell on your schedule.
 
 And there's a built-in backstop: if your home hasn't sold within 120 days, it's purchased, so you're not stuck carrying two homes.
 
