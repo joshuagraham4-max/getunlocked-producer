@@ -101,7 +101,7 @@ See where your property lands 👇`,
 
 This program goes up to 80% LTV even when the ratio is under 1.0. And if you just bought or rehabbed, cash-out has no seasoning requirement — you don't have to wait 6–12 months to pull your equity back out.
 
-First-time investor? You can qualify with 12 months of documented rental history. A decision on your file in about a day, close in as little as 20 days, and appraisal transfers are accepted.
+First-time investor? You can qualify with 12 months of documented rental history. An answer on your money in about a day, close in as little as 20 days, and appraisal transfers are accepted.
 
 Plug your numbers in and see exactly where it lands 👇`,
     video: {
@@ -215,7 +215,7 @@ Let's look at what a lender would really count 👇`,
 Let's see where you stand 👇`,
     long: `A credit score is a snapshot, not a verdict.
 
-If a bank turned you down over your score, this program was built for exactly that file. Scores down to 500, a real person who reviews your whole picture, and purchase, rate/term, or cash-out options. Single family, 2–4 units, PUDs and condos. First-time buyers welcome at 580+.
+If a bank turned you down over your score, this program was built for exactly that situation. Scores down to 500, a real person who reviews your whole picture, and purchase, rate/term, or cash-out options. Single family, 2–4 units, PUDs and condos. First-time buyers welcome at 580+.
 
 Let's look at your full picture, not just the number 👇`,
     video: {
@@ -355,6 +355,11 @@ export const MESSAGES = [
     caution: "Cite the source when posting: Federal Reserve Survey of Consumer Finances, 2025 (median $458,900 owners vs $10,600 renters). The '44x' figure is from older 2016 data." },
   { id: "M8", theme: "We teach", audience: "investor",
     text: "Our job isn't just to get you a loan. It's to teach you how to build wealth with real estate: how the strategies work, when to use them, and how to deploy them." },
+  { id: "M9", theme: "Your money works harder in a home", audience: "consumer",
+    text: "Say the market earns you 10% — that's 10% on the money you invested. $40,000 at 10% is about $4,000 a year. A home that appreciates 3–5% grows on its whole value: a $400,000 home at 4% is about $16,000 a year. Same idea, much bigger number working for you. Jump in a class with us and let us show you how.",
+    caution: "Illustration only: appreciation isn't guaranteed and prices can fall (Denver is down about 9% from its 2022 peak). Don't attach a down payment, rate or payment to this example in a consumer post, which can trigger Reg Z disclosures." },
+  { id: "M10", theme: "Take a class with us", audience: "consumer",
+    text: "Before you buy your first home, take a class with us. We'll show you how homeownership builds wealth, what you actually need to get started, and how to do it the smart way. Jump in a class with us. Let us show you how." },
 ];
 
 // ---- Content rules applied to every card and message
@@ -363,4 +368,6 @@ export const CONTENT_RULES = [
   "Plain words over lender jargon (no 'manual underwriting', 'WVOE', 'DTI' in public copy).",
   "Teach first: position Joshua as the person who shows them how to build wealth with real estate.",
   "Every post ends with a clear next step to the landing page ('Show me how').",
+  "Say 'your money' or 'your situation', never 'your file'.",
+  "First-time buyer posts lean on education: 'Take a class with us' and the 43x wealth gap.",
 ];
