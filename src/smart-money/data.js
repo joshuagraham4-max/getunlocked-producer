@@ -325,22 +325,25 @@ Educated buyers are smart money. Jump in a class with us and let us show you how
     ref: "EQ-01", bank: "equity", name: "Buy Before You Sell", lender: "HomeLight BBYS (internal)",
     audience: "consumer", license: "required", flyer: "/smart-money/flyers/EQ-01.png", footer: "consumer",
     painPoints: ["move-up"], magnet: "equity-unlock", skool: "Homebuyers",
-    highlights: ["Use your equity before you sell", "No home-sale contingency", "Move once", "Learn the move-up playbook"],
-    notes: "Partner program: 2.4% fee on the departing home's sale if used. Never name the partner or fee in public copy without full terms.",
+    highlights: ["Current equity funds your next purchase", "Old mortgage comes off your debt load", "No home-sale contingency", "Backstop: purchased if unsold in 120 days", "Move once"],
+    notes: "HomeLight: list within 21 days; if unsold by day 120 HomeLight buys at LOAN PAYOFF VALUE (not market). Fee 2.4% of sale (2.9% FL). Never say 'no risk'; never name partner or fee in public copy. Equity goes toward the new purchase; for paying off other debts use a HELOC/cash-out strategy instead.",
     short: `Found the one, but your house hasn't sold yet?
 
-Smart money moves first. Buy-before-you-sell lets you use the equity in your current home to make a strong offer with no home-sale contingency, then sell on your schedule.
+Smart money moves first. Put your current home's equity to work: fund your next purchase, take the old mortgage off your plate, and make an offer with no home-sale contingency.
 
-✔ Unlock your equity before you sell
-✔ Make an offer sellers take seriously
+✔ Your equity funds the next home
+✔ Your old mortgage comes off your debt load
+✔ Built-in backstop: if it hasn't sold in 120 days, it's purchased
 ✔ Move once, and skip the temporary rental
 
 Want the move-up playbook? Tap "Show me how" 👇`,
     long: `Most move-up buyers get stuck in the same spot: they find the right home, but their money is tied up in the one they're living in.
 
-So they either make a contingent offer that loses to a cleaner one, or they sell first and end up in a short-term rental with their stuff in storage.
+So they make a contingent offer that loses to a cleaner one, or they sell first and end up in a short-term rental with their stuff in storage.
 
-There's a smarter order of operations. Buy-before-you-sell lets you use the equity in your current home to buy your next one first, with no home-sale contingency. Then you sell on your schedule, not in a rush.
+There's a smarter order of operations. Buy-before-you-sell puts the equity in your current home to work on your next one, and takes that old mortgage off your debt load so you qualify the way you should. No home-sale contingency, and you sell on your schedule.
+
+And there's a built-in backstop: if your home hasn't sold within 120 days, it's purchased, so you're not stuck carrying two homes.
 
 Educated buyers are smart money. Let me walk you through the move-up playbook 👇`,
     video: {
