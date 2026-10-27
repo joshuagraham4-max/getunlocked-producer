@@ -395,11 +395,44 @@ If you ever want details on a scenario, or just live rates, I'm a phone call, te
     },
   },
   {
-    ref: "AG-01", bank: "agents", name: "Agent Playbook — 71% Closed Zero", lender: "N/A",
-    audience: "agent", license: "none", flyer: "/smart-money/flyers/AG-01.png", footer: "intro",
+    ref: "AG-01A", bank: "agents", name: "Agent Playbook — 71% Closed Zero (A: solve your lead problem)", lender: "N/A",
+    audience: "agent", license: "none", flyer: "/smart-money/flyers/AG-01A.png", footer: "intro",
     painPoints: [], magnet: "agent-strategy", skool: "Agents",
     highlights: ["71% of agents closed zero deals", "5 deals = top 14%", "10 deals = top 7%", "Playbook + database partnership", "A real person, not automation"],
-    notes: "Chart: NAR member count Dec 1, 2024–Nov 30, 2025, MLS resales only, includes non-practicing members — confirm original source before heavy use. Database/lead partnership offer: Joshua sending through ZPMS compliance.",
+    notes: "split test: same copy, flyer line differs — A 'Let me solve your lead problem.' vs B 'Let me help you unlock the leads you already have.' Track leads by ref. Chart: NAR member count Dec 1, 2024–Nov 30, 2025, MLS resales only, includes non-practicing members — confirm original source before heavy use. Database/lead partnership offer: Joshua sending through ZPMS compliance.",
+    short: `Real estate agents: take a good hard look at this chart.
+
+71% of agents closed ZERO deals last year. Close just one and you're ahead of them. Close five and you're in the top 14% nationwide. Ten puts you in the top 7%.
+
+Let me dial in your playbook. I'll partner with you, help work your database, and build a game plan to double, triple, even quadruple your business.
+
+Not just access to smart money and intelligent financing. A real, live partner alongside you, not another automated drip.
+
+Let me help you add some deals. Find out my strategies for free 👇`,
+    long: `Agents, take a good hard look at this chart.
+
+71% of real estate agents closed zero deals last year. That means closing just one puts you ahead of most of the industry. Five deals and you're in the top 14% nationwide. Ten, and you're in the top 7%.
+
+The gap between where most agents are and the top tier isn't talent. It's a playbook and a partner.
+
+That's what I bring. Let me help you work your database, keep your relationships warm, and build a game plan to double, triple or quadruple your business. I'm not just your access to smart money and intelligent financing. I'm a partner alongside you making sure your deals close and your pipeline keeps moving.
+
+And it's a real, live person, not an automated drip campaign.
+
+Let me help you add some deals. Find out my strategies for free, then join the community where I teach all of it 👇`,
+    video: {
+      title: "71% of agents closed zero deals. Here's how you get out of that group",
+      hook: "One deal puts you ahead of 71% of agents. Five puts you in the top 14%.",
+      points: ["What the deals-per-agent numbers actually show", "Why most agents stall: no playbook, no follow-up system", "How a lender partnership keeps your database warm and your deals closing"],
+      cta: "Grab my deal strategies free — link in the post.",
+    },
+  },
+  {
+    ref: "AG-01B", bank: "agents", name: "Agent Playbook — 71% Closed Zero (B: unlock the leads you have)", lender: "N/A",
+    audience: "agent", license: "none", flyer: "/smart-money/flyers/AG-01B.png", footer: "intro",
+    painPoints: [], magnet: "agent-strategy", skool: "Agents",
+    highlights: ["71% of agents closed zero deals", "5 deals = top 14%", "10 deals = top 7%", "Playbook + database partnership", "A real person, not automation"],
+    notes: "split test: same copy, flyer line differs — A 'Let me solve your lead problem.' vs B 'Let me help you unlock the leads you already have.' Track leads by ref. Chart: NAR member count Dec 1, 2024–Nov 30, 2025, MLS resales only, includes non-practicing members — confirm original source before heavy use. Database/lead partnership offer: Joshua sending through ZPMS compliance.",
     short: `Real estate agents: take a good hard look at this chart.
 
 71% of agents closed ZERO deals last year. Close just one and you're ahead of them. Close five and you're in the top 14% nationwide. Ten puts you in the top 7%.
