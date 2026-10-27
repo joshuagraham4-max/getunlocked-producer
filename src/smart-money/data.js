@@ -17,6 +17,7 @@ export const MAGNETS = {
   "medical-power": { name: "Medical Pro Buying-Power Check", path: null, live: false },
   "dpa-calc": { name: "Down Payment Assistance Calculator", path: null, live: false },
   "equity-unlock": { name: "Equity Unlock Estimator", path: null, live: false },
+  "portfolio-review": { name: "Portfolio Strategy Review (Show me how)", path: null, live: false },
 };
 
 export const SITE_BASE = "https://getunlocked-producer.vercel.app";
@@ -35,6 +36,8 @@ export const PAIN_POINTS = [
   { id: "salaried-no-returns", label: "Salaried, but doesn't want to (or can't) use tax returns" },
   { id: "new-doctor", label: "New doctor / NP stuck in short-term rentals" },
   { id: "asset-rich", label: "Strong savings or retirement assets, thin rental income" },
+  { id: "stuck", label: "Investor sitting on the sidelines — afraid of rates and prices" },
+  { id: "portfolio-audit", label: "Owns rentals that could be cash flowing with a better loan structure" },
 ];
 
 export const FOOTERS = {
@@ -197,7 +200,7 @@ Let's look at what a lender would really count 👇`,
   },
   {
     ref: "NQ-02", bank: "nonqm", name: "Core Flex — Credit Down to 500", lender: "TBD",
-    audience: "consumer", license: "required", flyer: null, footer: "consumer",
+    audience: "consumer", license: "required", flyer: "/smart-money/flyers/NQ-02.png", footer: "consumer",
     painPoints: ["credit"], magnet: "income-qualifier", skool: "Homebuyers",
     highlights: ["Credit scores down to 500", "Purchase, rate/term & cash-out", "Up to $1.25M", "1–4 units, PUD & condo", "First-time buyers OK at 580+"],
     notes: "Don't put '30-Year Fixed' in ads (Reg Z repayment-term trigger).",
@@ -249,6 +252,42 @@ Let's see if it fits your situation 👇`,
       cta: "Message me 'WVOE' to see if you fit.",
     },
   },
+  {
+    ref: "SM-01", bank: "strategy", name: "Portfolio Strategy Review", lender: "Any business-purpose lender — match to the strategy",
+    audience: "investor", license: "none", flyer: "/smart-money/flyers/SM-01.png", footer: "business",
+    painPoints: ["stuck", "portfolio-audit", "capped"], magnet: "portfolio-review", skool: "Investors",
+    highlights: ["Prepay buy-down strategy", "40-year term", "Interest-only options", "Qualify on the property", "Less paperwork", "Business-purpose loans in most states"],
+    notes: "Brand/strategy card, not one program. Avoid 'better rates than agency' as a blanket claim and 'nationwide' (13 states excluded).",
+    short: `Investors don't get stuck like everybody else.
+
+High rates and high prices stall most people. The only reason an investor stays stuck is not knowing the strategy, or not having someone to show them.
+
+Let me show you how, and get you the money to do it.
+
+✔ Prepay strategies that buy down your rate
+✔ 40-year and interest-only options for cash flow
+✔ Qualify on the property, not your tax returns
+✔ Less paperwork with business-purpose loans
+
+Let's audit your portfolio for the strategies you left on the table 👇`,
+    long: `Here's a question for every investor holding rentals right now:
+
+How many of your properties would be cash flowing today if your loans had been structured differently?
+
+A prepayment penalty you've already outlasted could have bought you a lower rate. A 40-year or interest-only structure could have turned a break-even rental into a cash-flowing one, on long-term and short-term rentals alike.
+
+That's what a portfolio review is for. We go property by property and find the strategies that were left on the table.
+
+I'm a wholesale broker with access to business-purpose lenders in most states. Qualify on the property, not your tax returns, with less paperwork and often lower payments.
+
+The only thing stopping most investors is not knowing who to call. Let me show you how 👇`,
+    video: {
+      title: "The prepay strategy most investors skip (and what it costs them)",
+      hook: "If your prepay period already ran out, you paid a higher rate for protection you never used.",
+      points: ["How a prepayment penalty buys down a rate, and when it's worth it", "40-year and interest-only: turning break-even into cash flow", "What a property-by-property portfolio review looks like"],
+      cta: "Tap 'Show me how' and send me your properties — I'll run the review.",
+    },
+  },
 ];
 
 // ---- Schedule: 7 days × 2 slots (8:30 AM / 12:30 PM ET). 8 investor / 6 consumer per week.
@@ -294,3 +333,21 @@ export function planFor(date) {
   const morningInvestor = out.find((s) => s.audience === "investor") || out[0];
   return { slots: out, video: morningInvestor.card };
 }
+
+// ---- Message bank: core Smart Money messages in Joshua's voice. Use as hooks, captions, video openers.
+export const MESSAGES = [
+  { id: "M1", theme: "Not stuck", audience: "investor",
+    text: "Investors don't get stuck like everybody else, afraid of high rates and high prices. The only reason you're stuck is not knowing how to build wealth with real estate, or not having someone to show you. Let me show you how, and let me get you the money to do it." },
+  { id: "M2", theme: "Portfolio deep dive", audience: "investor",
+    text: "Let's take a deep dive into your real estate portfolio and make sure you didn't leave any strategies on the table." },
+  { id: "M3", theme: "Prepay analysis", audience: "investor",
+    text: "How many of your properties would be cash flowing right now if you'd taken a simple prepayment penalty — one you've already outlasted — in exchange for a lower rate?" },
+  { id: "M4", theme: "40-year / interest-only", audience: "investor",
+    text: "A 40-year or interest-only structure can be the difference between a break-even rental and one that cash flows, on short-term and long-term rentals alike." },
+  { id: "M5", theme: "Get qualified", audience: "investor",
+    text: "I can get you qualified. Business-purpose loans save you the hassle: less paperwork, qualifying on the property instead of your tax returns, and often lower payments.",
+    caution: "Avoid 'better rates than agency' as a blanket claim unless you can back it up on that scenario." },
+  { id: "M6", theme: "The guy to call", audience: "investor",
+    text: "The only thing stopping most investors is not knowing who to call. I'm a wholesale broker with access to business-purpose lenders in most states. Call me.",
+    caution: "Say 'most states,' not 'nationwide' — 13 states require a license even for business purpose." },
+];

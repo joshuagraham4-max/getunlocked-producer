@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { BRAND, CARDS, PAIN_POINTS, MAGNETS, FOOTERS, CHANNELS, planFor, magnetLink } from "./data.js";
+import { BRAND, CARDS, PAIN_POINTS, MAGNETS, FOOTERS, CHANNELS, planFor, magnetLink, MESSAGES } from "./data.js";
 
 // Self-contained module: drop <SmartMoney /> into the Producer app later.
 const C = {
@@ -208,8 +208,26 @@ function Library({ selected, setSelected }) {
   );
 }
 
+function Messages() {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <p style={{ margin: 0, color: C.muted, fontSize: 14 }}>Core Smart Money messages. Use them as post hooks, captions or video openers.</p>
+      {MESSAGES.map((m) => (
+        <section key={m.id} style={panel}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
+            <Tag>{m.id}</Tag><span style={{ fontWeight: 800 }}>{m.theme}</span>
+            <span style={{ marginLeft: "auto" }}><CopyBtn text={m.text} /></span>
+          </div>
+          <p style={{ margin: 0, lineHeight: 1.6 }}>{m.text}</p>
+          {m.caution && <p style={{ margin: "8px 0 0", fontSize: 13, background: C.warnBg, color: C.warn, borderRadius: 8, padding: 8 }}>{m.caution}</p>}
+        </section>
+      ))}
+    </div>
+  );
+}
+
 const panel = { background: C.card, border: `1px solid ${C.line}`, borderRadius: 14, padding: 18 };
-const TABS = [["today", "Today"], ["flyers", "Flyers"], ["pain", "By Pain Point"], ["library", "Flyer + Copy"]];
+const TABS = [["today", "Today"], ["flyers", "Flyers"], ["pain", "By Pain Point"], ["library", "Flyer + Copy"], ["messages", "Messages"]];
 
 export default function SmartMoney() {
   const [tab, setTab] = useState("today");
@@ -234,6 +252,7 @@ export default function SmartMoney() {
         {tab === "flyers" && <Flyers open={open} />}
         {tab === "pain" && <PainPoints open={open} />}
         {tab === "library" && <Library selected={sel} setSelected={setSel} />}
+        {tab === "messages" && <Messages />}
       </main>
     </div>
   );
