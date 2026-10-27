@@ -19,6 +19,7 @@ export const MAGNETS = {
   "equity-unlock": { name: "Equity Unlock Estimator", path: null, live: false },
   "portfolio-review": { name: "Portfolio Strategy Review (Show me how)", path: null, live: false },
   "fthb-class": { name: "First-Time Homebuyer Class", path: null, live: false },
+  "agent-strategy": { name: "Free Agent Deal Strategies (then Skool: Agents)", path: null, live: false },
 };
 
 export const SITE_BASE = "https://getunlocked-producer.vercel.app";
@@ -396,7 +397,7 @@ If you ever want details on a scenario, or just live rates, I'm a phone call, te
   {
     ref: "AG-01", bank: "agents", name: "Agent Playbook — 71% Closed Zero", lender: "N/A",
     audience: "agent", license: "none", flyer: "/smart-money/flyers/AG-01.png", footer: "intro",
-    painPoints: [], magnet: null, skool: "Agents",
+    painPoints: [], magnet: "agent-strategy", skool: "Agents",
     highlights: ["71% of agents closed zero deals", "5 deals = top 14%", "10 deals = top 7%", "Playbook + database partnership", "A real person, not automation"],
     notes: "Chart: NAR member count Dec 1, 2024–Nov 30, 2025, MLS resales only, includes non-practicing members — confirm original source before heavy use. Database/lead partnership offer: Joshua sending through ZPMS compliance.",
     short: `Real estate agents: take a good hard look at this chart.
@@ -407,7 +408,7 @@ Let me dial in your playbook. I'll partner with you, help work your database, an
 
 Not just access to smart money and intelligent financing. A real, live partner alongside you, not another automated drip.
 
-Want the playbook? Send me a message 👇`,
+Let me help you add some deals. Find out my strategies for free 👇`,
     long: `Agents, take a good hard look at this chart.
 
 71% of real estate agents closed zero deals last year. That means closing just one puts you ahead of most of the industry. Five deals and you're in the top 14% nationwide. Ten, and you're in the top 7%.
@@ -418,12 +419,12 @@ That's what I bring. Let me help you work your database, keep your relationships
 
 And it's a real, live person, not an automated drip campaign.
 
-Want to see the playbook? Send me a message and let's map it out.`,
+Let me help you add some deals. Find out my strategies for free, then join the community where I teach all of it 👇`,
     video: {
       title: "71% of agents closed zero deals. Here's how you get out of that group",
       hook: "One deal puts you ahead of 71% of agents. Five puts you in the top 14%.",
       points: ["What the deals-per-agent numbers actually show", "Why most agents stall: no playbook, no follow-up system", "How a lender partnership keeps your database warm and your deals closing"],
-      cta: "Send me a message and I'll walk you through the playbook.",
+      cta: "Grab my deal strategies free — link in the post.",
     },
   },
 ];
