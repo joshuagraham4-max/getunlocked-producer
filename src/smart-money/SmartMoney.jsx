@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { BRAND, CARDS, PAIN_POINTS, MAGNETS, FOOTERS, CHANNELS, planFor, magnetLink, MESSAGES, CONTENT_RULES } from "./data.js";
+import { BRAND, CARDS, PAIN_POINTS, MAGNETS, FOOTERS, CHANNELS, planFor, magnetLink, MESSAGES, CONTENT_RULES, FUNNEL } from "./data.js";
 
 // Self-contained module: drop <SmartMoney /> into the Producer app later.
 const C = {
@@ -212,6 +212,7 @@ function Messages() {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
       <p style={{ margin: 0, color: C.muted, fontSize: 14 }}>Core Smart Money messages. Use them as post hooks, captions or video openers.</p>
+      <section style={{ ...panel, background: C.bg }}><div style={{ fontWeight: 800, marginBottom: 6 }}>The funnel</div><ol style={{ margin: 0, paddingLeft: 18, lineHeight: 1.6 }}>{FUNNEL.map((f) => <li key={f.step}><b>{f.name}</b> — {f.detail}</li>)}</ol></section>
       <section style={{ ...panel, background: C.bg }}><div style={{ fontWeight: 800, marginBottom: 6 }}>Content rules</div><ul style={{ margin: 0, paddingLeft: 18, lineHeight: 1.6 }}>{CONTENT_RULES.map((r) => <li key={r}>{r}</li>)}</ul></section>
       {MESSAGES.map((m) => (
         <section key={m.id} style={panel}>

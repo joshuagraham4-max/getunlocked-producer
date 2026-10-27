@@ -18,6 +18,7 @@ export const MAGNETS = {
   "dpa-calc": { name: "Down Payment Assistance Calculator", path: null, live: false },
   "equity-unlock": { name: "Equity Unlock Estimator", path: null, live: false },
   "portfolio-review": { name: "Portfolio Strategy Review (Show me how)", path: null, live: false },
+  "fthb-class": { name: "First-Time Homebuyer Class", path: null, live: false },
 };
 
 export const SITE_BASE = "https://getunlocked-producer.vercel.app";
@@ -37,6 +38,8 @@ export const PAIN_POINTS = [
   { id: "new-doctor", label: "New doctor / NP stuck in short-term rentals" },
   { id: "asset-rich", label: "Strong savings or retirement assets, thin rental income" },
   { id: "stuck", label: "Investor sitting on the sidelines — afraid of rates and prices" },
+  { id: "renting", label: "Renting and wants to own, but doesn't know where to start" },
+  { id: "move-up", label: "Found the next home, but the current one hasn't sold" },
   { id: "portfolio-audit", label: "Owns rentals that could be cash flowing with a better loan structure" },
 ];
 
@@ -288,6 +291,65 @@ The only thing stopping most investors is not knowing who to call. Tap "Show me 
       cta: "Tap 'Show me how' and send me your properties — I'll run the review.",
     },
   },
+  {
+    ref: "ED-01", bank: "dpa", name: "First-Time Homebuyer Class", lender: "N/A — education; route to DPA / first-time programs after the class",
+    audience: "consumer", license: "required", flyer: "/smart-money/flyers/ED-01.png", footer: "consumer",
+    painPoints: ["renting"], magnet: "fthb-class", skool: "Homebuyers",
+    highlights: ["Take a class with us", "43x owner vs. renter net worth", "Know your numbers before you shop", "Assistance programs explained"],
+    notes: "Cite Fed SCF 2025 for 43x. Don't attach down payment, rate or payment figures (Reg Z triggers).",
+    short: `Tired of paying your landlord's mortgage?
+
+Homeowners have about 43 times the net worth of renters (Federal Reserve, 2025). Educated buyers are smart money, and that starts with a class.
+
+In our first-time homebuyer class you'll learn:
+✔ How owning builds wealth
+✔ What you actually need to get started
+✔ How assistance programs can help with the upfront cost
+
+Jump in a class with us. Tap "Show me how" 👇`,
+    long: `Here's the number that changed how I talk to renters: homeowners have about 43 times the net worth of renters, according to the Federal Reserve's 2025 Survey of Consumer Finances.
+
+That's not because homeowners are lucky. It's because they learned how real estate builds wealth, and they made a plan.
+
+That's what our first-time homebuyer class is for. You'll learn how owning builds wealth over time, what you actually need to get started, how assistance programs work, and how to build a plan around your money, not someone else's.
+
+Educated buyers are smart money. Jump in a class with us and let us show you how 👇`,
+    video: {
+      title: "Why homeowners have 43x the net worth of renters",
+      hook: "Renting isn't free. You're building wealth either way, just not always your own.",
+      points: ["Where the 43x number comes from (and what it really means)", "How your money works harder in a home than in a savings account", "What the class covers and how to join"],
+      cta: "Tap 'Show me how' and save your seat in the next class.",
+    },
+  },
+  {
+    ref: "EQ-01", bank: "equity", name: "Buy Before You Sell", lender: "HomeLight BBYS (internal)",
+    audience: "consumer", license: "required", flyer: "/smart-money/flyers/EQ-01.png", footer: "consumer",
+    painPoints: ["move-up"], magnet: "equity-unlock", skool: "Homebuyers",
+    highlights: ["Use your equity before you sell", "No home-sale contingency", "Move once", "Learn the move-up playbook"],
+    notes: "Partner program: 2.4% fee on the departing home's sale if used. Never name the partner or fee in public copy without full terms.",
+    short: `Found the one, but your house hasn't sold yet?
+
+Smart money moves first. Buy-before-you-sell lets you use the equity in your current home to make a strong offer with no home-sale contingency, then sell on your schedule.
+
+✔ Unlock your equity before you sell
+✔ Make an offer sellers take seriously
+✔ Move once, and skip the temporary rental
+
+Want the move-up playbook? Tap "Show me how" 👇`,
+    long: `Most move-up buyers get stuck in the same spot: they find the right home, but their money is tied up in the one they're living in.
+
+So they either make a contingent offer that loses to a cleaner one, or they sell first and end up in a short-term rental with their stuff in storage.
+
+There's a smarter order of operations. Buy-before-you-sell lets you use the equity in your current home to buy your next one first, with no home-sale contingency. Then you sell on your schedule, not in a rush.
+
+Educated buyers are smart money. Let me walk you through the move-up playbook 👇`,
+    video: {
+      title: "Buy your next home before you sell: the smart order of operations",
+      hook: "You don't have to choose between losing the house and moving twice.",
+      points: ["Why contingent offers lose in competitive situations", "How your current equity funds the next purchase", "What to know before you start (timing, costs, eligibility)"],
+      cta: "Tap 'Show me how' and I'll estimate what equity you could unlock.",
+    },
+  },
 ];
 
 // ---- Schedule: 7 days × 2 slots (8:30 AM / 12:30 PM ET). 8 investor / 6 consumer per week.
@@ -360,6 +422,8 @@ export const MESSAGES = [
     caution: "Illustration only: appreciation isn't guaranteed and prices can fall (Denver is down about 9% from its 2022 peak). Don't attach a down payment, rate or payment to this example in a consumer post, which can trigger Reg Z disclosures." },
   { id: "M10", theme: "Take a class with us", audience: "consumer",
     text: "Before you buy your first home, take a class with us. We'll show you how homeownership builds wealth, what you actually need to get started, and how to do it the smart way. Jump in a class with us. Let us show you how." },
+  { id: "M11", theme: "Educated = smart money", audience: "consumer",
+    text: "Educated people are smart money. That's why we teach first. Whether it's your first home, your next home or your next rental, we'll help you become a smarter, savvier buyer, even the very first time." },
 ];
 
 // ---- Content rules applied to every card and message
@@ -370,4 +434,13 @@ export const CONTENT_RULES = [
   "Every post ends with a clear next step to the landing page ('Show me how').",
   "Say 'your money' or 'your situation', never 'your file'.",
   "First-time buyer posts lean on education: 'Take a class with us' and the 43x wealth gap.",
+];
+
+// ---- The funnel every post feeds (step 1 is the lead magnet; Skool + class come after the lead is captured)
+export const FUNNEL = [
+  { step: 1, name: "Post", detail: "Flyer + copy, ends with 'Show me how'." },
+  { step: 2, name: "Landing page + lead magnet", detail: "Calculator, class signup or review request. Lead form first: name, phone, email. Saves to Supabase with the ref code." },
+  { step: 3, name: "Join Skool + take a class", detail: "Invite shown only after the lead is captured." },
+  { step: 4, name: "Free credit review", detail: "Bonus for joining and taking a class." },
+  { step: 5, name: "Application", detail: "The credit review links straight into the full application." },
 ];
