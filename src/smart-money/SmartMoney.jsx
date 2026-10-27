@@ -190,6 +190,10 @@ function Library({ selected, setSelected }) {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 280px), 1fr))", gap: 20, alignItems: "start" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <Flyer card={card} />
+            {card.slides && <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 8 }}>
+              {card.slides.map((src, i) => <a key={src} href={src} download={`${card.ref}-${i + 1}.png`} title={`Download slide ${i + 1}`}><img src={src} alt={`Slide ${i + 1}`} style={{ width: "100%", borderRadius: 6, border: `1px solid ${C.line}`, display: "block" }} /></a>)}
+            </div>}
+            {card.slides && <div style={{ fontSize: 12, color: C.muted }}>Carousel: {card.slides.length} slides. Tap a slide to download it.</div>}
             <div style={{ fontSize: 13 }}><b>Highlights:</b> {card.highlights.join(" · ")}</div>
             <div style={{ fontSize: 13, background: C.warnBg, borderRadius: 8, padding: 10 }}>
               <b>Internal only</b> · Lender: {card.lender}{card.notes ? ` · ${card.notes}` : ""}

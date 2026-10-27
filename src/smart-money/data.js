@@ -356,30 +356,33 @@ Educated buyers are smart money. Let me walk you through the move-up playbook �
     },
   },
   {
-    ref: "ID-01", bank: "intro", name: "Meet Joshua — Group Introduction", lender: "N/A",
+    ref: "ID-01", bank: "intro", name: "Meet Joshua — Group Introduction (carousel)", lender: "N/A",
     audience: "intro", license: "none", flyer: "/smart-money/flyers/ID-01.png", footer: "intro",
+    slides: ["/smart-money/flyers/ID-01-1.png", "/smart-money/flyers/ID-01-2.png", "/smart-money/flyers/ID-01-3.png", "/smart-money/flyers/ID-01-4.png"],
     painPoints: [], magnet: null, skool: "All",
-    highlights: ["25+ years", "The guy to call for stuck deals", "Deals quarterbacked to closing", "Live rates on request"],
-    notes: "Post once when joining a new group. Not in the daily rotation. Pin it if the group allows.",
-    short: `Hi, I'm Joshua Graham. I'm new to the group and wanted to introduce myself.
+    highlights: ["Real estate-aholic", "25+ years", "The call for stuck deals at the 2-yard line", "Hundreds of real estate pros trained", "Live rates on request"],
+    notes: "Post once when joining a new group (carousel: all 4 slides). Each slide also works alone as a follow-up post. Not in the daily rotation.",
+    short: `Hi guys, I'm Joshua Graham, new to the group and a confessed real estate-aholic.
 
 I'm not here to sell you anything. I'm here to get to know people, build relationships, and help you all build.
 
-I've been doing this for over 25 years. I'm strong at communication and quarterbacking deals, and I'm known industry-wide as the guy to call when a deal gets stuck. I can help get you paid faster.
+25+ years in the mortgage business. When a deal is stuck at the 2-yard line, think of me. I'm strong at communication and quarterbacking deals across the goal line, and I can help get you paid faster.
 
-If you ever want details or just live rates, I'm a call, text or email away.
+I've also taught hundreds of real estate professionals how to finance homes intelligently. Smart investors work with smart money.
+
+Details on a scenario or just live rates? I'm a call, text or email away.
 
 📞 720-468-6872
 ✉️ jgraham@grahamfinancial.us`,
-    long: `Hi everyone, I'm Joshua Graham, and I'm new to the group.
+    long: `Hi everyone, I'm Joshua Graham. I'm new to the group, and I'll admit it up front: I'm a real estate-aholic.
 
-I wanted to introduce myself and let you know what I bring to the table. First, there's nothing to buy from me. I'm here to get to know people, build real relationships, and help the people in this group build.
+There's nothing to buy from me. I'm here to get to know people, build real relationships, and help the people in this group build.
 
-A little about me: I've been in the mortgage business for over 25 years. I'm a wholesale broker, which means I shop a wide range of lenders, and I'm strong at the two things that matter most when a deal is on the line: communication and quarterbacking it to the finish line.
+A little about me: I've been in the mortgage business for over 25 years as a wholesale broker, shopping a wide range of lenders. What I'm best at is communication and quarterbacking a deal all the way to closing. So when you've got a deal stuck at the 2-yard line, think of me. I'm known industry-wide as the call for stuck deals, and for agents that means getting paid faster.
 
-I'm known industry-wide as the guy to call when a deal gets stuck. If you're an agent, that means you get paid faster. If you're an investor or a buyer, it means fewer surprises and a closing that actually happens.
+I also teach. I've taught hundreds of real estate professionals how to finance homes intelligently, because educated people are smart money, and smart investors work with smart money.
 
-If you ever want details on a scenario, or just want live rates, I'm a phone call, text or email away. Looking forward to getting to know you all.
+If you ever want details on a scenario, or just live rates, I'm a phone call, text or email away. Looking forward to getting to know you all.
 
 📞 720-468-6872
 ✉️ jgraham@grahamfinancial.us`,
