@@ -101,7 +101,7 @@ See where your property lands 👇`,
 
 This program goes up to 80% LTV even when the ratio is under 1.0. And if you just bought or rehabbed, cash-out has no seasoning requirement — you don't have to wait 6–12 months to pull your equity back out.
 
-First-time investor? You can qualify with 12 months of documented rental history. 24-hour underwriting, close in as little as 20 days, and appraisal transfers are accepted.
+First-time investor? You can qualify with 12 months of documented rental history. A decision on your file in about a day, close in as little as 20 days, and appraisal transfers are accepted.
 
 Plug your numbers in and see exactly where it lands 👇`,
     video: {
@@ -210,18 +210,18 @@ Let's look at what a lender would really count 👇`,
 ✔ Purchase, refinance or cash-out
 ✔ Loan amounts up to $1.25M
 ✔ First-time buyers OK at 580+
-✔ Manual underwriting — a real person looks at your file
+✔ A real person reviews your whole story, not just the score
 
 Let's see where you stand 👇`,
     long: `A credit score is a snapshot, not a verdict.
 
-If a bank turned you down over your score, this program was built for exactly that file. Scores down to 500, manual underwriting where a real person reviews the whole picture, and purchase, rate/term, or cash-out options. Single family, 2–4 units, PUDs and condos. First-time buyers welcome at 580+.
+If a bank turned you down over your score, this program was built for exactly that file. Scores down to 500, a real person who reviews your whole picture, and purchase, rate/term, or cash-out options. Single family, 2–4 units, PUDs and condos. First-time buyers welcome at 580+.
 
 Let's look at your full picture, not just the number 👇`,
     video: {
       title: "Turned down for your credit score? Here's what most people don't know",
       hook: "The bank's 'no' and the market's 'no' are two different things.",
-      points: ["Why banks stop at a number", "What manual underwriting looks at instead", "Realistic expectations: what changes at 580 vs 500"],
+      points: ["Why banks stop at a number", "What a real person looks at besides the number", "Realistic expectations: what changes at 580 vs 500"],
       cta: "Message me 'SCORE' and let's look at your full picture.",
     },
   },
@@ -269,7 +269,7 @@ Let me show you how, and get you the money to do it.
 ✔ Qualify on the property, not your tax returns
 ✔ Less paperwork with business-purpose loans
 
-Let's audit your portfolio for the strategies you left on the table 👇`,
+Want to know what you left on the table? Comment or tap "Show me how" 👇`,
     long: `Here's a question for every investor holding rentals right now:
 
 How many of your properties would be cash flowing today if your loans had been structured differently?
@@ -280,7 +280,7 @@ That's what a portfolio review is for. We go property by property and find the s
 
 I'm a wholesale broker with access to business-purpose lenders in most states. Qualify on the property, not your tax returns, with less paperwork and often lower payments.
 
-The only thing stopping most investors is not knowing who to call. Let me show you how 👇`,
+The only thing stopping most investors is not knowing who to call. Tap "Show me how" and let's start your portfolio review 👇`,
     video: {
       title: "The prepay strategy most investors skip (and what it costs them)",
       hook: "If your prepay period already ran out, you paid a higher rate for protection you never used.",
@@ -350,4 +350,17 @@ export const MESSAGES = [
   { id: "M6", theme: "The guy to call", audience: "investor",
     text: "The only thing stopping most investors is not knowing who to call. I'm a wholesale broker with access to business-purpose lenders in most states. Call me.",
     caution: "Say 'most states,' not 'nationwide' — 13 states require a license even for business purpose." },
+  { id: "M7", theme: "Owners vs renters", audience: "consumer",
+    text: "Homeowners have about 43 times the net worth of renters. Owning real estate is one of the most proven ways regular people build wealth, and we're here to teach you how.",
+    caution: "Cite the source when posting: Federal Reserve Survey of Consumer Finances, 2025 (median $458,900 owners vs $10,600 renters). The '44x' figure is from older 2016 data." },
+  { id: "M8", theme: "We teach", audience: "investor",
+    text: "Our job isn't just to get you a loan. It's to teach you how to build wealth with real estate: how the strategies work, when to use them, and how to deploy them." },
+];
+
+// ---- Content rules applied to every card and message
+export const CONTENT_RULES = [
+  "Lead with their pain point, then the strategy that solves it.",
+  "Plain words over lender jargon (no 'manual underwriting', 'WVOE', 'DTI' in public copy).",
+  "Teach first: position Joshua as the person who shows them how to build wealth with real estate.",
+  "Every post ends with a clear next step to the landing page ('Show me how').",
 ];
