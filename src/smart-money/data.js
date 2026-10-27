@@ -82,7 +82,7 @@ Run the REAL numbers on your next rental — taxes and insurance included 👇`,
   },
   {
     ref: "NQ-05", bank: "nonqm", name: "Rental Loan — Sub-1.0 Ratio / No-Seasoning Cash-Out", lender: "Champions Funding",
-    audience: "investor", license: "none", flyer: null, footer: "business",
+    audience: "investor", license: "none", flyer: "/smart-money/flyers/NQ-05.png", footer: "business",
     painPoints: ["rent-short", "fast-cash"], magnet: "rental-calc", skool: "Investors",
     highlights: ["Up to 80% LTV even when rent is under the payment", "Cash-out with no seasoning", "First-time investors OK (12-mo VOR)", "Close in as little as 20 days", "24-hour underwriting", "Appraisal transfers accepted"],
     short: `Rent doesn't fully cover the payment? That's not an automatic no.
@@ -110,7 +110,7 @@ Plug your numbers in and see exactly where it lands 👇`,
   },
   {
     ref: "NQ-06", bank: "nonqm", name: "Rental Income + Assets to Qualify", lender: "RISE TPO",
-    audience: "investor", license: "none", flyer: null, footer: "business",
+    audience: "investor", license: "none", flyer: "/smart-money/flyers/NQ-06.png", footer: "business",
     painPoints: ["asset-rich", "rent-short", "capped"], magnet: "rental-calc", skool: "Investors",
     highlights: ["Rent + assets to qualify", "401(k), IRA, stocks, cash all count", "Up to $2.5M", "80% LTV purchase", "680 FICO", "No limit on financed properties"],
     notes: "2–4 units and condos only (no SFR listed). One borrower must be an experienced investor.",
