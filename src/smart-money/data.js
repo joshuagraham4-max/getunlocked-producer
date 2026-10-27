@@ -170,9 +170,9 @@ Relocating to Colorado for a new position? Let's map it out before you sign a le
   },
   {
     ref: "NQ-01", bank: "nonqm", name: "Self-Employed — 12/24-Month P&L Only", lender: "TBD",
-    audience: "consumer", license: "required", flyer: null, footer: "consumer",
+    audience: "consumer", license: "required", flyer: "/smart-money/flyers/NQ-01.png", footer: "consumer",
     painPoints: ["self-employed"], magnet: "income-qualifier", skool: "Homebuyers",
-    highlights: ["Qualify on a CPA-prepared P&L", "No bank statements", "Up to $2.5M", "80% max LTV", "660 FICO"],
+    highlights: ["Qualify on a CPA-prepared P&L", "No bank statements", "Up to $2.5M", "660 FICO"],
     notes: "P&L must be prepared by the same licensed preparer who filed the latest business return. Investment-property use = business purpose.",
     short: `Self-employed and your tax returns make you look broke? You're not the problem — the paperwork is.
 
@@ -180,13 +180,12 @@ Qualify with a 12- or 24-month P&L prepared by your tax preparer.
 
 ✔ No bank statements
 ✔ Loan amounts up to $2.5M
-✔ Up to 80% LTV
 ✔ 660 minimum FICO
 
 Let's see what lenders would actually count 👇`,
     long: `Business owners write off everything — that's smart tax planning. It's also why your tax return makes your income look a fraction of what it really is.
 
-This program qualifies you on a 12- or 24-month profit & loss statement prepared by the same licensed preparer who filed your latest business return. No bank statements required. Up to 80% LTV, loan amounts to $2.5M, 660 FICO minimum.
+This program qualifies you on a 12- or 24-month profit & loss statement prepared by the same licensed preparer who filed your latest business return. No bank statements required. Loan amounts to $2.5M, 660 FICO minimum.
 
 Let's look at what a lender would really count 👇`,
     video: {
@@ -225,14 +224,13 @@ Let's look at your full picture, not just the number 👇`,
   },
   {
     ref: "NQ-03", bank: "nonqm", name: "WVOE Only — No Tax Returns", lender: "TBD",
-    audience: "consumer", license: "required", flyer: null, footer: "consumer",
+    audience: "consumer", license: "required", flyer: "/smart-money/flyers/NQ-03.png", footer: "consumer",
     painPoints: ["salaried-no-returns"], magnet: "income-qualifier", skool: "Homebuyers",
-    highlights: ["Qualify with only a WVOE", "No W-2s, pay stubs or tax returns", "Up to $4M", "80% LTV purchase", "620 FICO"],
+    highlights: ["Qualify with only a WVOE", "No W-2s, pay stubs or tax returns", "Up to $4M", "620 FICO", "First-time buyers OK"],
     short: `Qualify with ONE form from your employer. No W-2s, no pay stubs, no tax returns.
 
 ✔ Written verification of employment only
 ✔ Loan amounts up to $4M
-✔ Up to 80% LTV purchase & rate/term
 ✔ 620 minimum FICO
 ✔ First-time buyers OK
 
@@ -241,7 +239,7 @@ Two-year job history + two months of bank statements. That's it 👇`,
 
 This program qualifies you on a written verification of employment completed by your company. No W-2s, no pay stubs, no tax returns. Two-year employment history and two months of bank statements to support your income.
 
-Up to 80% LTV on purchase and rate/term, 70% cash-out, loans to $4M, 620 FICO. First-time buyers OK up to 70% LTV.
+Loan amounts to $4M, 620 FICO minimum, and first-time buyers are welcome.
 
 Let's see if it fits your situation 👇`,
     video: {
