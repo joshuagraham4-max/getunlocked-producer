@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { supabase } from "../supabase.js";
 import { BRAND, CARDS, PAIN_POINTS, MAGNETS, FOOTERS, CHANNELS, planFor, magnetLink, MESSAGES, CONTENT_RULES, FUNNEL } from "./data.js";
 
 // Self-contained module: drop <SmartMoney /> into the Producer app later.
@@ -13,7 +14,41 @@ const store = {
   get(k) { try { return JSON.parse(localStorage.getItem(k) || "null"); } catch { return null; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
 };
-const dateKey = (d) => d.toISOString().slice(0, 10);
+const dateKey = (d) => { const z = new Date(d.getTime() - d.getTimezoneOffset() * 60000); return z.toISOString().slice(0, 10); };
+
+// Posted / Filmed checkmarks. Signed in (inside the Producer app): saved to Supabase so they follow you
+// across devices. Not signed in, or table missing: falls back to this browser only.
+const posts = {
+  async load(userId, day) {
+    const local = store.get(`sm_done_${day}`) || {};
+    if (!userId) return local;
+    const { data, error } = await supabase.from("smart_money_posts").select("slot, done").eq("user_id", userId).eq("day", day);
+    if (error) return local;
+    const remote = Object.fromEntries((data || []).map((r) => [r.slot, r.done]));
+    const missing = Object.keys(local).filter((k) => local[k] && !(k in remote));
+    if (missing.length) {
+      await supabase.from("smart_money_posts").upsert(missing.map((slot) => ({ user_id: userId, day, slot, done: true })));
+      missing.forEach((k) => { remote[k] = true; });
+    }
+    return remote;
+  },
+  async save(userId, day, slot, done, all) {
+    store.set(`sm_done_${day}`, all);
+    if (!userId) return true;
+    const { error } = await supabase.from("smart_money_posts").upsert({ user_id: userId, day, slot, done, updated_at: new Date().toISOString() });
+    return !error;
+  },
+};
+
+function useFonts() {
+  React.useEffect(() => {
+    if (document.getElementById("sm-fonts")) return;
+    const l = document.createElement("link");
+    l.id = "sm-fonts"; l.rel = "stylesheet";
+    l.href = "https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Public+Sans:wght@400;600;700&display=swap";
+    document.head.appendChild(l);
+  }, []);
+}
 
 function CopyBtn({ text, label = "Copy" }) {
   const [done, setDone] = useState(false);
@@ -77,14 +112,23 @@ function PostKit({ card, copyKind = "short" }) {
 }
 
 // ---------------- Views
-function Today() {
+function Today({ userId }) {
   const [offset, setOffset] = useState(0);
   const date = useMemo(() => { const d = new Date(); d.setDate(d.getDate() + offset); return d; }, [offset]);
   const plan = planFor(date);
-  const key = `sm_done_${dateKey(date)}`;
-  const [done, setDone] = useState(() => store.get(key) || {});
-  const toggle = (id) => { const n = { ...done, [id]: !done[id] }; setDone(n); store.set(key, n); };
-  React.useEffect(() => { setDone(store.get(key) || {}); }, [key]);
+  const day = dateKey(date);
+  const [done, setDone] = useState({});
+  const [saveErr, setSaveErr] = useState(false);
+  React.useEffect(() => {
+    let live = true;
+    setDone(store.get(`sm_done_${day}`) || {});
+    posts.load(userId, day).then((d) => { if (live) setDone(d); });
+    return () => { live = false; };
+  }, [day, userId]);
+  const toggle = async (id) => {
+    const n = { ...done, [id]: !done[id] }; setDone(n);
+    const ok = await posts.save(userId, day, id, n[id], n); setSaveErr(!ok);
+  };
   const v = plan.video.video;
   const count = ["am", "pm", "video"].filter((k) => done[k]).length;
 
@@ -96,6 +140,7 @@ function Today() {
         <button style={ghost} onClick={() => setOffset(offset + 1)} aria-label="Next day">›</button>
         {offset !== 0 && <button style={ghost} onClick={() => setOffset(0)}>Today</button>}
         <span style={{ marginLeft: "auto" }}><Tag tone={count === 3 ? "good" : "neutral"}>{count}/3 done</Tag></span>
+        {saveErr && <span style={{ width: "100%", fontSize: 13, color: C.warn }}>Saved on this device only. The database didn't accept it; check that the smart_money_posts table exists.</span>}
       </div>
 
       {plan.slots.map((s) => (
@@ -235,12 +280,13 @@ function Messages() {
 const panel = { background: C.card, border: `1px solid ${C.line}`, borderRadius: 14, padding: 18 };
 const TABS = [["today", "Today"], ["flyers", "Flyers"], ["pain", "By Pain Point"], ["library", "Flyer + Copy"], ["messages", "Messages"]];
 
-export default function SmartMoney() {
+export default function SmartMoney({ userId = null, embedded = false }) {
+  useFonts();
   const [tab, setTab] = useState("today");
   const [sel, setSel] = useState(CARDS[0].ref);
   const open = (ref) => { setSel(ref); setTab("library"); };
   return (
-    <div style={{ fontFamily: F.body, color: C.ink, background: C.bg, minHeight: "100%" }}>
+    <div style={{ fontFamily: F.body, color: C.ink, background: C.bg, minHeight: "100%", ...(embedded ? { borderRadius: 14, overflow: "hidden", border: `1px solid ${C.line}` } : {}) }}>
       <header style={{ background: C.navy, color: "#fff" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto", padding: "22px 16px 0" }}>
           <div style={{ fontFamily: F.display, fontWeight: 700, fontSize: 12, letterSpacing: "0.16em", color: C.sky, textTransform: "uppercase" }}>Graham Financial · Smart Money Posting</div>
@@ -254,7 +300,7 @@ export default function SmartMoney() {
         </div>
       </header>
       <main style={{ maxWidth: 1100, margin: "0 auto", padding: "20px 16px 48px" }}>
-        {tab === "today" && <Today />}
+        {tab === "today" && <Today userId={userId} />}
         {tab === "flyers" && <Flyers open={open} />}
         {tab === "pain" && <PainPoints open={open} />}
         {tab === "library" && <Library selected={sel} setSelected={setSel} />}
