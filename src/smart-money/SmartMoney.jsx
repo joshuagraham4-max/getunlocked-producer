@@ -88,7 +88,8 @@ function PostKit({ card, copyKind = "short" }) {
   const m = MAGNETS[card.magnet];
   const body = card[copyKind];
   const footer = FOOTERS[card.footer];
-  const full = `${body}${link ? `\n\n${link}` : ""}\n\n${footer}`;
+  const full = `${body}\n\n${link || BRAND.bookingCta}\n\n${footer}`;
+  const withBooking = `${body}${link ? `\n\n${link}` : ""}\n\n${BRAND.bookingCta}\n\n${footer}`;
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12, minWidth: 0 }}>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>{audTag(card)}{licTag(card)}<Tag>REF {card.ref}</Tag></div>
@@ -96,7 +97,7 @@ function PostKit({ card, copyKind = "short" }) {
         <div style={{ fontSize: 12, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>Lead magnet</div>
         <div style={{ fontWeight: 700 }}>{m.name}</div>
         {link ? <div style={{ fontSize: 13, color: C.blue, wordBreak: "break-all", userSelect: "all" }}>{link}</div>
-              : <div style={{ fontSize: 13, color: C.warn }}>Not built yet — post without a link, or use "Message me" CTA in the copy.</div>}
+              : <div style={{ fontSize: 13, color: C.warn }}>Not built yet — "Copy full post" uses your booking link instead.</div>}
       </div>}
       <pre style={{ whiteSpace: "pre-wrap", fontFamily: F.body, fontSize: 14, lineHeight: 1.55, margin: 0, background: C.card, border: `1px solid ${C.line}`, borderRadius: 10, padding: 14 }}>{body}</pre>
       <div style={{ fontSize: 11, color: C.muted, lineHeight: 1.5 }}>{footer}</div>
@@ -104,6 +105,8 @@ function PostKit({ card, copyKind = "short" }) {
         <CopyBtn text={full} label="Copy full post" />
         <CopyBtn text={body} label="Copy text only" />
         {link && <CopyBtn text={link} label="Copy link" />}
+        <CopyBtn text={withBooking} label="Copy post + booking link" />
+        <CopyBtn text={BRAND.bookingCta} label="Copy booking CTA" />
         <CopyBtn text={footer} label="Copy footer" />
         {card.flyer && <a href={card.flyer} download={`${card.ref}.png`} style={{ ...ghost, textDecoration: "none", display: "inline-flex", alignItems: "center" }}>Download flyer</a>}
       </div>

@@ -8,6 +8,8 @@ export const BRAND = {
   email: "jgraham@grahamfinancial.us",
   phone: "720-468-6872",
   site: "approvedbyjoshua.com",
+  booking: "https://calendar.app.google/khAdKK7Dx4HqGBWF6",
+  bookingCta: "Book your 15 min with me. NOT a sales call. It's free to find out 👉 https://calendar.app.google/khAdKK7Dx4HqGBWF6",
 };
 
 // Where every post sends people. `path` = landing page in this app; null = not built yet.
@@ -122,16 +124,16 @@ Plug your numbers in and see exactly where it lands 👇`,
     ref: "CASH-01A", bank: "nonqm", name: "Rental Cash Out (A: next down payment)", lender: "RISE TPO",
     audience: "investor", license: "none", flyer: "/smart-money/flyers/CASH-01A.png", footer: "business",
     painPoints: ["equity-trapped", "fast-cash", "self-employed"], magnet: "rental-calc", skool: "Investors",
-    highlights: ["Cash out up to 80% LTV (720+ FICO)", "Qualify on the property's rent, not income", "15, 30 & 40-yr fixed + interest-only", "1–4 unit rentals, loans to $1M", "Short-term rentals OK (max 70% LTV cash out)"],
-    notes: "Split test with CASH-01A/B/C: same copy body, headline differs. 80% LTV cash out needs 720+ FICO; keep that next to the 80%. STR: 5% LTV reduction, max 70% cash out. No rates on this flyer.",
+    highlights: ["Cash out up to 80% LTV (720+ FICO, loans to $1M)", "Qualify on the property's rent, not income", "15, 30 & 40-yr fixed + interest-only", "1–4 unit rentals (single family to fourplex)", "Short-term rentals OK (max 70% LTV cash out)"],
+    notes: "Split test with CASH-01A/B/C: same copy body, headline differs. 80% LTV cash out needs 720+ FICO; keep that next to the 80%. STR: 5% LTV reduction, max 70% cash out. No rates on this flyer. Cash in hand max $500K above 75% LTV; 6 mos ownership for cash-out.",
     short: `Real estate investors: Your rentals are sitting on your next down payment.
 
 Pull equity out of the rentals you already own and put it to work on your next deal. You qualify on the property's rent, not your tax returns.
 
-✔ Cash out up to 80% LTV (720+ FICO)
+✔ Cash out up to 80% LTV (720+ FICO, loans to $1M)
 ✔ No employment or income docs
 ✔ 15, 30 & 40-year fixed, plus interest-only
-✔ 1–4 unit rentals, loans up to $1M
+✔ 1–4 unit rentals, single family to fourplex
 ✔ Short-term rentals OK (up to 70% cash out)
 
 Your equity, deployed. Your portfolio, expanded 👇`,
@@ -141,7 +143,7 @@ Most investors have more buying power than they think. It's just sitting in the 
 
 A rental cash-out loan lets you pull that equity without showing a W-2 or a tax return. The property's rent does the qualifying. If the rent covers the payment, you're in the conversation.
 
-Up to 80% LTV with a 720+ FICO. 15, 30 and 40-year fixed terms, plus interest-only options to keep cash flow strong. 1–4 unit rentals, loans up to $1M. Short-term rentals count too, up to 70% cash out.
+Up to 80% LTV with a 720+ FICO on loans to $1M (cash in hand up to $500K above 75% LTV). 15, 30 and 40-year fixed terms, plus interest-only options to keep cash flow strong. 1–4 unit rentals. Short-term rentals count too, up to 70% cash out.
 
 Use it for the down payment on the next one, a rehab, or reserves.
 
@@ -217,16 +219,16 @@ Relocating to Colorado for a new position? Let's map it out before you sign a le
     ref: "CASH-01B", bank: "nonqm", name: "Rental Cash Out (B: no tax returns)", lender: "RISE TPO",
     audience: "investor", license: "none", flyer: "/smart-money/flyers/CASH-01B.png", footer: "business",
     painPoints: ["equity-trapped", "fast-cash", "self-employed"], magnet: "rental-calc", skool: "Investors",
-    highlights: ["Cash out up to 80% LTV (720+ FICO)", "Qualify on the property's rent, not income", "15, 30 & 40-yr fixed + interest-only", "1–4 unit rentals, loans to $1M", "Short-term rentals OK (max 70% LTV cash out)"],
-    notes: "Split test with CASH-01A/B/C: same copy body, headline differs. 80% LTV cash out needs 720+ FICO; keep that next to the 80%. STR: 5% LTV reduction, max 70% cash out. No rates on this flyer.",
+    highlights: ["Cash out up to 80% LTV (720+ FICO, loans to $1M)", "Qualify on the property's rent, not income", "15, 30 & 40-yr fixed + interest-only", "1–4 unit rentals (single family to fourplex)", "Short-term rentals OK (max 70% LTV cash out)"],
+    notes: "Split test with CASH-01A/B/C: same copy body, headline differs. 80% LTV cash out needs 720+ FICO; keep that next to the 80%. STR: 5% LTV reduction, max 70% cash out. No rates on this flyer. Cash in hand max $500K above 75% LTV; 6 mos ownership for cash-out.",
     short: `Real estate investors: Pull cash out of your rentals. No tax returns.
 
 Pull equity out of the rentals you already own and put it to work on your next deal. You qualify on the property's rent, not your tax returns.
 
-✔ Cash out up to 80% LTV (720+ FICO)
+✔ Cash out up to 80% LTV (720+ FICO, loans to $1M)
 ✔ No employment or income docs
 ✔ 15, 30 & 40-year fixed, plus interest-only
-✔ 1–4 unit rentals, loans up to $1M
+✔ 1–4 unit rentals, single family to fourplex
 ✔ Short-term rentals OK (up to 70% cash out)
 
 Your equity, deployed. Your portfolio, expanded 👇`,
@@ -236,7 +238,7 @@ Most investors have more buying power than they think. It's just sitting in the 
 
 A rental cash-out loan lets you pull that equity without showing a W-2 or a tax return. The property's rent does the qualifying. If the rent covers the payment, you're in the conversation.
 
-Up to 80% LTV with a 720+ FICO. 15, 30 and 40-year fixed terms, plus interest-only options to keep cash flow strong. 1–4 unit rentals, loans up to $1M. Short-term rentals count too, up to 70% cash out.
+Up to 80% LTV with a 720+ FICO on loans to $1M (cash in hand up to $500K above 75% LTV). 15, 30 and 40-year fixed terms, plus interest-only options to keep cash flow strong. 1–4 unit rentals. Short-term rentals count too, up to 70% cash out.
 
 Use it for the down payment on the next one, a rehab, or reserves.
 
@@ -366,19 +368,51 @@ The only thing stopping most investors is not knowing who to call. Tap "Show me 
     },
   },
   {
+    ref: "FLOW-01", bank: "strategy", name: "The Name of the Game Is Cash Flow", lender: "Any business-purpose rental lender — RISE Core DSCR fits most",
+    audience: "investor", license: "none", flyer: "/smart-money/flyers/FLOW-01.png", footer: "business",
+    painPoints: ["self-employed", "portfolio-audit", "rent-short"], magnet: "rental-calc", skool: "Investors",
+    highlights: ["Qualify on the rent, not your income", "30 & 40-year fixed", "Interest-only to protect cash flow", "1–4 units and 5–8 unit buildings", "Short-term rentals OK (1–4 units)"],
+    notes: "Brand/strategy card. Flyer example: $300K loan at 7.00%, rent $2,600, taxes+insurance $450 → 30-yr P&I $1,996 (+$154/mo), 40-yr $1,864 (+$286), IO $1,750 (+$400). Illustrative only; IO is 10 yrs then payment rises. 5–8 units: experienced investors, no STR income, no 40-yr.",
+    short: `Real estate investors: the name of the game is cash flow.
+
+Not your W-2. Not your tax returns. If the property's rent covers the payment, you're in the conversation.
+
+✔ Qualify on the rent, not your income
+✔ 30 & 40-year fixed, plus interest-only to protect monthly cash flow
+✔ 1–4 units, and 5–8 unit buildings
+✔ Short-term rentals OK
+
+Let's run the REAL numbers on your next one 👇`,
+    long: `The name of the game is cash flow.
+
+Appreciation is a bonus. Cash flow is what keeps you in the game and lets you buy the next one.
+
+So why let a lender judge you on your tax returns? A rental cash-flow loan looks at the property: does the rent cover the payment? Structure it right with a 40-year term or interest-only, and the same property cash flows more every month.
+
+That's the difference between owning rentals and building a portfolio.
+
+Let's run the REAL numbers on your next one 👇`,
+    video: {
+      title: "Same property, more cash flow: it's the loan structure",
+      hook: "Two investors buy the same rental. One makes $154 a month, the other makes $400. The only difference is the loan.",
+      points: ["Why rental loans qualify on the rent, not your tax return", "30-year vs 40-year vs interest-only: what each does to monthly cash flow", "When interest-only makes sense, and what happens when the IO period ends"],
+      cta: "Run your rental through the calculator, or book 15 minutes with me — links in the post.",
+    },
+  },
+  {
     ref: "CASH-01C", bank: "nonqm", name: "Rental Cash Out (C: up to 80%)", lender: "RISE TPO",
     audience: "investor", license: "none", flyer: "/smart-money/flyers/CASH-01C.png", footer: "business",
     painPoints: ["equity-trapped", "fast-cash", "self-employed"], magnet: "rental-calc", skool: "Investors",
-    highlights: ["Cash out up to 80% LTV (720+ FICO)", "Qualify on the property's rent, not income", "15, 30 & 40-yr fixed + interest-only", "1–4 unit rentals, loans to $1M", "Short-term rentals OK (max 70% LTV cash out)"],
-    notes: "Split test with CASH-01A/B/C: same copy body, headline differs. 80% LTV cash out needs 720+ FICO; keep that next to the 80%. STR: 5% LTV reduction, max 70% cash out. No rates on this flyer.",
+    highlights: ["Cash out up to 80% LTV (720+ FICO, loans to $1M)", "Qualify on the property's rent, not income", "15, 30 & 40-yr fixed + interest-only", "1–4 unit rentals (single family to fourplex)", "Short-term rentals OK (max 70% LTV cash out)"],
+    notes: "Split test with CASH-01A/B/C: same copy body, headline differs. 80% LTV cash out needs 720+ FICO; keep that next to the 80%. STR: 5% LTV reduction, max 70% cash out. No rates on this flyer. Cash in hand max $500K above 75% LTV; 6 mos ownership for cash-out.",
     short: `Real estate investors: Cash out up to 80%. Qualify on the rent.
 
 Pull equity out of the rentals you already own and put it to work on your next deal. You qualify on the property's rent, not your tax returns.
 
-✔ Cash out up to 80% LTV (720+ FICO)
+✔ Cash out up to 80% LTV (720+ FICO, loans to $1M)
 ✔ No employment or income docs
 ✔ 15, 30 & 40-year fixed, plus interest-only
-✔ 1–4 unit rentals, loans up to $1M
+✔ 1–4 unit rentals, single family to fourplex
 ✔ Short-term rentals OK (up to 70% cash out)
 
 Your equity, deployed. Your portfolio, expanded 👇`,
@@ -388,7 +422,7 @@ Most investors have more buying power than they think. It's just sitting in the 
 
 A rental cash-out loan lets you pull that equity without showing a W-2 or a tax return. The property's rent does the qualifying. If the rent covers the payment, you're in the conversation.
 
-Up to 80% LTV with a 720+ FICO. 15, 30 and 40-year fixed terms, plus interest-only options to keep cash flow strong. 1–4 unit rentals, loans up to $1M. Short-term rentals count too, up to 70% cash out.
+Up to 80% LTV with a 720+ FICO on loans to $1M (cash in hand up to $500K above 75% LTV). 15, 30 and 40-year fixed terms, plus interest-only options to keep cash flow strong. 1–4 unit rentals. Short-term rentals count too, up to 70% cash out.
 
 Use it for the down payment on the next one, a rehab, or reserves.
 
