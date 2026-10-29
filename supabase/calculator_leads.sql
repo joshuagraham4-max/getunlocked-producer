@@ -12,7 +12,7 @@ create table if not exists public.calculator_leads (
   property_state  text,
   zip             text,
   consent         boolean not null default false,
-  ref             text,            -- program code, e.g. NQ-04 (from ?ref= on the link)
+  ref             text,            -- program code, e.g. RTL-01 (from ?ref= on the link)
   source          text,            -- e.g. rental-calculator
   page_url        text,
   user_agent      text,

@@ -92,7 +92,7 @@ function PostKit({ card, copyKind = "short" }) {
   const withBooking = `${body}${link ? `\n\n${link}` : ""}\n\n${BRAND.bookingCta}\n\n${footer}`;
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12, minWidth: 0 }}>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>{audTag(card)}{licTag(card)}<Tag>REF {card.ref}</Tag></div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>{audTag(card)}{licTag(card)}<Tag>REF {card.ref}</Tag>{card.was && <Tag>was {card.was}</Tag>}</div>
       {m && <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 10, padding: 14 }}>
         <div style={{ fontSize: 12, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>Lead magnet</div>
         <div style={{ fontWeight: 700 }}>{m.name}</div>
@@ -232,7 +232,7 @@ function Library({ selected, setSelected }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <select value={card.ref} onChange={(e) => setSelected(e.target.value)} style={{ font: "inherit", padding: 10, borderRadius: 8, border: `1px solid ${C.line}`, maxWidth: 520 }} aria-label="Choose a program">
-        {CARDS.map((c) => <option key={c.ref} value={c.ref}>{c.ref} · {c.name}</option>)}
+        {CARDS.map((c) => <option key={c.ref} value={c.ref}>{c.ref}{c.was ? ` (was ${c.was})` : ""} · {c.name}</option>)}
       </select>
       <section style={panel}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 280px), 1fr))", gap: 20, alignItems: "start" }}>
