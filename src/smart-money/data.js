@@ -134,7 +134,7 @@ Pull equity out of the rentals you already own and put it to work on your next d
 ✔ 1–4 unit rentals, loans up to $1M
 ✔ Short-term rentals OK (up to 70% cash out)
 
-Let's find the cash in your rentals 👇`,
+Your equity, deployed. Your portfolio, expanded 👇`,
     long: `Your rentals are sitting on your next down payment.
 
 Most investors have more buying power than they think. It's just sitting in the properties they already own.
@@ -145,7 +145,7 @@ Up to 80% LTV with a 720+ FICO. 15, 30 and 40-year fixed terms, plus interest-on
 
 Use it for the down payment on the next one, a rehab, or reserves.
 
-Let's find the cash in your rentals. Run the REAL numbers on your property 👇`,
+Your equity, deployed. Your portfolio, expanded. Run the REAL numbers on your property 👇`,
     video: {
       title: "The down payment you already own",
       hook: "Your next down payment might already be sitting in a rental you own.",
@@ -229,7 +229,7 @@ Pull equity out of the rentals you already own and put it to work on your next d
 ✔ 1–4 unit rentals, loans up to $1M
 ✔ Short-term rentals OK (up to 70% cash out)
 
-Let's find the cash in your rentals 👇`,
+Your equity, deployed. Your portfolio, expanded 👇`,
     long: `Pull cash out of your rentals. No tax returns.
 
 Most investors have more buying power than they think. It's just sitting in the properties they already own.
@@ -240,7 +240,7 @@ Up to 80% LTV with a 720+ FICO. 15, 30 and 40-year fixed terms, plus interest-on
 
 Use it for the down payment on the next one, a rehab, or reserves.
 
-Let's find the cash in your rentals. Run the REAL numbers on your property 👇`,
+Your equity, deployed. Your portfolio, expanded. Run the REAL numbers on your property 👇`,
     video: {
       title: "The down payment you already own",
       hook: "Your next down payment might already be sitting in a rental you own.",
@@ -381,7 +381,7 @@ Pull equity out of the rentals you already own and put it to work on your next d
 ✔ 1–4 unit rentals, loans up to $1M
 ✔ Short-term rentals OK (up to 70% cash out)
 
-Let's find the cash in your rentals 👇`,
+Your equity, deployed. Your portfolio, expanded 👇`,
     long: `Cash out up to 80%. Qualify on the rent.
 
 Most investors have more buying power than they think. It's just sitting in the properties they already own.
@@ -392,7 +392,7 @@ Up to 80% LTV with a 720+ FICO. 15, 30 and 40-year fixed terms, plus interest-on
 
 Use it for the down payment on the next one, a rehab, or reserves.
 
-Let's find the cash in your rentals. Run the REAL numbers on your property 👇`,
+Your equity, deployed. Your portfolio, expanded. Run the REAL numbers on your property 👇`,
     video: {
       title: "The down payment you already own",
       hook: "Your next down payment might already be sitting in a rental you own.",
