@@ -8,8 +8,8 @@ export const BRAND = {
   email: "jgraham@grahamfinancial.us",
   phone: "720-468-6872",
   site: "approvedbyjoshua.com",
-  booking: "https://calendar.app.google/khAdKK7Dx4HqGBWF6",
-  bookingCta: "Book your 15 min with me. NOT a sales call. It's free to find out 👉 https://calendar.app.google/khAdKK7Dx4HqGBWF6",
+  booking: "https://calendar.app.google/nz1sdrnBGK1D4LXh7",
+  bookingCta: "Book your 15 min with me. NOT a sales call. It's free to find out 👉 https://calendar.app.google/nz1sdrnBGK1D4LXh7",
 };
 
 // Where every post sends people. `path` = landing page in this app; null = not built yet.
