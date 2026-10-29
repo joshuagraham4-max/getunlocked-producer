@@ -44,6 +44,7 @@ export const PAIN_POINTS = [
   { id: "renting", label: "Renting and wants to own, but doesn't know where to start" },
   { id: "move-up", label: "Found the next home, but the current one hasn't sold" },
   { id: "equity-trapped", label: "Equity sitting in their rentals — needs a down payment for the next deal" },
+  { id: "priced-out", label: "Wants to buy or move, but the monthly payment doesn't make sense at today's prices" },
   { id: "portfolio-audit", label: "Owns rentals that could be cash flowing with a better loan structure" },
 ];
 
@@ -52,6 +53,8 @@ export const FOOTERS = {
     "Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity. Business-purpose loans on non-owner-occupied investment property only. Not available in AZ, CA, ID, MI, MN, NV, NJ, ND, OR, SD, UT, VT, VA. Rates subject to change; actual rate depends on credit, LTV and property type. Not a commitment to lend; subject to credit approval, underwriting guidelines and change without notice.",
   consumer:
     "Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity. Licensed in Colorado. Not a commitment to lend; subject to credit approval, underwriting guidelines and change without notice.",
+  market:
+    "Hypothetical example for illustration only; not an offer of credit or a prediction of home values. Assumes a $747,073 estimated value, 20% down payment, 30-year fixed loan at 6.50% interest, $414/mo taxes and $200/mo insurance; excludes HOA, mortgage insurance and closing costs. APR would be higher than the interest rate. Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity. Licensed in Colorado.",
   intro:
     "Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity.",
   medical:
@@ -432,6 +435,41 @@ Your equity, deployed. Your portfolio, expanded. Run the REAL numbers on your pr
       hook: "Your next down payment might already be sitting in a rental you own.",
       points: ["How a rental cash-out loan qualifies on the rent, not your tax returns", "What 80% LTV really means in dollars (and why 720+ FICO matters)", "Interest-only and 40-year terms: protecting cash flow after you pull cash"],
       cta: "Run your rental through the calculator — link in the post.",
+    },
+  },
+  {
+    ref: "MKT-01", bank: "strategy", name: "A Home Is Worth What Someone Can Pay Monthly", lender: "N/A — market education",
+    audience: "consumer", license: "required", flyer: "/smart-money/flyers/MKT-01.png", footer: "market",
+    painPoints: ["priced-out", "move-up", "renting"], magnet: null, skool: "Homebuyers",
+    highlights: ["Rent $3,580 vs. own $4,392 on the same home", "Owning = renting at about $587K vs. a $747K value", "Why buyers are sitting still", "Free home value + comps look-up"],
+    notes: "Teaching post, not a prediction. States a rate and down payment, so keep the full 'market' footer with it (example terms + APR note) and have ZPMS compliance review before posting. Don't name the street. Check the latest MBA weekly survey before claiming applications are at multi-decade lows.",
+    short: `A home is worth what someone can pay monthly.
+
+Same 4-bed Denver-area home:
+🏠 Rent it: $3,580/mo
+🏠 Own it: $4,392/mo (payment, taxes, insurance)
+
+At today's rates, owning only costs the same as renting at about $587K. The value estimate is $747K.
+
+That gap is why so many buyers are sitting still. It doesn't mean prices have to fall. It means the math has to line up, through rents, rates or prices.
+
+Want to see what YOUR home's numbers say? 👇`,
+    long: `A home is worth what someone can pay monthly.
+
+I ran the numbers on a 4-bed home in the Denver area. It rents for about $3,580 a month. To buy it at today's value with 20% down, the payment plus taxes and insurance comes to about $4,392.
+
+That's an $800-a-month premium to own.
+
+For owning to cost the same as renting, the price would need to be around $587K. The value estimate is $747K.
+
+This is why buyers are stuck and so many people are staying put. It's not panic. It's math. That gap closes one of three ways: rents rise, rates come down, or prices flatten for a while.
+
+Thinking about buying, selling, or moving up? Let's look at what YOUR home's numbers actually say. I'll run a real value and rent estimate for you, free 👇`,
+    video: {
+      title: "Why buyers are stuck: the rent vs. own math",
+      hook: "This house rents for $3,580 a month. Buying it costs $4,392. Here's what that gap tells us.",
+      points: ["Price is set by what buyers can pay monthly", "Where owning and renting break even on this house ($587K vs. $747K)", "Three ways the gap closes: rents, rates or prices (no doom predictions)"],
+      cta: "Want your own home's value and rent estimate? Book 15 minutes with me — link in the post.",
     },
   },
   {
