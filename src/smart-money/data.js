@@ -54,7 +54,7 @@ export const FOOTERS = {
   consumer:
     "Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity. Licensed in Colorado. Not a commitment to lend; subject to credit approval, underwriting guidelines and change without notice.",
   market:
-    "Hypothetical example for illustration only; not an offer of credit or a prediction of home values. Assumes a $747,073 estimated value, 20% down payment, 30-year fixed loan at 6.50% interest, $414/mo taxes and $200/mo insurance; excludes HOA, mortgage insurance and closing costs. APR would be higher than the interest rate. Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity. Licensed in Colorado.",
+    "Illustration based on an estimated home value and market rent for one Denver-area home; not an offer of credit, a rate quote or a prediction of home values. Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity. Licensed in Colorado.",
   intro:
     "Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity.",
   medical:
@@ -441,33 +441,31 @@ Your equity, deployed. Your portfolio, expanded. Run the REAL numbers on your pr
     ref: "MKT-01", bank: "strategy", name: "A Home Is Worth What Someone Can Pay Monthly", lender: "N/A — market education",
     audience: "consumer", license: "required", flyer: "/smart-money/flyers/MKT-01.png", footer: "market",
     painPoints: ["priced-out", "move-up", "renting"], magnet: null, skool: "Homebuyers",
-    highlights: ["Rent $3,580 vs. own $4,392 on the same home", "Owning = renting at about $587K vs. a $747K value", "Why buyers are sitting still", "Free home value + comps look-up"],
-    notes: "Teaching post, not a prediction. States a rate and down payment, so keep the full 'market' footer with it (example terms + APR note) and have ZPMS compliance review before posting. Don't name the street. Check the latest MBA weekly survey before claiming applications are at multi-decade lows.",
+    highlights: ["About $800/mo more to own than to rent the same home", "Owning = renting at about $587K vs. a $747K value", "Why buyers are sitting still", "Free home value + comps look-up"],
+    notes: "Teaching post, not a prediction. Stays general: no payment amounts, down payment or loan term (standing rule). The $800 is a rent-vs-own cost difference from Joshua's example (value $747K, rent $3,580); have ZPMS compliance OK it. Don't name the street. Pair with MKT-02 (solution post) when built.",
     short: `A home is worth what someone can pay monthly.
 
-Same 4-bed Denver-area home:
-🏠 Rent it: $3,580/mo
-🏠 Own it: $4,392/mo (payment, taxes, insurance)
+Same 4-bed Denver-area home: at today's rates, owning it costs about $800 a month more than renting it.
 
-At today's rates, owning only costs the same as renting at about $587K. The value estimate is $747K.
+Owning only matches renting at about $587K. The value estimate is $747K.
 
 That gap is why so many buyers are sitting still. It doesn't mean prices have to fall. It means the math has to line up, through rents, rates or prices.
 
 Want to see what YOUR home's numbers say? 👇`,
     long: `A home is worth what someone can pay monthly.
 
-I ran the numbers on a 4-bed home in the Denver area. It rents for about $3,580 a month. To buy it at today's value with 20% down, the payment plus taxes and insurance comes to about $4,392.
-
-That's an $800-a-month premium to own.
+I ran the numbers on a 4-bed home in the Denver area. At today's rates, owning it costs about $800 a month more than renting it.
 
 For owning to cost the same as renting, the price would need to be around $587K. The value estimate is $747K.
 
 This is why buyers are stuck and so many people are staying put. It's not panic. It's math. That gap closes one of three ways: rents rise, rates come down, or prices flatten for a while.
 
+And there are ways buyers close it today. Ask how sellers can pay down your rate and your closing costs.
+
 Thinking about buying, selling, or moving up? Let's look at what YOUR home's numbers actually say. I'll run a real value and rent estimate for you, free 👇`,
     video: {
       title: "Why buyers are stuck: the rent vs. own math",
-      hook: "This house rents for $3,580 a month. Buying it costs $4,392. Here's what that gap tells us.",
+      hook: "Owning this house costs about $800 a month more than renting it. Here's what that gap tells us.",
       points: ["Price is set by what buyers can pay monthly", "Where owning and renting break even on this house ($587K vs. $747K)", "Three ways the gap closes: rents, rates or prices (no doom predictions)"],
       cta: "Want your own home's value and rent estimate? Book 15 minutes with me — link in the post.",
     },
