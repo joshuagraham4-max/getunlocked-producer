@@ -418,6 +418,23 @@ function IOITab() {
 }
 
 // CSV/TSV header → DB column mapping (supports legacy exports)
+// Supabase returns max 1,000 rows per request — page through all of them.
+async function loadAllContacts(userId) {
+  const all = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await supabase.from("contacts").select("*").eq("user_id", userId)
+      .order("last_name").order("id").range(from, from + 999);
+    if (error) { console.error("loadAllContacts:", error); return all.length ? all : null; }
+    all.push(...data);
+    if (data.length < 1000) return all;
+  }
+}
+// Only these columns are sent on import; anything else in a file is skipped instead of failing the batch.
+const CONTACT_COLUMNS = new Set(["first_name","last_name","phone","phone_2","email","email_2","address","city","state","zip",
+  "co_borrower_first","co_borrower_last","co_borrower_phone","co_borrower_email","source_category","source_file","birthday",
+  "loan_amount","note_rate","appraised_value","property_address","property_city","property_state","property_zip",
+  "last_contacted","contact_note","contact_type","subtype","company","agent_role","loan_number","ltv_orig","funded_date",
+  "loan_purpose","loan_type","home_value","home_value_source","home_value_date","follow_up_date"]);
 const HEADER_MAP = {
   "First Name":"first_name","Last Name":"last_name","Phone":"phone","Phone 2":"phone_2",
   "Email":"email","Email 2":"email_2","Address":"address","City":"city","State":"state","Zip":"zip",
@@ -488,6 +505,7 @@ export default function App() {
   const [ydayP, setYdayP] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [cFilter, setCFilter] = useState("all");
+  const [cType, setCType] = useState("past_client");
   const [cSearch, setCSearch] = useState("");
   const [selC, setSelC] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(null);
@@ -600,7 +618,7 @@ export default function App() {
         .maybeSingle();
       setAgreementSigned(!!existingAgreement);
       setAgreementChecked(true);
-      const { data: ctData } = await supabase.from("contacts").select("*").eq("user_id",userId).order("last_name");
+      const ctData = await loadAllContacts(userId);
       if (ctData) setContacts(ctData);
     } catch(e) { console.error("loadUserData:",e); }
     finally { setDataLoading(false); setAuthReady(true); }
@@ -808,7 +826,7 @@ export default function App() {
     return lines.slice(1).filter(l=>l.trim()).map(line=>{
       const vals=isCSV?parseCSVLine(line):line.split("\t");
       const obj={};
-      headers.forEach((h,i)=>{ if(h) obj[h]=(vals[i]||"").trim().replace(/^"|"$/g,""); });
+      headers.forEach((h,i)=>{ if(h && CONTACT_COLUMNS.has(h)) { const v=(vals[i]||"").trim().replace(/^"|"$/g,""); if(v!=="") obj[h]=v; } });
       return obj;
     });
   }
@@ -831,14 +849,14 @@ export default function App() {
     setUploadProgress({current:0,total:totalBatches,done:false,errors:0});
     setUploadPending(null);
     let errors=0;
-    if(replace) await supabase.from("contacts").delete().eq("user_id",userRef.current.id);
+    // Safety: never delete existing contacts on upload (a failed re-import used to leave an empty list).
     for(let i=0;i<totalBatches;i++){
       const batch=rows.slice(i*batchSize,(i+1)*batchSize).map(r=>({...r,user_id:userRef.current.id}));
       const {error}=await supabase.from("contacts").insert(batch);
       if(error) errors++;
       setUploadProgress({current:i+1,total:totalBatches,done:false,errors});
     }
-    const {data:ctData}=await supabase.from("contacts").select("*").eq("user_id",userRef.current.id).order("last_name");
+    const ctData=await loadAllContacts(userRef.current.id);
     if(ctData) setContacts(ctData);
     setUploadProgress({current:totalBatches,total:totalBatches,done:true,errors});
     setTimeout(()=>setUploadProgress(null),3000);
@@ -857,8 +875,9 @@ export default function App() {
   function rFlag(c) { const r=parseFloat(c.note_rate); if(!r) return null; return r>=6.5?"high":r>=5.5?"mid":"low"; }
   const filtC=contacts.filter(c=>{
     const search=cSearch.toLowerCase(), name=`${c.first_name||""} ${c.last_name||""}`.toLowerCase();
-    const ms=!search||name.includes(search)||(c.phone||"").includes(search);
+    const ms=!search||name.includes(search)||(c.phone||"").includes(search)||(c.email||"").toLowerCase().includes(search)||(c.company||"").toLowerCase().includes(search);
     if(!ms) return false;
+    if(cType!=="any" && (c.contact_type||"past_client")!==cType) return false;
     if(cFilter==="never") return cStatus(c)==="never";
     if(cFilter==="cold") return cStatus(c)==="cold";
     if(cFilter==="highrate") return rFlag(c)==="high";
@@ -1527,6 +1546,11 @@ export default function App() {
           <div style={{marginBottom:14}}>
             <input value={cSearch} onChange={e=>setCSearch(e.target.value)} placeholder="Search by name or phone..."
               style={{width:"100%",padding:"11px 14px",borderRadius:7,border:`1px solid ${C.rule}`,background:C.card,fontFamily:F.body,fontSize:13,color:C.ink,outline:"none",boxSizing:"border-box",marginBottom:10}}/>
+            <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:8}}>
+              {[["past_client","Past Clients"],["agent","Agents"],["referral_partner","Referral Partners"],["rolodex","Rolodex"],["any","Everyone"]].map(([id,lbl])=>(
+                <Chip key={id} selected={cType===id} onClick={()=>setCType(id)} color={C.green}>{lbl} ({id==="any"?contacts.length:contacts.filter(c=>(c.contact_type||"past_client")===id).length})</Chip>
+              ))}
+            </div>
             <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
               {[["all","All"],["never","Never Contacted"],["cold","90+ Days"],["highrate","High Rate"]].map(([id,lbl])=>(
                 <Chip key={id} selected={cFilter===id} onClick={()=>setCFilter(id)} color={C.blue}>{lbl}</Chip>
