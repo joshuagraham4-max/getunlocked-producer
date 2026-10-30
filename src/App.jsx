@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { supabase } from "./supabase.js";
 import FocusMode from "./FocusMode.jsx";
+import ContactsTab from "./contacts/ContactsTab.jsx";
 import { lazy, Suspense, Component } from "react";
 const SmartMoney = lazy(() => import("./smart-money/SmartMoney.jsx"));
 
@@ -1543,20 +1544,6 @@ export default function App() {
 
       {tab==="contacts" && (
         <div>
-          <div style={{marginBottom:14}}>
-            <input value={cSearch} onChange={e=>setCSearch(e.target.value)} placeholder="Search by name or phone..."
-              style={{width:"100%",padding:"11px 14px",borderRadius:7,border:`1px solid ${C.rule}`,background:C.card,fontFamily:F.body,fontSize:13,color:C.ink,outline:"none",boxSizing:"border-box",marginBottom:10}}/>
-            <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:8}}>
-              {[["past_client","Past Clients"],["agent","Agents"],["referral_partner","Referral Partners"],["rolodex","Rolodex"],["any","Everyone"]].map(([id,lbl])=>(
-                <Chip key={id} selected={cType===id} onClick={()=>setCType(id)} color={C.green}>{lbl} ({id==="any"?contacts.length:contacts.filter(c=>(c.contact_type||"past_client")===id).length})</Chip>
-              ))}
-            </div>
-            <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-              {[["all","All"],["never","Never Contacted"],["cold","90+ Days"],["highrate","High Rate"]].map(([id,lbl])=>(
-                <Chip key={id} selected={cFilter===id} onClick={()=>setCFilter(id)} color={C.blue}>{lbl}</Chip>
-              ))}
-            </div>
-          </div>
           {/* Upload progress bar */}
           {uploadProgress && (
             <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:"12px 14px",marginBottom:14}}>
@@ -1577,65 +1564,10 @@ export default function App() {
               <button onClick={()=>fRef.current?.click()} style={{...btnP,maxWidth:240,margin:"0 auto"}}>Upload Contact File</button>
             </div>
           ) : (
-            <div>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-                <span style={{fontFamily:F.mono,fontSize:10,color:C.mid}}>{filtC.length} of {contacts.length} contacts</span>
-                <button onClick={()=>fRef.current?.click()} style={{fontFamily:F.mono,fontSize:9,padding:"4px 8px",borderRadius:4,border:`1px solid ${C.rule}`,background:C.card,color:C.mid,cursor:"pointer"}}>Replace</button>
-                <input ref={fRef} type="file" accept=".csv,.txt,.tsv" onChange={handleFile} style={{display:"none"}}/>
-              </div>
-              {selC ? (
-                <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:10,padding:"18px 16px"}}>
-                  <button onClick={()=>setSelC(null)} style={{fontFamily:F.mono,fontSize:9,padding:"4px 8px",borderRadius:4,border:`1px solid ${C.rule}`,background:C.bg,color:C.mid,cursor:"pointer",marginBottom:14}}>← Back</button>
-                  <div style={{fontFamily:F.cond,fontSize:22,fontWeight:800,color:C.ink,marginBottom:4}}>{selC.first_name} {selC.last_name}</div>
-                  {selC.co_borrower_first && <div style={{fontFamily:F.mono,fontSize:10,color:C.mid,marginBottom:12}}>Co-borrower: {selC.co_borrower_first} {selC.co_borrower_last}</div>}
-                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:16}}>
-                    {[
-                      ["Note Rate", selC.note_rate?`${selC.note_rate}%`:"—"],
-                      ["Loan Amount", selC.loan_amount?`$${Number(selC.loan_amount).toLocaleString()}`:"—"],
-                      ["Appraised Value", selC.appraised_value?`$${Number(selC.appraised_value).toLocaleString()}`:"—"],
-                      ["Birthday", selC.birthday||"—"],
-                      ["Source", selC.source_category||"—"],
-                      ["Last Contact", sLabels[cStatus(selC)]],
-                    ].map(([k,v])=>(
-                      <div key={k} style={{background:C.bg,border:`1px solid ${C.rule}`,borderRadius:6,padding:"8px 10px"}}>
-                        <div style={{fontFamily:F.mono,fontSize:9,color:C.light,marginBottom:2}}>{k}</div>
-                        <div style={{fontFamily:F.cond,fontSize:14,fontWeight:700,color:C.ink}}>{v}</div>
-                      </div>
-                    ))}
-                  </div>
-                  <div style={{fontFamily:F.mono,fontSize:9,color:C.light,marginBottom:12}}>{selC.property_address}{selC.property_city?`, ${selC.property_city}`:""}{selC.property_state?`, ${selC.property_state}`:""}</div>
-                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:14}}>
-                    {[
-                      ["Call", `tel:${selC.phone}`],
-                      ["Text", `sms:${selC.phone}?body=Hi ${selC.first_name}, this is ${profile.name}. Just checking in.`],
-                      ["Email", `mailto:${selC.email}?subject=Checking in`],
-                    ].map(([lbl,href])=>(
-                      <a key={lbl} href={href} style={{display:"block",padding:"10px 0",textAlign:"center",borderRadius:6,border:`1.5px solid ${C.green}`,background:C.greenBg,color:C.green,fontFamily:F.cond,fontSize:13,fontWeight:700,textDecoration:"none"}}>{lbl}</a>
-                    ))}
-                  </div>
-                  <button onClick={()=>{logC(selC);setSelC(null);}} style={{...btnP,background:C.green}}>Mark as Contacted Today</button>
-                </div>
-              ) : (
-                <div>
-                  {filtC.slice(0,50).map((c,i)=>{
-                    const st=cStatus(c), rf=rFlag(c);
-                    return (
-                      <div key={c.id||i} onClick={()=>setSelC(c)} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:"11px 14px",marginBottom:5,cursor:"pointer"}}>
-                        <div>
-                          <div style={{fontFamily:F.cond,fontSize:14,fontWeight:700,color:C.ink}}>{c.first_name} {c.last_name}</div>
-                          <div style={{fontFamily:F.mono,fontSize:9,color:C.light,marginTop:2}}>{c.phone} · {c.source_category||"—"}</div>
-                        </div>
-                        <div style={{display:"flex",gap:6,alignItems:"center"}}>
-                          {c.note_rate && <span style={{fontFamily:F.mono,fontSize:10,padding:"2px 6px",borderRadius:3,background:rf==="high"?C.redBg:C.stoneBg,color:rf==="high"?C.red:C.stone}}>{c.note_rate}%</span>}
-                          <span style={{fontFamily:F.mono,fontSize:9,padding:"2px 6px",borderRadius:3,background:C.stoneBg,color:sColors[st]}}>{sLabels[st]}</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                  {filtC.length>50 && <div style={{fontFamily:F.mono,fontSize:10,color:C.light,textAlign:"center",marginTop:10}}>Showing 50 of {filtC.length} — use search to narrow</div>}
-                </div>
-              )}
-            </div>
+            <>
+              <input ref={fRef} type="file" accept=".csv,.txt,.tsv" onChange={handleFile} style={{display:"none"}}/>
+              <ContactsTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onUpload={()=>fRef.current?.click()}/>
+            </>
           )}
         </div>
       )}
