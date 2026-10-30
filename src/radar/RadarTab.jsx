@@ -82,8 +82,8 @@ function CallCard({ c, info, onOutcome, onOpen, done, profileName, tag }) {
   );
 }
 
-export default function RadarTab({ userId, contacts, setContacts, profileName, onOpen }) {
-  const [view, setView] = useState("calls");
+export default function RadarTab({ userId, contacts, setContacts, profileName, onOpen, onGoCalls }) {
+  const [view, setView] = useState("radar");
   const [settings, setSettings] = useState({ refi_threshold:0.5, appreciation_pct:4, equity_ltv_max:70, seasoning_months:7 });
   const [rates, setRates] = useState({ conventional:"", fha:"", va:"" });
   const [ratesDay, setRatesDay] = useState(null);
@@ -234,7 +234,7 @@ export default function RadarTab({ userId, contacts, setContacts, profileName, o
     <div>
       <HowTo id="radar" {...GUIDES.radar}/>
       <div style={{display:"flex", gap:6, marginBottom:12}}>
-        <button onClick={() => setView("calls")} style={view === "calls" ? primary : ghost}>Today's Calls{queue ? ` (${doneCount}/${queue.clients.length + queue.agents.length})` : ""}</button>
+        <button onClick={() => onGoCalls ? onGoCalls() : setView("calls")} style={ghost}>Today's Calls{queue ? ` (${doneCount}/${queue.clients.length + queue.agents.length})` : ""}</button>
         <button onClick={() => setView("radar")} style={view === "radar" ? primary : ghost}>Rate & Equity Radar</button>
       </div>
 

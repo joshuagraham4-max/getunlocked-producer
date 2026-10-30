@@ -1,5 +1,11 @@
 // All in-app how-to guides in one place (used on each screen + the Team tab "How-to guides" page).
 export const GUIDES = {
+  calls: { title: "How to use Calls", steps: [
+        <>Your daily call list is on the left (pick 10 to 50 with <b>Daily target</b>). About a third are agents; the rest are past clients, inherited files and new leads, hottest first.</>,
+        <>Click a name. The colored <b>Why now</b> box says why they're on today's list; the <b>Say this</b> box is a talking point for that exact situation (rate gap, birthday, loan anniversary, equity, inherited file, new lead, agent). Edit it if you want.</>,
+        <>Hit <b>CALL</b>, then tap the outcome. <b>Voicemail</b> and <b>No answer</b> pop up a ready follow-up text and email. Every outcome logs a dated note and sets the next follow-up (talked 30 days, voicemail 3, no answer 2, not interested 180).</>,
+        <>The list moves to the next person automatically. <b>Skip for today</b> sets someone aside without logging a call. The list stays the same all day; <b>Rebuild list</b> refreshes it (for example after entering today's rates on the Radar tab).</>,
+      ] },
   radar: { title: "How to use Radar & Today's Calls", steps: [
         <><b>Every morning:</b> on the Radar tab, enter today's Conventional, FHA and VA rates and tap <b>Save today's rates</b>, then tap <b>Rebuild today's list</b> once so rate opportunities rank first.</>,
         <><b>Today's Calls</b> = 10 past clients (new calculator leads jump to the top) + 10 agents, each with the reason they're on the list (rate gap, birthday, loan anniversary, equity, closed deals together, follow-up due).</>,
