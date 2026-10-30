@@ -62,9 +62,13 @@ with base as (select id, user_id, lower(first_name) fn, lower(last_name) ln, ema
 pairs as (
   select a.id a_id, b.id b_id, a.user_id, 'same name' reason from base a join base b on a.user_id=b.user_id and a.fn=b.fn and a.ln=b.ln and a.id<b.id
   union all
-  select least(a.id,b.id), greatest(a.id,b.id), a.user_id, 'same email' from base a join base b on a.user_id=b.user_id and a.id<>b.id and a.email is not null and (a.email=b.email or a.email=b.email_2)
+  select least(a.id,b.id), greatest(a.id,b.id), a.user_id, 'same email' from base a join base b on a.user_id=b.user_id and a.email=b.email and a.id<b.id
   union all
-  select least(a.id,b.id), greatest(a.id,b.id), a.user_id, 'same phone' from base a join base b on a.user_id=b.user_id and a.id<>b.id and a.phone is not null and (a.phone=b.phone or a.phone=b.phone_2)
+  select least(a.id,b.id), greatest(a.id,b.id), a.user_id, 'same email' from base a join base b on a.user_id=b.user_id and a.email=b.email_2 and a.id<>b.id
+  union all
+  select least(a.id,b.id), greatest(a.id,b.id), a.user_id, 'same phone' from base a join base b on a.user_id=b.user_id and a.phone=b.phone and a.id<b.id
+  union all
+  select least(a.id,b.id), greatest(a.id,b.id), a.user_id, 'same phone' from base a join base b on a.user_id=b.user_id and a.phone=b.phone_2 and a.id<>b.id
 ),
 dedup as (select distinct on (a_id,b_id) a_id,b_id,user_id,reason from pairs order by a_id,b_id,reason)
 select d.* from dedup d
