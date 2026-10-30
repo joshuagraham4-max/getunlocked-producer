@@ -2,7 +2,7 @@
 export const GUIDES = {
   radar: { title: "How to use Radar & Today's Calls", steps: [
         <><b>Every morning:</b> on the Radar tab, enter today's Conventional, FHA and VA rates and tap <b>Save today's rates</b>, then tap <b>Rebuild today's list</b> once so rate opportunities rank first.</>,
-        <><b>Today's Calls</b> = 10 past clients + 10 agents, each with the reason they're on the list (rate gap, birthday, loan anniversary, equity, closed deals together, follow-up due).</>,
+        <><b>Today's Calls</b> = 10 past clients (new calculator leads jump to the top) + 10 agents, each with the reason they're on the list (rate gap, birthday, loan anniversary, equity, closed deals together, follow-up due).</>,
         <>Use <b>Call / Text / Email</b> — the text and email are pre-written. Add a quick note or a follow-up date if you want.</>,
         <>Tap an outcome: <b>Talked</b> (follow up in 30 days), <b>Voicemail</b> (3), <b>No answer</b> (2), <b>Booked</b>, <b>Not interested</b> (180), <b>Wrong #</b>. It logs a dated note and sets the follow-up. Done cards get a ✓; the list stays the same all day.</>,
         <><b>Rate & Equity Radar</b>: tap a tile — Conventional R&T, FHA Streamline, VA IRRRL, Equity, Watchlist — to see who qualifies. Tap a name to open the full contact.</>,

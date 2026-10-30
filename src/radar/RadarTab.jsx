@@ -170,12 +170,16 @@ export default function RadarTab({ userId, contacts, setContacts, profileName, o
     const inB = Object.fromEntries(Object.entries(radar.out).flatMap(([k, arr]) => arr.map((c) => [c.id + ":" + k, true])));
     const pc = [];
     for (const c of contacts) {
-      if ((c.contact_type || "past_client") !== "past_client" || c.do_not_contact || !(c.phone || c.email)) continue;
+      const ty = c.contact_type || "past_client";
+      if (c.do_not_contact || !(c.phone || c.email)) continue;
       const due = c.follow_up_date && c.follow_up_date <= t;
+      if (ty === "lead") { if (!due) continue; }            // leads only when a follow-up is due (new calculator leads land due today)
+      else if (ty !== "past_client") continue;
       if (c.follow_up_date && c.follow_up_date > t) continue;
       if (!due && daysSince(c.last_contacted) < 21) continue;
       const i = radar.info[c.id] || {}; let s = 0, why = [];
-      if (due) { s += 1000; why.push("follow-up due"); }
+      if (due) { s += 1000; why.push(ty === "lead" ? `NEW LEAD${c.subtype ? ` · ${c.subtype}` : ""}` : "follow-up due"); }
+      if (ty === "lead" && (c.tags || []).includes("calculator lead")) s += 200;
       const rb = ["conv","fha","va"].find((k) => inB[c.id + ":" + k]);
       if (rb) { s += 500 + i.gap * 100; why.push(`${rb === "conv" ? "Conv R&T" : rb === "fha" ? "FHA Streamline" : "VA IRRRL"} +${i.gap.toFixed(2)}%`); }
       if (bdaySoon(c.birthday)) { s += 300; why.push("birthday this week"); }
@@ -263,7 +267,7 @@ export default function RadarTab({ userId, contacts, setContacts, profileName, o
         <div>
           {!ratesOk && <div style={{...box, background:C.amberBg, color:C.amber, fontFamily:F.mono, fontSize:11}}>Enter today's market rates above so rate opportunities rank first, then tap "Rebuild today's list".</div>}
           <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8}}>
-            <div style={lbl}>Past clients · top {queue.clients.length}</div>
+            <div style={lbl}>Past clients & new leads · top {queue.clients.length}</div>
             <button onClick={rebuild} style={ghost}>Rebuild today's list</button>
           </div>
           {queue.clients.map(([c, why]) => <CallCard key={c.id} c={c} info={radar.info[c.id]} tag={why} done={done(c)} onOutcome={outcome} onOpen={onOpen} profileName={profileName}/>)}
