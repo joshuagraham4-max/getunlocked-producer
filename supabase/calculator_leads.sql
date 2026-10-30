@@ -29,13 +29,15 @@ create policy "public can submit leads"
   to anon
   with check (consent = true);
 
--- Logged-in app users (you) can read and update leads inside the Producer app.
+-- Only Joshua (jgraham@zpmloans.com) can read/update leads. Team members see nothing. (Locked Oct 30, 2026)
 drop policy if exists "app users can read leads" on public.calculator_leads;
-create policy "app users can read leads"
-  on public.calculator_leads for select to authenticated using (true);
-
 drop policy if exists "app users can update leads" on public.calculator_leads;
-create policy "app users can update leads"
-  on public.calculator_leads for update to authenticated using (true);
+drop policy if exists "owner reads leads" on public.calculator_leads;
+create policy "owner reads leads" on public.calculator_leads for select to authenticated
+  using (auth.uid() = 'f43a0121-3b76-4d1e-92b5-73e685b81c52'::uuid);
+drop policy if exists "owner updates leads" on public.calculator_leads;
+create policy "owner updates leads" on public.calculator_leads for update to authenticated
+  using (auth.uid() = 'f43a0121-3b76-4d1e-92b5-73e685b81c52'::uuid)
+  with check (auth.uid() = 'f43a0121-3b76-4d1e-92b5-73e685b81c52'::uuid);
 
 create index if not exists calculator_leads_created_idx on public.calculator_leads (created_at desc);
