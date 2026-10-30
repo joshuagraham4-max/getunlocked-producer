@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "../supabase.js";
 import HowTo from "../HowTo.jsx";
 import { GUIDES } from "../howto/guides.jsx";
+import { loadRadarData, computeRadar, reasonFor, priorityScore, REASON_COLOR, REASON_BG } from "../radar/engine.js";
 
 const C = {
   bg:"#f5f0e8", card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc",
@@ -229,6 +230,28 @@ function Dupes({ contacts, setContacts, userId, close, open, reloadLinks }) {
 }
 
 // ── detail ─────────────────────────────────────────────────────────────────────
+function BucketEditor({ c, contacts, save }) {
+  const [v, setV] = useState("");
+  const all = useMemo(() => Array.from(new Set(contacts.flatMap((x) => x.buckets || []))).sort(), [contacts]);
+  const mine = c.buckets || [];
+  const add = async () => { const b = v.trim(); if (!b || mine.includes(b)) { setV(""); return; } await save({ buckets:[...mine, b].sort() }); setV(""); };
+  return (
+    <div style={{marginTop:8}}>
+      <div style={{fontFamily:F.mono, fontSize:10, color:C.light, marginBottom:4}}>Buckets</div>
+      <div style={{display:"flex", gap:6, flexWrap:"wrap", alignItems:"center"}}>
+        {mine.map((b) => (
+          <span key={b} style={{fontFamily:F.mono, fontSize:11, padding:"3px 8px", borderRadius:5, background:C.bg, border:`1px solid ${C.rule}`, color:C.ink}}>
+            {b} <span onClick={() => save({ buckets:mine.filter((x) => x !== b) })} style={{cursor:"pointer", color:C.light, marginLeft:4}}>x</span>
+          </span>
+        ))}
+        <input list="bucket-list" value={v} onChange={(e) => setV(e.target.value)} onKeyDown={(e) => e.key === "Enter" && add()} placeholder="Add to a bucket…" style={{...inp, width:200, padding:"5px 8px", fontSize:12}}/>
+        <datalist id="bucket-list">{all.map((b) => <option key={b} value={b}/>)}</datalist>
+        <button onClick={add} style={{...ghost, padding:"4px 9px"}}>Add</button>
+      </div>
+    </div>
+  );
+}
+
 function Detail({ c, contacts, setContacts, userId, profileName, back, open, links, reloadLinks, createContact }) {
   const save = async (fields) => {
     const { data, error } = await supabase.from("contacts").update(fields).eq("id", c.id).select().single();
@@ -258,6 +281,14 @@ function Detail({ c, contacts, setContacts, userId, profileName, back, open, lin
           {TYPES.filter(([t]) => t !== "any").map(([t, l]) => <Chip key={t} small selected={typeOf(c) === t} onClick={() => setType(t)}>{l}</Chip>)}
         </div>
         <Field label="Sub-type (e.g. buyer agent, title, old credit app)" value={c.subtype} onSave={f("subtype")}/>
+        {typeOf(c) === "past_client" && (
+          <div style={{display:"flex", gap:6, alignItems:"center", margin:"10px 0 4px", flexWrap:"wrap"}}>
+            <span style={{fontFamily:F.mono, fontSize:10, color:C.light, marginRight:4}}>Book</span>
+            <Chip small selected={c.book !== "past LO"} onClick={() => save({ book:"mine" })}>My client</Chip>
+            <Chip small selected={c.book === "past LO"} onClick={() => save({ book:"past LO" })}>Past LO funding</Chip>
+          </div>
+        )}
+        <BucketEditor c={c} contacts={contacts} save={save}/>
         {contactable && c.phone && (
           <div style={{display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:6, marginTop:10}}>
             <a href={`tel:${digits(c.phone)}`} style={{...primary, textAlign:"center", textDecoration:"none", padding:"10px"}}>Call</a>
@@ -318,16 +349,42 @@ function Detail({ c, contacts, setContacts, userId, profileName, back, open, lin
 }
 
 // ── main ───────────────────────────────────────────────────────────────────────
-export default function ContactsTab({ userId, contacts, setContacts, profileName, onUpload, openId, onOpened }) {
+// ── main (Version B: Today's Calls strip + one toolbar + clean table) ─────────────
+const CATS = [
+  ["mine","My Clients", (c) => typeOf(c) === "past_client" && c.book !== "past LO"],
+  ["pastlo","Past LO Fundings", (c) => typeOf(c) === "past_client" && c.book === "past LO"],
+  ["agent","Agents", (c) => typeOf(c) === "agent"],
+  ["lead","Leads", (c) => typeOf(c) === "lead"],
+  ["referral_partner","Referral Partners", (c) => typeOf(c) === "referral_partner"],
+  ["rolodex","Rolodex", (c) => typeOf(c) === "rolodex"],
+  ["any","Everyone", () => true],
+];
+const SORTS = [["hot","Hottest first"],["rate","Rate: high to low"],["stale","Longest since last call"],["follow","Next follow-up"],["new","Newest added"],["az","Name A–Z"]];
+const FILTERS = [
+  ["Rate", [["rate7","7%+"],["rate65","6.5–7%"],["rate6","6–6.5%"]]],
+  ["Loan", [["conv","Conventional"],["fha","FHA"],["va","VA"],["purchase","Purchase"],["refi","Refinance"]]],
+  ["Funded", [["y2022","2022"],["y2023","2023"],["y2024","2024"],["y2025","2025+"],["pre2022","Before 2022"]]],
+  ["Agents", [["closed","Closed deals together"],["active","Active partner"],["buyer","Buyer agents"],["seller","Seller agents"]]],
+  ["Contact", [["phone","Has phone"],["nophone","No phone"],["addr","Has address"],["noaddr","No address"],["never","Never contacted"],["cold","90+ days since call"],["follow","Follow-up due"],["review","Needs review"],["cob","Co-borrowers"]]],
+];
+const FLABEL = Object.fromEntries(FILTERS.flatMap(([, xs]) => xs));
+
+export default function ContactsTab({ userId, contacts, setContacts, profileName, onUpload, openId, onOpened, onGoCalls }) {
   const [q, setQ] = useState("");
-  const [type, setType] = useState("past_client");
-  const [sub, setSub] = useState("all");
+  const [cat, setCat] = useState("mine");
+  const [filters, setFilters] = useState([]);
+  const [bucket, setBucket] = useState("");
   const [brokerage, setBrokerage] = useState("");
+  const [sort, setSort] = useState("hot");
+  const [showFilters, setShowFilters] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   const [shown, setShown] = useState(PAGE);
   const [sel, setSel] = useState(null);
   const [view, setView] = useState("list");
   const [links, setLinks] = useState([]);
   const [dupeCount, setDupeCount] = useState(null);
+  const [radarData, setRadarData] = useState(null);
+  const wide = typeof window !== "undefined" && window.innerWidth >= 900;
 
   const reloadLinks = useCallback(async () => {
     const all = [];
@@ -340,12 +397,11 @@ export default function ContactsTab({ userId, contacts, setContacts, profileName
     setDupeCount(count ?? null);
   }, []);
   useEffect(() => { reloadLinks(); }, [reloadLinks]);
+  useEffect(() => { if (userId) loadRadarData(userId).then(setRadarData); }, [userId]);
   useEffect(() => { if (openId) { setSel(openId); setView("detail"); onOpened?.(); } }, [openId, onOpened]);
-  useEffect(() => { setShown(PAGE); }, [q, type, sub, brokerage]);
-  useEffect(() => { setSub("all"); setBrokerage(""); }, [type]);
+  useEffect(() => { setShown(PAGE); }, [q, cat, filters, bucket, brokerage, sort]);
 
   const byId = useMemo(() => Object.fromEntries(contacts.map((c) => [c.id, c])), [contacts]);
-  // names/phones/emails of linked people (co-borrowers) so searching "Vicky" finds the borrower too
   const linkedText = useMemo(() => {
     const m = {};
     for (const l of links) {
@@ -355,6 +411,8 @@ export default function ContactsTab({ userId, contacts, setContacts, profileName
     }
     return m;
   }, [links, byId]);
+  const radar = useMemo(() => radarData ? computeRadar(contacts, radarData.loans, radarData.rates, radarData.settings) : { info:{} }, [contacts, radarData]);
+  const reasons = useMemo(() => { const m = {}; for (const c of contacts) m[c.id] = reasonFor(c, radar.info[c.id]); return m; }, [contacts, radar]);
 
   const createContact = async (fields) => {
     const { data, error } = await supabase.from("contacts").insert({ user_id:userId, source_category:"manual", source_file:"manual", ...fields }).select().single();
@@ -362,120 +420,173 @@ export default function ContactsTab({ userId, contacts, setContacts, profileName
     setContacts((p) => [...p, data]); return data;
   };
 
-  const counts = useMemo(() => { const m = { any:contacts.length }; for (const c of contacts) m[typeOf(c)] = (m[typeOf(c)] || 0) + 1; return m; }, [contacts]);
-  const inType = useMemo(() => contacts.filter((c) => type === "any" || typeOf(c) === type), [contacts, type]);
-  const brokerages = useMemo(() => {
-    if (type !== "agent") return [];
-    const m = {}; for (const c of inType) if (c.company) m[c.company] = (m[c.company] || 0) + 1;
-    return Object.entries(m).sort((a, b) => b[1] - a[1]).slice(0, 60);
-  }, [inType, type]);
+  const counts = useMemo(() => Object.fromEntries(CATS.map(([k, , fn]) => [k, contacts.filter(fn).length])), [contacts]);
+  const inCat = useMemo(() => contacts.filter((CATS.find((x) => x[0] === cat) || CATS[6])[2]), [contacts, cat]);
+  const buckets = useMemo(() => { const m = {}; for (const c of inCat) for (const b of c.buckets || []) m[b] = (m[b] || 0) + 1; return Object.entries(m).sort((a, b) => b[1] - a[1]); }, [inCat]);
+  const brokerages = useMemo(() => { if (cat !== "agent") return []; const m = {}; for (const c of inCat) if (c.company) m[c.company] = (m[c.company] || 0) + 1; return Object.entries(m).sort((a, b) => b[1] - a[1]).slice(0, 80); }, [inCat, cat]);
 
-  const SUBS = {
-    past_client: [["all","All"],["rate7","7%+"],["rate65","6.5–7%"],["rate6","6–6.5%"],["conv","Conventional"],["fha","FHA"],["va","VA"],["purchase","Purchase"],["refi","Refinance"],["y2022","2022"],["y2023","2023"],["y2024","2024"],["y2025","2025+"],["addr","Has address"],["noaddr","No address"],["cob","Co-borrowers"]],
-    agent: [["all","All"],["closed","Closed deal together"],["active","Active partner"],["buyer","Buyer agents"],["seller","Seller agents"],["phone","Has phone"],["nophone","No phone"]],
-    lead: [["all","All"], ...Array.from(new Set(inType.map((c) => c.subtype).filter(Boolean))).map((s) => ["st:" + s, s])],
-    referral_partner: [["all","All"], ...Array.from(new Set(inType.map((c) => c.subtype).filter(Boolean))).map((s) => ["st:" + s, s])],
-    rolodex: [["all","All"], ...Array.from(new Set(inType.map((c) => c.subtype).filter(Boolean))).map((s) => ["st:" + s, s])],
-    any: [["all","All"]],
-  };
-  const COMMON = [["never","Never contacted"],["cold","90+ days"],["follow","Follow-up due"],["review","Needs review"]];
-
-  const cold = (c) => !c.last_contacted || (Date.now() - new Date(c.last_contacted)) / 864e5 > 90;
-  const match = (c) => {
-    const r = parseFloat(c.note_rate), t = (c.tags || []);
-    switch (sub) {
-      case "all": return true;
+  const t = new Date().toISOString().slice(0, 10);
+  const test = (c, f) => {
+    const r = parseFloat(c.note_rate), tags = c.tags || [], y = year(c.funded_date);
+    switch (f) {
       case "rate7": return r >= 7; case "rate65": return r >= 6.5 && r < 7; case "rate6": return r >= 6 && r < 6.5;
       case "conv": return c.loan_type === "Conventional"; case "fha": return c.loan_type === "FHA"; case "va": return c.loan_type === "VA";
       case "purchase": return c.loan_purpose === "purchase"; case "refi": return c.loan_purpose === "refinance";
-      case "y2022": return year(c.funded_date) === "2022"; case "y2023": return year(c.funded_date) === "2023"; case "y2024": return year(c.funded_date) === "2024"; case "y2025": return year(c.funded_date) >= "2025";
-      case "addr": return !!(c.address || c.property_address); case "noaddr": return !(c.address || c.property_address);
-      case "cob": return c.subtype === "co-borrower";
-      case "closed": return t.includes("closed deal together"); case "active": return c.subtype === "active partner";
+      case "y2022": return y === "2022"; case "y2023": return y === "2023"; case "y2024": return y === "2024"; case "y2025": return y >= "2025"; case "pre2022": return y && y < "2022";
+      case "closed": return tags.includes("closed deal together"); case "active": return c.subtype === "active partner";
       case "buyer": return (c.agent_role || "").includes("buyer"); case "seller": return (c.agent_role || "").includes("seller");
       case "phone": return !!c.phone; case "nophone": return !c.phone;
-      case "never": return !c.last_contacted; case "cold": return cold(c);
-      case "follow": return c.follow_up_date && c.follow_up_date <= today();
-      case "review": return !!c.verify_flag;
-      default: return sub.startsWith("st:") ? c.subtype === sub.slice(3) : true;
+      case "addr": return !!(c.address || c.property_address); case "noaddr": return !(c.address || c.property_address);
+      case "never": return !c.last_contacted; case "cold": return !c.last_contacted || (Date.now() - new Date(c.last_contacted)) / 864e5 > 90;
+      case "follow": return c.follow_up_date && c.follow_up_date <= t; case "review": return !!c.verify_flag; case "cob": return c.subtype === "co-borrower";
+      default: return true;
     }
   };
   const ql = q.trim().toLowerCase(), qd = digits(q);
-  const list = useMemo(() => inType.filter((c) => {
-    if (brokerage && c.company !== brokerage) return false;
-    if (!match(c)) return false;
-    if (!ql) return true;
-    const hay = `${fullName(c)} ${c.email || ""} ${c.email_2 || ""} ${c.company || ""} ${c.co_borrower_first || ""} ${c.co_borrower_last || ""} ${c.address || ""} ${c.property_address || ""} ${linkedText[c.id] || ""}`.toLowerCase();
-    if (hay.includes(ql)) return true;
-    if (qd.length >= 4 && (digits(c.phone).includes(qd) || digits(c.phone_2).includes(qd) || (linkedText[c.id] || "").includes(qd))) return true;
-    return ql.split(/\s+/).every((w) => hay.includes(w));
-  }).sort((a, b) => (a.last_name || "~").localeCompare(b.last_name || "~") || (a.first_name || "").localeCompare(b.first_name || "")),
+  const list = useMemo(() => {
+    const out = inCat.filter((c) => {
+      if (bucket && !(c.buckets || []).includes(bucket)) return false;
+      if (brokerage && c.company !== brokerage) return false;
+      for (const f of filters) if (!test(c, f)) return false;
+      if (!ql) return true;
+      const hay = `${fullName(c)} ${c.email || ""} ${c.email_2 || ""} ${c.company || ""} ${c.co_borrower_first || ""} ${c.co_borrower_last || ""} ${c.address || ""} ${c.property_address || ""} ${(c.buckets || []).join(" ")} ${linkedText[c.id] || ""}`.toLowerCase();
+      if (hay.includes(ql)) return true;
+      if (qd.length >= 4 && (digits(c.phone).includes(qd) || digits(c.phone_2).includes(qd) || (linkedText[c.id] || "").includes(qd))) return true;
+      return ql.split(/\s+/).every((w) => hay.includes(w));
+    });
+    const az = (a, b) => (a.last_name || "~").localeCompare(b.last_name || "~") || (a.first_name || "").localeCompare(b.first_name || "");
+    const cmp = {
+      hot: (a, b) => priorityScore(b, reasons[b.id]) - priorityScore(a, reasons[a.id]) || az(a, b),
+      rate: (a, b) => (parseFloat(b.note_rate) || 0) - (parseFloat(a.note_rate) || 0) || az(a, b),
+      stale: (a, b) => (a.last_contacted || "0000").localeCompare(b.last_contacted || "0000") || az(a, b),
+      follow: (a, b) => (a.follow_up_date || "9999").localeCompare(b.follow_up_date || "9999") || az(a, b),
+      new: (a, b) => (b.created_at || "").localeCompare(a.created_at || "") || az(a, b),
+      az,
+    }[sort];
+    return out.sort(cmp);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  [inType, sub, brokerage, ql, qd, linkedText]);
+  }, [inCat, bucket, brokerage, filters, ql, qd, linkedText, sort, reasons]);
 
   const open = (c) => { setSel(c.id); setView("detail"); window.scrollTo?.(0, 0); };
   const selC = sel ? byId[sel] : null;
 
+  // Today's Calls strip: read the Calls tab's saved list for today
+  const strip = useMemo(() => {
+    let saved = null; try { saved = JSON.parse(localStorage.getItem(`gupCalls:${userId}:${t}`) || "null"); } catch {}
+    if (!saved?.items) return null;
+    const items = saved.items.filter((x) => byId[x.id]);
+    const made = items.filter((x) => byId[x.id].last_contacted === t).length;
+    return { items, made, nextUp: items.filter((x) => byId[x.id].last_contacted !== t).slice(0, 5) };
+  }, [byId, userId, t]);
+
   if (view === "dupes") return <Dupes contacts={contacts} setContacts={setContacts} userId={userId} close={() => { setView("list"); reloadLinks(); }} open={open} reloadLinks={reloadLinks}/>;
   if (view === "detail" && selC) return <Detail c={selC} contacts={contacts} setContacts={setContacts} userId={userId} profileName={profileName} back={() => setView("list")} open={open} links={links} reloadLinks={reloadLinks} createContact={createContact}/>;
 
+  const toggleF = (f) => setFilters((p) => (p.includes(f) ? p.filter((x) => x !== f) : [...p, f]));
+  const sel2 = { ...inp, width:"auto", padding:"9px 12px", fontFamily:F.cond, fontWeight:700, fontSize:15, cursor:"pointer" };
+  const sub = (c) => [typeOf(c) === "past_client" ? (c.book === "past LO" ? "PAST LO" : "MY CLIENT") : TYPE_LABEL[typeOf(c)]?.toUpperCase(), c.loan_type && (c.loan_type === "Conventional" ? "CONV" : c.loan_type.toUpperCase()), year(c.funded_date), typeOf(c) === "agent" && c.company].filter(Boolean).join(" · ");
+  const Pill = ({ r }) => !r ? <span style={{color:C.light}}>—</span> : (
+    <span><span style={{fontFamily:F.mono, fontSize:11, padding:"2px 8px", borderRadius:999, background:REASON_BG[r.key], color:REASON_COLOR[r.key], whiteSpace:"nowrap"}}>{r.title}</span>
+      {r.detail ? <span style={{color:C.mid, marginLeft:8}}>{r.detail}</span> : null}</span>
+  );
+  const th = { fontFamily:F.cond, fontWeight:700, fontSize:12, letterSpacing:"0.12em", textTransform:"uppercase", color:C.light, textAlign:"left", padding:"10px 12px", borderBottom:`1px solid ${C.rule}` };
+  const td = { padding:"10px 12px", borderBottom:"1px solid #ece5d9", fontSize:14, verticalAlign:"middle" };
+  const rows = list.slice(0, shown);
+
   return (
     <div>
-      <HowTo id="contacts" {...GUIDES.contacts}/>
-      <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, phone, email, company, address, co-borrower…"
-        style={{...inp, padding:"11px 14px", marginBottom:10}}/>
-      <div style={{display:"flex", gap:6, flexWrap:"wrap", marginBottom:8}}>
-        {TYPES.map(([t, l]) => <Chip key={t} selected={type === t} onClick={() => setType(t)}>{l} ({(counts[t] || 0).toLocaleString()})</Chip>)}
-      </div>
-      <div style={{display:"flex", gap:5, flexWrap:"wrap", marginBottom:6}}>
-        {(SUBS[type] || SUBS.any).map(([id, l]) => <Chip key={id} small color={C.blue} selected={sub === id} onClick={() => setSub(id)}>{l}</Chip>)}
-      </div>
-      <div style={{display:"flex", gap:5, flexWrap:"wrap", marginBottom:8}}>
-        {COMMON.map(([id, l]) => <Chip key={id} small color={C.purple} selected={sub === id} onClick={() => setSub(sub === id ? "all" : id)}>{l}</Chip>)}
-        {type === "agent" && (
-          <select value={brokerage} onChange={(e) => setBrokerage(e.target.value)} style={{...inp, width:"auto", padding:"5px 8px", fontSize:11}}>
-            <option value="">All brokerages</option>{brokerages.map(([b, n]) => <option key={b} value={b}>{b} ({n})</option>)}
-          </select>
-        )}
-      </div>
-      <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", margin:"10px 0", gap:8, flexWrap:"wrap"}}>
-        <span style={{fontFamily:F.mono, fontSize:10, color:C.mid}}>{list.length.toLocaleString()} of {contacts.length.toLocaleString()} contacts</span>
-        <div style={{display:"flex", gap:6}}>
-          <button onClick={() => setView("dupes")} style={{...ghost, borderColor:C.amber, color:C.amber}}>Possible duplicates{dupeCount != null ? ` (${dupeCount})` : ""}</button>
-          <button onClick={async () => { const c = await createContact({ first_name:"New", last_name:"Contact", contact_type:type === "any" ? "past_client" : type }); if (c) open(c); }} style={ghost}>+ New contact</button>
-          {onUpload && <button onClick={onUpload} style={ghost}>Import file</button>}
+      {strip && (
+        <div style={{...box, padding:"16px 18px"}}>
+          <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", gap:10, flexWrap:"wrap"}}>
+            <div style={{fontFamily:F.cond, fontWeight:800, fontSize:22}}>Today's Calls <span style={{fontFamily:F.mono, fontSize:12, color:C.mid, fontWeight:400, marginLeft:8}}>{strip.made} of {strip.items.length} made</span></div>
+            {onGoCalls && <button onClick={onGoCalls} style={{...primary, fontFamily:F.cond, fontWeight:700, fontSize:14, padding:"8px 14px"}}>{strip.made ? "Keep calling" : "Start calling"}</button>}
+          </div>
+          <div style={{height:8, borderRadius:4, background:C.rule, overflow:"hidden", marginTop:10}}><div style={{height:"100%", width:`${strip.items.length ? (strip.made / strip.items.length) * 100 : 0}%`, background:C.green}}/></div>
+          {wide && strip.nextUp.length > 0 && (
+            <div style={{display:"grid", gridTemplateColumns:`repeat(${strip.nextUp.length},1fr)`, gap:10, marginTop:12}}>
+              {strip.nextUp.map((x) => { const c = byId[x.id]; return (
+                <div key={x.id} onClick={() => open(c)} style={{background:"#fff", border:`1px solid ${C.rule}`, borderRadius:8, padding:"10px 12px", cursor:"pointer"}}>
+                  <div style={{fontFamily:F.cond, fontWeight:700, fontSize:16}}>{fullName(c)}</div>
+                  <div style={{fontSize:12, marginTop:3, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}><span style={{display:"inline-block", width:8, height:8, borderRadius:"50%", background:REASON_COLOR[x.reason.key], marginRight:7}}/>{x.reason.title}</div>
+                </div>); })}
+            </div>
+          )}
         </div>
+      )}
+
+      <div style={{display:"flex", gap:10, alignItems:"center", margin:"4px 0 10px", flexWrap:"wrap"}}>
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, phone, email, address, co-borrower, bucket" style={{...inp, flex:"1 1 280px", padding:"10px 14px"}}/>
+        <select value={cat} onChange={(e) => { setCat(e.target.value); setFilters([]); setBucket(""); setBrokerage(""); }} style={sel2}>
+          {CATS.map(([k, l]) => <option key={k} value={k}>{l} ({(counts[k] || 0).toLocaleString()})</option>)}
+        </select>
+        <button onClick={() => setShowFilters((s) => !s)} style={{...sel2, background: showFilters || filters.length || bucket || brokerage ? C.blueBg : "#fff"}}>Filters{filters.length + (bucket ? 1 : 0) + (brokerage ? 1 : 0) ? ` (${filters.length + (bucket ? 1 : 0) + (brokerage ? 1 : 0)})` : ""}</button>
+        <select value={sort} onChange={(e) => setSort(e.target.value)} style={sel2}>{SORTS.map(([k, l]) => <option key={k} value={k}>Sort: {l}</option>)}</select>
+        <button onClick={() => setShowHelp((s) => !s)} title="How to use Contacts" style={{...ghost, padding:"8px 11px", fontWeight:700}}>?</button>
+      </div>
+      {showHelp && <HowTo id="contacts-help" {...GUIDES.contacts}/>}
+
+      {showFilters && (
+        <div style={{...box, padding:"12px 14px"}}>
+          {FILTERS.map(([g, xs]) => (
+            <div key={g} style={{display:"flex", gap:6, alignItems:"center", flexWrap:"wrap", marginBottom:6}}>
+              <span style={{fontFamily:F.mono, fontSize:10, color:C.light, width:60}}>{g}</span>
+              {xs.map(([k, l]) => <Chip key={k} small color={C.blue} selected={filters.includes(k)} onClick={() => toggleF(k)}>{l}</Chip>)}
+            </div>
+          ))}
+          <div style={{display:"flex", gap:8, alignItems:"center", flexWrap:"wrap", marginTop:4}}>
+            <span style={{fontFamily:F.mono, fontSize:10, color:C.light, width:60}}>Bucket</span>
+            <select value={bucket} onChange={(e) => setBucket(e.target.value)} style={{...inp, width:"auto", padding:"5px 8px", fontSize:12}}>
+              <option value="">Any bucket</option>{buckets.map(([b, n]) => <option key={b} value={b}>{b} ({n})</option>)}
+            </select>
+            {cat === "agent" && (
+              <select value={brokerage} onChange={(e) => setBrokerage(e.target.value)} style={{...inp, width:"auto", padding:"5px 8px", fontSize:12}}>
+                <option value="">Any brokerage</option>{brokerages.map(([b, n]) => <option key={b} value={b}>{b} ({n})</option>)}
+              </select>
+            )}
+          </div>
+        </div>
+      )}
+
+      <div style={{display:"flex", gap:8, alignItems:"center", marginBottom:10, flexWrap:"wrap"}}>
+        {filters.map((f) => <span key={f} onClick={() => toggleF(f)} style={{fontFamily:F.mono, fontSize:11, padding:"3px 8px", borderRadius:5, background:C.card, border:`1px solid ${C.rule}`, color:C.mid, cursor:"pointer"}}>{FLABEL[f]} x</span>)}
+        {bucket && <span onClick={() => setBucket("")} style={{fontFamily:F.mono, fontSize:11, padding:"3px 8px", borderRadius:5, background:C.card, border:`1px solid ${C.rule}`, color:C.mid, cursor:"pointer"}}>Bucket: {bucket} x</span>}
+        {brokerage && <span onClick={() => setBrokerage("")} style={{fontFamily:F.mono, fontSize:11, padding:"3px 8px", borderRadius:5, background:C.card, border:`1px solid ${C.rule}`, color:C.mid, cursor:"pointer"}}>{brokerage} x</span>}
+        <span style={{fontFamily:F.mono, fontSize:11, color:C.mid, marginLeft:"auto"}}>{list.length.toLocaleString()} contacts</span>
+        <button onClick={() => setView("dupes")} style={{...ghost, borderColor:C.amber, color:C.amber}}>Duplicates{dupeCount != null ? ` (${dupeCount})` : ""}</button>
+        <button onClick={async () => { const c = await createContact({ first_name:"New", last_name:"Contact", contact_type: cat === "agent" || cat === "lead" || cat === "referral_partner" || cat === "rolodex" ? cat : "past_client", book: cat === "pastlo" ? "past LO" : "mine" }); if (c) open(c); }} style={ghost}>+ New</button>
+        {onUpload && <button onClick={onUpload} style={ghost}>Import</button>}
       </div>
 
-      {list.slice(0, shown).map((c) => {
-        const t = typeOf(c);
-        return (
-          <div key={c.id} onClick={() => open(c)} style={{background:C.card, border:`1px solid ${C.rule}`, borderRadius:8, padding:"10px 12px", marginBottom:6, cursor:"pointer"}}>
-            <div style={{display:"flex", justifyContent:"space-between", gap:8, alignItems:"flex-start"}}>
-              <div style={{minWidth:0}}>
-                <div style={{fontFamily:F.cond, fontSize:16, fontWeight:700, color:C.ink}}>{fullName(c)}</div>
-                <div style={{fontFamily:F.body, fontSize:13, color:C.ink, marginTop:2, display:"flex", gap:12, flexWrap:"wrap"}}>
-                  {c.phone ? <a href={`tel:${digits(c.phone)}`} onClick={(e) => e.stopPropagation()} style={{color:C.blue, textDecoration:"none"}}>{c.phone}</a> : <span style={{color:C.light}}>no phone</span>}
-                  {c.email ? <span style={{color:C.mid, wordBreak:"break-all", userSelect:"text"}} onClick={(e) => e.stopPropagation()}>{c.email}</span> : <span style={{color:C.light}}>no email</span>}
-                </div>
-                <div style={{fontFamily:F.mono, fontSize:10, color:C.mid, marginTop:3}}>
-                  {t === "agent" ? [c.company, c.agent_role && `${c.agent_role} agent`].filter(Boolean).join(" · ")
-                    : t === "past_client" || t === "lead" ? [c.subtype, c.loan_type && `${c.loan_type}${c.loan_type_source && c.loan_type_source !== "verified" ? " (est.)" : ""}`, year(c.funded_date), c.ltv_orig && `LTV ${Math.round(c.ltv_orig)}%`, c.address || c.property_address].filter(Boolean).join(" · ")
-                    : [c.subtype, c.company].filter(Boolean).join(" · ")}
-                </div>
-              </div>
-              <div style={{display:"flex", gap:4, flexWrap:"wrap", justifyContent:"flex-end", flexShrink:0}}>
-                {c.note_rate && <Badge color={parseFloat(c.note_rate) >= 6.5 ? C.red : C.mid} bg={parseFloat(c.note_rate) >= 6.5 ? C.redBg : C.stoneBg}>{c.note_rate}%</Badge>}
-                {(c.tags || []).includes("closed deal together") && <Badge color={C.green} bg={C.greenBg}>CLOSED DEALS</Badge>}
-                {c.subtype === "active partner" && <Badge color={C.purple} bg={C.purpleBg}>ACTIVE</Badge>}
-                {c.verify_flag && <Badge color={C.amber} bg={C.amberBg}>REVIEW</Badge>}
-                {type === "any" && <Badge>{TYPE_LABEL[t]}</Badge>}
-              </div>
-            </div>
-          </div>
-        );
-      })}
-      {list.length > shown && <button onClick={() => setShown((s) => s + PAGE * 2)} style={{...ghost, width:"100%", padding:"10px"}}>Load more ({(list.length - shown).toLocaleString()} more)</button>}
+      {wide ? (
+        <div style={{...box, padding:0, overflow:"hidden"}}>
+          <table style={{width:"100%", borderCollapse:"collapse"}}>
+            <thead><tr><th style={th}>Name</th><th style={th}>Why now</th><th style={th}>Phone</th><th style={th}>Rate</th><th style={th}>Last call</th><th style={th}>Next follow-up</th></tr></thead>
+            <tbody>
+              {rows.map((c, n) => (
+                <tr key={c.id} onClick={() => open(c)} style={{cursor:"pointer", background: n % 2 ? "#f8f4ed" : "transparent"}}>
+                  <td style={{...td, minWidth:180}}>
+                    <div style={{fontFamily:F.cond, fontWeight:700, fontSize:16}}>{fullName(c)}</div>
+                    <div style={{fontFamily:F.mono, fontSize:10, color:C.light}}>{sub(c)}</div>
+                  </td>
+                  <td style={td}><Pill r={reasons[c.id]}/></td>
+                  <td style={{...td, whiteSpace:"nowrap"}}>{c.phone ? <a href={`tel:${digits(c.phone)}`} onClick={(e) => e.stopPropagation()} style={{color:C.ink, textDecoration:"none"}}>{c.phone}</a> : <span style={{color:C.light}}>—</span>}</td>
+                  <td style={td}>{c.note_rate ? `${c.note_rate}%` : <span style={{color:C.light}}>—</span>}</td>
+                  <td style={{...td, color: c.last_contacted ? C.ink : C.light, whiteSpace:"nowrap"}}>{c.last_contacted ? new Date(c.last_contacted + "T12:00:00").toLocaleDateString("en-US", { month:"short", day:"numeric", year: c.last_contacted.slice(0, 4) === t.slice(0, 4) ? undefined : "numeric" }) : "Never"}</td>
+                  <td style={{...td, whiteSpace:"nowrap", color: c.follow_up_date && c.follow_up_date <= t ? C.amber : C.ink}}>{c.follow_up_date ? (c.follow_up_date === t ? "Today" : new Date(c.follow_up_date + "T12:00:00").toLocaleDateString("en-US", { month:"short", day:"numeric" })) : "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : rows.map((c) => (
+        <div key={c.id} onClick={() => open(c)} style={{...box, padding:"10px 12px", marginBottom:6, cursor:"pointer"}}>
+          <div style={{fontFamily:F.cond, fontSize:16, fontWeight:700}}>{fullName(c)}</div>
+          <div style={{fontFamily:F.mono, fontSize:10, color:C.light}}>{sub(c)}</div>
+          <div style={{marginTop:4, fontSize:13}}><Pill r={reasons[c.id]}/></div>
+          <div style={{marginTop:4, fontSize:13}}>{c.phone ? <a href={`tel:${digits(c.phone)}`} onClick={(e) => e.stopPropagation()} style={{color:C.blue, textDecoration:"none"}}>{c.phone}</a> : <span style={{color:C.light}}>no phone</span>}</div>
+        </div>
+      ))}
+      {list.length > shown && <button onClick={() => setShown((s) => s + PAGE * 2)} style={{...ghost, width:"100%", padding:"10px", marginTop:8}}>Show more ({(list.length - shown).toLocaleString()} more)</button>}
       {list.length === 0 && <div style={{...box, textAlign:"center", fontFamily:F.mono, fontSize:11, color:C.light}}>No contacts match.</div>}
     </div>
   );

@@ -102,6 +102,11 @@ export function reasonFor(c, i, t = today()) {
 }
 
 // Daily queue: target N calls, ~30% agents. Returns [{ id, reason }].
+export const priorityScore = (c, reason) => {
+  if (!reason) return 0; const ty = c.contact_type || "past_client";
+  const tier = ["followup","newlead"].includes(reason.key) ? 5000 : (ty === "past_client" && c.book === "mine") ? 2000 : 0;
+  return tier + reason.score + (reason.also?.length || 0) * 15;
+};
 export function buildQueue(contacts, radar, target = 20) {
   const t = today(); const nAgents = Math.round(target * 0.3), nClients = target - nAgents;
   const pool = { clients:[], agents:[] };
@@ -114,7 +119,9 @@ export function buildQueue(contacts, radar, target = 20) {
     if (ty === "lead" && !due) continue;
     if (!due && daysSince(c.last_contacted) < (ty === "agent" ? 30 : 21)) continue;
     const reason = reasonFor(c, radar.info[c.id], t); if (!reason) continue;
-    const s = reason.score + (reason.also.length * 15) + Math.random();
+    // Priority tiers: commitments (follow-ups due / new leads) > Joshua's own closings > past LO files.
+    const tier = ["followup","newlead"].includes(reason.key) ? 5000 : (ty === "past_client" && c.book === "mine") ? 2000 : 0;
+    const s = tier + reason.score + (reason.also.length * 15) + Math.random();
     (ty === "agent" ? pool.agents : pool.clients).push({ id:c.id, reason, s });
   }
   pool.clients.sort((a, b) => b.s - a.s); pool.agents.sort((a, b) => b.s - a.s);

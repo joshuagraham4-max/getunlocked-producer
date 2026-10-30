@@ -6,6 +6,7 @@ import ContactsTab from "./contacts/ContactsTab.jsx";
 import RadarTab from "./radar/RadarTab.jsx";
 import CallsTab from "./calls/CallsTab.jsx";
 import HowTo from "./HowTo.jsx";
+import Attestation, { hasSigned } from "./upload/Attestation.jsx";
 import { GUIDES } from "./howto/guides.jsx";
 import { lazy, Suspense, Component } from "react";
 const SmartMoney = lazy(() => import("./smart-money/SmartMoney.jsx"));
@@ -517,6 +518,10 @@ export default function App() {
   const [uploadProgress, setUploadProgress] = useState(null);
   const [uploadPending, setUploadPending] = useState(null);
   const fRef = useRef();
+  const [signed, setSigned] = useState(false);
+  const [showAttest, setShowAttest] = useState(false);
+  useEffect(() => { if (user?.id) hasSigned(user.id).then(setSigned); }, [user?.id]);
+  const startUpload = () => { if (signed) fRef.current?.click(); else setShowAttest(true); };
   const [teamData, setTeamData] = useState([]);
   const [teamLoading, setTeamLoading] = useState(false);
   const [inviteCopied, setInviteCopied] = useState(false);
@@ -1561,17 +1566,18 @@ export default function App() {
               {uploadProgress.errors>0 && <div style={{fontFamily:F.mono,fontSize:9,color:C.red,marginTop:6}}>{uploadProgress.errors} batch{uploadProgress.errors>1?"es":""} had errors</div>}
             </div>
           )}
+          {showAttest && <Attestation userId={user?.id} defaultName={profile.name} onCancel={()=>setShowAttest(false)} onSigned={()=>{setSigned(true);setShowAttest(false);setTimeout(()=>fRef.current?.click(),50);}}/>}
           {contacts.length===0 ? (
             <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:10,padding:"32px 20px",textAlign:"center"}}>
               <div style={{fontFamily:F.cond,fontSize:16,fontWeight:700,color:C.mid,marginBottom:8}}>No Contacts Loaded</div>
               <div style={{fontFamily:F.mono,fontSize:10,color:C.light,marginBottom:20}}>Upload a CSV or tab-delimited file. Headers map to: first_name, last_name, phone, email, note_rate, etc. Legacy headers (First Name, Last Name…) also supported. Up to 5,000 rows.</div>
               <input ref={fRef} type="file" accept=".csv,.txt,.tsv" onChange={handleFile} style={{display:"none"}}/>
-              <button onClick={()=>fRef.current?.click()} style={{...btnP,maxWidth:240,margin:"0 auto"}}>Upload Contact File</button>
+              <button onClick={startUpload} style={{...btnP,maxWidth:240,margin:"0 auto"}}>Upload Contact File</button>
             </div>
           ) : (
             <>
               <input ref={fRef} type="file" accept=".csv,.txt,.tsv" onChange={handleFile} style={{display:"none"}}/>
-              <ContactsTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onUpload={()=>fRef.current?.click()} openId={openContactId} onOpened={()=>setOpenContactId(null)}/>
+              <ContactsTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onUpload={startUpload} openId={openContactId} onOpened={()=>setOpenContactId(null)} onGoCalls={()=>setTab("calls")}/>
             </>
           )}
         </div>

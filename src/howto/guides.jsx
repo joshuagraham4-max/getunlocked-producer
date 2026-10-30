@@ -16,11 +16,12 @@ export const GUIDES = {
   ] },
   contacts: { title: "How to use Contacts", steps: [
         <><b>Search</b> finds name, phone, email, company, address and linked people (search a co-borrower's name to find the borrower).</>,
-        <><b>Tabs</b> split Past Clients, Agents, Leads, Referral Partners and Rolodex; the blue chips filter inside each tab (rate band, loan type, closed deals together, has phone…). Purple chips work everywhere: never contacted, 90+ days, follow-up due, needs review.</>,
+        <>The <b>category</b> dropdown picks My Clients, Past LO Fundings, Agents, Leads, Referral Partners, Rolodex or Everyone. <b>Filters</b> opens rate, loan, funded year, agent, contact and <b>bucket</b> (your old Contactually buckets) filters; active filters show as tags you can click to remove. <b>Sort</b> defaults to Hottest first (your own clients ahead of past LO files).</>,
         <>Tap a contact to open it. Every field has <b>Edit</b> and <b>Copy</b>. Use the <b>Category</b> chips to move someone (Rolodex = never called or emailed).</>,
         <><b>Loans</b>: add or edit loans; "Make current" picks the one the Radar uses. Typing a real loan type marks it verified (drops the "est.").</>,
         <><b>Linked people</b>: link a co-borrower, spouse, their agent or who referred them — or add a new person right there.</>,
-        <><b>Possible duplicates</b> (top right) reviews look-alike records — merge, link, or mark "not the same".</>,
+        <>Each row has a <b>Why now</b> pill (rate gap, birthday, anniversary, equity, inherited file, follow-up). Edit a contact's <b>Book</b> (My client / Past LO) and <b>Buckets</b> inside the contact.</>,
+        <><b>Duplicates</b> (above the table) reviews look-alike records — merge, link, or mark "not the same".</>,
   ] },
   dupes: { title: "How to review duplicates", steps: [
         <>Each card shows two records that look like the same person (same name, email or phone), side by side. Tap a name to open that record first if you need to check.</>,
