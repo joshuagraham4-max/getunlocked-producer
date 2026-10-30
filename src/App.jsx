@@ -4,6 +4,8 @@ import { supabase } from "./supabase.js";
 import FocusMode from "./FocusMode.jsx";
 import ContactsTab from "./contacts/ContactsTab.jsx";
 import RadarTab from "./radar/RadarTab.jsx";
+import HowTo from "./HowTo.jsx";
+import { GUIDES } from "./howto/guides.jsx";
 import { lazy, Suspense, Component } from "react";
 const SmartMoney = lazy(() => import("./smart-money/SmartMoney.jsx"));
 
@@ -1635,6 +1637,10 @@ export default function App() {
       {/* TEAM tab */}
       {tab==="team" && (
         <div>
+          <div style={{marginBottom:16}}>
+            <div style={{fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.2em",textTransform:"uppercase",color:C.light,marginBottom:8}}>How-to guides</div>
+            {Object.entries(GUIDES).map(([id,g])=><HowTo key={id} id={"team-"+id} {...g} defaultOpen={false}/>)}
+          </div>
           {isAdmin ? (
             /* ── ADMIN VIEW ── */
             <div>

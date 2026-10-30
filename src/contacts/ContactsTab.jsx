@@ -2,6 +2,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "../supabase.js";
 import HowTo from "../HowTo.jsx";
+import { GUIDES } from "../howto/guides.jsx";
 
 const C = {
   bg:"#f5f0e8", card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc",
@@ -203,13 +204,7 @@ function Dupes({ contacts, setContacts, userId, close, open, reloadLinks }) {
   return (
     <div>
       <button onClick={close} style={{...ghost, marginBottom:12}}>← Back to contacts</button>
-      <HowTo id="dupes" title="How to review duplicates" steps={[
-        <>Each card shows two records that look like the same person (same name, email or phone), side by side. Tap a name to open that record first if you need to check.</>,
-        <><b>← Keep left</b> or <b>Keep right →</b> merges them into the one you keep. The other's phone and email become Phone 2 / Email 2; loans, linked people, notes and call history all move over; the extra record is removed.</>,
-        <><b>They're co-borrowers</b> links the two people instead of merging (spouses, co-borrowers on the same loan).</>,
-        <><b>Not the same</b> hides that pair for good (e.g., two different people named Jose Perez).</>,
-        <>Tip: start with Holly Romero — keep either side and you'll see one Holly with both phones and both loans.</>,
-      ]}/>
+      <HowTo id="dupes" {...GUIDES.dupes}/>
       <div style={box}>
         <div style={lbl}>Possible duplicates ({pairs ? pairs.length : "…"})</div>
         <div style={{fontFamily:F.body, fontSize:13, color:C.mid, lineHeight:1.5}}>
@@ -426,14 +421,7 @@ export default function ContactsTab({ userId, contacts, setContacts, profileName
 
   return (
     <div>
-      <HowTo id="contacts" title="How to use Contacts" steps={[
-        <><b>Search</b> finds name, phone, email, company, address and linked people (search a co-borrower's name to find the borrower).</>,
-        <><b>Tabs</b> split Past Clients, Agents, Leads, Referral Partners and Rolodex; the blue chips filter inside each tab (rate band, loan type, closed deals together, has phone…). Purple chips work everywhere: never contacted, 90+ days, follow-up due, needs review.</>,
-        <>Tap a contact to open it. Every field has <b>Edit</b> and <b>Copy</b>. Use the <b>Category</b> chips to move someone (Rolodex = never called or emailed).</>,
-        <><b>Loans</b>: add or edit loans; "Make current" picks the one the Radar uses. Typing a real loan type marks it verified (drops the "est.").</>,
-        <><b>Linked people</b>: link a co-borrower, spouse, their agent or who referred them — or add a new person right there.</>,
-        <><b>Possible duplicates</b> (top right) reviews look-alike records — merge, link, or mark "not the same".</>,
-      ]}/>
+      <HowTo id="contacts" {...GUIDES.contacts}/>
       <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, phone, email, company, address, co-borrower…"
         style={{...inp, padding:"11px 14px", marginBottom:10}}/>
       <div style={{display:"flex", gap:6, flexWrap:"wrap", marginBottom:8}}>

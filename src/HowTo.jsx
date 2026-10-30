@@ -1,9 +1,9 @@
 // Collapsible "How to use" guide shown at the top of a screen. Open/closed state is remembered per browser.
 import { useState } from "react";
 
-export default function HowTo({ id, title = "How to use this", steps }) {
+export default function HowTo({ id, title = "How to use this", steps, defaultOpen = true }) {
   const key = `howto:${id}`;
-  const [open, setOpen] = useState(() => { try { return localStorage.getItem(key) !== "closed"; } catch { return true; } });
+  const [open, setOpen] = useState(() => { try { const v = localStorage.getItem(key); return v ? v === "open" : defaultOpen; } catch { return defaultOpen; } });
   const toggle = () => { const n = !open; setOpen(n); try { localStorage.setItem(key, n ? "open" : "closed"); } catch {} };
   return (
     <div style={{background:"#e6eef9", border:"1px solid #b8d0ec", borderRadius:10, padding:"10px 14px", marginBottom:12}}>
