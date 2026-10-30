@@ -3,6 +3,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { supabase } from "./supabase.js";
 import FocusMode from "./FocusMode.jsx";
 import ContactsTab from "./contacts/ContactsTab.jsx";
+import RadarTab from "./radar/RadarTab.jsx";
 import { lazy, Suspense, Component } from "react";
 const SmartMoney = lazy(() => import("./smart-money/SmartMoney.jsx"));
 
@@ -505,6 +506,7 @@ export default function App() {
   const [history, setHistory] = useState([]);
   const [ydayP, setYdayP] = useState([]);
   const [contacts, setContacts] = useState([]);
+  const [openContactId, setOpenContactId] = useState(null);
   const [cFilter, setCFilter] = useState("all");
   const [cType, setCType] = useState("past_client");
   const [cSearch, setCSearch] = useState("");
@@ -1190,7 +1192,7 @@ export default function App() {
             <div style={{fontFamily:F.mono,fontSize:9,color:"#666",marginTop:4}}>{dateStr}</div>
           </div>
           <nav style={{padding:"16px 0",flex:1}}>
-            {[["today","Today"],["contacts","Contacts"],["scripts","Scripts"],["ioi","IOI"],["history","History"],["team","Team"]].concat(isAdmin?[["posts","Posts"]]:[]).map(([id,lbl])=>(
+            {[["today","Today"],["radar","Radar"],["contacts","Contacts"],["scripts","Scripts"],["ioi","IOI"],["history","History"],["team","Team"]].concat(isAdmin?[["posts","Posts"]]:[]).map(([id,lbl])=>(
               <button key={id} onClick={()=>{setTab(id);setRebuildOk(false);}}
                 style={{display:"block",width:"100%",padding:"11px 20px",border:"none",textAlign:"left",background:tab===id?C.green:"transparent",color:tab===id?"#fff":"#888",fontFamily:F.cond,fontSize:14,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer",transition:"all 0.15s",borderLeft:tab===id?"3px solid #fff":"3px solid transparent"}}>
                 {lbl}
@@ -1212,7 +1214,7 @@ export default function App() {
         <div style={{fontFamily:F.cond,fontSize:10,fontWeight:600,letterSpacing:"0.2em",textTransform:"uppercase",color:C.light,marginBottom:3}}>Get Unlocked Producer</div>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end"}}>
           <div style={{fontFamily:F.cond,fontSize:22,fontWeight:800,color:C.ink,lineHeight:1}}>
-            {profile.name?.toUpperCase()} <span style={{color:C.green}}>— {tab==="today"?"TODAY":tab==="contacts"?"CONTACTS":tab==="scripts"?"SCRIPTS":tab==="ioi"?"IOI":tab==="history"?"HISTORY":tab==="posts"?"SMART MONEY POSTS":"TEAM"}</span>
+            {profile.name?.toUpperCase()} <span style={{color:C.green}}>— {tab==="today"?"TODAY":tab==="radar"?"RADAR":tab==="contacts"?"CONTACTS":tab==="scripts"?"SCRIPTS":tab==="ioi"?"IOI":tab==="history"?"HISTORY":tab==="posts"?"SMART MONEY POSTS":"TEAM"}</span>
           </div>
           <div style={{textAlign:"right"}}>
             <div style={{fontFamily:F.mono,fontSize:10,color:C.mid}}>{dateStr}</div>
@@ -1226,7 +1228,7 @@ export default function App() {
       {isWide && (
         <div style={{marginBottom:28}}>
           <div style={{fontFamily:F.cond,fontSize:32,fontWeight:900,color:C.ink,lineHeight:1}}>
-            {tab==="today"?"TODAY":tab==="contacts"?"CONTACTS":tab==="scripts"?"SCRIPTS":tab==="ioi"?"IOI POSTS":tab==="history"?"HISTORY":tab==="posts"?"SMART MONEY POSTS":"TEAM"}
+            {tab==="today"?"TODAY":tab==="radar"?"RADAR":tab==="contacts"?"CONTACTS":tab==="scripts"?"SCRIPTS":tab==="ioi"?"IOI POSTS":tab==="history"?"HISTORY":tab==="posts"?"SMART MONEY POSTS":"TEAM"}
           </div>
           <div style={{fontFamily:F.mono,fontSize:10,color:C.light,marginTop:4}}>{dateStr}</div>
         </div>
@@ -1234,8 +1236,8 @@ export default function App() {
 
       {/* Nav tabs — mobile only */}
       {!isWide && (
-      <div style={{display:"grid",gridTemplateColumns:`repeat(${isAdmin?7:6},1fr)`,gap:3,marginBottom:12,background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:4}}>
-        {[["today","Today"],["contacts","Contacts"],["scripts","Scripts"],["ioi","IOI"],["history","History"],["team","Team"]].concat(isAdmin?[["posts","Posts"]]:[]).map(([id,lbl])=>(
+      <div style={{display:"grid",gridTemplateColumns:`repeat(${isAdmin?4:4},1fr)`,gap:3,marginBottom:12,background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:4}}>
+        {[["today","Today"],["radar","Radar"],["contacts","Contacts"],["scripts","Scripts"],["ioi","IOI"],["history","History"],["team","Team"]].concat(isAdmin?[["posts","Posts"]]:[]).map(([id,lbl])=>(
           <button key={id} onClick={()=>{setTab(id);setRebuildOk(false);}} style={{padding:"8px 2px",borderRadius:6,border:"none",background:tab===id?C.green:"transparent",color:tab===id?"#fff":C.mid,fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.03em",textTransform:"uppercase",cursor:"pointer",transition:"all 0.15s"}}>{lbl}</button>
         ))}
       </div>
@@ -1566,12 +1568,13 @@ export default function App() {
           ) : (
             <>
               <input ref={fRef} type="file" accept=".csv,.txt,.tsv" onChange={handleFile} style={{display:"none"}}/>
-              <ContactsTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onUpload={()=>fRef.current?.click()}/>
+              <ContactsTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onUpload={()=>fRef.current?.click()} openId={openContactId} onOpened={()=>setOpenContactId(null)}/>
             </>
           )}
         </div>
       )}
 
+      {tab==="radar" && <RadarTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onOpen={(c)=>{setOpenContactId(c.id);setTab("contacts");}}/>}
       {tab==="scripts" && <ScriptsTab/>}
       {tab==="ioi" && <IOITab/>}
       {tab==="posts" && isAdmin && (

@@ -315,7 +315,7 @@ function Detail({ c, contacts, setContacts, userId, profileName, back, open, lin
 }
 
 // ── main ───────────────────────────────────────────────────────────────────────
-export default function ContactsTab({ userId, contacts, setContacts, profileName, onUpload }) {
+export default function ContactsTab({ userId, contacts, setContacts, profileName, onUpload, openId, onOpened }) {
   const [q, setQ] = useState("");
   const [type, setType] = useState("past_client");
   const [sub, setSub] = useState("all");
@@ -337,6 +337,7 @@ export default function ContactsTab({ userId, contacts, setContacts, profileName
     setDupeCount(count ?? null);
   }, []);
   useEffect(() => { reloadLinks(); }, [reloadLinks]);
+  useEffect(() => { if (openId) { setSel(openId); setView("detail"); onOpened?.(); } }, [openId, onOpened]);
   useEffect(() => { setShown(PAGE); }, [q, type, sub, brokerage]);
   useEffect(() => { setSub("all"); setBrokerage(""); }, [type]);
 
