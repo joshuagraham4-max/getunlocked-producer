@@ -21,6 +21,7 @@ export const MAGNETS = {
   "equity-unlock": { name: "Equity Unlock Estimator", path: null, live: false },
   "portfolio-review": { name: "Portfolio Strategy Review (Show me how)", path: null, live: false },
   "fthb-class": { name: "First-Time Homebuyer Class", path: null, live: false },
+  "fthb-dpa": { name: "Down Payment Help Check (then Skool: Homebuyers)", path: null, live: false },
   "agent-strategy": { name: "Free Agent Deal Strategies (then Skool: Agents)", path: null, live: false },
 };
 
@@ -45,6 +46,7 @@ export const PAIN_POINTS = [
   { id: "move-up", label: "Found the next home, but the current one hasn't sold" },
   { id: "equity-trapped", label: "Equity sitting in their rentals — needs a down payment for the next deal" },
   { id: "priced-out", label: "Wants to buy or move, but the monthly payment doesn't make sense at today's prices" },
+  { id: "no-down-payment", label: "Could afford the payment, but hasn't saved the down payment and closing costs" },
   { id: "portfolio-audit", label: "Owns rentals that could be cash flowing with a better loan structure" },
 ];
 
@@ -55,6 +57,8 @@ export const FOOTERS = {
     "Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity. Licensed in Colorado. Not a commitment to lend; subject to credit approval, underwriting guidelines and change without notice.",
   market:
     "Illustration based on an estimated home value and market rent for one Denver-area home; not an offer of credit, a rate quote or a prediction of home values. Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity. Licensed in Colorado.",
+  dpa:
+    "Down payment assistance and seller concessions subject to program guidelines, eligibility and availability; homebuyer education required. Temporary rate buydowns are seller-funded and buyers qualify at the full note rate. Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity. Licensed in Colorado. Not a commitment to lend; subject to credit approval.",
   intro:
     "Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity.",
   medical:
@@ -468,6 +472,77 @@ Thinking about buying, selling, or moving up? Let's look at what YOUR home's num
       hook: "Owning this house costs about $800 a month more than renting it. Here's what that gap tells us.",
       points: ["Price is set by what buyers can pay monthly", "Where owning and renting break even on this house ($587K vs. $747K)", "Three ways the gap closes: rents, rates or prices (no doom predictions)"],
       cta: "Want your own home's value and rent estimate? Book 15 minutes with me — link in the post.",
+    },
+  },
+  {
+    ref: "MKT-02", bank: "dpa", name: "The Gap Is Real. Here's How Buyers Close It.", lender: "RISE TPO FHA LoanLift (DPA) + seller concessions",
+    audience: "consumer", license: "required", flyer: "/smart-money/flyers/MKT-02.png", footer: "dpa",
+    painPoints: ["priced-out", "no-down-payment", "renting"], magnet: "fthb-dpa", skool: "Homebuyers",
+    highlights: ["Seller-paid rate buydown", "Seller-paid closing costs", "Down payment assistance for qualified buyers", "No income limits"],
+    notes: "Follow-up to MKT-01 (post it 1–3 days after). Stays general: no DPA %, $0 down, payment amounts or term. Behind it: FHA LoanLift / Plus / Max, seller contributions up to 6%, seller-paid 2/1 buydown (qualify at note rate), homebuyer education required. See Lender Guidelines Library.",
+    short: `The gap is real. Here's how buyers are closing it.
+
+Prices and rates are what they are. These three moves still change what it takes to buy:
+
+1️⃣ The seller pays down your rate for the first couple of years
+2️⃣ The seller covers your closing costs
+3️⃣ Down payment assistance for qualified buyers, with no income limits
+
+You don't need perfect timing. You need the right plan.
+
+Let's build yours 👇`,
+    long: `Last time I showed you why so many buyers are stuck: on a lot of homes, owning costs more each month than renting.
+
+Here's the part most people don't hear: buyers are still closing that gap.
+
+1. A seller-paid rate buydown. The seller pays to lower your rate for the first couple of years, so your early payments come down.
+2. Seller-paid closing costs. In this market, sellers are often willing to cover some or all of your costs to close.
+3. Down payment assistance. Programs for qualified buyers, with no income limits, and you don't have to be a first-time buyer.
+
+Stack the right ones and the math can look completely different.
+
+Want to see what that looks like for you? Let's build your plan 👇`,
+    video: {
+      title: "Three ways buyers are closing the gap right now",
+      hook: "Everyone says it's a bad time to buy. Here are three things the people who are buying know.",
+      points: ["How a seller-paid rate buydown works (and why you still qualify at the full rate)", "Asking the seller to cover closing costs in this market", "Down payment assistance: no income limits, not just for first-time buyers"],
+      cta: "Book 15 minutes and let's build your plan — link in the post.",
+    },
+  },
+  {
+    ref: "DPA-01", bank: "dpa", name: "Down Payment Holding You Back? Let's Talk.", lender: "RISE TPO FHA LoanLift / Plus / Max",
+    audience: "consumer", license: "required", flyer: "/smart-money/flyers/DPA-01.png", footer: "dpa",
+    painPoints: ["no-down-payment", "renting", "move-up"], magnet: "fthb-dpa", skool: "Homebuyers",
+    highlights: ["Down payment assistance for qualified buyers", "No income limits", "Not just for first-time buyers", "Help can go toward closing costs", "Homebuyer class included"],
+    notes: "Stays general: never state the DPA %, '$0 down', CLTV, term or payment amounts. Pick the option in conversation: LoanLift (forgivable, no 2nd payment), Plus (3.5%, small 2nd payment), Max (5%, covers closing costs). FHA, primary residence, 1–2 units, purchase only, 620+ (660 manual). Homebuyer education required — pair with the FTB-01 class.",
+    short: `Down payment holding you back? Let's talk.
+
+Down payment assistance is available for qualified buyers, and it's not just for first-time buyers.
+
+✔ No income limits
+✔ Help can go toward closing costs
+✔ Repeat buyers welcome
+✔ Homebuyer class included
+
+Renting and ready to own? Great income but haven't saved a big down payment? Helping your kids buy their first place? This is for you.
+
+Let's see what you qualify for 👇`,
+    long: `"I'll buy once I save up the down payment."
+
+I hear it every week. And every year, rent goes up and the savings goal moves.
+
+Here's what most people don't know: down payment assistance is available for qualified buyers. There are no income limits, you don't have to be a first-time buyer, and the help can go toward your closing costs too.
+
+It's built for people who can handle the monthly payment but haven't stacked up the cash to get in the door. Renters ready to own. Families moving up. Parents helping their kids buy.
+
+There's a homebuyer class built in, and I'll walk you through every step.
+
+Stop saving forever. Start owning smarter. Let's see what you qualify for 👇`,
+    video: {
+      title: "Down payment assistance: what most people get wrong",
+      hook: "Most people think down payment help is only for first-time buyers with low income. Not true.",
+      points: ["Who qualifies: no income limits, repeat buyers OK", "How the help can cover closing costs too", "The homebuyer class and what to expect"],
+      cta: "Book 15 minutes with me and let's see what you qualify for — link in the post.",
     },
   },
   {
