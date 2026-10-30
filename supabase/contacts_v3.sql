@@ -54,21 +54,22 @@ drop policy if exists "Users own dismissals" on public.contact_dupe_dismissed;
 create policy "Users own dismissals" on public.contact_dupe_dismissed for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
 -- 4) Possible duplicates: same name, or shared email/phone (rolodex excluded). Runs with the caller's RLS.
+create index if not exists contacts_name_idx  on public.contacts (user_id, lower(first_name), lower(last_name));
+create index if not exists contacts_email_idx on public.contacts (user_id, email);
+create index if not exists contacts_phone_idx on public.contacts (user_id, phone);
 create or replace view public.contact_dupe_candidates with (security_invoker = true) as
-select a.id a_id, b.id b_id, a.user_id,
-  case when lower(a.first_name)=lower(b.first_name) and lower(a.last_name)=lower(b.last_name) then 'same name'
-       when a.email is not null and a.email in (b.email, b.email_2) then 'same email'
-       else 'same phone' end as reason
-from public.contacts a
-join public.contacts b on a.user_id=b.user_id and a.id < b.id
-where coalesce(a.contact_type,'') <> 'rolodex' and coalesce(b.contact_type,'') <> 'rolodex'
-  and (
-    (a.first_name is not null and a.last_name is not null and lower(a.first_name)=lower(b.first_name) and lower(a.last_name)=lower(b.last_name))
-    or (a.email is not null and a.email in (b.email, b.email_2))
-    or (a.phone is not null and a.phone in (b.phone, b.phone_2))
-  )
-  and not exists (select 1 from public.contact_dupe_dismissed d where (d.a=a.id and d.b=b.id) or (d.a=b.id and d.b=a.id))
-  and not exists (select 1 from public.contact_links l where (l.contact_id=a.id and l.linked_id=b.id) or (l.contact_id=b.id and l.linked_id=a.id));
+with base as (select id, user_id, lower(first_name) fn, lower(last_name) ln, email, email_2, phone, phone_2 from public.contacts where coalesce(contact_type,'') <> 'rolodex'),
+pairs as (
+  select a.id a_id, b.id b_id, a.user_id, 'same name' reason from base a join base b on a.user_id=b.user_id and a.fn=b.fn and a.ln=b.ln and a.id<b.id
+  union all
+  select least(a.id,b.id), greatest(a.id,b.id), a.user_id, 'same email' from base a join base b on a.user_id=b.user_id and a.id<>b.id and a.email is not null and (a.email=b.email or a.email=b.email_2)
+  union all
+  select least(a.id,b.id), greatest(a.id,b.id), a.user_id, 'same phone' from base a join base b on a.user_id=b.user_id and a.id<>b.id and a.phone is not null and (a.phone=b.phone or a.phone=b.phone_2)
+),
+dedup as (select distinct on (a_id,b_id) a_id,b_id,user_id,reason from pairs order by a_id,b_id,reason)
+select d.* from dedup d
+where not exists (select 1 from public.contact_dupe_dismissed x where (x.a=d.a_id and x.b=d.b_id) or (x.a=d.b_id and x.b=d.a_id))
+  and not exists (select 1 from public.contact_links l where (l.contact_id=d.a_id and l.linked_id=d.b_id) or (l.contact_id=d.b_id and l.linked_id=d.a_id));
 
 -- 5) Merge two contacts: keep `keep_id`, fold `drop_id` into it, delete `drop_id`. Owner-only.
 create or replace function public.merge_contacts(keep_id uuid, drop_id uuid) returns void
