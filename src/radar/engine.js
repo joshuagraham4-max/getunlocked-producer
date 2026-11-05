@@ -157,41 +157,57 @@ export function buildQueue(contacts, radar, target = 20) {
 // Call script + voicemail follow-ups for a contact and reason.
 export function scriptsFor(c, i, reason, me = "Joshua Graham") {
   const first = c.first_name || "there"; const yr = i?.funded ? i.funded.slice(0, 4) : "";
-  const inherited = c.book === "past LO"; const intro = inherited ? `this is ${me}, AVP at Zero Point Mortgage Services. I'm the loan originator now taking care of your ${yr ? yr + " " : ""}${i?.purpose === "refinance" ? "refinance" : "home loan"}` : `it's ${me}`;
+  const inherited = c.book === "past LO";
+  const hi = inherited ? `Hi ${first}, this is ${me}, AVP at Zero Point Mortgage Services. I'm the loan originator now taking care of your home loan.` : `Hey ${first}, ${me}.`;
+  const years = Math.max(1, Math.round((i?.months || 12) / 12));
+  const tags = c.tags || [];
+  const worked = tags.includes("closed deal together") || c.subtype === "active partner";
   let say, short;
   switch (reason?.key) {
     case "rate":
-      say = `Hi ${first}, ${intro}. Rates have come down since you closed${i.bucket === "fha" ? ", and on FHA loans there's a streamline option with no appraisal" : i.bucket === "va" ? ", and VA has a streamline refinance with very little paperwork" : ""}. Do you have two minutes so I can see if it would lower your payment?`;
+      say = i?.bucket === "fha" || i?.bucket === "va"
+        ? `${hi} I keep an eye on my clients' loans, and yours just came up on my radar. Rates have moved, and on your ${i.bucket === "fha" ? "FHA" : "VA"} loan there's a streamline option. Less paperwork, usually no appraisal. Worth five minutes to see if it pays?`
+        : `${hi} I keep an eye on my clients' loans, and yours just came up on my radar. Rates have moved enough that there may be real money on the table for you. Got two minutes so I can tell you what I'm seeing?`;
       short = `Rates have moved since your ${yr} loan, and I'd like to run quick numbers for you`; break;
-    case "bday":
-      say = `Hi ${first}, it's ${me}. Just calling to say happy birthday! No business, I just wanted to reach out. How's everything with you and the family?`;
-      short = `Happy birthday! Hope it's a great one`; break;
+    case "bday": {
+      const bd = bdayDue(c);
+      say = bd?.missed
+        ? `${first}! ${me}. I'm late, and I'm owning it. Happy birthday. How was it?`
+        : `${first}! ${me}. Not calling about anything except to say happy birthday. How are you celebrating?`;
+      short = `Happy birthday! Hope it's a great one`; break; }
     case "anniv":
-      say = `Hi ${first}, ${intro}. Believe it or not, it's been ${Math.round((i?.months || 12) / 12)} years since you closed on your home. Just checking in: how's the house treating you? Anything coming up, like a remodel, a move, or a rental?`;
-      short = `Happy home anniversary, ${Math.round((i?.months || 12) / 12)} years! Just checking in`; break;
+      say = inherited
+        ? `${hi} ${years} years ago this month you got the keys. Wanted to check in. How's the house treating you? Still the right fit, or has life changed since?`
+        : `Hey ${first}, ${me}. ${years} years ago this month we got you the keys. Wanted to check in. How's the house treating you? Still the right fit, or has life changed since?`;
+      short = `Happy home anniversary, ${years} years! Just checking in`; break;
     case "equity":
-      say = `Hi ${first}, ${intro}. Your home has likely gained real value since ${yr || "you bought it"}. A lot of my clients are using that equity to pay off higher-interest debt or fund a project${i?.pmi ? ", and you may be able to drop your mortgage insurance" : ""}. Want me to pull a free home value and show you what's available? No obligation.`;
+      say = `${hi} Your home has done some quiet work for you since ${yr || "you bought it"}. There's likely real equity sitting there${i?.pmi ? ", maybe even enough to drop your mortgage insurance" : ""}. Most people don't know what theirs is worth or what it can do. Want me to run the numbers? Free, and you'll know exactly where you stand.`;
       short = `Your home has likely gained real equity, and I can pull a free home value for you`; break;
     case "watch":
-      say = `Hi ${first}, ${intro}. Rates are getting close to where a refinance could make sense for you. I'm watching it for you. Want me to text you the moment it hits?`;
+      say = `${hi} Heads up: rates are getting close to where it makes sense to look at your loan again. I'm watching it for you. When it hits, I'll call you first. Best number still this one?`;
       short = `Rates are getting close to refi territory for you, and I'm watching it`; break;
     case "inherited":
-      say = `Hi ${first}, ${intro}. No sales pitch. I just want to introduce myself, make sure I have your current info, and be your go-to if anything comes up with the home. Is this still the best number for you?`;
+      say = `Hi ${first}, this is ${me}, AVP at Zero Point Mortgage Services. I'm the loan originator now taking care of your home loan, and I wanted to introduce myself personally. No pitch. If anything ever comes up with your home or your money, I'm your guy. Is this still the best number for you?`;
       short = `I'm the loan originator now taking care of your loan and wanted to introduce myself`; break;
-    case "newlead":
-      say = `Hi ${first}, this is ${me} with Graham Financial. I saw you ran the numbers on our calculator. I'd love to walk through what you're looking at. What property are you thinking about?`;
-      short = `Thanks for running the numbers on our calculator. I'd love to walk through it with you`; break;
+    case "newlead": {
+      const rental = tags.some((x) => /rtl|rental|cash|flow/i.test(x)) || /rental/i.test(c.subtype || "");
+      say = `Hey ${first}, ${me}. You ran the numbers on our ${rental ? "rental" : "home"} calculator. Smart move. What's the property you're looking at?`;
+      short = `Thanks for running the numbers on our calculator. I'd love to walk through it with you`; break; }
     case "followup":
-      say = `Hi ${first}, it's ${me} following up from our last conversation. ${c.outcome === "talked" ? "I wanted to get you those numbers we talked about." : "Is now a better time?"}`;
+      say = c.outcome === "talked" || c.outcome === "replied to email"
+        ? `Hey ${first}, ${me}. I've got those numbers we talked about. Got a minute?`
+        : `Hey ${first}, ${me} again. Wanted to catch you live this time. Quick question for you: how's everything with the house?`;
       short = `Following up from our last conversation`; break;
     case "agent":
-      say = (c.tags || []).includes("closed deal together") || c.subtype === "active partner"
-        ? `Hi ${first}, it's ${me}. It's been a bit since we talked. What are you working on right now, and is anyone in your pipeline I can help get approved or find creative financing for?`
-        : `Hi ${first}, this is ${me} with Graham Financial. I work with a handful of agents on getting buyers approved and on creative financing: DSCR for investors, non-QM, and down payment help. Who in your pipeline is stuck right now?`;
+      say = worked
+        ? `Hey ${first}, ${me}. It's been too long since our last closing together. What are you working on right now? Anybody stuck I can help get to the table?`
+        : `Hey ${first}, ${me} with Graham Financial. Quick one: when your buyers think they can't buy yet (self-employed, need to sell first, think they need more saved), who do you send them to? Most of them are closer than they think. I'd like to be that call for you.`;
       short = `Checking in to see who in your pipeline I can help`; break;
     default:
-      say = `Hi ${first}, ${intro}. Quick check-in, and a heads up that my info changed. I'm with Graham Financial now. Anything new on your end, like a new email or number?`;
-      short = `Quick check-in, and my info changed`;
+      say = inherited
+        ? `${hi} Just checking in. How's life, and anything going on with the house?`
+        : `Hey ${first}, ${me}. You were on my mind and I hadn't heard from you in a while. How's life? Anything going on with the house?`;
+      short = `Quick check-in, you were on my mind`;
   }
   const vmText = `Hi ${first}, it's ${me}. Just tried you. ${short}. Call or text me back at ${MY_PHONE} when you have a minute, or grab a time here: ${BOOKING}`;
   const emailSubject = reason?.key === "bday" ? "Happy birthday!" : reason?.key === "rate" ? "Quick rate check" : "Checking in";
