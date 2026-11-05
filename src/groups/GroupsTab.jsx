@@ -25,7 +25,7 @@ const IMAGES = [ { name:"Plum suit", src:"/groups/JG-SaveDeals-plum.png" }, { na
 const fill = (t) => t.replaceAll("{CALC}", CALC).replaceAll("{BOOK}", BOOKING);
 const copy = (t) => navigator.clipboard?.writeText(t);
 
-export default function GroupsTab({ userId }) {
+export default function GroupsTab({ userId, onContact }) {
   const [posts, setPosts] = useState([]); const [groups, setGroups] = useState([]); const [log, setLog] = useState([]);
   const [view, setView] = useState("today");
   const [edit, setEdit] = useState(null); const [newG, setNewG] = useState({ name:"", url:"", members:"", rules:"", promo_day:"" });
@@ -77,7 +77,7 @@ export default function GroupsTab({ userId }) {
       {msg && <div style={{fontFamily:F.mono, fontSize:12, color:C.red, marginBottom:10}}>{msg}</div>}
 
       {view === "profile" && <ProfilePosts userId={userId}/>}
-      {view === "outreach" && <AgentOutreach userId={userId}/>}
+      {view === "outreach" && <AgentOutreach userId={userId} onContact={onContact}/>}
 
       {view === "today" && (
         <>

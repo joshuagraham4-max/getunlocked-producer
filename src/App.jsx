@@ -1575,7 +1575,7 @@ export default function App() {
 
       {tab==="calls" && <CallsTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onOpen={(c)=>{setOpenContactId(c.id);setTab("contacts");}} onGoRadar={()=>setTab("radar")}/>}
       {tab==="radar" && <RadarTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onOpen={(c)=>{setOpenContactId(c.id);setTab("contacts");}} onGoCalls={()=>setTab("calls")}/>}
-      {tab==="groups" && <GroupsTab userId={user?.id}/>}
+      {tab==="groups" && <GroupsTab userId={user?.id} onContact={(c) => setContacts((p) => p.some((x) => x.id === c.id) ? p.map((x) => (x.id === c.id ? c : x)) : [...p, c])}/>}
       {tab==="investors" && <InvestorLeads userId={user?.id} contacts={contacts} setContacts={setContacts}/>}
       {tab==="scripts" && <ScriptsTab/>}
       {tab==="ioi" && <IOITab/>}

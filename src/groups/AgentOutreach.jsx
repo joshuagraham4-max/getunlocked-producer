@@ -19,7 +19,7 @@ const copy = (t) => navigator.clipboard?.writeText(t);
 const chName = (k) => (CHANNELS.find((c) => c.k === k) || {}).l || k;
 const EMPTY = { full_name:"", area:"", state:"FL", brokerage:"", profile_url:"", hook:"", channel:"facebook", source:"existing friend" };
 
-export default function AgentOutreach({ userId }) {
+export default function AgentOutreach({ userId, onContact }) {
   const [rows, setRows] = useState([]); const [view, setView] = useState("today"); const [chan, setChan] = useState("all");
   const [drafts, setDrafts] = useState({}); const [add, setAdd] = useState(null); const [msg, setMsg] = useState("");
   const t = localDay();
@@ -43,18 +43,10 @@ export default function AgentOutreach({ userId }) {
   const sent = (r) => { const m = messageFor(r); const ns = (r.step || 0) + 1;
     upd(r, { step:ns, status: ns >= 3 ? "no reply" : "messaging", next_date: ns >= 3 ? null : addDays(m.wait), last_message:textOf(r), sent_at:new Date().toISOString() });
     setDrafts((d) => { const x = { ...d }; delete x[r.id]; return x; }); };
+  // The database trigger tags the contact and puts them on today's call list.
   const gotReply = async (r) => {
-    const [first, ...rest] = r.full_name.trim().split(/\s+/);
-    const note = `${t} · replied on ${chName(r.channel)}${r.area ? ` · ${r.area}` : ""}${r.brokerage ? ` · ${r.brokerage}` : ""}${r.profile_url ? ` · ${r.profile_url}` : ""}`;
-    let cid = r.contact_id;
-    if (!cid) {
-      const { data, error } = await supabase.from("contacts").insert({ user_id:userId, first_name:first, last_name:rest.join(" "), contact_type:"agent", subtype:"partner prospect",
-        follow_up_date:t, contact_note:note, tags:["messenger reply", `${r.channel} outreach`], source_category:"agent outreach", source_file:"agent outreach", external_id:`ao-${r.id}` }).select("id").single();
-      if (error) { setMsg(error.message); return; } cid = data.id;
-    } else {
-      await supabase.from("contacts").update({ follow_up_date:t }).eq("id", cid);
-    }
-    upd(r, { status:"replied", replied_at:new Date().toISOString(), contact_id:cid, next_date:null });
+    await upd(r, { status:"replied", replied_at:new Date().toISOString(), next_date:null });
+    if (onContact && r.contact_id) { const { data } = await supabase.from("contacts").select("*").eq("id", r.contact_id).single(); if (data) onContact(data); }
   };
   const saveNew = async () => {
     if (!add.full_name.trim()) { setMsg("Name is required."); return; }
@@ -130,7 +122,7 @@ export default function AgentOutreach({ userId }) {
       </div>}
 
       {view === "replied" && <div style={{display:"grid", gap:10}}>
-        <div style={{fontFamily:F.mono, fontSize:12, color:C.mid}}>These are yours now. Each one is also on today's call list under Agents.</div>
+        <div style={{fontFamily:F.mono, fontSize:12, color:C.mid}}>These are yours now. Each one is also on today's call list under Agents, tagged "outreach: replied" in Contacts.</div>
         {replied.map((r) => (
           <div key={r.id} style={{...card, padding:12, borderColor:C.amber}}>
             <div style={{fontFamily:F.cond, fontWeight:800, fontSize:17}}>{r.full_name}</div><Meta r={r}/>

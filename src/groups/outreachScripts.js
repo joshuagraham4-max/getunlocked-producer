@@ -11,22 +11,22 @@ export const STEPS = [
   { step:1, name:"Opener", wait:2, variants:[
     (p) => `Hey ${p.first}! ${hookLine(p.hook)}I see you're doing real estate${inArea(p.area)} and I've been noticing your posts. I'm looking for a few agent partners and you stood out.
 
-Joshua Graham here, AVP at Zero Point Mortgage. I'm not a lender, I'm a wholesale broker, so I have access to money where most lenders get stuck. Not selling anything, I just want to know the agents worth knowing.
+Joshua Graham here, AVP at Zero Point Mortgage. I'm not a lender, I'm a wholesale broker, so I have access to money where most lenders get stuck. Not selling anything.
 
-What are you working most right now?`,
+I also generate buyer and investor leads, and I'm looking for a few agents to send them to. What's the best way to refer someone to you, and what areas do you cover?`,
     (p) => `Hey ${p.first}! ${hookLine(p.hook)}Your posts keep showing up on my feed and you stood out. I'm putting together a small group of agent partners${inArea(p.area)}.
 
 I'm Joshua Graham, AVP at Zero Point Mortgage. Not a lender, a wholesale broker, so I can get money where most lenders get stuck. Nothing to sell you.
 
-Are you mostly buyers, listings, or investors these days?`,
+I generate buyer and investor leads and I'm looking for a few good agents to send them to. How do you like to get referrals, and what areas do you work?`,
   ]},
   { step:2, name:"Stuck deal nudge", wait:2, variants:[
     (p) => `No pressure ${p.first}. If you've got a buyer or investor stuck right now, that's exactly what I fix. Even just the scenario, no names needed.`,
     (p) => `Hey ${p.first}, one quick one: anything stuck right now? Self-employed buyer, investor, credit issue, a file another lender bailed on. That's my lane.`,
   ]},
   { step:3, name:"Last touch", wait:null, variants:[
-    (p) => `Last one from me ${p.first}. Just closed a cash-out in 10 days that another lender sat on for a month. If a deal ever gets stuck, I'm the call: ${PHONE}.`,
-    (p) => `I'll leave it here ${p.first}. 25 years in, and the loans other lenders can't close are the ones I like. Save my number for when one gets weird: ${PHONE}.`,
+    (p) => `Last one from me ${p.first}. If you want to be on my list for buyer and investor leads${inArea(p.area)}, just reply "in." Either way, if a deal ever gets stuck, I'm the call: ${PHONE}.`,
+    (p) => `I'll leave it here ${p.first}. I'm finalizing my agent list for buyer and investor leads${inArea(p.area)}. Reply "in" if you want on it. And if a deal ever gets weird, save my number: ${PHONE}.`,
   ]},
 ];
 
