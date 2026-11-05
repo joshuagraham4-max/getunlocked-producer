@@ -235,7 +235,7 @@ export default function GamePlan({ userId, avgCommission, onGoCalls }) {
         </div>
 
         <div style={{...card, overflow:"hidden", alignSelf:"start"}}>
-          <div style={{padding:"14px 16px", ...lbl}}>Schedule · Prospecting day</div>
+          <div style={{padding:"14px 16px", ...lbl}}>Schedule · Go hard prospect</div>
           {plan.map((r, i) => {
             const t = TAG[r.k] || TAG.fixed; const on = !!(day.done || {})[r.n]; const now = cur === r;
             return (

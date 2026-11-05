@@ -1242,10 +1242,10 @@ export default function App() {
       {tab==="today" && (
         <div>
           <div style={{display:"flex",gap:8,marginBottom:14,alignItems:"center",flexWrap:"wrap"}}>
-            {[["prospect","Prospecting day"],["deal","Deal day"]].map(([k,l])=>(
+            {[["prospect","Go hard prospect"],["deal","Custom day"]].map(([k,l])=>(
               <button key={k} onClick={()=>setDayModeSaved(k)} style={{padding:"9px 18px",borderRadius:7,border:`1px solid ${dayMode===k?C.green:C.rule}`,background:dayMode===k?C.green:C.card,color:dayMode===k?"#fff":C.mid,fontFamily:F.cond,fontSize:15,fontWeight:700,cursor:"pointer"}}>{l}</button>
             ))}
-            <span style={{fontFamily:F.mono,fontSize:10,color:C.light}}>{dayMode==="prospect"?"Call block locked, everything else fits around it.":"The scheduler places your time where your deals need it."}</span>
+            <span style={{fontFamily:F.mono,fontSize:10,color:C.light}}>{dayMode==="prospect"?"Call block locked, everything else fits around it.":"Build your own day: the scheduler places your time where you need it."}</span>
           </div>
           {dayMode==="prospect" ? <GamePlan userId={user?.id} avgCommission={profile.avgCommission} onGoCalls={()=>setTab("calls")}/> : (<>
           {ydayP.length>0 && (

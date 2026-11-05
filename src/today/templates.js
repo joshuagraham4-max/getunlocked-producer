@@ -21,19 +21,18 @@ export const JOSHUA = {
     ],
   },
   day: [
-    ["08:30","09:00","School run + wife to the gym","fixed","Drop-off 8:45.",P],
+    ["08:30","09:00","School run + wife to the gym","fixed","Drop-off.",P],
     ["09:00","09:45","Dog walk","rest","The real walk. No phone.",P],
-    ["09:45","10:25","Wife pickup + breakfast","fixed","",P],
-    ["10:25","11:30","Emails + group posts","money","Today's 10 reconnect emails and the group posts.",C],
+    ["09:45","11:30","Emails + group posts","money","Today's 10 reconnect emails and the group posts.",C],
     ["11:30","12:00","Lunch","rest","First 5 min: X and Facebook on the timer. Then phone down.",null],
-    ["12:00","13:00","Prep: rates in, call list, deal follow-ups","money","Enter today's rates on Radar so rate opportunities rank first.",C],
-    ["13:00","15:00","Call block","money","",LOCK],
-    ["15:00","15:25","Follow-ups from today's calls","money","Texts and emails from today's voicemails.",C],
-    ["15:25","16:15","Pickup + home buffer","fixed","Hard stop at 3:25.",P],
+    ["12:00","13:30","Prep: rates in, call list, deal follow-ups","money","Enter today's rates on Radar so rate opportunities rank first.",C],
+    ["13:30","13:50","Pick up wife","fixed","Back by 1:50.",P],
+    ["14:00","15:25","Call block","money","",LOCK],
+    ["15:25","16:15","Leave for school pickup + home buffer","fixed","Hard stop at 3:25.",P],
   ],
   evening: {
     "630": [
-      ["16:15","17:45","Deal work + callbacks","money","Files, quotes, returned calls.",C],
+      ["16:15","17:45","Follow-ups, deal work + callbacks","money","Texts and emails from today's voicemails, files, quotes, returned calls.",C],
       ["18:00","18:30","Dinner with family","family","",P],
       ["18:30","20:30","Gym","rest","Drive there, 90 min training, drive back.",PC],
       ["20:30","21:30","Family time","family","No work.",P],
@@ -42,14 +41,14 @@ export const JOSHUA = {
       ["22:45","06:45","Lights out","rest","8 hours before the 6:45 alarm.",PC],
     ],
     am: [
-      ["16:15","17:45","Deal work + callbacks","money","Files, quotes, returned calls.",C],
+      ["16:15","17:45","Follow-ups, deal work + callbacks","money","Texts and emails from today's voicemails, files, quotes, returned calls.",C],
       ["18:00","20:30","Dinner, family, free time","family","Not on X or Facebook.",P],
       ["20:30","20:45","Prep tomorrow","fixed","Clothes out, food prepped.",P],
       ["20:45","21:15","Wind down","rest","Phone charging outside the bedroom.",P],
       ["21:15","05:00","Lights out","rest","7.75 hours before the 5:00 alarm.",PC],
     ],
     "830": [
-      ["16:15","17:45","Deal work + callbacks","money","Files, quotes, returned calls.",C],
+      ["16:15","17:45","Follow-ups, deal work + callbacks","money","Texts and emails from today's voicemails, files, quotes, returned calls.",C],
       ["18:00","20:15","Dinner, family, free time","family","Obligations first. Then you're clear to go.",P],
       ["20:15","20:30","Leave buffer","fixed","Keys, out the door.",P],
       ["20:30","22:30","Gym","rest","Replaces the evening build.",PC],
@@ -57,7 +56,7 @@ export const JOSHUA = {
       ["22:45","06:45","Lights out","rest","8 hours before the alarm.",PC],
     ],
     "415": [
-      ["16:15","18:15","Gym","rest","Takes the deal-work block.",PC],
+      ["16:15","18:15","Gym","rest","Takes the follow-up and deal-work block.",PC],
       ["18:15","20:30","Dinner, family, free time","family","Not on X or Facebook.",P],
       ["20:30","21:30","Deep build","build","Quiet house.",C],
       ["21:30","22:15","Prep + wind down","rest","Phone charging outside the bedroom.",P],
@@ -88,7 +87,7 @@ export function defaultSettings(userId, avgCommission = 4000) {
   const me = userId === JOSHUA_ID;
   const c = Number(avgCommission) || 4000;
   return {
-    callBlock: { start:"13:00", end:"15:00", tz:"America/New_York" },
+    callBlock: me ? { start:"14:00", end:"15:25", tz:"America/New_York" } : { start:"13:00", end:"15:00", tz:"America/New_York" },
     routine: me,                       // "My routine" (personal blocks, timers, gym tiers)
     messages: me ? "mine" : "standard",// off | standard | mine
     myMessages: [],
