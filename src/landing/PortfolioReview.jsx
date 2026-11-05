@@ -34,6 +34,7 @@ function Shell({ children }) {
         <p style={{ margin:0, fontFamily:F.display, fontWeight:700, fontSize:12, letterSpacing:"0.16em", textTransform:"uppercase", color:C.sky }}>Free portfolio review</p>
         <h1 style={{ margin:"6px 0 0", fontFamily:F.display, fontWeight:800, fontSize:28, lineHeight:1.15 }}>Is your equity working for you?</h1>
         <p style={{ margin:"6px 0 0", color:"#C9D6E3", fontSize:15 }}>Joshua Graham, AVP · Graham Financial, powered by Zero Point Mortgage Services</p>
+          <p style={{ margin:"8px 0 0", color:"#fff", fontSize:15, lineHeight:1.5 }}>Nine quick questions. I'll show you how much of your equity is sitting idle and what it could be doing, from small portfolios to large ones.</p>
       </div>
     </header>
     <main style={{ maxWidth:640, margin:"0 auto", padding:"24px 20px 40px" }}>{children}
@@ -85,6 +86,16 @@ export default function PortfolioReview() {
             <li>Build reserves so one vacancy never becomes a problem</li>
             <li>Consolidate higher-rate debt across the portfolio</li>
           </ul>
+          <div style={{ background:C.bg, borderRadius:10, padding:"14px 16px", margin:"0 0 16px" }}>
+            <p style={{ margin:"0 0 6px", fontFamily:F.display, fontWeight:700, fontSize:12, letterSpacing:"0.14em", textTransform:"uppercase", color:C.muted }}>How I work</p>
+            <ul style={{ fontSize:15, lineHeight:1.65, margin:0, paddingLeft:20 }}>
+              <li>25 years in. I'm the one people call for the loans other lenders couldn't close.</li>
+              <li>Speed: investor loans closed in as little as 10 days.</li>
+              <li>Broker access to wholesale pricing from multiple lenders, which can mean a bigger approval on the same rent.</li>
+              <li>The rent qualifies the loan. No tax returns, no pay stubs, no pile of paperwork.</li>
+              <li>Last week: a family with old, tangled liens. We cleared them, got them about $100K in two weeks, and mapped out their other properties around how long they plan to hold them.</li>
+            </ul>
+          </div>
           <p style={{ fontSize:16, fontWeight:600, margin:"0 0 14px" }}>I'll run your real numbers and send your review. Tell me the best time to call you, or book with me here at your convenience.</p>
           <div style={{ display:"grid", gap:10 }}>
             <a href={BOOKING} style={{ ...btn, textAlign:"center", textDecoration:"none" }}>Book my portfolio review</a>
