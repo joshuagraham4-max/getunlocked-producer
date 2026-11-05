@@ -4,6 +4,7 @@ import HowTo from "../HowTo.jsx";
 import { GUIDES } from "../howto/guides.jsx";
 import { today, addDays, digits, fullName, fmtMo, loadRadarData, computeRadar, buildQueue, reasonFor, scriptsFor, logOutcome, undoOutcome, canUndo, segmentOf, REASON_COLOR, REASON_BG } from "../radar/engine.js";
 import { supabase } from "../supabase.js";
+import EmailDesk from "./EmailDesk.jsx";
 
 const C = { bg:"#f5f0e8", card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc", green:"#1e6e4a", amber:"#b05e0d", amberBg:"#fdf0e0" };
 const F = { mono:"'DM Mono',monospace", cond:"'Barlow Condensed',sans-serif", body:"'Barlow',sans-serif" };
@@ -108,11 +109,6 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
           <div style={{fontFamily:F.mono, fontSize:11, color:C.mid}}>{new Date().toLocaleDateString("en-US", { weekday:"short", month:"short", day:"numeric" })}</div>
         </div>
         {(() => { const b = callBlock(); return <div style={{marginTop:8, fontFamily:F.mono, fontSize:11, padding:"5px 8px", borderRadius:6, background: b.live ? C.green : C.bg, color: b.live ? "#fff" : C.mid}}>{b.text}</div>; })()}
-        <div style={{display:"flex", gap:6, marginTop:10}}>
-          {[["customers","Customers"],["agents","Agents"]].map(([k, l]) => (
-            <button key={k} onClick={() => { setSeg(k); setSelId(null); }} style={{...(seg === k ? btnG : btn), flex:1, padding:"7px 8px"}}>{l} {segDone(k)}/{segN(k)}</button>
-          ))}
-        </div>
         <div style={{display:"flex", justifyContent:"space-between", margin:"10px 0 6px", fontFamily:F.mono, fontSize:11, color:C.ink}}>
           <span>{made} of {queue.length} calls made</span><span>{talked} talked · {booked} booked</span>
         </div>
@@ -227,9 +223,15 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
   return (
     <div>
       <HowTo id="calls" {...GUIDES.calls} defaultOpen={false}/>
+      <div style={{display:"flex", gap:8, marginBottom:14, flexWrap:"wrap"}}>
+        {[["customers",`Customers ${segDone("customers")}/${segN("customers")}`],["agents",`Agents ${segDone("agents")}/${segN("agents")}`],["emails","Emails"]].map(([k, l]) => (
+          <button key={k} onClick={() => { setSeg(k); setSelId(null); }} style={{...(seg === k ? btnG : btn), padding:"9px 18px", fontSize:15}}>{l}</button>
+        ))}
+      </div>
+      {seg === "emails" ? <EmailDesk userId={userId} contacts={contacts} setContacts={setContacts} callIds={(queue || []).map((x) => x.id)} wide={wide}/> : (
       <div style={{display:"grid", gridTemplateColumns: wide ? "400px 1fr" : "1fr", gap:18}}>
         {wide ? <>{List}{Focus}</> : <>{Focus}{List}</>}
-      </div>
+      </div>)}
     </div>
   );
 }

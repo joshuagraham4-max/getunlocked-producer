@@ -108,7 +108,7 @@ export function reasonFor(c, i, t = today()) {
   const bd = bdayDue(c, t);
   if (bd) r.push({ key:"bday", score:2000, title: bd.missed ? `Birthday ${bd.when}` : `Birthday ${bd.when}`, detail: ty === "agent" ? (c.company || "") : c.book === "mine" ? "your client" : "" });
   else if (b != null) r.push({ key:"bday", score:450 - b * 10, title:`Birthday ${dayName(b)}`, detail: ty === "agent" ? (c.company || "") : c.book === "mine" ? "your client" : "" });
-  if (ty === "past_client" && c.book === "past LO" && !c.last_contacted) r.push({ key:"inherited", score:200, title:"Inherited file", detail:"past LO funding · never contacted" });
+  if (ty === "past_client" && c.book === "past LO" && !c.last_contacted) r.push({ key:"inherited", score:200, title:"Inherited client", detail:"past LO funding · never contacted" });
   if (ty === "agent") {
     if (c.subtype === "active partner") r.push({ key:"agent", score:700, title:"Active partner", detail: c.company || "" });
     else if (tags.includes("closed deal together")) r.push({ key:"agent", score:500, title:"Closed deals together", detail:`${c.company || ""}${c.last_contacted ? ` · ${Math.round(daysSince(c.last_contacted))} days quiet` : " · never called"}` });
@@ -157,7 +157,7 @@ export function buildQueue(contacts, radar, target = 20) {
 // Call script + voicemail follow-ups for a contact and reason.
 export function scriptsFor(c, i, reason, me = "Joshua Graham") {
   const first = c.first_name || "there"; const yr = i?.funded ? i.funded.slice(0, 4) : "";
-  const inherited = c.book === "past LO"; const intro = inherited ? `this is ${me} with Graham Financial. I'm the loan officer now handling your file from your ${yr ? yr + " " : ""}${i?.purpose === "refinance" ? "refinance" : "home loan"}` : `it's ${me}`;
+  const inherited = c.book === "past LO"; const intro = inherited ? `this is ${me}, AVP at Zero Point Mortgage Services. I'm the loan originator now taking care of your ${yr ? yr + " " : ""}${i?.purpose === "refinance" ? "refinance" : "home loan"}` : `it's ${me}`;
   let say, short;
   switch (reason?.key) {
     case "rate":
@@ -177,7 +177,7 @@ export function scriptsFor(c, i, reason, me = "Joshua Graham") {
       short = `Rates are getting close to refi territory for you, and I'm watching it`; break;
     case "inherited":
       say = `Hi ${first}, ${intro}. No sales pitch. I just want to introduce myself, make sure I have your current info, and be your go-to if anything comes up with the home. Is this still the best number for you?`;
-      short = `I'm the loan officer now handling your file and wanted to introduce myself`; break;
+      short = `I'm the loan originator now taking care of your loan and wanted to introduce myself`; break;
     case "newlead":
       say = `Hi ${first}, this is ${me} with Graham Financial. I saw you ran the numbers on our calculator. I'd love to walk through what you're looking at. What property are you thinking about?`;
       short = `Thanks for running the numbers on our calculator. I'd love to walk through it with you`; break;

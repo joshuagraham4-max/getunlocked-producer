@@ -5,6 +5,7 @@ export const GUIDES = {
         <>Two lists: <b>Customers</b> (your clients first, then past LO files and leads) and <b>Agents</b>. Flip between them with the toggle; each shows calls made out of the total.</>,
         <><b>Birthdays are never missed:</b> they go to the top of the list on the day, on Friday for Saturday and Sunday birthdays, and as "missed" catch-ups on Monday if one slipped. They are added on top of your target.</>,
         <>Click a name, read the <b>Why now</b> box and the <b>Say this</b> talking point, hit <b>CALL</b>, then tap the outcome. Voicemail and No answer pop up a ready follow-up text and email.</>,
+        <><b>Emails</b>: about 10 reconnect emails a day, 3 per person (check in and update info, free home value, book a call). Agents and clients you've closed with come first; past LO fundings come last. Edit the draft if you want, hit <b>Open in email</b>, send it, then <b>Mark sent</b>. <b>They replied</b> ends the emails and puts them on your call list.</>,
         <>Clicked the wrong outcome? <b>Undo</b> puts everything back exactly as it was (works all day). <b>Skip for today</b> sets someone aside; <b>Unskip</b> brings them back.</>,
       ] },
   radar: { title: "How to use Radar & Today's Calls", steps: [
