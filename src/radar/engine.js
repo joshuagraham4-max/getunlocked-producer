@@ -200,7 +200,7 @@ export function scriptsFor(c, i, reason, me = "Joshua Graham") {
     } else {
       const rental = tags.some((x) => /rtl|rental|cash|flow/i.test(x)) || /rental/i.test(c.subtype || "");
       say = `Hey ${first}, ${me}. You ran the numbers on our ${rental ? "rental" : "home"} calculator. Smart move. What's the property you're looking at?`;
-      short = `Thanks for running the numbers on our calculator. I'd love to walk through it with you`; break; } }
+      short = `Thanks for running the numbers on our calculator. I'd love to walk through it with you`; break; }
     case "followup":
       say = c.outcome === "talked" || c.outcome === "replied to email"
         ? `Hey ${first}, ${me}. I've got those numbers we talked about. Got a minute?`
