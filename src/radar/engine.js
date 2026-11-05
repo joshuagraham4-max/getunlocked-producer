@@ -73,6 +73,23 @@ const bdaySoon = (b) => { if (!b) return null; const s = String(b); const mmdd =
 const dayName = (k) => k === 0 ? "today" : k === 1 ? "tomorrow" : new Date(addDays(k) + "T12:00:00").toLocaleDateString("en-US", { weekday:"long" });
 const daysSince = (d) => d ? (Date.now() - new Date(d)) / 864e5 : 9999;
 
+// Birthdays are never missed: due on the day, on Friday for Sat/Sun birthdays, and caught up on
+// Saturday-Monday if a weekend birthday was missed and nobody has been contacted since.
+const mmddOf = (b) => { if (!b) return null; const s = String(b); return s.length > 5 ? s.slice(5, 10) : s; };
+export function bdayDue(c, t = today()) {
+  const mmdd = mmddOf(c.birthday); if (!mmdd) return null;
+  const dow = new Date(t + "T12:00:00").getDay();       // 0 Sun ... 5 Fri, 6 Sat
+  const shift = (n) => { const d = new Date(t + "T12:00:00"); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
+  if (t.slice(5) === mmdd) return { when:"today", date:t };
+  if (dow === 5) for (const n of [1, 2]) if (shift(n).slice(5) === mmdd) return { when: n === 1 ? "Saturday" : "Sunday", date:shift(n) };
+  for (const n of [1, 2, 3]) {                          // missed catch-up (up to 3 days back)
+    const d = shift(-n); if (d.slice(5) !== mmdd) continue;
+    if (!c.last_contacted || c.last_contacted < shift(-n - 2)) return { when:`missed ${new Date(d + "T12:00:00").toLocaleDateString("en-US", { weekday:"long" })}`, date:d, missed:true };
+  }
+  return null;
+}
+export const segmentOf = (c) => ((c.contact_type || "past_client") === "agent" ? "agents" : "customers");
+
 // One "why now" reason per contact: { key, title, detail, score }
 export function reasonFor(c, i, t = today()) {
   const ty = c.contact_type || "past_client"; const tags = c.tags || [];
@@ -88,7 +105,9 @@ export function reasonFor(c, i, t = today()) {
     if (i.equity) r.push({ key:"equity", score:250 + (70 - i.estLtv), title:`Est. ${Math.round(i.estLtv)}% LTV`, detail: i.pmi ? "PMI removal likely" : "cash-out / HELOC conversation" });
     if (i.bucket === "watch") r.push({ key:"watch", score:150 + i.gap * 100, title:`Watchlist +${i.gap.toFixed(2)}%`, detail: i.seasoning ? "not seasoned yet" : "one more rate drop and they qualify" });
   }
-  if (b != null) r.push({ key:"bday", score:450 - b * 10, title:`Birthday ${dayName(b)}`, detail: ty === "agent" ? (c.company || "") : c.book === "mine" ? "your client" : "" });
+  const bd = bdayDue(c, t);
+  if (bd) r.push({ key:"bday", score:2000, title: bd.missed ? `Birthday ${bd.when}` : `Birthday ${bd.when}`, detail: ty === "agent" ? (c.company || "") : c.book === "mine" ? "your client" : "" });
+  else if (b != null) r.push({ key:"bday", score:450 - b * 10, title:`Birthday ${dayName(b)}`, detail: ty === "agent" ? (c.company || "") : c.book === "mine" ? "your client" : "" });
   if (ty === "past_client" && c.book === "past LO" && !c.last_contacted) r.push({ key:"inherited", score:200, title:"Inherited file", detail:"past LO funding · never contacted" });
   if (ty === "agent") {
     if (c.subtype === "active partner") r.push({ key:"agent", score:700, title:"Active partner", detail: c.company || "" });
@@ -109,11 +128,14 @@ export const priorityScore = (c, reason) => {
 };
 export function buildQueue(contacts, radar, target = 20) {
   const t = today(); const nAgents = Math.round(target * 0.3), nClients = target - nAgents;
-  const pool = { clients:[], agents:[] };
+  const pool = { clients:[], agents:[] }; const bdays = [];
   for (const c of contacts) {
     const ty = c.contact_type || "past_client";
-    if (c.do_not_contact || !c.phone) continue;                       // calls first: needs a phone number
-    if (!["past_client","lead","agent"].includes(ty)) continue;
+    if (c.do_not_contact) continue;
+    if (!["past_client","lead","agent","referral_partner"].includes(ty)) continue;
+    // Birthdays: always on the list, on top of the target, even if called recently or no phone.
+    if (bdayDue(c, t)) { const reason = reasonFor(c, radar.info[c.id], t); bdays.push({ id:c.id, reason, group:segmentOf(c), bday:true, s:9000 + (c.book === "mine" ? 100 : 0) }); continue; }
+    if (!c.phone || ty === "referral_partner") continue;              // calls first: needs a phone number
     const due = c.follow_up_date && c.follow_up_date <= t;
     if (c.follow_up_date && c.follow_up_date > t) continue;
     if (ty === "lead" && !due) continue;
@@ -122,13 +144,14 @@ export function buildQueue(contacts, radar, target = 20) {
     // Priority tiers: commitments (follow-ups due / new leads) > Joshua's own closings > past LO files.
     const tier = ["followup","newlead"].includes(reason.key) ? 5000 : (ty === "past_client" && c.book === "mine") ? 2000 : 0;
     const s = tier + reason.score + (reason.also.length * 15) + Math.random();
-    (ty === "agent" ? pool.agents : pool.clients).push({ id:c.id, reason, s });
+    (ty === "agent" ? pool.agents : pool.clients).push({ id:c.id, reason, group:segmentOf(c), s });
   }
   pool.clients.sort((a, b) => b.s - a.s); pool.agents.sort((a, b) => b.s - a.s);
   const picked = [...pool.clients.slice(0, nClients), ...pool.agents.slice(0, nAgents)];
   if (picked.length < target) picked.push(...pool.clients.slice(nClients, nClients + target - picked.length));
+  picked.push(...bdays);
   picked.sort((a, b) => b.s - a.s);
-  return picked.map(({ id, reason }) => ({ id, reason }));
+  return picked.map(({ id, reason, group, bday }) => ({ id, reason, group, bday: !!bday }));
 }
 
 // Call script + voicemail follow-ups for a contact and reason.
@@ -181,10 +204,26 @@ export const REASON_BG = { rate:"#fbeae7", bday:"#eeebf8", equity:"#e8f4ee", inh
 
 // Log an outcome: touch row + contact fields. Returns the updated contact.
 export async function logOutcome(userId, c, result, note, followUp, channel = "call") {
-  await supabase.from("contact_touches").insert({ user_id:userId, contact_id:c.id, channel, outcome:result, note:note || null });
+  const prev = { last_contacted:c.last_contacted ?? null, outcome:c.outcome ?? null, follow_up_date:c.follow_up_date ?? null, contact_note:c.contact_note ?? null };
+  const { data:touch } = await supabase.from("contact_touches").insert({ user_id:userId, contact_id:c.id, channel, outcome:result, note:note || null }).select("id").single();
   const line = `${today()}: ${channel === "call" ? "" : channel + " · "}${result}${note ? ` — ${note}` : ""}`;
   const fields = { last_contacted:today(), outcome:result, contact_note:[c.contact_note, line].filter(Boolean).join("\n") };
   if (followUp !== undefined) fields.follow_up_date = followUp;
   const { data } = await supabase.from("contacts").update(fields).eq("id", c.id).select().single();
+  saveUndo(userId, c.id, { prev, touchId:touch?.id || null });
+  return data;
+}
+
+// Undo: every logged outcome keeps a same-day snapshot so it can be reversed exactly.
+const undoKey = (userId) => `gupUndo:${userId}:${today()}`;
+const readUndo = (userId) => { try { return JSON.parse(localStorage.getItem(undoKey(userId)) || "{}"); } catch { return {}; } };
+function saveUndo(userId, id, snap) { const u = readUndo(userId); (u[id] = u[id] || []).push(snap); try { localStorage.setItem(undoKey(userId), JSON.stringify(u)); } catch {} }
+export const canUndo = (userId, id) => !!(readUndo(userId)[id] || []).length;
+export async function undoOutcome(userId, id) {
+  const u = readUndo(userId); const stack = u[id] || []; const snap = stack.pop(); if (!snap) return null;
+  if (snap.touchId) await supabase.from("contact_touches").delete().eq("id", snap.touchId);
+  const { data, error } = await supabase.from("contacts").update(snap.prev).eq("id", id).select().single();
+  if (error) return null;
+  u[id] = stack; try { localStorage.setItem(undoKey(userId), JSON.stringify(u)); } catch {}
   return data;
 }

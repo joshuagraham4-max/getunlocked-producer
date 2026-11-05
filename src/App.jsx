@@ -478,7 +478,10 @@ export default function App() {
   const [obSaving, setObSaving] = useState(false);
 
   // ── App state ─────────────────────────────────────────────────────────────────
-  const [tab, setTab] = useState("today");
+  const [tab, setTab] = useState("calls");
+  // Stripped-down nav: Calls, Contacts, Radar. Everything else is hidden behind "More" (nothing deleted).
+  const [showMore, setShowMore] = useState(() => { try { return localStorage.getItem("gupShowMore") === "1"; } catch { return false; } });
+  const toggleMore = () => setShowMore((v) => { try { localStorage.setItem("gupShowMore", v ? "0" : "1"); } catch {} return !v; });
   const [profile, setProfile] = useState({name:"",partnerName:"",partnerPhone:"",avgCommission:4000,baselineClosings:2});
   const [sqStep, setSqStep] = useState(0);
   const [startHour, setStartHour] = useState(10);
@@ -703,6 +706,7 @@ export default function App() {
     }
   }
   // eslint-disable-next-line react-hooks/exhaustive-deps
+  const navTabs = [["calls","Calls"],["contacts","Contacts"],["radar","Radar"]].concat(showMore ? [["today","Today"],["scripts","Scripts"],["ioi","IOI"],["history","History"],["team","Team"]].concat(isAdmin?[["posts","Posts"]]:[]) : []).concat([["__more", showMore ? "Less" : "More"]]);
   useEffect(() => { if (tab==="team" && isAdmin) loadTeamData(); }, [tab, isAdmin]);
 
   const tomTimer = useRef(null);
@@ -1200,8 +1204,8 @@ export default function App() {
             <div style={{fontFamily:F.mono,fontSize:9,color:"#666",marginTop:4}}>{dateStr}</div>
           </div>
           <nav style={{padding:"16px 0",flex:1}}>
-            {[["today","Today"],["calls","Calls"],["radar","Radar"],["contacts","Contacts"],["scripts","Scripts"],["ioi","IOI"],["history","History"],["team","Team"]].concat(isAdmin?[["posts","Posts"]]:[]).map(([id,lbl])=>(
-              <button key={id} onClick={()=>{setTab(id);setRebuildOk(false);}}
+            {navTabs.map(([id,lbl])=>(
+              <button key={id} onClick={()=>{ if(id==="__more"){toggleMore();return;} setTab(id);setRebuildOk(false);}}
                 style={{display:"block",width:"100%",padding:"11px 20px",border:"none",textAlign:"left",background:tab===id?C.green:"transparent",color:tab===id?"#fff":"#888",fontFamily:F.cond,fontSize:14,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer",transition:"all 0.15s",borderLeft:tab===id?"3px solid #fff":"3px solid transparent"}}>
                 {lbl}
               </button>
@@ -1245,8 +1249,8 @@ export default function App() {
       {/* Nav tabs — mobile only */}
       {!isWide && (
       <div style={{display:"grid",gridTemplateColumns:`repeat(${isAdmin?4:4},1fr)`,gap:3,marginBottom:12,background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:4}}>
-        {[["today","Today"],["calls","Calls"],["radar","Radar"],["contacts","Contacts"],["scripts","Scripts"],["ioi","IOI"],["history","History"],["team","Team"]].concat(isAdmin?[["posts","Posts"]]:[]).map(([id,lbl])=>(
-          <button key={id} onClick={()=>{setTab(id);setRebuildOk(false);}} style={{padding:"8px 2px",borderRadius:6,border:"none",background:tab===id?C.green:"transparent",color:tab===id?"#fff":C.mid,fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.03em",textTransform:"uppercase",cursor:"pointer",transition:"all 0.15s"}}>{lbl}</button>
+        {navTabs.map(([id,lbl])=>(
+          <button key={id} onClick={()=>{ if(id==="__more"){toggleMore();return;} setTab(id);setRebuildOk(false);}} style={{padding:"8px 2px",borderRadius:6,border:"none",background:tab===id?C.green:"transparent",color:tab===id?"#fff":C.mid,fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.03em",textTransform:"uppercase",cursor:"pointer",transition:"all 0.15s"}}>{lbl}</button>
         ))}
       </div>
       )}

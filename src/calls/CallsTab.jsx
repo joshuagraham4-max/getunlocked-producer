@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import HowTo from "../HowTo.jsx";
 import { GUIDES } from "../howto/guides.jsx";
-import { today, addDays, digits, fullName, fmtMo, loadRadarData, computeRadar, buildQueue, reasonFor, scriptsFor, logOutcome, REASON_COLOR, REASON_BG } from "../radar/engine.js";
+import { today, addDays, digits, fullName, fmtMo, loadRadarData, computeRadar, buildQueue, reasonFor, scriptsFor, logOutcome, undoOutcome, canUndo, segmentOf, REASON_COLOR, REASON_BG } from "../radar/engine.js";
 import { supabase } from "../supabase.js";
 
 const C = { bg:"#f5f0e8", card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc", green:"#1e6e4a", amber:"#b05e0d", amberBg:"#fdf0e0" };
@@ -14,6 +14,15 @@ const btnG = { ...btn, background:C.green, borderColor:C.green, color:"#fff" };
 const inp = { padding:"8px 10px", borderRadius:6, border:`1px solid ${C.rule}`, background:"#fff", fontFamily:F.body, fontSize:13, color:C.ink, boxSizing:"border-box" };
 const TARGETS = [10, 15, 20, 30, 40, 50];
 const OUTCOMES = [["talked","Talked",30],["voicemail","Voicemail",3],["no answer","No answer",2],["booked","Booked",null],["not interested","Not interested",180],["wrong number","Wrong number",null]];
+
+// Daily call block: 1:00-3:00 PM Eastern.
+function callBlock() {
+  const et = new Date(new Date().toLocaleString("en-US", { timeZone:"America/New_York" }));
+  const m = et.getHours() * 60 + et.getMinutes(), start = 13 * 60, end = 15 * 60;
+  if (m >= start && m < end) return { live:true, text:`Call block live: ${end - m} min left` };
+  if (m < start) { const d = start - m; return { live:false, text:`Call block 1-3 PM ET starts in ${d >= 60 ? `${Math.floor(d / 60)}h ${d % 60}m` : `${d} min`}` }; }
+  return { live:false, text:"Call block 1-3 PM ET done for today" };
+}
 
 function useWide() {
   const [w, setW] = useState(typeof window !== "undefined" ? window.innerWidth : 1200);
@@ -30,6 +39,9 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
   const [follow, setFollow] = useState(null);      // after voicemail / no answer: show text + email follow-up
   const [say, setSay] = useState("");
   const [nonce, setNonce] = useState(0);
+  const [seg, setSeg] = useState("customers");
+  const [, tick] = useState(0);
+  useEffect(() => { const i = setInterval(() => tick((n) => n + 1), 60000); return () => clearInterval(i); }, []);
 
   useEffect(() => { if (userId) loadRadarData(userId).then(setData); }, [userId]);
   const radar = useMemo(() => data ? computeRadar(contacts, data.loans, data.rates, data.settings) : null, [contacts, data]);
@@ -40,7 +52,7 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
   const queue = useMemo(() => {
     if (!radar) return null;
     let saved = null; try { saved = JSON.parse(localStorage.getItem(qKey) || "null"); } catch {}
-    if (saved && saved.target === target && Array.isArray(saved.items)) return saved.items.filter((x) => byId[x.id]);
+    if (saved && saved.target === target && Array.isArray(saved.items)) return saved.items.filter((x) => byId[x.id]).map((x) => ({ ...x, group: x.group || segmentOf(byId[x.id]) }));
     const items = buildQueue(contacts, radar, target);
     try { localStorage.setItem(qKey, JSON.stringify({ target, items })); } catch {}
     return items;
@@ -48,12 +60,16 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
   }, [radar, target, qKey, nonce]);
   const skipped = useMemo(() => { try { return JSON.parse(localStorage.getItem(skipKey) || "[]"); } catch { return []; } }, [skipKey, nonce]);
 
+  const all = queue;
+  const segQ = useMemo(() => all ? all.filter((x) => x.group === seg) : null, [all, seg]);
   const isDone = useCallback((id) => byId[id]?.last_contacted === today() || skipped.includes(id), [byId, skipped]);
+  const segDone = (g) => all ? all.filter((x) => x.group === g && byId[x.id]?.last_contacted === today()).length : 0;
+  const segN = (g) => all ? all.filter((x) => x.group === g).length : 0;
   const made = queue ? queue.filter((x) => byId[x.id]?.last_contacted === today()).length : 0;
   const talked = queue ? queue.filter((x) => byId[x.id]?.last_contacted === today() && byId[x.id]?.outcome === "talked").length : 0;
   const booked = queue ? queue.filter((x) => byId[x.id]?.last_contacted === today() && byId[x.id]?.outcome === "booked").length : 0;
 
-  useEffect(() => { if (queue && (!selId || !queue.find((x) => x.id === selId))) { const n = queue.find((x) => !isDone(x.id)); setSelId(n ? n.id : queue[0]?.id || null); } }, [queue, selId, isDone]);
+  useEffect(() => { if (segQ && (!selId || !segQ.find((x) => x.id === selId))) { const n = segQ.find((x) => !isDone(x.id)); setSelId(n ? n.id : segQ[0]?.id || null); } }, [segQ, selId, isDone]);
   const sel = selId ? byId[selId] : null;
   const item = queue?.find((x) => x.id === selId);
   const info = sel ? radar?.info[sel.id] : null;
@@ -61,7 +77,13 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
   const scripts = sel ? scriptsFor(sel, info, item?.reason || reason, profileName || "Joshua Graham") : null;
   useEffect(() => { setSay(scripts?.say || ""); setNote(""); setFu(""); setFollow(null); }, [selId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const next = () => { const idx = queue.findIndex((x) => x.id === selId); const n = queue.slice(idx + 1).find((x) => !isDone(x.id)) || queue.find((x) => !isDone(x.id) && x.id !== selId); if (n) setSelId(n.id); };
+  const next = () => { const q = segQ; const idx = q.findIndex((x) => x.id === selId); const n = q.slice(idx + 1).find((x) => !isDone(x.id)) || q.find((x) => !isDone(x.id) && x.id !== selId); if (n) setSelId(n.id); };
+  const undo = async () => {
+    const upd = await undoOutcome(userId, sel.id);
+    if (upd) setContacts((p) => p.map((x) => (x.id === upd.id ? upd : x)));
+    setFollow(null);
+  };
+  const unskip = () => { try { localStorage.setItem(skipKey, JSON.stringify(skipped.filter((x) => x !== selId))); } catch {} setNonce((n) => n + 1); };
   const record = async (result, days) => {
     const followUp = fu || (days ? addDays(days) : null);
     const upd = await logOutcome(userId, sel, result, note, followUp);
@@ -85,6 +107,12 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
           <div style={{fontFamily:F.cond, fontWeight:800, fontSize:24}}>Today's Calls</div>
           <div style={{fontFamily:F.mono, fontSize:11, color:C.mid}}>{new Date().toLocaleDateString("en-US", { weekday:"short", month:"short", day:"numeric" })}</div>
         </div>
+        {(() => { const b = callBlock(); return <div style={{marginTop:8, fontFamily:F.mono, fontSize:11, padding:"5px 8px", borderRadius:6, background: b.live ? C.green : C.bg, color: b.live ? "#fff" : C.mid}}>{b.text}</div>; })()}
+        <div style={{display:"flex", gap:6, marginTop:10}}>
+          {[["customers","Customers"],["agents","Agents"]].map(([k, l]) => (
+            <button key={k} onClick={() => { setSeg(k); setSelId(null); }} style={{...(seg === k ? btnG : btn), flex:1, padding:"7px 8px"}}>{l} {segDone(k)}/{segN(k)}</button>
+          ))}
+        </div>
         <div style={{display:"flex", justifyContent:"space-between", margin:"10px 0 6px", fontFamily:F.mono, fontSize:11, color:C.ink}}>
           <span>{made} of {queue.length} calls made</span><span>{talked} talked · {booked} booked</span>
         </div>
@@ -102,7 +130,7 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
         )}
       </div>
       <div style={{maxHeight: wide ? "calc(100vh - 290px)" : "none", overflowY:"auto"}}>
-        {queue.map((x, n) => {
+        {segQ.map((x, n) => {
           const c = byId[x.id]; if (!c) return null; const d = isDone(x.id); const on = x.id === selId;
           return (
             <div key={x.id} onClick={() => setSelId(x.id)} style={{display:"flex", gap:12, padding:"11px 18px", borderBottom:`1px solid ${C.rule}`, cursor:"pointer", background:on ? "#fff" : "transparent", borderLeft:on ? `4px solid ${C.green}` : "4px solid transparent", opacity:d && !on ? 0.45 : 1}}>
@@ -111,13 +139,13 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
                 <div style={{fontFamily:F.cond, fontWeight:700, fontSize:17, textDecoration:d ? "line-through" : "none"}}>{fullName(c)}</div>
                 <div style={{fontSize:13, color:C.ink, marginTop:2, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>
                   <span style={{display:"inline-block", width:8, height:8, borderRadius:"50%", background:REASON_COLOR[x.reason.key] || C.mid, marginRight:8}}/>
-                  {x.reason.title}{x.reason.detail ? ` · ${x.reason.detail}` : ""}
+                  {x.reason.title}{x.reason.detail ? ` · ${x.reason.detail}` : ""}{!c.phone ? " · no phone" : ""}
                 </div>
               </div>
             </div>
           );
         })}
-        {queue.length === 0 && <div style={{padding:18, fontFamily:F.mono, fontSize:12, color:C.light}}>Nobody due today. Rebuild after entering rates, or raise the target.</div>}
+        {segQ.length === 0 && <div style={{padding:18, fontFamily:F.mono, fontSize:12, color:C.light}}>Nobody due today. Rebuild after entering rates, or raise the target.</div>}
       </div>
     </div>
   );
@@ -152,9 +180,22 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
       </div>
       <div style={lbl}>Say this</div>
       <textarea value={say} onChange={(e) => setSay(e.target.value)} rows={4} style={{...inp, width:"100%", marginTop:6, fontSize:15, lineHeight:1.55, resize:"vertical", fontFamily:F.body}}/>
-      <a href={`tel:${digits(sel.phone)}`} style={{display:"block", textAlign:"center", fontFamily:F.cond, fontWeight:800, fontSize:22, letterSpacing:"0.06em", background:C.green, color:"#fff", borderRadius:9, padding:14, margin:"16px 0 12px", textDecoration:"none"}}>
+      {sel.phone ? <a href={`tel:${digits(sel.phone)}`} style={{display:"block", textAlign:"center", fontFamily:F.cond, fontWeight:800, fontSize:22, letterSpacing:"0.06em", background:C.green, color:"#fff", borderRadius:9, padding:14, margin:"16px 0 12px", textDecoration:"none"}}>
         CALL {(sel.first_name || "").toUpperCase()}
-      </a>
+      </a> : (
+        <div style={{margin:"16px 0 12px", padding:"12px 14px", borderRadius:9, background:C.amberBg, color:C.amber, fontFamily:F.mono, fontSize:12, display:"flex", gap:8, alignItems:"center", flexWrap:"wrap"}}>
+          <span>No phone on file.</span>
+          {sel.email && <a href={`mailto:${sel.email}?subject=${encodeURIComponent(scripts.emailSubject)}&body=${encodeURIComponent(scripts.emailBody)}`} onClick={() => logOutcome(userId, sel, "emailed", "", undefined, "email").then((u) => u && setContacts((p) => p.map((x) => (x.id === u.id ? u : x))))} style={btnG}>Send email</a>}
+          <button onClick={() => onOpen(sel)} style={btn}>Add a phone number</button>
+        </div>
+      )}
+      {sel.last_contacted === today() && !follow && (
+        <div style={{display:"flex", gap:8, alignItems:"center", marginBottom:10, padding:"9px 12px", borderRadius:8, background:"#fff", border:`1px solid ${C.rule}`}}>
+          <span style={{fontFamily:F.mono, fontSize:12}}>Logged today: <b>{sel.outcome}</b></span>
+          {canUndo(userId, sel.id) && <button onClick={undo} style={{...btn, padding:"4px 12px", marginLeft:"auto"}}>Undo</button>}
+        </div>
+      )}
+      {skipped.includes(sel.id) && <div style={{display:"flex", gap:8, alignItems:"center", marginBottom:10, fontFamily:F.mono, fontSize:12}}>Skipped for today. <button onClick={unskip} style={{...btn, padding:"4px 12px"}}>Unskip</button></div>}
       {follow ? (
         <div style={{background:"#fff", border:`1px solid ${C.rule}`, borderRadius:8, padding:"14px 16px"}}>
           <div style={{fontFamily:F.cond, fontWeight:800, fontSize:18, marginBottom:6}}>Logged: {follow}. Send a quick follow-up?</div>
@@ -163,7 +204,8 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
             <a href={`sms:${digits(sel.phone)}?body=${encodeURIComponent(scripts.vmText)}`} onClick={() => sentFollow("text")} style={btnG}>Send text</a>
             {sel.email && <a href={`mailto:${sel.email}?subject=${encodeURIComponent(scripts.emailSubject)}&body=${encodeURIComponent(scripts.emailBody)}`} onClick={() => sentFollow("email")} style={btnG}>Send email</a>}
             <button onClick={() => navigator.clipboard?.writeText(scripts.vmText)} style={btn}>Copy text</button>
-            <button onClick={next} style={{...btn, marginLeft:"auto"}}>Next call</button>
+            <button onClick={undo} style={{...btn, marginLeft:"auto"}}>Undo</button>
+            <button onClick={next} style={btn}>Next call</button>
           </div>
         </div>
       ) : (

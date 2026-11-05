@@ -1,16 +1,17 @@
 // All in-app how-to guides in one place (used on each screen + the Team tab "How-to guides" page).
 export const GUIDES = {
   calls: { title: "How to use Calls", steps: [
-        <>Your daily call list is on the left (pick 10 to 50 with <b>Daily target</b>). About a third are agents; the rest are past clients, inherited files and new leads, hottest first.</>,
-        <>Click a name. The colored <b>Why now</b> box says why they're on today's list; the <b>Say this</b> box is a talking point for that exact situation (rate gap, birthday, loan anniversary, equity, inherited file, new lead, agent). Edit it if you want.</>,
-        <>Hit <b>CALL</b>, then tap the outcome. <b>Voicemail</b> and <b>No answer</b> pop up a ready follow-up text and email. Every outcome logs a dated note and sets the next follow-up (talked 30 days, voicemail 3, no answer 2, not interested 180).</>,
-        <>The list moves to the next person automatically. <b>Skip for today</b> sets someone aside without logging a call. The list stays the same all day; <b>Rebuild list</b> refreshes it (for example after entering today's rates on the Radar tab).</>,
+        <>Your call block is <b>1-3 PM Eastern</b> every day; the bar at the top shows when it's live. Pick a <b>Daily target</b> (10 to 50).</>,
+        <>Two lists: <b>Customers</b> (your clients first, then past LO files and leads) and <b>Agents</b>. Flip between them with the toggle; each shows calls made out of the total.</>,
+        <><b>Birthdays are never missed:</b> they go to the top of the list on the day, on Friday for Saturday and Sunday birthdays, and as "missed" catch-ups on Monday if one slipped. They are added on top of your target.</>,
+        <>Click a name, read the <b>Why now</b> box and the <b>Say this</b> talking point, hit <b>CALL</b>, then tap the outcome. Voicemail and No answer pop up a ready follow-up text and email.</>,
+        <>Clicked the wrong outcome? <b>Undo</b> puts everything back exactly as it was (works all day). <b>Skip for today</b> sets someone aside; <b>Unskip</b> brings them back.</>,
       ] },
   radar: { title: "How to use Radar & Today's Calls", steps: [
         <><b>Every morning:</b> on the Radar tab, enter today's Conventional, FHA and VA rates and tap <b>Save today's rates</b>, then tap <b>Rebuild today's list</b> once so rate opportunities rank first.</>,
         <><b>Today's Calls</b> = 10 past clients (new calculator leads jump to the top) + 10 agents, each with the reason they're on the list (rate gap, birthday, loan anniversary, equity, closed deals together, follow-up due).</>,
         <>Use <b>Call / Text / Email</b> — the text and email are pre-written. Add a quick note or a follow-up date if you want.</>,
-        <>Tap an outcome: <b>Talked</b> (follow up in 30 days), <b>Voicemail</b> (3), <b>No answer</b> (2), <b>Booked</b>, <b>Not interested</b> (180), <b>Wrong #</b>. It logs a dated note and sets the follow-up. Done cards get a ✓; the list stays the same all day.</>,
+        <>Tap an outcome: <b>Talked</b> (follow up in 30 days), <b>Voicemail</b> (3), <b>No answer</b> (2), <b>Booked</b>, <b>Not interested</b> (180), <b>Wrong #</b>. It logs a dated note and sets the follow-up. Done names are crossed out; the list stays the same all day.</>,
         <><b>Rate & Equity Radar</b>: tap a tile — Conventional R&T, FHA Streamline, VA IRRRL, Equity, Watchlist — to see who qualifies. Tap a name to open the full contact.</>,
         <><b>Settings</b>: refi threshold (0.50% over market), home appreciation (4%/yr), equity line (est. LTV ≤ 70%), FHA/VA seasoning (7 months). "est." means the loan type or equity is estimated until real data is on file.</>,
   ] },

@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "../supabase.js";
 import HowTo from "../HowTo.jsx";
 import { GUIDES } from "../howto/guides.jsx";
-import { today, digits, fullName, fmtMo, money, loadRadarData, computeRadar, reasonFor, DEFAULT_SETTINGS } from "./engine.js";
+import { today, digits, fullName, fmtMo, money, loadRadarData, computeRadar, reasonFor, bdayDue, DEFAULT_SETTINGS } from "./engine.js";
 
 const C = { bg:"#f5f0e8", card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc", green:"#1e6e4a", amber:"#b05e0d", amberBg:"#fdf0e0", red:"#9e3020", purple:"#5b3fa6", teal:"#1a6570", blue:"#1a4f8a" };
 const F = { mono:"'DM Mono',monospace", cond:"'Barlow Condensed',sans-serif", body:"'Barlow',sans-serif" };
@@ -79,8 +79,10 @@ export default function RadarTab({ userId, contacts, onOpen, onGoCalls }) {
     if (!radar) return null;
     const { out, info } = radar;
     const rate = [...out.conv, ...out.fha, ...out.va].filter(inBook).sort((a, b) => mineFirst(a, b) || info[b.id].gap - info[a.id].gap);
-    const follow = contacts.filter((c) => !c.do_not_contact && c.follow_up_date && c.follow_up_date <= t && inBook(c)).sort((a, b) => mineFirst(a, b) || a.follow_up_date.localeCompare(b.follow_up_date));
-    const life = contacts.filter((c) => !c.do_not_contact && c.contact_type !== "rolodex" && inBook(c)).map((c) => [c, reasonFor(c, info[c.id], t)]).filter(([, r]) => r && (r.key === "bday" || r.key === "anniv" || (r.also || []).some((x) => /Birthday|anniversary/.test(x)))).map(([c]) => c).sort(mineFirst);
+    const live = contacts.filter((c) => !c.do_not_contact && c.contact_type !== "rolodex" && inBook(c));
+    const bdays = live.filter((c) => bdayDue(c, t)).sort(mineFirst);
+    const follow = [...bdays, ...live.filter((c) => !bdayDue(c, t) && c.follow_up_date && c.follow_up_date <= t).sort((a, b) => mineFirst(a, b) || a.follow_up_date.localeCompare(b.follow_up_date))];
+    const life = live.filter((c) => c.contact_type === "past_client" && info[c.id]?.funded && info[c.id].funded.slice(5, 7) === t.slice(5, 7) && info[c.id].months >= 11).sort(mineFirst);
     const equity = out.equity.filter(inBook).sort((a, b) => mineFirst(a, b) || info[a.id].estLtv - info[b.id].estLtv);
     const watch = out.watch.filter(inBook).sort((a, b) => mineFirst(a, b) || info[b.id].gap - info[a.id].gap);
     return { rate, follow, life, equity, watch, info };
@@ -99,8 +101,8 @@ export default function RadarTab({ userId, contacts, onOpen, onGoCalls }) {
   );
   const why = {
     rate: (c) => { const i = S.info[c.id]; return `${i.rate}% vs ${Number(i.market).toFixed(2)}% ${i.prog === "Conventional" ? "market" : i.prog} · +${i.gap.toFixed(2)}% · ${i.bucket === "fha" ? "FHA Streamline" : i.bucket === "va" ? "VA IRRRL" : "Conventional R&T"}${i.save > 0 ? ` · ~${money(i.save)}/mo` : ""}`; },
-    follow: (c) => `${c.follow_up_date === t ? "Due today" : `Due ${c.follow_up_date.slice(5)}`}${c.outcome ? ` · last: ${c.outcome}` : ""}${c.contact_type === "lead" && c.subtype ? ` · ${c.subtype}` : ""}`,
-    life: (c) => { const r = reasonFor(c, S.info[c.id], t); return [r.key === "bday" || r.key === "anniv" ? r.title : (r.also || []).find((x) => /Birthday|anniversary/.test(x)), r.key === "anniv" ? r.detail : null].filter(Boolean).join(" · "); },
+    follow: (c) => { const b = bdayDue(c, t); if (b) return `BIRTHDAY ${b.when.toUpperCase()}${c.phone ? "" : " · no phone, send email"}`; return `${c.follow_up_date === t ? "Due today" : `Due ${c.follow_up_date.slice(5)}`}${c.outcome ? ` · last: ${c.outcome}` : ""}${c.contact_type === "lead" && c.subtype ? ` · ${c.subtype}` : ""}`; },
+    life: (c) => { const i = S.info[c.id]; return `${Math.round(i.months / 12)}-year loan anniversary · closed ${fmtMo(i.funded)}`; },
     equity: (c) => { const i = S.info[c.id]; return `Est. ${Math.round(i.estLtv)}% LTV · ${i.pmi ? "PMI removal likely" : "cash-out / HELOC"} · funded ${fmtMo(i.funded)}`; },
     watch: (c) => { const i = S.info[c.id]; return `+${i.gap.toFixed(2)}% over market${i.seasoning ? " · not seasoned yet" : " · one more drop"}`; },
   };
@@ -145,12 +147,12 @@ export default function RadarTab({ userId, contacts, onOpen, onGoCalls }) {
             </div>
             {tile(S.rate.length, "RATE OPPORTUNITIES", C.red)}
             {tile(S.equity.length, "EQUITY CONVERSATIONS", C.green)}
-            {tile(S.follow.length, "FOLLOW-UPS DUE", C.amber)}
+            {tile(S.follow.length, "BIRTHDAYS + FOLLOW-UPS DUE", C.amber)}
           </div>
           {!ratesOk && <div style={{...card, padding:"10px 14px", marginBottom:14, background:C.amberBg, color:C.amber, fontFamily:F.mono, fontSize:12}}>Enter today's market rates above to fill Rate opportunities and Watchlist.</div>}
-          <Section title="Follow-ups due" color={C.amber} items={S.follow} onOpen={onOpen} whyFor={why.follow}/>
+          <Section title="Due now: birthdays and follow-ups" color={C.amber} items={S.follow} onOpen={onOpen} whyFor={why.follow}/>
           <Section title="Rate opportunities" color={C.red} note={`threshold ${settings.refi_threshold}%`} items={S.rate} onOpen={onOpen} whyFor={why.rate}/>
-          <Section title="Birthdays & anniversaries" color={C.purple} note="this week / this month" items={S.life} onOpen={onOpen} whyFor={why.life}/>
+          <Section title="Loan anniversaries" color={C.purple} note="this month" items={S.life} onOpen={onOpen} whyFor={why.life}/>
           <Section title="Equity conversations" color={C.green} note={`est. LTV at or below ${settings.equity_ltv_max}%`} items={S.equity} onOpen={onOpen} whyFor={why.equity}/>
           <Section title="Watchlist" color={C.teal} note="above market, not yet past threshold" items={S.watch} onOpen={onOpen} whyFor={why.watch}/>
         </>
