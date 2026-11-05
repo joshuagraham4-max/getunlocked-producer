@@ -6,6 +6,7 @@ import ContactsTab from "./contacts/ContactsTab.jsx";
 import RadarTab from "./radar/RadarTab.jsx";
 import CallsTab from "./calls/CallsTab.jsx";
 import GroupsTab from "./groups/GroupsTab.jsx";
+import GamePlan from "./today/GamePlan.jsx";
 import HowTo from "./HowTo.jsx";
 import Attestation, { hasSigned } from "./upload/Attestation.jsx";
 import { GUIDES } from "./howto/guides.jsx";
@@ -480,6 +481,9 @@ export default function App() {
 
   // ── App state ─────────────────────────────────────────────────────────────────
   const [tab, setTab] = useState("calls");
+  const gpDay = () => { const x=new Date(); if (x.getHours()*60+x.getMinutes()<300) x.setDate(x.getDate()-1); return x.toISOString().slice(0,10); };
+  const [dayMode, setDayMode] = useState(() => { try { return localStorage.getItem("gupDayMode:"+gpDay()) || "prospect"; } catch { return "prospect"; } });
+  const setDayModeSaved = (k) => { setDayMode(k); try { localStorage.setItem("gupDayMode:"+gpDay(), k); } catch {} };
   // Stripped-down nav: Calls, Contacts, Radar. Everything else is hidden behind "More" (nothing deleted).
   const [showMore, setShowMore] = useState(() => { try { return localStorage.getItem("gupShowMore") === "1"; } catch { return false; } });
   const toggleMore = () => setShowMore((v) => { try { localStorage.setItem("gupShowMore", v ? "0" : "1"); } catch {} return !v; });
@@ -703,7 +707,7 @@ export default function App() {
     }
   }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const navTabs = [["calls","Calls"],["contacts","Contacts"],["radar","Radar"],["groups","Groups"]].concat(showMore ? [["today","Today"],["scripts","Scripts"],["ioi","IOI"],["team","Team"]].concat(isAdmin?[["posts","Posts"]]:[]) : []).concat([["__more", showMore ? "Less" : "More"]]);
+  const navTabs = [["today","Today"],["calls","Calls"],["contacts","Contacts"],["radar","Radar"],["groups","Groups"]].concat(showMore ? [["scripts","Scripts"],["ioi","IOI"],["team","Team"]].concat(isAdmin?[["posts","Posts"]]:[]) : []).concat([["__more", showMore ? "Less" : "More"]]);
   useEffect(() => { if (tab==="team" && isAdmin) loadTeamData(); }, [tab, isAdmin]);
 
   const tomTimer = useRef(null);
@@ -1237,6 +1241,13 @@ export default function App() {
       {/* TODAY tab */}
       {tab==="today" && (
         <div>
+          <div style={{display:"flex",gap:8,marginBottom:14,alignItems:"center",flexWrap:"wrap"}}>
+            {[["prospect","Prospecting day"],["deal","Deal day"]].map(([k,l])=>(
+              <button key={k} onClick={()=>setDayModeSaved(k)} style={{padding:"9px 18px",borderRadius:7,border:`1px solid ${dayMode===k?C.green:C.rule}`,background:dayMode===k?C.green:C.card,color:dayMode===k?"#fff":C.mid,fontFamily:F.cond,fontSize:15,fontWeight:700,cursor:"pointer"}}>{l}</button>
+            ))}
+            <span style={{fontFamily:F.mono,fontSize:10,color:C.light}}>{dayMode==="prospect"?"Call block locked, everything else fits around it.":"The scheduler places your time where your deals need it."}</span>
+          </div>
+          {dayMode==="prospect" ? <GamePlan userId={user?.id} avgCommission={profile.avgCommission} onGoCalls={()=>setTab("calls")}/> : (<>
           {ydayP.length>0 && (
             <div style={{background:C.amberBg,border:`1px solid ${C.amberBd}`,borderRadius:8,padding:"12px 16px",marginBottom:16}}>
               <div style={{fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.15em",textTransform:"uppercase",color:C.amber,marginBottom:8}}>From yesterday</div>
@@ -1510,6 +1521,7 @@ export default function App() {
               </div>
             </div>
           )}
+          </>)}
         </div>
       )}
 
