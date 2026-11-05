@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { supabase } from "../supabase.js";
 import { BRAND, FOOTERS } from "../smart-money/data.js";
+import BrandBar, { NoSpam } from "./BrandBar.jsx";
 
 const SKOOL_URL = ""; // add the Smart Money Skool invite link when it's ready
 const TAX_RATE = 0.0125, INS_RATE = 0.002; // estimates when taxes/insurance are left blank
@@ -81,7 +82,7 @@ function Gate({ onDone }) {
       <Field label="Property zip" hint="Optional" id="zip" inputMode="numeric" maxLength={5} value={f.zip} onChange={set("zip")} />
       <label style={{ gridColumn: "1/-1", display: "flex", gap: 10, alignItems: "flex-start", fontSize: 13, color: C.muted }}>
         <input id="consent" type="checkbox" checked={f.consent} onChange={set("consent")} style={{ marginTop: 3, width: 18, height: 18 }} />
-        <span>I agree that Graham Financial, powered by Zero Point Mortgage Services, may contact me by phone, text or email at the information above, including by automated means. Consent is not a condition of any loan. Message and data rates may apply.</span>
+        <span>I agree that Graham Financial, powered by Zero Point Mortgage Services, may contact me by phone, text or email at the information above, including by automated means. Consent is not a condition of any loan. Message and data rates may apply.<NoSpam/></span>
       </label>
       {err && <p style={{ gridColumn: "1/-1", color: C.bad, margin: 0 }}>{err}</p>}
       <button type="submit" disabled={busy} style={{ ...btnS, gridColumn: "1/-1" }}>{busy ? "Unlocking…" : "Unlock the calculator"}</button>
@@ -180,6 +181,7 @@ export default function RentalCalculator() {
   const [unlocked, setUnlocked] = useState(prior ? { loan: num(prior), fresh: false } : null);
   return (
     <div style={{ fontFamily: F.body, color: C.ink, background: C.bg, minHeight: "100vh", fontSize: 16, lineHeight: 1.5 }}>
+      <BrandBar/>
       <header style={{ background: C.navy, color: "#fff" }}>
         <div style={{ maxWidth: 1120, margin: "0 auto", padding: "40px 16px 44px", display: "flex", flexDirection: "column", gap: 10 }}>
           <p style={{ margin: 0, fontFamily: F.display, fontWeight: 700, fontSize: 13, letterSpacing: "0.16em", textTransform: "uppercase", color: C.sky }}>{BRAND.motto}</p>

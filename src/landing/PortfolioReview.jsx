@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { supabase } from "../supabase.js";
 import { BRAND, FOOTERS } from "../smart-money/data.js";
+import BrandBar, { NoSpam } from "./BrandBar.jsx";
 
 const BOOKING = "https://calendar.app.google/nz1sdrnBGK1D4LXh7";
 const C = { navy:"#0E1B2A", sky:"#4FB0EA", ink:"#0E1B2A", muted:"#51647A", line:"#DCE3EB", bg:"#F3F6F9", card:"#FFFFFF", blue:"#1F6FA8", gold:"#D4A537", good:"#2E8B3E", bad:"#C0392B" };
@@ -29,6 +30,7 @@ const input = { font:"inherit", fontSize:16, color:C.ink, background:"#fff", bor
 function Shell({ children }) {
   return (
   <div style={{ minHeight:"100vh", background:C.bg, fontFamily:F.body, color:C.ink }}>
+    <BrandBar max={640}/>
     <header style={{ background:C.navy, color:"#fff", padding:"22px 20px" }}>
       <div style={{ maxWidth:640, margin:"0 auto" }}>
         <p style={{ margin:0, fontFamily:F.display, fontWeight:700, fontSize:12, letterSpacing:"0.16em", textTransform:"uppercase", color:C.sky }}>Free portfolio review</p>
@@ -137,7 +139,7 @@ export default function PortfolioReview() {
           <label style={{ display:"flex", gap:10, fontSize:15 }}><input type="checkbox" checked={f.text_ok} onChange={(e) => setF({ ...f, text_ok:e.target.checked })} style={{ width:18, height:18 }}/>Text me instead of calling</label>
           <label style={{ display:"flex", gap:10, alignItems:"flex-start", fontSize:13, color:C.muted }}>
             <input type="checkbox" checked={f.consent} onChange={(e) => setF({ ...f, consent:e.target.checked })} style={{ marginTop:3, width:18, height:18 }}/>
-            <span>I agree that Graham Financial, powered by Zero Point Mortgage Services, may contact me by phone, text or email at the information above, including by automated means. Consent is not a condition of any loan. Message and data rates may apply.</span>
+            <span>I agree that Graham Financial, powered by Zero Point Mortgage Services, may contact me by phone, text or email at the information above, including by automated means. Consent is not a condition of any loan. Message and data rates may apply.<NoSpam/></span>
           </label>
           {err && <p style={{ color:C.bad, margin:0 }}>{err}</p>}
           <button type="submit" disabled={busy} style={btn}>{busy ? "Sending..." : "Show me my dead money"}</button>
