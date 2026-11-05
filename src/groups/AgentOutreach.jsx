@@ -43,7 +43,7 @@ export default function AgentOutreach({ userId, onContact }) {
   const sent = (r) => { const m = messageFor(r); const ns = (r.step || 0) + 1;
     upd(r, { step:ns, status: ns >= 3 ? "no reply" : "messaging", next_date: ns >= 3 ? null : addDays(m.wait), last_message:textOf(r), sent_at:new Date().toISOString() });
     setDrafts((d) => { const x = { ...d }; delete x[r.id]; return x; }); };
-  // The database trigger tags the contact and puts them on today's call list.
+  // The database trigger tags the contact "outreach: replied". Joshua takes over in Messenger; no call list entry.
   const gotReply = async (r) => {
     await upd(r, { status:"replied", replied_at:new Date().toISOString(), next_date:null });
     if (onContact && r.contact_id) { const { data } = await supabase.from("contacts").select("*").eq("id", r.contact_id).single(); if (data) onContact(data); }
@@ -122,7 +122,7 @@ export default function AgentOutreach({ userId, onContact }) {
       </div>}
 
       {view === "replied" && <div style={{display:"grid", gap:10}}>
-        <div style={{fontFamily:F.mono, fontSize:12, color:C.mid}}>These are yours now. Each one is also on today's call list under Agents, tagged "outreach: replied" in Contacts.</div>
+        <div style={{fontFamily:F.mono, fontSize:12, color:C.mid}}>These are yours now. Pick up the conversation in Messenger. They're tagged "outreach: replied" in Contacts.</div>
         {replied.map((r) => (
           <div key={r.id} style={{...card, padding:12, borderColor:C.amber}}>
             <div style={{fontFamily:F.cond, fontWeight:800, fontSize:17}}>{r.full_name}</div><Meta r={r}/>

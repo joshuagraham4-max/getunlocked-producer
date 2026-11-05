@@ -1,3 +1,4 @@
+-- Replies are handled by Joshua in Messenger; they do not go on the call list.
 -- Every agent prospect is also a Contact (type agent), tagged with outreach status so Contacts can filter on it.
 -- Works for rows added in the app and rows Claude loads in the daily batch.
 create or replace function public.agent_outreach_sync() returns trigger
@@ -27,7 +28,7 @@ begin
     update contacts set tags = array(select distinct x from unnest(array(select t from unnest(coalesce(tags,'{}')) t where t not like 'outreach: %') || array['agent outreach', tag]) x)
     where id = new.contact_id;
     if new.status = 'replied' then
-      update contacts set follow_up_date = d, tags = array(select distinct x from unnest(coalesce(tags,'{}') || array['messenger reply']) x),
+      update contacts set tags = array(select distinct x from unnest(coalesce(tags,'{}') || array['messenger reply']) x),
         contact_note = concat_ws(E'\n', contact_note, d::text || ' · replied on ' || new.channel) where id = new.contact_id;
     end if;
   end if;
