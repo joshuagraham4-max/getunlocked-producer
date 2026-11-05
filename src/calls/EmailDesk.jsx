@@ -184,7 +184,7 @@ export default function EmailDesk({ userId, contacts, setContacts, callIds, wide
     <div style={{...card, padding: wide ? "24px 28px" : 18}}>
       <div style={{fontFamily:F.cond, fontWeight:800, fontSize:30, lineHeight:1}}>{fullName(sel)}</div>
       <div style={{fontFamily:F.mono, fontSize:12, color:C.mid, margin:"6px 0 14px"}}>{label(sel)}{sel.company ? ` · ${sel.company}` : ""} · {sel.email}</div>
-      {done(sel.id) ? (
+      {done(sel.id) ? (<>
         <div style={{display:"flex", gap:8, alignItems:"center", padding:"10px 12px", borderRadius:8, background:"#fff", border:`1px solid ${C.rule}`}}>
           <span style={{fontFamily:F.mono, fontSize:12}}>{sentToday[sel.id] ? "Today" : "Logged"}: <b>{sel.email_bad ? "email bounced, on today's call list to get a new email" : sel.outcome === "replied to email" ? "replied" : sel.outcome === "asked to stop" ? "asked to stop" : `email ${sel.email_step} sent`}</b>{sel.email_next ? ` · next email ${sel.email_next.slice(5)}` : ""}</span>
           {canUndo(sel.id) && <button onClick={() => undo(sel.id)} style={{...btn, padding:"4px 12px", marginLeft:"auto"}}>Undo</button>}
@@ -197,7 +197,7 @@ export default function EmailDesk({ userId, contacts, setContacts, callIds, wide
             <button onClick={() => navigator.clipboard?.writeText(sentToday[sel.id].note.split("\n\n").slice(1).join("\n\n"))} style={btn}>Copy text</button>
             <button onClick={() => navigator.clipboard?.writeText(sentToday[sel.id].note.split("\n\n")[0])} style={btn}>Copy subject</button>
           </div></>}
-      ) : (
+      </>) : (
         <>
           <div style={{fontFamily:F.cond, fontWeight:700, fontSize:12, letterSpacing:"0.16em", textTransform:"uppercase", color:C.light}}>Email {step} of 3</div>
           <input value={draft.subject} onChange={(e) => setDraft((d) => ({ ...d, subject:e.target.value }))} style={{...inp, marginTop:6, fontWeight:600}}/>
