@@ -514,10 +514,6 @@ export default function App() {
   const [ydayP, setYdayP] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [openContactId, setOpenContactId] = useState(null);
-  const [cFilter, setCFilter] = useState("all");
-  const [cType, setCType] = useState("past_client");
-  const [cSearch, setCSearch] = useState("");
-  const [selC, setSelC] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(null);
   const [uploadPending, setUploadPending] = useState(null);
   const fRef = useRef();
@@ -876,30 +872,6 @@ export default function App() {
     setUploadProgress({current:totalBatches,total:totalBatches,done:true,errors});
     setTimeout(()=>setUploadProgress(null),3000);
   }
-  async function logC(c) {
-    if(!userRef.current||!c.id) return;
-    const {error}=await supabase.from("contacts").update({last_contacted:today}).eq("id",c.id);
-    if(!error) setContacts(prev=>prev.map(ct=>ct.id===c.id?{...ct,last_contacted:today}:ct));
-  }
-  function cStatus(c) {
-    const d=c.last_contacted; if(!d) return "never";
-    const days=Math.round((new Date(today)-new Date(d))/86400000);
-    if(isNaN(days)) return "never";
-    return days<=30?"recent":days<=90?"warm":"cold";
-  }
-  function rFlag(c) { const r=parseFloat(c.note_rate); if(!r) return null; return r>=6.5?"high":r>=5.5?"mid":"low"; }
-  const filtC=contacts.filter(c=>{
-    const search=cSearch.toLowerCase(), name=`${c.first_name||""} ${c.last_name||""}`.toLowerCase();
-    const ms=!search||name.includes(search)||(c.phone||"").includes(search)||(c.email||"").toLowerCase().includes(search)||(c.company||"").toLowerCase().includes(search);
-    if(!ms) return false;
-    if(cType!=="any" && (c.contact_type||"past_client")!==cType) return false;
-    if(cFilter==="never") return cStatus(c)==="never";
-    if(cFilter==="cold") return cStatus(c)==="cold";
-    if(cFilter==="highrate") return rFlag(c)==="high";
-    return true;
-  });
-  const sColors={never:C.red,cold:C.amber,warm:C.mid,recent:C.green};
-  const sLabels={never:"Never",cold:"90+ days",warm:"Warm",recent:"Recent"};
 
   // ── Chart ─────────────────────────────────────────────────────────────────────
   function buildChart() {
@@ -1600,51 +1572,6 @@ export default function App() {
       )}
 
       {/* HISTORY tab */}
-      {tab==="history" && (
-        <div>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:8,marginBottom:16}}>
-            {[["Streak",`${streak}d`],["Total",totDays],["Complete",compDays],["Rate",`${compRate}%`]].map(([lbl,val])=>(
-              <div key={lbl} style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:"10px 8px",textAlign:"center"}}>
-                <div style={{fontFamily:F.mono,fontSize:8,color:C.light,marginBottom:4,letterSpacing:"0.08em",textTransform:"uppercase"}}>{lbl}</div>
-                <div style={{fontFamily:F.cond,fontSize:20,fontWeight:800,color:C.green}}>{val}</div>
-              </div>
-            ))}
-          </div>
-          {chartData.length>0 && (
-            <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:10,padding:"16px 12px",marginBottom:16}}>
-              <div style={{fontFamily:F.cond,fontSize:12,fontWeight:700,letterSpacing:"0.15em",textTransform:"uppercase",color:C.mid,marginBottom:14}}>Closings vs Baseline</div>
-              <ResponsiveContainer width="100%" height={160}>
-                <LineChart data={chartData} margin={{top:5,right:10,left:-20,bottom:5}}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={C.rule}/>
-                  <XAxis dataKey="label" tick={{fontFamily:F.mono,fontSize:9,fill:C.light}}/>
-                  <YAxis tick={{fontFamily:F.mono,fontSize:9,fill:C.light}}/>
-                  <Tooltip contentStyle={{fontFamily:F.mono,fontSize:10,background:C.card,border:`1px solid ${C.rule}`,borderRadius:6}}/>
-                  <ReferenceLine y={profile.baselineClosings} stroke={C.amber} strokeDasharray="4 4" label={{value:"Baseline",position:"right",fontFamily:F.mono,fontSize:9,fill:C.amber}}/>
-                  <Line type="monotone" dataKey="closings" stroke={C.green} strokeWidth={2} dot={{fill:C.green,r:3}} name="Closings"/>
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          )}
-          <div style={{fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.15em",textTransform:"uppercase",color:C.mid,marginBottom:10}}>Daily Log</div>
-          {history.length===0 ? (
-            <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:"24px 16px",textAlign:"center",fontFamily:F.mono,fontSize:11,color:C.light}}>No history yet. Complete your first day to start the log.</div>
-          ) : history.slice(0,30).map((entry,i)=>{
-            const hit=[PRIMARY,APPS_ACT,...ACTS.filter(a=>a.goal>0)].every(a=>(entry.counts?.[a.id]||0)>=a.goal)&&entry.pb;
-            return (
-              <div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:hit?C.greenBg:C.card,border:`1px solid ${hit?C.greenBd:C.rule}`,borderRadius:8,padding:"10px 14px",marginBottom:5}}>
-                <div>
-                  <div style={{fontFamily:F.cond,fontSize:13,fontWeight:700,color:hit?C.green:C.ink}}>{new Date(entry.date+"T12:00:00").toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"})}</div>
-                  <div style={{fontFamily:F.mono,fontSize:9,color:C.light,marginTop:2}}>Convos:{entry.counts?.conversations||0} DB:{entry.counts?.database||0} R:{entry.counts?.realtor||0}</div>
-                </div>
-                <div style={{textAlign:"right"}}>
-                  <div style={{fontFamily:F.cond,fontSize:13,fontWeight:700,color:hit?C.green:C.mid}}>{hit?"Complete":`${entry.counts?.conversations||0}/5`}</div>
-                  {(entry.counts?.closings||0)>0 && <div style={{fontFamily:F.mono,fontSize:9,color:C.amber}}>{entry.counts.closings} closing{entry.counts.closings>1?"s":""}</div>}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
 
       {/* TEAM tab */}
       {tab==="team" && (

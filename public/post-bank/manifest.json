@@ -1,0 +1,335 @@
+{
+ "note": "Image bank for IOI / weekly posts. 'used' = dates posted.",
+ "images": [
+  {
+   "file": "/post-bank/img-01.jpg",
+   "category": "interior",
+   "description": "Open living and dining, morning light",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-02.jpg",
+   "category": "interior",
+   "description": "Foyer with French doors to sunroom",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-03.jpg",
+   "category": "interior",
+   "description": "Split-level living room, tall windows",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-04.jpg",
+   "category": "exterior",
+   "description": "White cottage on a lake, big lawn",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-05.jpg",
+   "category": "kitchen",
+   "description": "Small kitchen, dappled light",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-06.jpg",
+   "category": "bedroom",
+   "description": "Bedroom with green bedding and garden view",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-07.jpg",
+   "category": "interior",
+   "description": "Two-story living room, fireplace",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-08.jpg",
+   "category": "interior",
+   "description": "Two-story living and dining from above",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-09.jpg",
+   "category": "interior",
+   "description": "Hallway into kitchen at sunset",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-10.jpg",
+   "category": "exterior",
+   "description": "Farmhouse porch in snow, Christmas",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-11.jpg",
+   "category": "kitchen",
+   "description": "Bright kitchen with wood dining table",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-12.jpg",
+   "category": "interior",
+   "description": "Loft living room, big factory windows",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-13.jpg",
+   "category": "exterior",
+   "description": "Modern black front door with olive tree",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-14.jpg",
+   "category": "interior",
+   "description": "Small apartment with balcony garden",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-15.jpg",
+   "category": "office",
+   "description": "Window desk over a garden",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-16.jpg",
+   "category": "exterior",
+   "description": "Single-story home, tile roof, garden path",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-17.jpg",
+   "category": "interior",
+   "description": "Open staircase and living room",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-18.jpg",
+   "category": "interior",
+   "description": "Traditional living room, floral rug",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-19.jpg",
+   "category": "interior",
+   "description": "Living room opening to patio",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-20.jpg",
+   "category": "kitchen",
+   "description": "Wood kitchen with arched window",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-21.jpg",
+   "category": "chart",
+   "description": "Case-Shiller home appreciation by year, 1956-2025",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-22.jpg",
+   "category": "exterior",
+   "description": "White house with flower boxes and lanterns",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-23.jpg",
+   "category": "interior",
+   "description": "Living room opening to courtyard",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-24.jpg",
+   "category": "kitchen",
+   "description": "Sage green kitchen, butcher block",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-25.jpg",
+   "category": "interior",
+   "description": "Living room with French doors to the yard",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-26.jpg",
+   "category": "interior",
+   "description": "Warm hallway at night",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-27.jpg",
+   "category": "exterior",
+   "description": "White cottage, autumn flowers",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-28.jpg",
+   "category": "interior",
+   "description": "Arched hallway, herringbone floors",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-29.jpg",
+   "category": "exterior",
+   "description": "Green cottage, stone path",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-30.jpg",
+   "category": "interior",
+   "description": "Dining and living, dark wood built-ins, evening",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-31.jpg",
+   "category": "exterior",
+   "description": "White brick cottage, black shutters, garden",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-32.jpg",
+   "category": "exterior",
+   "description": "Oak-lined drive to a columned estate",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-33.jpg",
+   "category": "exterior",
+   "description": "Old stone villa behind olive groves",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-34.jpg",
+   "category": "interior",
+   "description": "Sunlit foyer with curved staircase",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-35.jpg",
+   "category": "interior",
+   "description": "Sunroom with brick floor, autumn trees",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-36.jpg",
+   "category": "bedroom",
+   "description": "Bedroom with green bedding, balcony doors",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-37.jpg",
+   "category": "exterior",
+   "description": "Stone cottage by a creek",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-38.jpg",
+   "category": "kitchen",
+   "description": "Sage kitchen up two wood steps",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-39.jpg",
+   "category": "interior",
+   "description": "Stone great room under a glass roof",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-40.jpg",
+   "category": "exterior",
+   "description": "Backyard pergola and lawn at sunset",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-41.jpg",
+   "category": "interior",
+   "description": "Attic hallway, painted floors, old flag",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-42.jpg",
+   "category": "kitchen",
+   "description": "Sage kitchen with skylight and copper lights",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-43.jpg",
+   "category": "bedroom",
+   "description": "Old-world bedroom, blue painted walls",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-44.jpg",
+   "category": "exterior",
+   "description": "Porch overlooking a lake at sunset",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-45.jpg",
+   "category": "kitchen",
+   "description": "Kitchen opening to a garden under a skylight",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-46.jpg",
+   "category": "interior",
+   "description": "Living room with tall arched windows",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-47.jpg",
+   "category": "interior",
+   "description": "Living and dining through an arch, evening",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-48.jpg",
+   "category": "interior",
+   "description": "Staircase and living room, green walls",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-49.jpg",
+   "category": "interior",
+   "description": "Cream sectional, palms, arched windows",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-50.jpg",
+   "category": "exterior",
+   "description": "Stucco home with arched entry and garden",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-51.jpg",
+   "category": "interior",
+   "description": "Two-story great room, dark wood",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-52.jpg",
+   "category": "exterior",
+   "description": "Stucco courtyard with balconies and flowers",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-53.jpg",
+   "category": "kitchen",
+   "description": "Brick kitchen with arched window",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-54.jpg",
+   "category": "interior",
+   "description": "Sunny hallway with glass door",
+   "used": []
+  },
+  {
+   "file": "/post-bank/img-55.jpg",
+   "category": "kitchen",
+   "description": "Kitchen and sunroom under skylights",
+   "used": []
+  }
+ ]
+}
