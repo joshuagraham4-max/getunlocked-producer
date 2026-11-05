@@ -8,7 +8,7 @@ const inArea = (a) => (a ? ` in ${a}` : "");
 const hookLine = (h) => (h ? `${h.trim().replace(/[.!]?$/, "!")} ` : "");
 
 export const STEPS = [
-  { step:1, name:"Opener", wait:5, variants:[
+  { step:1, name:"Opener", wait:2, variants:[
     (p) => `Hey ${p.first}! ${hookLine(p.hook)}I see you're doing real estate${inArea(p.area)} and I've been noticing your posts. I'm looking for a few agent partners and you stood out.
 
 Joshua Graham here, AVP at Zero Point Mortgage. I'm not a lender, I'm a wholesale broker, so I have access to money where most lenders get stuck. Not selling anything, I just want to know the agents worth knowing.
@@ -20,7 +20,7 @@ I'm Joshua Graham, AVP at Zero Point Mortgage. Not a lender, a wholesale broker,
 
 Are you mostly buyers, listings, or investors these days?`,
   ]},
-  { step:2, name:"Stuck deal nudge", wait:7, variants:[
+  { step:2, name:"Stuck deal nudge", wait:2, variants:[
     (p) => `No pressure ${p.first}. If you've got a buyer or investor stuck right now, that's exactly what I fix. Even just the scenario, no names needed.`,
     (p) => `Hey ${p.first}, one quick one: anything stuck right now? Self-employed buyer, investor, credit issue, a file another lender bailed on. That's my lane.`,
   ]},
