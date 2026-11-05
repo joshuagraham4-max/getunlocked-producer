@@ -52,9 +52,10 @@ export default function GamePlan({ userId, avgCommission, onGoCalls }) {
   const loadAuto = useCallback(async () => {
     if (!userId) return;
     const start = new Date(KEY + "T00:00:00").toISOString();
-    const [{ data:t }, { data:g }] = await Promise.all([
+    const [{ data:t }, { data:g }, { data:pp }] = await Promise.all([
       supabase.from("contact_touches").select("channel,outcome").eq("user_id", userId).gte("touched_at", start).limit(2000),
       supabase.from("group_post_log").select("id").eq("user_id", userId).gte("created_at", start).limit(500),
+      supabase.from("profile_posts").select("id").eq("user_id", userId).gte("posted_at", start).limit(50),
     ]);
     const rows = t || [];
     setAuto({
@@ -62,7 +63,7 @@ export default function GamePlan({ userId, avgCommission, onGoCalls }) {
       conv: rows.filter((r) => r.channel === "call" && (r.outcome === "talked" || r.outcome === "booked")).length,
       booked: rows.filter((r) => r.outcome === "booked").length,
       emails: rows.filter((r) => r.channel === "email" && /^email \d sent$/.test(r.outcome || "")).length,
-      posts: (g || []).length,
+      posts: (g || []).length + (pp || []).length,
     });
   }, [userId, KEY]);
   useEffect(() => { loadAuto(); const i = setInterval(() => { loadAuto(); tick((n) => n + 1); }, 60000); return () => clearInterval(i); }, [loadAuto]);
@@ -216,7 +217,7 @@ export default function GamePlan({ userId, avgCommission, onGoCalls }) {
               <Count label="Dials" n={auto.dials} goal={callTarget} autoTag/>
               <Count label="Conversations" n={auto.conv} goal={settings.targets.conv} autoTag/>
               <Count label="Emails sent" n={auto.emails} goal={emailTarget} autoTag/>
-              <Count label="Group posts" n={auto.posts} goal={settings.targets.posts} autoTag/>
+              <Count label="Posts (profile + groups)" n={auto.posts} goal={settings.targets.posts} autoTag/>
               <Count label="Booked" n={auto.booked} autoTag/>
               {(settings.extraCounters || []).map((k) => <Count key={k} label={EXTRA[k] || k} n={m[k] || 0} k={k}/>)}
             </div>

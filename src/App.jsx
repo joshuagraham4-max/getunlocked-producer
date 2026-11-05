@@ -7,6 +7,7 @@ import RadarTab from "./radar/RadarTab.jsx";
 import CallsTab from "./calls/CallsTab.jsx";
 import GroupsTab from "./groups/GroupsTab.jsx";
 import GamePlan from "./today/GamePlan.jsx";
+import InvestorLeads from "./investors/InvestorLeads.jsx";
 import HowTo from "./HowTo.jsx";
 import Attestation, { hasSigned } from "./upload/Attestation.jsx";
 import { GUIDES } from "./howto/guides.jsx";
@@ -707,7 +708,7 @@ export default function App() {
     }
   }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const navTabs = [["today","Today"],["calls","Calls"],["contacts","Contacts"],["radar","Radar"],["groups","Groups"]].concat(showMore ? [["scripts","Scripts"],["ioi","IOI"],["team","Team"]].concat(isAdmin?[["posts","Posts"]]:[]) : []).concat([["__more", showMore ? "Less" : "More"]]);
+  const navTabs = [["today","Today"],["calls","Calls"],["contacts","Contacts"],["radar","Radar"],["investors","Investors"],["groups","Groups"]].concat(showMore ? [["scripts","Scripts"],["ioi","IOI"],["team","Team"]].concat(isAdmin?[["posts","Posts"]]:[]) : []).concat([["__more", showMore ? "Less" : "More"]]);
   useEffect(() => { if (tab==="team" && isAdmin) loadTeamData(); }, [tab, isAdmin]);
 
   const tomTimer = useRef(null);
@@ -1203,7 +1204,7 @@ export default function App() {
         <div style={{fontFamily:F.cond,fontSize:10,fontWeight:600,letterSpacing:"0.2em",textTransform:"uppercase",color:C.light,marginBottom:3}}>Get Unlocked Producer</div>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end"}}>
           <div style={{fontFamily:F.cond,fontSize:22,fontWeight:800,color:C.ink,lineHeight:1}}>
-            {profile.name?.toUpperCase()} <span style={{color:C.green}}>— {tab==="today"?"TODAY":tab==="calls"?"CALLS":tab==="radar"?"RADAR":tab==="contacts"?"CONTACTS":tab==="scripts"?"SCRIPTS":tab==="ioi"?"IOI":tab==="history"?"HISTORY":tab==="posts"?"SMART MONEY POSTS":tab==="groups"?"GROUPS":"TEAM"}</span>
+            {profile.name?.toUpperCase()} <span style={{color:C.green}}>— {tab==="today"?"TODAY":tab==="calls"?"CALLS":tab==="radar"?"RADAR":tab==="contacts"?"CONTACTS":tab==="scripts"?"SCRIPTS":tab==="ioi"?"IOI":tab==="history"?"HISTORY":tab==="posts"?"SMART MONEY POSTS":tab==="groups"?"GROUPS":tab==="investors"?"INVESTOR LEADS":"TEAM"}</span>
           </div>
           <div style={{textAlign:"right"}}>
             <div style={{fontFamily:F.mono,fontSize:10,color:C.mid}}>{dateStr}</div>
@@ -1217,7 +1218,7 @@ export default function App() {
       {isWide && (
         <div style={{marginBottom:28}}>
           <div style={{fontFamily:F.cond,fontSize:32,fontWeight:900,color:C.ink,lineHeight:1}}>
-            {tab==="today"?"TODAY":tab==="calls"?"CALLS":tab==="radar"?"RADAR":tab==="contacts"?"CONTACTS":tab==="scripts"?"SCRIPTS":tab==="ioi"?"IOI POSTS":tab==="history"?"HISTORY":tab==="posts"?"SMART MONEY POSTS":tab==="groups"?"GROUPS":"TEAM"}
+            {tab==="today"?"TODAY":tab==="calls"?"CALLS":tab==="radar"?"RADAR":tab==="contacts"?"CONTACTS":tab==="scripts"?"SCRIPTS":tab==="ioi"?"IOI POSTS":tab==="history"?"HISTORY":tab==="posts"?"SMART MONEY POSTS":tab==="groups"?"GROUPS":tab==="investors"?"INVESTOR LEADS":"TEAM"}
           </div>
           <div style={{fontFamily:F.mono,fontSize:10,color:C.light,marginTop:4}}>{dateStr}</div>
         </div>
@@ -1575,6 +1576,7 @@ export default function App() {
       {tab==="calls" && <CallsTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onOpen={(c)=>{setOpenContactId(c.id);setTab("contacts");}} onGoRadar={()=>setTab("radar")}/>}
       {tab==="radar" && <RadarTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onOpen={(c)=>{setOpenContactId(c.id);setTab("contacts");}} onGoCalls={()=>setTab("calls")}/>}
       {tab==="groups" && <GroupsTab userId={user?.id}/>}
+      {tab==="investors" && <InvestorLeads userId={user?.id} contacts={contacts} setContacts={setContacts}/>}
       {tab==="scripts" && <ScriptsTab/>}
       {tab==="ioi" && <IOITab/>}
       {tab==="posts" && isAdmin && (

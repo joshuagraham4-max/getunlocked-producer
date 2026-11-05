@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "../supabase.js";
 import { today, BOOKING } from "../radar/engine.js";
+import ProfilePosts from "./ProfilePosts.jsx";
 
 const C = { bg:"#f5f0e8", card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc", green:"#1e6e4a", amber:"#b05e0d", amberBg:"#fdf0e0", red:"#9e3020" };
 const F = { mono:"'DM Mono',monospace", cond:"'Barlow Condensed',sans-serif", body:"'Barlow',sans-serif" };
@@ -70,9 +71,11 @@ export default function GroupsTab({ userId }) {
   return (
     <div>
       <div style={{display:"flex", gap:8, marginBottom:14, flexWrap:"wrap"}}>
-        <Tab k="today" l={`Today's posts ${postedToday}/${active.length}`}/><Tab k="groups" l={`Groups ${joined.length}/${groups.length}`}/><Tab k="tools" l="Tools & links"/><Tab k="bank" l="Post bank"/>
+        <Tab k="profile" l="Profile posts"/><Tab k="today" l={`Group posts ${postedToday}/${active.length}`}/><Tab k="groups" l={`Groups ${joined.length}/${groups.length}`}/><Tab k="tools" l="Tools & links"/><Tab k="bank" l="Post bank"/>
       </div>
       {msg && <div style={{fontFamily:F.mono, fontSize:12, color:C.red, marginBottom:10}}>{msg}</div>}
+
+      {view === "profile" && <ProfilePosts userId={userId}/>}
 
       {view === "today" && (
         <>

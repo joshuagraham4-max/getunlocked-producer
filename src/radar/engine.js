@@ -96,7 +96,9 @@ export function reasonFor(c, i, t = today()) {
   const due = c.follow_up_date && c.follow_up_date <= t;
   const b = bdaySoon(c.birthday);
   const r = [];
-  if (ty === "lead" && due) r.push({ key:"newlead", score:1300, title: tags.includes("calculator lead") ? "New calculator lead" : "Lead follow-up due", detail: (c.contact_note || "").split("\n").slice(-1)[0] || c.subtype || "" });
+  const inv = tags.includes("investor lead");
+  const invTitle = tags.includes("maturing_hard_money") ? "Investor: hard money coming due" : tags.includes("dead_money") ? "Investor: dead money in equity" : "Investor: portfolio review";
+  if (ty === "lead" && due) r.push({ key:"newlead", score: inv ? 1350 : 1300, title: inv ? invTitle : tags.includes("calculator lead") ? "New calculator lead" : "Lead follow-up due", detail: (c.contact_note || "").split("\n").slice(-1)[0] || c.subtype || "" });
   else if (due) r.push({ key:"followup", score:1200, title:"Follow-up due", detail: c.outcome ? `last outcome: ${c.outcome}` : (c.contact_note || "").split("\n").slice(-1)[0] || "" });
   if (ty === "past_client" && i) {
     if (["conv","fha","va"].includes(i.bucket)) r.push({ key:"rate", score:600 + i.gap * 100, title:`Rate gap +${i.gap.toFixed(2)}%`,
@@ -189,10 +191,16 @@ export function scriptsFor(c, i, reason, me = "Joshua Graham") {
     case "inherited":
       say = `Hi ${first}, this is ${me}, AVP at Zero Point Mortgage Services. I'm the loan originator now taking care of your home loan, and I wanted to introduce myself personally. No pitch. If anything ever comes up with your home or your money, I'm your guy. Is this still the best number for you?`;
       short = `I'm the loan originator now taking care of your loan and wanted to introduce myself`; break;
-    case "newlead": {
+    case "newlead": if ((c.tags || []).includes("investor lead")) {
+      const t = c.tags || []; const rev = /Portfolio Review/.test(c.contact_note || "");
+      if (t.includes("maturing_hard_money") && !rev) say = `Hey ${first}, ${me}, AVP at Zero Point Mortgage Services. I work with investors, and public records show a short-term loan on one of your properties that's probably coming due soon. When it does, I can roll you into a long-term loan where the rent qualifies it, no tax returns. Rates are in the high sixes right now. What's your plan for that one?`;
+      else if (t.includes("dead_money") && !rev) say = `Hey ${first}, ${me}, AVP at Zero Point Mortgage Services. I work with rental owners. Quick question: you've got real equity sitting in your rentals that isn't earning you anything. I do free portfolio reviews: what you own, where the cash is stuck, and how to pull it out for the next one without your tax returns. Got two minutes?`;
+      else say = `Hey ${first}, ${me}. You filled out my portfolio review. Thanks. I looked at what you sent${t.includes("maturing_hard_money") ? ", and that hard money loan is the first thing I want to solve" : ""}. Walk me through your properties for a minute: what's the one you'd most like to pull cash out of?`;
+      short = `I'd like to walk you through your free portfolio review and where your equity could be working harder`; break;
+    } else {
       const rental = tags.some((x) => /rtl|rental|cash|flow/i.test(x)) || /rental/i.test(c.subtype || "");
       say = `Hey ${first}, ${me}. You ran the numbers on our ${rental ? "rental" : "home"} calculator. Smart move. What's the property you're looking at?`;
-      short = `Thanks for running the numbers on our calculator. I'd love to walk through it with you`; break; }
+      short = `Thanks for running the numbers on our calculator. I'd love to walk through it with you`; break; } }
     case "followup":
       say = c.outcome === "talked" || c.outcome === "replied to email"
         ? `Hey ${first}, ${me}. I've got those numbers we talked about. Got a minute?`
