@@ -414,6 +414,24 @@
    "category": "exterior",
    "description": "Green mid-century ranch, stone base",
    "used": []
+  },
+  {
+   "file": "/post-bank/ads/dscr-10-day-close.jpg",
+   "category": "dscr ad",
+   "description": "DSCR ad: 10-day close, rent qualifies the loan",
+   "used": []
+  },
+  {
+   "file": "/post-bank/ads/dscr-high-6s-every-fee.jpg",
+   "category": "dscr ad",
+   "description": "DSCR ad: high 6s, every fee shown before you apply",
+   "used": []
+  },
+  {
+   "file": "/post-bank/ads/dscr-2-more-rentals.jpg",
+   "category": "dscr ad",
+   "description": "DSCR ad: 2 more rentals from equity you already have (Portfolio Review)",
+   "used": []
   }
  ]
 }
