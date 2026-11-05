@@ -432,6 +432,24 @@
    "category": "dscr ad",
    "description": "DSCR ad: 2 more rentals from equity you already have (Portfolio Review)",
    "used": []
+  },
+  {
+   "file": "/post-bank/ads/cashout-before-you-need-it.jpg",
+   "category": "cash out ad",
+   "description": "Cash-out ad: cash out before you need it, qualify while income is steady",
+   "used": []
+  },
+  {
+   "file": "/post-bank/ads/cashout-home-is-your-cushion.jpg",
+   "category": "cash out ad",
+   "description": "Cash-out ad: your cushion is in your home, consolidate before 2027",
+   "used": []
+  },
+  {
+   "file": "/post-bank/ads/cashout-580-bank-statements.jpg",
+   "category": "cash out ad",
+   "description": "Cash-out ad: 580 FICO, bank statements for self-employed",
+   "used": []
   }
  ]
 }
