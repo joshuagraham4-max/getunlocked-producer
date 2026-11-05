@@ -93,7 +93,7 @@ export function defaultSettings(userId, avgCommission = 4000) {
     myMessages: [],
     targets: { conv:5, posts:7 },
     // Dollar value of each activity, from average commission: app 25%, conversation 8.75%, post 3.5%, dial/email 1.75%.
-    values: { dial:Math.round(c * 0.0175), email:Math.round(c * 0.0175), conv:Math.round(c * 0.0875), booked:Math.round(c * 0.0875), post:Math.round(c * 0.035), app:Math.round(c * 0.25), video:Math.round(c * 0.035) },
+    values: { dial:Math.round(c * 0.0175), email:Math.round(c * 0.0175), conv:Math.round(c * 0.0875), booked:Math.round(c * 0.0875), post:Math.round(c * 0.035), app:Math.round(c * 0.25), video:Math.round(c * 0.035), dm:10 },
     extraCounters: me ? ["apps","videos","proposals","sold"] : ["apps"],
     template: me ? "joshua" : "default",
     customDay: null,                   // optional edited day blocks

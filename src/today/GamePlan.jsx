@@ -30,7 +30,7 @@ export default function GamePlan({ userId, avgCommission, onGoCalls }) {
   const [settings, setSettings] = useState(null);
   const [day, setDay] = useState({ gym:"630", missed:false, pool:false, done:{}, manual:{}, notes:"", med:[] });
   const [history, setHistory] = useState({});
-  const [auto, setAuto] = useState({ dials:0, conv:0, booked:0, emails:0, posts:0 });
+  const [auto, setAuto] = useState({ dials:0, conv:0, booked:0, emails:0, posts:0, dms:0 });
   const [showSet, setShowSet] = useState(false);
   const [toastMsg, setToastMsg] = useState(null);
   const [, tick] = useState(0);
@@ -52,10 +52,11 @@ export default function GamePlan({ userId, avgCommission, onGoCalls }) {
   const loadAuto = useCallback(async () => {
     if (!userId) return;
     const start = new Date(KEY + "T00:00:00").toISOString();
-    const [{ data:t }, { data:g }, { data:pp }] = await Promise.all([
+    const [{ data:t }, { data:g }, { data:pp }, { data:dm }] = await Promise.all([
       supabase.from("contact_touches").select("channel,outcome").eq("user_id", userId).gte("touched_at", start).limit(2000),
       supabase.from("group_post_log").select("id").eq("user_id", userId).gte("created_at", start).limit(500),
       supabase.from("profile_posts").select("id").eq("user_id", userId).gte("posted_at", start).limit(50),
+      supabase.from("agent_outreach").select("id").eq("user_id", userId).gte("sent_at", start).limit(500),
     ]);
     const rows = t || [];
     setAuto({
@@ -64,6 +65,7 @@ export default function GamePlan({ userId, avgCommission, onGoCalls }) {
       booked: rows.filter((r) => r.outcome === "booked").length,
       emails: rows.filter((r) => r.channel === "email" && /^email \d sent$/.test(r.outcome || "")).length,
       posts: (g || []).length + (pp || []).length,
+      dms: (dm || []).length,
     });
   }, [userId, KEY]);
   useEffect(() => { loadAuto(); const i = setInterval(() => { loadAuto(); tick((n) => n + 1); }, 60000); return () => clearInterval(i); }, [loadAuto]);
@@ -99,10 +101,11 @@ export default function GamePlan({ userId, avgCommission, onGoCalls }) {
   const v = settings?.values || {};
   const m = day.manual || {};
   const earnedParts = settings ? [
-    ["dial", auto.dials, "dials"], ["conv", auto.conv, "conversations"], ["email", auto.emails, "emails"], ["post", auto.posts, "group posts"],
+    ["dial", auto.dials, "dials"], ["conv", auto.conv, "conversations"], ["email", auto.emails, "emails"], ["post", auto.posts, "group posts"], ["dm", auto.dms, "agent DMs"],
     ["app", m.apps || 0, "apps"], ["video", m.videos || 0, "videos"],
   ] : [];
-  const earned = earnedParts.reduce((s, [k, n]) => s + n * (v[k] || 0), 0);
+  const val = (k) => (v[k] ?? (k === "dm" ? 10 : 0));   // agent DMs default to $10 each
+  const earned = earnedParts.reduce((s, [k, n]) => s + n * val(k), 0);
 
   const evaluate = useCallback((rec, a) => {
     const crit = [];
@@ -139,7 +142,7 @@ export default function GamePlan({ userId, avgCommission, onGoCalls }) {
     }, 500);
   }, [userId, KEY, evaluate, auto, earned]);
   const update = (fn) => setDay((d) => { const n = fn(d); persist(n); return n; });
-  useEffect(() => { if (loaded.current) persist(day); }, [auto.dials, auto.conv, auto.emails, auto.posts]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (loaded.current) persist(day); }, [auto.dials, auto.conv, auto.emails, auto.posts, auto.dms]); // eslint-disable-line react-hooks/exhaustive-deps
   const saveSettings = async (patch) => {
     const n = { ...settings, ...patch }; setSettings(n);
     await supabase.from("game_plan_settings").upsert({ user_id:userId, settings:n, updated_at:new Date().toISOString() });
@@ -204,7 +207,7 @@ export default function GamePlan({ userId, avgCommission, onGoCalls }) {
               <div style={{background:C.greenBg, border:`1px solid ${C.greenBd}`, borderRadius:10, padding:"14px 16px"}}>
                 <div style={{...lbl, color:C.green}}>Earned today</div>
                 <div style={{fontFamily:F.cond, fontWeight:800, fontSize:54, color:C.green, lineHeight:1}}>${earned.toLocaleString()}</div>
-                <div style={{fontFamily:F.mono, fontSize:10, color:C.mid, marginTop:4}}>{earnedParts.filter(([, n]) => n).map(([k, n, l]) => `${n} ${l} x $${(v[k] || 0).toLocaleString()}`).join(" · ") || "Every call counts. Start the scoreboard."}</div>
+                <div style={{fontFamily:F.mono, fontSize:10, color:C.mid, marginTop:4}}>{earnedParts.filter(([, n]) => n).map(([k, n, l]) => `${n} ${l} x $${val(k).toLocaleString()}`).join(" · ") || "Every call counts. Start the scoreboard."}</div>
               </div>
               <div style={{padding:"4px"}}>
                 <div style={lbl}>Perfect-day streak</div>
@@ -218,6 +221,7 @@ export default function GamePlan({ userId, avgCommission, onGoCalls }) {
               <Count label="Conversations" n={auto.conv} goal={settings.targets.conv} autoTag/>
               <Count label="Emails sent" n={auto.emails} goal={emailTarget} autoTag/>
               <Count label="Posts (profile + groups)" n={auto.posts} goal={settings.targets.posts} autoTag/>
+              <Count label="Agent DMs" n={auto.dms} goal={10} autoTag/>
               <Count label="Booked" n={auto.booked} autoTag/>
               {(settings.extraCounters || []).map((k) => <Count key={k} label={EXTRA[k] || k} n={m[k] || 0} k={k}/>)}
             </div>
@@ -325,7 +329,7 @@ function Settings({ settings, save, tpl }) {
       <div>
         <div style={lbl}>Dollar value of each activity</div>
         <div style={{display:"flex", gap:8, flexWrap:"wrap", marginTop:6}}>
-          {[["dial","Dial"],["conv","Conversation"],["email","Email"],["post","Group post"],["app","App"],["video","Video"]].map(([k, l]) => field(l, <input key={k} type="number" value={s.values[k] || 0} onChange={(e) => setS({ ...s, values:{ ...s.values, [k]:Number(e.target.value) } })} style={{...inp, width:90}}/>))}
+          {[["dial","Dial"],["conv","Conversation"],["email","Email"],["post","Group post"],["dm","Agent DM"],["app","App"],["video","Video"]].map(([k, l]) => field(l, <input key={k} type="number" value={s.values[k] ?? (k === "dm" ? 10 : 0)} onChange={(e) => setS({ ...s, values:{ ...s.values, [k]:Number(e.target.value) } })} style={{...inp, width:90}}/>))}
         </div>
       </div>
       <div>
