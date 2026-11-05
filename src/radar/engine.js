@@ -98,8 +98,8 @@ export function reasonFor(c, i, t = today()) {
   const r = [];
   const inv = tags.includes("investor lead");
   const invTitle = tags.includes("maturing_hard_money") ? "Investor: hard money coming due" : tags.includes("dead_money") ? "Investor: dead money in equity" : "Investor: portfolio review";
-  if (ty === "lead" && due) r.push({ key:"newlead", score: inv ? 1350 : 1300, title: inv ? invTitle : tags.includes("calculator lead") ? "New calculator lead" : "Lead follow-up due", detail: (c.contact_note || "").split("\n").slice(-1)[0] || c.subtype || "" });
-  else if (due) r.push({ key:"followup", score:1200, title: (c.tags || []).includes("messenger reply") ? "Agent replied on messenger" : "Follow-up due", detail: c.outcome ? `last outcome: ${c.outcome}` : (c.contact_note || "").split("\n").slice(-1)[0] || "" });
+  if (ty === "lead" && due) r.push({ key:"newlead", score: inv ? 1350 : 1300, title: c.email_bad ? "Email bounced: get a new email" : inv ? invTitle : tags.includes("calculator lead") ? "New calculator lead" : "Lead follow-up due", detail: (c.contact_note || "").split("\n").slice(-1)[0] || c.subtype || "" });
+  else if (due) r.push({ key:"followup", score:1200, title: c.email_bad ? "Email bounced: get a new email" : (c.tags || []).includes("messenger reply") ? "Agent replied on messenger" : "Follow-up due", detail: c.outcome ? `last outcome: ${c.outcome}` : (c.contact_note || "").split("\n").slice(-1)[0] || "" });
   if (ty === "past_client" && i) {
     if (["conv","fha","va"].includes(i.bucket)) r.push({ key:"rate", score:600 + i.gap * 100, title:`Rate gap +${i.gap.toFixed(2)}%`,
       detail:`${i.rate}% vs ${Number(i.market).toFixed(2)}% ${i.prog === "Conventional" ? "market" : i.prog} today${i.bucket === "fha" ? " · FHA Streamline eligible" : i.bucket === "va" ? " · VA IRRRL eligible" : " · Conventional R&T"}${i.save > 0 ? ` · ~${money(i.save)}/mo` : ""}` });

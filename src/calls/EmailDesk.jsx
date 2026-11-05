@@ -101,13 +101,22 @@ export default function EmailDesk({ userId, contacts, setContacts, callIds, wide
   const [selId, setSelId] = useState(null);
   const [draft, setDraft] = useState({ subject:"", body:"" });
   const byId = useMemo(() => Object.fromEntries(contacts.map((c) => [c.id, c])), [contacts]);
+  const [sentToday, setSentToday] = useState({});   // contact id -> { outcome, note } logged today
+  useEffect(() => {
+    if (!userId) return;
+    const start = new Date(); start.setHours(0, 0, 0, 0);
+    supabase.from("contact_touches").select("contact_id, outcome, note, touched_at").eq("user_id", userId).eq("channel", "email")
+      .gte("touched_at", start.toISOString()).order("touched_at").then(({ data }) => {
+        const m = {}; (data || []).forEach((r) => { m[r.contact_id] = r; }); setSentToday(m);
+      });
+  }, [userId]);
   const key = `gupEmails:${userId}:${t}`;
 
   const queue = useMemo(() => {
     let saved = null; try { saved = JSON.parse(localStorage.getItem(key) || "null"); } catch {}
     if (saved && saved.target === target) return saved.ids.filter((id) => byId[id]);
     const skip = new Set(callIds || []);
-    const due = contacts.filter((c) => !c.do_not_contact && c.email && /@/.test(c.email)
+    const due = contacts.filter((c) => !c.do_not_contact && !c.email_bad && c.email && /@/.test(c.email)
       && ["past_client","agent","lead"].includes(c.contact_type || "past_client")
       && (c.email_step || 0) < 3 && (!c.email_next || c.email_next <= t) && !skip.has(c.id) && c.last_contacted !== t);
     due.sort((a, b) => (priority(b) - priority(a)) || ((b.email_step || 0) - (a.email_step || 0)) || String(b.funded_date || "").localeCompare(String(a.funded_date || "")));
@@ -117,20 +126,21 @@ export default function EmailDesk({ userId, contacts, setContacts, callIds, wide
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [target, key, nonce, contacts.length]);
 
-  const done = (id) => { const c = byId[id]; return !!c && (c.__emailedToday || (c.email_next && c.email_next > t) || c.email_step >= 3); };
+  const done = (id) => { const c = byId[id]; return !!c && (!!sentToday[id] || c.__emailedToday || c.email_bad || (c.email_next && c.email_next > t) || c.email_step >= 3); };
   useEffect(() => { if (!selId || !queue.includes(selId)) { const n = queue.find((id) => !done(id)); setSelId(n || queue[0] || null); } }, [queue]); // eslint-disable-line react-hooks/exhaustive-deps
   const sel = selId ? byId[selId] : null;
   useEffect(() => { if (sel) setDraft(emailFor(sel)); }, [selId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const undoKey = `gupEmailUndo:${userId}:${t}`;
-  const save = async (fields, label) => {
+  const save = async (fields, label, note = null) => {
     const prev = { email_step:sel.email_step || 0, email_next:sel.email_next || null, follow_up_date:sel.follow_up_date || null, do_not_contact:!!sel.do_not_contact, outcome:sel.outcome || null };
-    const { data:touch } = await supabase.from("contact_touches").insert({ user_id:userId, contact_id:sel.id, channel:"email", outcome:label }).select("id").single();
+    const { data:touch } = await supabase.from("contact_touches").insert({ user_id:userId, contact_id:sel.id, channel:"email", outcome:label, note }).select("id").single();
+    setSentToday((m) => ({ ...m, [sel.id]: { outcome:label, note } }));
     const { data } = await supabase.from("contacts").update(fields).eq("id", sel.id).select().single();
     if (data) setContacts((p) => p.map((x) => (x.id === data.id ? { ...data, __emailedToday:true } : x)));
     try { const u = JSON.parse(localStorage.getItem(undoKey) || "{}"); u[sel.id] = { prev, touchId:touch?.id }; localStorage.setItem(undoKey, JSON.stringify(u)); } catch {}
-    const idx = queue.indexOf(sel.id); const n = queue.slice(idx + 1).find((id) => !done(id) && id !== sel.id) || queue.find((id) => !done(id) && id !== sel.id); if (n) setSelId(n);
   };
+  const goNext = () => { const idx = queue.indexOf(selId); const n = queue.slice(idx + 1).find((id) => !done(id)) || queue.find((id) => !done(id)); if (n) setSelId(n); };
   const undo = async (id) => {
     let u = {}; try { u = JSON.parse(localStorage.getItem(undoKey) || "{}"); } catch {}
     const s = u[id]; if (!s) return;
@@ -138,12 +148,15 @@ export default function EmailDesk({ userId, contacts, setContacts, callIds, wide
     const { data } = await supabase.from("contacts").update(s.prev).eq("id", id).select().single();
     if (data) setContacts((p) => p.map((x) => (x.id === data.id ? data : x)));
     delete u[id]; try { localStorage.setItem(undoKey, JSON.stringify(u)); } catch {}
+    setSentToday((m) => { const x = { ...m }; delete x[id]; return x; });
     setSelId(id);
   };
   const canUndo = (id) => { try { return !!JSON.parse(localStorage.getItem(undoKey) || "{}")[id]; } catch { return false; } };
 
   const step = sel ? (sel.email_step || 0) + 1 : 1;
-  const markSent = () => { const ns = (sel.email_step || 0) + 1; save({ email_step:ns, email_next: ns < 3 ? addDays(GAP[ns]) : null }, `email ${ns} sent`); };
+  const markSent = () => { const ns = (sel.email_step || 0) + 1; save({ email_step:ns, email_next: ns < 3 ? addDays(GAP[ns]) : null }, `email ${ns} sent`, `${draft.subject}\n\n${draft.body}`); };
+  const bounced = () => save({ email_bad:true, email_step:0, email_next:null, follow_up_date:t, outcome:"email bounced",
+    contact_note:[sel.contact_note, `${t} · email bounced: ${sel.email}`].filter(Boolean).join("\n") }, "bounced");
   const replied = () => save({ email_step:99, email_next:null, follow_up_date:t, outcome:"replied to email" }, "replied");
   const stop = () => save({ email_step:99, email_next:null, do_not_contact:true, outcome:"asked to stop" }, "asked to stop");
   const label = (c) => ({ agent: workedWith(c) ? "AGENT · WORKED TOGETHER" : "AGENT", client: workedWith(c) ? "MY CLIENT · CLOSED" : "MY CLIENT", lead:"LEAD", pastlo:"PAST LO FUNDING" })[kind(c)];
@@ -173,9 +186,17 @@ export default function EmailDesk({ userId, contacts, setContacts, callIds, wide
       <div style={{fontFamily:F.mono, fontSize:12, color:C.mid, margin:"6px 0 14px"}}>{label(sel)}{sel.company ? ` · ${sel.company}` : ""} · {sel.email}</div>
       {done(sel.id) ? (
         <div style={{display:"flex", gap:8, alignItems:"center", padding:"10px 12px", borderRadius:8, background:"#fff", border:`1px solid ${C.rule}`}}>
-          <span style={{fontFamily:F.mono, fontSize:12}}>Logged today: <b>{sel.outcome === "replied to email" ? "replied" : sel.outcome === "asked to stop" ? "asked to stop" : `email ${sel.email_step} sent`}</b>{sel.email_next ? ` · next email ${sel.email_next.slice(5)}` : ""}</span>
+          <span style={{fontFamily:F.mono, fontSize:12}}>{sentToday[sel.id] ? "Today" : "Logged"}: <b>{sel.email_bad ? "email bounced, on today's call list to get a new email" : sel.outcome === "replied to email" ? "replied" : sel.outcome === "asked to stop" ? "asked to stop" : `email ${sel.email_step} sent`}</b>{sel.email_next ? ` · next email ${sel.email_next.slice(5)}` : ""}</span>
           {canUndo(sel.id) && <button onClick={() => undo(sel.id)} style={{...btn, padding:"4px 12px", marginLeft:"auto"}}>Undo</button>}
+          <button onClick={goNext} style={{...btnG, padding:"4px 12px", marginLeft: canUndo(sel.id) ? 0 : "auto"}}>Next person</button>
         </div>
+        {sentToday[sel.id]?.note && <>
+          <div style={{fontFamily:F.cond, fontWeight:700, fontSize:12, letterSpacing:"0.16em", textTransform:"uppercase", color:C.light, marginTop:14}}>What you sent</div>
+          <textarea readOnly value={sentToday[sel.id].note} rows={12} style={{...inp, marginTop:6, lineHeight:1.5, background:"#f7f4ee", fontFamily:F.body}}/>
+          <div style={{display:"flex", gap:8, marginTop:8}}>
+            <button onClick={() => navigator.clipboard?.writeText(sentToday[sel.id].note.split("\n\n").slice(1).join("\n\n"))} style={btn}>Copy text</button>
+            <button onClick={() => navigator.clipboard?.writeText(sentToday[sel.id].note.split("\n\n")[0])} style={btn}>Copy subject</button>
+          </div></>}
       ) : (
         <>
           <div style={{fontFamily:F.cond, fontWeight:700, fontSize:12, letterSpacing:"0.16em", textTransform:"uppercase", color:C.light}}>Email {step} of 3</div>
@@ -186,9 +207,10 @@ export default function EmailDesk({ userId, contacts, setContacts, callIds, wide
             <button onClick={() => navigator.clipboard?.writeText(draft.body)} style={btn}>Copy text</button>
             <button onClick={markSent} style={btnG}>Mark sent</button>
             <button onClick={replied} style={{...btn, marginLeft:"auto"}}>They replied</button>
+            <button onClick={bounced} style={btn}>Bounced</button>
             <button onClick={stop} style={btn}>Asked to stop</button>
           </div>
-          <div style={{fontFamily:F.mono, fontSize:11, color:C.light, marginTop:10}}>Mark sent schedules the next email ({step === 1 ? "in 4 days" : step === 2 ? "in 7 days" : "none, this is the last one"}). They replied: ends the emails and puts a follow-up call on today's call list. Asked to stop: marks them do-not-contact.</div>
+          <div style={{fontFamily:F.mono, fontSize:11, color:C.light, marginTop:10}}>Mark sent schedules the next email ({step === 1 ? "in 4 days" : step === 2 ? "in 7 days" : "none, this is the last one"}). They replied: ends the emails and puts a follow-up call on today's call list. Bounced: takes them off emails and puts them on today's call list to get a new email; entering it restarts the sequence. Asked to stop: marks them do-not-contact.</div>
         </>
       )}
     </div>

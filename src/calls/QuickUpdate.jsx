@@ -31,7 +31,7 @@ export default function QuickUpdate({ userId, c, setContacts, onLoansChanged }) 
     const val = v.value.trim(); const rate = Number(v.rate);
     switch (open) {
       case "phone": if (!val) return; return commit({ phone:val, phone_2:c.phone && c.phone !== val ? c.phone : c.phone_2 }, `new phone ${val}`);
-      case "email": if (!/@/.test(val)) return setMsg("That email doesn't look right."); return commit({ email:val, email_2:c.email && c.email !== val ? c.email : c.email_2 }, `new email ${val}`);
+      case "email": if (!/@/.test(val)) return setMsg("That email doesn't look right."); return commit({ email:val, email_2:c.email && c.email !== val && !c.email_bad ? c.email : c.email_2, email_bad:false, email_step:0, email_next:null }, `new email ${val}`);
       case "rate": if (!rate) return setMsg("Enter the rate.");
         return commit({ note_rate:rate }, `rate corrected to ${rate}%`, async () => { await supabase.from("loans").update({ note_rate:rate }).eq("contact_id", c.id).eq("is_current", true); });
       case "refi": if (!rate) return setMsg("Enter the new rate.");
