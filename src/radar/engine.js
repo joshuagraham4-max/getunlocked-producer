@@ -38,7 +38,7 @@ export function computeRadar(contacts, loans, rates, settings) {
   const thr = Number(settings.refi_threshold) || 0.5, appr = (Number(settings.appreciation_pct) || 0) / 100, eqMax = Number(settings.equity_ltv_max) || 70, season = Number(settings.seasoning_months) || 7;
   const mkt = { Conventional:Number(rates.conventional) || null, FHA:Number(rates.fha) || null, VA:Number(rates.va) || null };
   for (const c of contacts) {
-    if ((c.contact_type || "past_client") !== "past_client" || c.do_not_contact) continue;
+    if ((c.contact_type || "past_client") !== "past_client" || c.do_not_contact || (c.tags || []).includes("sold home")) continue;
     const l = loans[c.id] || {};
     const rate = Number(l.note_rate ?? c.note_rate); if (!rate) continue;
     const type = l.loan_type || c.loan_type || null;

@@ -5,6 +5,7 @@ import { GUIDES } from "../howto/guides.jsx";
 import { today, addDays, digits, fullName, fmtMo, loadRadarData, computeRadar, buildQueue, reasonFor, scriptsFor, logOutcome, undoOutcome, canUndo, segmentOf, REASON_COLOR, REASON_BG } from "../radar/engine.js";
 import { supabase } from "../supabase.js";
 import EmailDesk from "./EmailDesk.jsx";
+import QuickUpdate from "./QuickUpdate.jsx";
 
 const C = { bg:"#f5f0e8", card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc", green:"#1e6e4a", amber:"#b05e0d", amberBg:"#fdf0e0" };
 const F = { mono:"'DM Mono',monospace", cond:"'Barlow Condensed',sans-serif", body:"'Barlow',sans-serif" };
@@ -217,6 +218,7 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
           </div>
         </>
       )}
+      <QuickUpdate key={sel.id} userId={userId} c={sel} setContacts={setContacts} onLoansChanged={() => loadRadarData(userId).then(setData)}/>
     </div>
   );
 
