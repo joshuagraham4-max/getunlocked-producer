@@ -15,7 +15,16 @@ export const MY_PHONE = "720-468-6872";
 export const DEFAULT_SETTINGS = { refi_threshold:0.5, appreciation_pct:4, equity_ltv_max:70, seasoning_months:7 };
 
 // Load settings, latest market rates and current loans for a user.
+// Radar data is kept in memory so switching tabs doesn't re-download every loan. Screens show the saved copy
+// right away (peekRadarData) and refresh it quietly in the background (loadRadarData).
+let radarCache = null;
+export const peekRadarData = (userId) => (radarCache && radarCache.userId === userId ? radarCache.data : null);
 export async function loadRadarData(userId) {
+  const data = await fetchRadarData(userId);
+  radarCache = { userId, data };
+  return data;
+}
+async function fetchRadarData(userId) {
   const { data: s } = await supabase.from("radar_settings").select("*").eq("user_id", userId).maybeSingle();
   const { data: r } = await supabase.from("market_rates").select("*").eq("user_id", userId).order("day", { ascending:false }).limit(1);
   const all = [];
@@ -250,4 +259,13 @@ export async function undoOutcome(userId, id) {
   if (error) return null;
   u[id] = stack; try { localStorage.setItem(undoKey(userId), JSON.stringify(u)); } catch {}
   return data;
+}
+
+// Wrong number: ask for the new number by email.
+export function wrongNumberEmail(c, me = "Joshua Graham") {
+  const first = c.first_name || "there";
+  return {
+    subject: "Trying to reach you",
+    body: `Hi ${first},\n\nI tried calling you at ${c.phone || "the number I have on file"}, and it looks like that number isn't yours anymore. What's the best number to reach you?\n\nThanks,\n${me}\nAVP / Regional Loan Originator\nGraham Financial powered by Zero Point Mortgage Services\nNMLS 169809 | ${MY_PHONE}`,
+  };
 }

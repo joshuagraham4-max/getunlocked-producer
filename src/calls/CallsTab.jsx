@@ -1,8 +1,8 @@
 // Calls — the daily call desk: queue on the left, one person at a time on the right.
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import HowTo from "../HowTo.jsx";
 import { GUIDES } from "../howto/guides.jsx";
-import { today, addDays, digits, fullName, fmtMo, loadRadarData, computeRadar, buildQueue, reasonFor, scriptsFor, logOutcome, undoOutcome, canUndo, segmentOf, REASON_COLOR, REASON_BG } from "../radar/engine.js";
+import { today, addDays, digits, fullName, fmtMo, loadRadarData, peekRadarData, wrongNumberEmail, computeRadar, buildQueue, reasonFor, scriptsFor, logOutcome, undoOutcome, canUndo, segmentOf, REASON_COLOR, REASON_BG } from "../radar/engine.js";
 import { supabase } from "../supabase.js";
 import EmailDesk from "./EmailDesk.jsx";
 import QuickUpdate from "./QuickUpdate.jsx";
@@ -34,7 +34,11 @@ function useWide() {
 
 export default function CallsTab({ userId, contacts, setContacts, profileName, onOpen, onGoRadar }) {
   const wide = useWide();
-  const [data, setData] = useState(null);
+  const [data, setData] = useState(() => peekRadarData(userId));
+  const [pinned, setPinned] = useState(null);      // a contact opened from the callback finder or Called today, even if not on today's list
+  const [find, setFind] = useState("");
+  const [calledToday, setCalledToday] = useState([]);
+  const listRef = useRef(null); const focusRef = useRef(null);
   const [target, setTarget] = useState(() => { try { return Number(localStorage.getItem(`gupTarget:${userId}`)) || 20; } catch { return 20; } });
   const [selId, setSelId] = useState(null);
   const [note, setNote] = useState(""); const [fu, setFu] = useState("");
@@ -46,6 +50,14 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
   useEffect(() => { const i = setInterval(() => tick((n) => n + 1), 60000); return () => clearInterval(i); }, []);
 
   useEffect(() => { if (userId) loadRadarData(userId).then(setData); }, [userId]);
+  // Everyone dialed today, newest first, from the call log.
+  const loadCalled = useCallback(async () => {
+    if (!userId) return;
+    const start = new Date(); start.setHours(0, 0, 0, 0);
+    const { data: t } = await supabase.from("contact_touches").select("contact_id,created_at,outcome").eq("user_id", userId).eq("channel", "call").gte("created_at", start.toISOString()).order("created_at", { ascending:false }).limit(300);
+    const seen = new Set(); setCalledToday((t || []).filter((x) => !seen.has(x.contact_id) && seen.add(x.contact_id)));
+  }, [userId]);
+  useEffect(() => { loadCalled(); }, [loadCalled]);
   const radar = useMemo(() => data ? computeRadar(contacts, data.loans, data.rates, data.settings) : null, [contacts, data]);
   const byId = useMemo(() => Object.fromEntries(contacts.map((c) => [c.id, c])), [contacts]);
 
@@ -71,7 +83,7 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
   const talked = queue ? queue.filter((x) => byId[x.id]?.last_contacted === today() && byId[x.id]?.outcome === "talked").length : 0;
   const booked = queue ? queue.filter((x) => byId[x.id]?.last_contacted === today() && byId[x.id]?.outcome === "booked").length : 0;
 
-  useEffect(() => { if (segQ && (!selId || !segQ.find((x) => x.id === selId))) { const n = segQ.find((x) => !isDone(x.id)); setSelId(n ? n.id : segQ[0]?.id || null); } }, [segQ, selId, isDone]);
+  useEffect(() => { if (segQ && selId !== pinned && (!selId || !segQ.find((x) => x.id === selId))) { const n = segQ.find((x) => !isDone(x.id)); setSelId(n ? n.id : segQ[0]?.id || null); } }, [segQ, selId, isDone, pinned]);
   const sel = selId ? byId[selId] : null;
   const item = queue?.find((x) => x.id === selId);
   const info = sel ? radar?.info[sel.id] : null;
@@ -79,18 +91,32 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
   const scripts = sel ? scriptsFor(sel, info, item?.reason || reason, profileName || "Joshua Graham") : null;
   useEffect(() => { setSay(scripts?.say || ""); setNote(""); setFu(""); setFollow(null); }, [selId]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const openPerson = (id) => {
+    const inQ = queue?.find((x) => x.id === id);
+    if (inQ && inQ.group !== seg) setSeg(inQ.group);
+    if (!inQ && seg === "emails") setSeg("customers");
+    setPinned(inQ ? null : id); setSelId(id); setFind("");
+    setTimeout(() => focusRef.current?.scrollIntoView({ behavior:"smooth", block:"start" }), 50);
+  };
+  const findDigits = digits(find); const findText = find.trim().toLowerCase();
+  const found = useMemo(() => {
+    if (findDigits.length >= 3) return contacts.filter((c) => [c.phone, c.phone_2, c.co_borrower_phone].some((ph) => digits(ph).includes(findDigits))).slice(0, 8);
+    if (findText.length >= 2 && !findDigits) return contacts.filter((c) => `${fullName(c)} ${c.co_borrower_first || ""} ${c.co_borrower_last || ""}`.toLowerCase().includes(findText)).slice(0, 8);
+    return [];
+  }, [contacts, findDigits, findText]);
   const next = () => { const q = segQ; const idx = q.findIndex((x) => x.id === selId); const n = q.slice(idx + 1).find((x) => !isDone(x.id)) || q.find((x) => !isDone(x.id) && x.id !== selId); if (n) setSelId(n.id); };
   const undo = async () => {
     const upd = await undoOutcome(userId, sel.id);
     if (upd) setContacts((p) => p.map((x) => (x.id === upd.id ? upd : x)));
-    setFollow(null);
+    setFollow(null); loadCalled();
   };
   const unskip = () => { try { localStorage.setItem(skipKey, JSON.stringify(skipped.filter((x) => x !== selId))); } catch {} setNonce((n) => n + 1); };
   const record = async (result, days) => {
     const followUp = fu || (days ? addDays(days) : null);
     const upd = await logOutcome(userId, sel, result, note, followUp);
     if (upd) setContacts((p) => p.map((x) => (x.id === upd.id ? upd : x)));
-    if (result === "voicemail" || result === "no answer") setFollow(result); else next();
+    loadCalled();
+    if (result === "voicemail" || result === "no answer" || result === "wrong number") setFollow(result); else next();
   };
   const sentFollow = async (channel) => {
     await supabase.from("contact_touches").insert({ user_id:userId, contact_id:sel.id, channel, outcome:"sent follow-up" });
@@ -103,7 +129,7 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
   if (!queue) return <div style={{fontFamily:F.mono, fontSize:12, color:C.light}}>Building today's calls…</div>;
 
   const List = (
-    <div style={{...card, overflow:"hidden", alignSelf:"start"}}>
+    <div ref={listRef} style={{...card, overflow:"hidden", alignSelf:"start", scrollMarginTop:10}}>
       <div style={{padding:"16px 18px", borderBottom:`1px solid ${C.rule}`}}>
         <div style={{display:"flex", justifyContent:"space-between", alignItems:"baseline"}}>
           <div style={{fontFamily:F.cond, fontWeight:800, fontSize:24}}>Today's Calls</div>
@@ -130,7 +156,7 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
         {segQ.map((x, n) => {
           const c = byId[x.id]; if (!c) return null; const d = isDone(x.id); const on = x.id === selId;
           return (
-            <div key={x.id} onClick={() => setSelId(x.id)} style={{display:"flex", gap:12, padding:"11px 18px", borderBottom:`1px solid ${C.rule}`, cursor:"pointer", background:on ? "#fff" : "transparent", borderLeft:on ? `4px solid ${C.green}` : "4px solid transparent", opacity:d && !on ? 0.45 : 1}}>
+            <div key={x.id} onClick={() => { setPinned(null); setSelId(x.id); }} style={{display:"flex", gap:12, padding:"11px 18px", borderBottom:`1px solid ${C.rule}`, cursor:"pointer", background:on ? "#fff" : "transparent", borderLeft:on ? `4px solid ${C.green}` : "4px solid transparent", opacity:d && !on ? 0.45 : 1}}>
               <div style={{fontFamily:F.mono, fontSize:11, color:C.light, width:18, paddingTop:3}}>{n + 1}</div>
               <div style={{minWidth:0}}>
                 <div style={{fontFamily:F.cond, fontWeight:700, fontSize:17, textDecoration:d ? "line-through" : "none"}}>{fullName(c)}</div>
@@ -152,7 +178,9 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
     : [["NOTE RATE", info?.rate ? `${info.rate}%` : "—"], ["LOAN TYPE", info?.type ? `${info.type}${info.est ? " (est.)" : ""}` : "—"], ["FUNDED", info?.funded ? fmtMo(info.funded) : "—"], ["LAST CALL", sel.last_contacted || "Never"]]);
 
   const Focus = !sel ? <div style={{...card, padding:30, fontFamily:F.mono, color:C.light}}>Pick someone from the list.</div> : (
-    <div style={{...card, padding: wide ? "26px 30px" : "18px"}}>
+    <div ref={focusRef} style={{...card, padding: wide ? "26px 30px" : "18px", scrollMarginTop:10}}>
+      {!wide && <button onClick={() => listRef.current?.scrollIntoView({ behavior:"smooth", block:"start" })} style={{...btn, padding:"5px 12px", fontSize:13, marginBottom:12}}>Back to list</button>}
+      {pinned === sel.id && <div style={{fontFamily:F.mono, fontSize:11, color:C.amber, marginBottom:8}}>Not on today's call list. Opened from search.</div>}
       <div style={{display:"flex", justifyContent:"space-between", gap:16, flexWrap:"wrap"}}>
         <div>
           <div style={{fontFamily:F.cond, fontWeight:800, fontSize:34, lineHeight:1}}>{fullName(sel)}</div>
@@ -195,6 +223,17 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
       {skipped.includes(sel.id) && <div style={{display:"flex", gap:8, alignItems:"center", marginBottom:10, fontFamily:F.mono, fontSize:12}}>Skipped for today. <button onClick={unskip} style={{...btn, padding:"4px 12px"}}>Unskip</button></div>}
       {follow ? (
         <div style={{background:"#fff", border:`1px solid ${C.rule}`, borderRadius:8, padding:"14px 16px"}}>
+          {follow === "wrong number" ? (() => { const w = wrongNumberEmail(sel, profileName || "Joshua Graham"); return (<>
+          <div style={{fontFamily:F.cond, fontWeight:800, fontSize:18, marginBottom:6}}>Logged: wrong number. Ask for the new one?</div>
+          {sel.email ? <div style={{fontSize:14, lineHeight:1.5, color:C.ink, marginBottom:10, whiteSpace:"pre-wrap"}}>{w.body}</div>
+            : <div style={{fontFamily:F.mono, fontSize:12, color:C.amber, marginBottom:10}}>No email on file, so there's no way to ask. Add one if you find it.</div>}
+          <div style={{display:"flex", gap:8, flexWrap:"wrap"}}>
+            {sel.email && <a href={`mailto:${sel.email}?subject=${encodeURIComponent(w.subject)}&body=${encodeURIComponent(w.body)}`} onClick={() => sentFollow("email")} style={btnG}>Send email</a>}
+            {sel.email && <button onClick={() => navigator.clipboard?.writeText(w.body)} style={btn}>Copy email</button>}
+            {!sel.email && <button onClick={() => onOpen(sel)} style={btn}>Open full contact</button>}
+            <button onClick={undo} style={{...btn, marginLeft:"auto"}}>Undo</button>
+            <button onClick={next} style={btn}>Next call</button>
+          </div></>); })() : <>
           <div style={{fontFamily:F.cond, fontWeight:800, fontSize:18, marginBottom:6}}>Logged: {follow}. Send a quick follow-up?</div>
           <div style={{fontSize:14, lineHeight:1.5, color:C.ink, marginBottom:10}}>{scripts.vmText}</div>
           <div style={{display:"flex", gap:8, flexWrap:"wrap"}}>
@@ -203,7 +242,7 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
             <button onClick={() => navigator.clipboard?.writeText(scripts.vmText)} style={btn}>Copy text</button>
             <button onClick={undo} style={{...btn, marginLeft:"auto"}}>Undo</button>
             <button onClick={next} style={btn}>Next call</button>
-          </div>
+          </div></>}
         </div>
       ) : (
         <>
@@ -225,6 +264,22 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
   return (
     <div>
       <HowTo id="calls" {...GUIDES.calls} defaultOpen={false}/>
+      <div style={{...card, padding:"10px 12px", marginBottom:12}}>
+        <input value={find} onChange={(e) => setFind(e.target.value)} inputMode="search" placeholder="Who called? Last 4 digits or a name" style={{...inp, width:"100%", fontSize:16}}/>
+        {found.length > 0 && <div style={{marginTop:8, display:"grid", gap:4}}>
+          {found.map((c) => <button key={c.id} onClick={() => openPerson(c.id)} style={{...btn, textAlign:"left", display:"flex", justifyContent:"space-between", gap:8, color:C.ink}}>
+            <span>{fullName(c)}</span><span style={{fontFamily:F.mono, fontSize:12, color:C.mid}}>{c.phone || ""}</span></button>)}
+        </div>}
+        {(findDigits.length >= 3 || (findText.length >= 2 && !findDigits)) && found.length === 0 && <div style={{marginTop:6, fontFamily:F.mono, fontSize:12, color:C.light}}>No match in your contacts.</div>}
+        {calledToday.length > 0 && <>
+          <div style={{...lbl, marginTop:10, marginBottom:6}}>Called today</div>
+          <div style={{display:"flex", gap:6, overflowX:"auto", paddingBottom:4}}>
+            {calledToday.map((x) => { const c = byId[x.contact_id]; if (!c) return null; return (
+              <button key={x.contact_id} onClick={() => openPerson(c.id)} style={{...(selId === c.id ? btnG : btn), whiteSpace:"nowrap", flex:"0 0 auto", padding:"6px 11px", fontSize:13}}>
+                {fullName(c)} <span style={{opacity:0.7, fontWeight:400}}>{new Date(x.created_at).toLocaleTimeString("en-US", { hour:"numeric", minute:"2-digit" })}</span>
+              </button>); })}
+          </div></>}
+      </div>
       <div style={{display:"flex", gap:8, marginBottom:14, flexWrap:"wrap"}}>
         {[["customers",`Customers ${segDone("customers")}/${segN("customers")}`],["agents",`Agents ${segDone("agents")}/${segN("agents")}`],["emails","Emails"]].map(([k, l]) => (
           <button key={k} onClick={() => { setSeg(k); setSelId(null); }} style={{...(seg === k ? btnG : btn), padding:"9px 18px", fontSize:15}}>{l}</button>

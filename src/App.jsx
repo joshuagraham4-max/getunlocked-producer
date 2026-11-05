@@ -482,6 +482,8 @@ export default function App() {
 
   // ── App state ─────────────────────────────────────────────────────────────────
   const [tab, setTab] = useState("calls");
+  const [callsSeen, setCallsSeen] = useState(false);
+  useEffect(() => { if (tab === "calls") setCallsSeen(true); }, [tab]);
   const gpDay = () => { const x=new Date(); if (x.getHours()*60+x.getMinutes()<300) x.setDate(x.getDate()-1); return x.toISOString().slice(0,10); };
   const [dayMode, setDayMode] = useState(() => { try { return localStorage.getItem("gupDayMode:"+gpDay()) || "prospect"; } catch { return "prospect"; } });
   const setDayModeSaved = (k) => { setDayMode(k); try { localStorage.setItem("gupDayMode:"+gpDay(), k); } catch {} };
@@ -1573,7 +1575,8 @@ export default function App() {
         </div>
       )}
 
-      {tab==="calls" && <CallsTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onOpen={(c)=>{setOpenContactId(c.id);setTab("contacts");}} onGoRadar={()=>setTab("radar")}/>}
+      {/* Calls stays loaded after the first visit so coming back is instant (hidden, not rebuilt). */}
+      {(tab==="calls" || callsSeen) && <div style={{display:tab==="calls"?"block":"none"}}><CallsTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onOpen={(c)=>{setOpenContactId(c.id);setTab("contacts");}} onGoRadar={()=>setTab("radar")}/></div>}
       {tab==="radar" && <RadarTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onOpen={(c)=>{setOpenContactId(c.id);setTab("contacts");}} onGoCalls={()=>setTab("calls")}/>}
       {tab==="groups" && <GroupsTab userId={user?.id} onContact={(c) => setContacts((p) => p.some((x) => x.id === c.id) ? p.map((x) => (x.id === c.id ? c : x)) : [...p, c])}/>}
       {tab==="investors" && <InvestorLeads userId={user?.id} contacts={contacts} setContacts={setContacts}/>}

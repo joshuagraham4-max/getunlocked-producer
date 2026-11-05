@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "../supabase.js";
 import HowTo from "../HowTo.jsx";
 import { GUIDES } from "../howto/guides.jsx";
-import { loadRadarData, computeRadar, reasonFor, priorityScore, REASON_COLOR, REASON_BG } from "../radar/engine.js";
+import { loadRadarData, peekRadarData, computeRadar, reasonFor, priorityScore, REASON_COLOR, REASON_BG } from "../radar/engine.js";
 
 const C = {
   bg:"#f5f0e8", card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc",
@@ -383,7 +383,7 @@ export default function ContactsTab({ userId, contacts, setContacts, profileName
   const [view, setView] = useState("list");
   const [links, setLinks] = useState([]);
   const [dupeCount, setDupeCount] = useState(null);
-  const [radarData, setRadarData] = useState(null);
+  const [radarData, setRadarData] = useState(() => peekRadarData(userId));
   const wide = typeof window !== "undefined" && window.innerWidth >= 900;
 
   const reloadLinks = useCallback(async () => {
