@@ -686,7 +686,7 @@ export default function App() {
     if (!isAdmin) return;
     setTeamLoading(true);
     try {
-      const { data: profiles } = await supabase.from("profiles").select("*").order("name");
+      const { data: profiles } = await supabase.from("profiles").select("*").eq("active", true).order("name");
       const { data: logs } = await supabase.from("daily_logs").select("user_id,date,counts,pb");
       const todayStr = todayKey();
       const monthStart = todayStr.slice(0,7) + "-01";
@@ -706,7 +706,7 @@ export default function App() {
     }
   }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const navTabs = [["calls","Calls"],["contacts","Contacts"],["radar","Radar"]].concat(showMore ? [["today","Today"],["scripts","Scripts"],["ioi","IOI"],["history","History"],["team","Team"]].concat(isAdmin?[["posts","Posts"]]:[]) : []).concat([["__more", showMore ? "Less" : "More"]]);
+  const navTabs = [["calls","Calls"],["contacts","Contacts"],["radar","Radar"]].concat(showMore ? [["today","Today"],["scripts","Scripts"],["ioi","IOI"],["team","Team"]].concat(isAdmin?[["posts","Posts"]]:[]) : []).concat([["__more", showMore ? "Less" : "More"]]);
   useEffect(() => { if (tab==="team" && isAdmin) loadTeamData(); }, [tab, isAdmin]);
 
   const tomTimer = useRef(null);
