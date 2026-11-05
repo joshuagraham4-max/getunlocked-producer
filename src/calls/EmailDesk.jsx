@@ -161,6 +161,17 @@ export default function EmailDesk({ userId, contacts, setContacts, callIds, wide
   const stop = () => save({ email_step:99, email_next:null, do_not_contact:true, outcome:"asked to stop" }, "asked to stop");
   const label = (c) => ({ agent: workedWith(c) ? "AGENT · WORKED TOGETHER" : "AGENT", client: workedWith(c) ? "MY CLIENT · CLOSED" : "MY CLIENT", lead:"LEAD", pastlo:"PAST LO FUNDING" })[kind(c)];
   const doneCount = queue.filter(done).length;
+  const [find, setFind] = useState("");
+  const found = find.trim().length < 3 ? [] : contacts.filter((c) => c.email && !c.email_bad && ((c.email_step || 0) > 0 || sentToday[c.id])
+    && `${c.first_name || ""} ${c.last_name || ""} ${c.email}`.toLowerCase().includes(find.trim().toLowerCase())).slice(0, 6);
+  const bounceOther = async (c) => {
+    const fields = { email_bad:true, email_step:0, email_next:null, follow_up_date:t, outcome:"email bounced",
+      contact_note:[c.contact_note, `${t} · email bounced: ${c.email}`].filter(Boolean).join("\n") };
+    await supabase.from("contact_touches").insert({ user_id:userId, contact_id:c.id, channel:"email", outcome:"bounced" });
+    const { data } = await supabase.from("contacts").update(fields).eq("id", c.id).select().single();
+    if (data) setContacts((p) => p.map((x) => (x.id === data.id ? data : x)));
+    setFind("");
+  };
 
   const List = (
     <div style={{...card, overflow:"hidden", alignSelf:"start"}}>
@@ -169,6 +180,10 @@ export default function EmailDesk({ userId, contacts, setContacts, callIds, wide
           <span>Daily <select value={target} onChange={(e) => { const v = Number(e.target.value); setTarget(v); try { localStorage.setItem(`gupEmailTarget:${userId}`, String(v)); localStorage.removeItem(key); } catch {} }} style={{...inp, width:"auto", padding:"2px 4px", fontSize:12}}>{TARGETS.map((x) => <option key={x}>{x}</option>)}</select></span></div>
         <div style={{height:8, borderRadius:4, background:C.rule, overflow:"hidden", marginTop:8}}><div style={{height:"100%", width:`${queue.length ? doneCount / queue.length * 100 : 0}%`, background:C.green}}/></div>
         <button onClick={() => { try { localStorage.removeItem(key); } catch {} setSelId(null); setNonce((n) => n + 1); }} style={{...btn, padding:"3px 9px", fontSize:12, marginTop:10}}>Rebuild list</button>
+        <input value={find} onChange={(e) => setFind(e.target.value)} placeholder="Got a bounce? Type their name or email" style={{...inp, marginTop:10, fontSize:13}}/>
+        {found.map((c) => <div key={c.id} style={{display:"flex", justifyContent:"space-between", alignItems:"center", gap:8, marginTop:6, fontSize:13}}>
+          <span>{fullName(c)} <span style={{color:C.light}}>{c.email}</span></span>
+          <button onClick={() => bounceOther(c)} style={{...btn, padding:"3px 9px", fontSize:12}}>Bounced</button></div>)}
       </div>
       {queue.map((id, n) => { const c = byId[id]; const d = done(id); const on = id === selId; return (
         <div key={id} onClick={() => setSelId(id)} style={{display:"flex", gap:12, padding:"10px 18px", borderBottom:`1px solid ${C.rule}`, cursor:"pointer", background:on ? "#fff" : "transparent", borderLeft:on ? `4px solid ${C.green}` : "4px solid transparent", opacity:d && !on ? 0.45 : 1}}>
@@ -188,7 +203,8 @@ export default function EmailDesk({ userId, contacts, setContacts, callIds, wide
         <div style={{display:"flex", gap:8, alignItems:"center", padding:"10px 12px", borderRadius:8, background:"#fff", border:`1px solid ${C.rule}`}}>
           <span style={{fontFamily:F.mono, fontSize:12}}>{sentToday[sel.id] ? "Today" : "Logged"}: <b>{sel.email_bad ? "email bounced, on today's call list to get a new email" : sel.outcome === "replied to email" ? "replied" : sel.outcome === "asked to stop" ? "asked to stop" : `email ${sel.email_step} sent`}</b>{sel.email_next ? ` · next email ${sel.email_next.slice(5)}` : ""}</span>
           {canUndo(sel.id) && <button onClick={() => undo(sel.id)} style={{...btn, padding:"4px 12px", marginLeft:"auto"}}>Undo</button>}
-          <button onClick={goNext} style={{...btnG, padding:"4px 12px", marginLeft: canUndo(sel.id) ? 0 : "auto"}}>Next person</button>
+          {!sel.email_bad && <button onClick={bounced} style={{...btn, padding:"4px 12px", marginLeft: canUndo(sel.id) ? 0 : "auto"}}>Bounced</button>}
+          <button onClick={goNext} style={{...btnG, padding:"4px 12px", marginLeft: canUndo(sel.id) || !sel.email_bad ? 0 : "auto"}}>Next person</button>
         </div>
         {sentToday[sel.id]?.note && <>
           <div style={{fontFamily:F.cond, fontWeight:700, fontSize:12, letterSpacing:"0.16em", textTransform:"uppercase", color:C.light, marginTop:14}}>What you sent</div>
