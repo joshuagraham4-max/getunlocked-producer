@@ -3,7 +3,7 @@ export default function BrandBar({ max = 1120 }) {
   return (
     <div style={{ background:"#fff", borderBottom:"1px solid #DCE3EB" }}>
       <div style={{ maxWidth:max, margin:"0 auto", padding:"10px 16px", display:"flex", alignItems:"center", justifyContent:"space-between", gap:12 }}>
-        <img src="/brand/gf-logo.png" alt="Graham Financial" style={{ height:46, width:"auto" }}/>
+        <img src="/brand/gf-logo.png" alt="Graham Financial" style={{ height:58, width:"auto" }}/>
         <div style={{ display:"flex", alignItems:"center", gap:10 }}>
           <div style={{ textAlign:"right", fontFamily:"'Public Sans', system-ui, sans-serif", lineHeight:1.25 }}>
             <div style={{ fontFamily:"'Montserrat', Arial, sans-serif", fontWeight:700, fontSize:14, color:"#0E1B2A" }}>Joshua Graham</div>
