@@ -20,7 +20,16 @@ const Q = [
   { k:"states", q:"What state are the properties in?", text:true, placeholder:"Florida, Colorado..." },
   { k:"scenario", q:"Your scenario, in your own words.", sub:"Ask me anything. Weird deals welcome.", long:true, optional:true },
 ];
-const EQUITY = { "Under $100K":[25000, 75000], "$100-250K":[75000, 190000], "$250-500K":[190000, 375000], "$500K+":[375000, null] };
+// Equity bracket -> usable cash (keeping 25% equity in every property) -> more rentals.
+// Example math: each purchase needs 25% down plus ~3% closing; $800/mo cash flow per door after the payment.
+const PER_DOOR = 800, DOWN = 0.25, COSTS = 0.03;
+const PLAY = {
+  "Under $100K": { cash:60000,  doors:1, price:200000 },
+  "$100-250K":   { cash:130000, doors:1, price:400000 },
+  "$250-500K":   { cash:280000, doors:2, price:400000 },
+  "$500K+":      { cash:375000, doors:3, price:400000, plus:true },
+};
+const money = (n) => "$" + Math.round(n).toLocaleString("en-US");
 const k$ = (n) => "$" + (n >= 1000000 ? (n / 1000000).toFixed(1).replace(/\.0$/, "") + "M" : Math.round(n / 1000) + "K");
 
 const btn = { fontFamily:F.display, fontWeight:700, fontSize:16, background:C.blue, color:"#fff", border:0, borderRadius:10, padding:"14px 20px", cursor:"pointer", minHeight:48 };
@@ -75,18 +84,31 @@ export default function PortfolioReview() {
 
 
   if (done) {
-    const [lo, hi] = EQUITY[a.equity] || [0, null];
+    const pl = PLAY[a.equity];
+    const need = pl ? pl.price * (DOWN + COSTS) : 0;
+    const left = pl ? Math.max(0, pl.cash - need * pl.doors) : 0;
+    const mo = pl ? PER_DOOR * pl.doors : 0;
     return (
       <Shell>
         <div style={{ background:C.card, border:`1px solid ${C.line}`, borderRadius:14, padding:24 }}>
           <p style={{ margin:0, fontFamily:F.display, fontWeight:700, fontSize:12, letterSpacing:"0.14em", textTransform:"uppercase", color:C.muted }}>Your first look</p>
-          <h2 style={{ fontFamily:F.display, fontWeight:800, fontSize:26, margin:"8px 0" }}>{lo ? <>You may have <span style={{ color:C.good }}>{k$(lo)}{hi ? `-${k$(hi)}` : "+"}</span> in dead money.</> : "Let's find your dead money."}</h2>
-          <p style={{ fontSize:16, lineHeight:1.55, color:C.muted, margin:"0 0 14px" }}>That's equity sitting in your rentals that isn't earning anything. Here's what it could be doing instead:</p>
+          {pl ? <>
+            <h2 style={{ fontFamily:F.display, fontWeight:800, fontSize:28, lineHeight:1.2, margin:"8px 0" }}>Your equity could buy <span style={{ color:C.good }}>{pl.doors}{pl.plus ? "+" : ""} more {k$(pl.price)} rental{pl.doors > 1 || pl.plus ? "s" : ""}</span>.</h2>
+            <div style={{ display:"grid", gridTemplateColumns:"minmax(0,1fr) minmax(0,1fr)", gap:10, margin:"14px 0" }}>
+              <div style={{ background:"#EAF5EE", borderRadius:10, padding:"14px 16px" }}>
+                <div style={{ fontFamily:F.display, fontWeight:800, fontSize:"clamp(22px, 6vw, 30px)", color:C.good }}>{money(mo)}{pl.plus ? "+" : ""}/mo</div>
+                <div style={{ fontSize:14, color:C.muted }}>new cash flow</div></div>
+              <div style={{ background:"#EAF5EE", borderRadius:10, padding:"14px 16px" }}>
+                <div style={{ fontFamily:F.display, fontWeight:800, fontSize:"clamp(22px, 6vw, 30px)", color:C.good }}>{money(mo * 12)}{pl.plus ? "+" : ""}/yr</div>
+                <div style={{ fontSize:14, color:C.muted }}>every year you hold them</div></div>
+            </div>
+            <p style={{ fontSize:16, lineHeight:1.55, margin:"0 0 14px" }}>Without selling anything or putting in your own cash. You'd still keep 25% equity in every property you own now{left >= 10000 ? <>, with about <b>{k$(left)}</b> left over for reserves</> : ""}.</p>
+            <p style={{ fontSize:16, lineHeight:1.55, color:C.muted, margin:"0 0 14px" }}>That's your dead money: about <b>{k$(pl.cash)}{pl.plus ? "+" : ""}</b> sitting in your rentals right now, earning nothing.</p>
+          </> : <h2 style={{ fontFamily:F.display, fontWeight:800, fontSize:26, margin:"8px 0" }}>Let's find your dead money.</h2>}
           <ul style={{ fontSize:16, lineHeight:1.7, margin:"0 0 18px", paddingLeft:20 }}>
             <li>Buy your next property, where the rent qualifies the loan instead of your tax return</li>
             {a.hard_money && a.hard_money !== "No" && <li>Pay off the hard money loan before it comes due</li>}
             <li>Build reserves so one vacancy never becomes a problem</li>
-            <li>Consolidate higher-rate debt across the portfolio</li>
           </ul>
           <div style={{ background:C.bg, borderRadius:10, padding:"14px 16px", margin:"0 0 16px" }}>
             <p style={{ margin:"0 0 6px", fontFamily:F.display, fontWeight:700, fontSize:12, letterSpacing:"0.14em", textTransform:"uppercase", color:C.muted }}>How I work</p>
@@ -98,12 +120,12 @@ export default function PortfolioReview() {
               <li>Last week: a family with old, tangled liens. We cleared them, got them about $100K in two weeks, and mapped out their other properties around how long they plan to hold them.</li>
             </ul>
           </div>
-          <p style={{ fontSize:16, fontWeight:600, margin:"0 0 14px" }}>I'll run your real numbers and send your review. Tell me the best time to call you, or book with me here at your convenience.</p>
+          <p style={{ fontSize:16, fontWeight:600, margin:"0 0 14px" }}>Next is your deep dive: I'll pull current values on every property you own and show you exactly what's available, property by property. Tell me the best time to call you, or book with me here at your convenience.</p>
           <div style={{ display:"grid", gap:10 }}>
-            <a href={BOOKING} style={{ ...btn, textAlign:"center", textDecoration:"none" }}>Book my portfolio review</a>
-            <a href={`sms:${BRAND.phone.replace(/\D/g, "")}?body=${encodeURIComponent(`Hi Joshua, it's ${f.first}. I just did the portfolio review.`)}`} style={{ ...btn, background:"#fff", color:C.blue, border:`2px solid ${C.blue}`, textAlign:"center", textDecoration:"none" }}>Text Joshua now</a>
+            <a href={BOOKING} style={{ ...btn, display:"flex", alignItems:"center", justifyContent:"center", textDecoration:"none" }}>Book my deep dive</a>
+            <a href={`sms:${BRAND.phone.replace(/\D/g, "")}?body=${encodeURIComponent(`Hi Joshua, it's ${f.first}. I just did the portfolio review.`)}`} style={{ ...btn, background:"#fff", color:C.blue, border:`2px solid ${C.blue}`, display:"flex", alignItems:"center", justifyContent:"center", textDecoration:"none" }}>Text Joshua now</a>
           </div>
-          <p style={{ fontSize:13, color:C.muted, marginTop:14 }}>Estimate based on the range you picked, for scenario review only. Not an offer to lend.</p>
+          <p style={{ fontSize:13, color:C.muted, marginTop:14 }}>Example only: about {money(need || 112000)} per purchase (25% down plus about 3% closing costs) and $800/mo cash flow per door after the payment. Your values, rents and terms will differ. Business-purpose loans, for scenario review only. Not an offer to lend.</p>
         </div>
       </Shell>
     );
