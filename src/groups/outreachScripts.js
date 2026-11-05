@@ -14,7 +14,7 @@ export const STEPS = [
 Joshua Graham here, AVP at Zero Point Mortgage. I'm not a lender, I'm a wholesale broker, so I have access to money where most lenders get stuck. Not selling anything, I just want to know the agents worth knowing.
 
 What are you working most right now?`,
-    (p) => `Hey ${p.first}, ${hookLine(p.hook)}your posts keep showing up on my feed and you stood out. I'm putting together a small group of agent partners${inArea(p.area)}.
+    (p) => `Hey ${p.first}! ${hookLine(p.hook)}Your posts keep showing up on my feed and you stood out. I'm putting together a small group of agent partners${inArea(p.area)}.
 
 I'm Joshua Graham, AVP at Zero Point Mortgage. Not a lender, a wholesale broker, so I can get money where most lenders get stuck. Nothing to sell you.
 
@@ -32,7 +32,7 @@ Are you mostly buyers, listings, or investors these days?`,
 
 // LinkedIn connection request note (300 character limit). The opener follows once they accept.
 export const linkedInNote = (p) => {
-  const t = `Hi ${p.first}, ${hookLine(p.hook)}noticed your posts and you stood out. I'm a wholesale mortgage broker (AVP, Zero Point Mortgage) looking for a few agent partners${inArea(p.area)}. I get money where most lenders get stuck. Would love to connect.`;
+  const t = `Hi ${p.first}! ${hookLine(p.hook)}Noticed your posts and you stood out. I'm a wholesale mortgage broker (AVP, Zero Point Mortgage) looking for a few agent partners${inArea(p.area)}. I get money where most lenders get stuck. Would love to connect.`;
   return t.length <= 300 ? t : `Hi ${p.first}, I'm a wholesale mortgage broker (AVP, Zero Point Mortgage) looking for a few agent partners${inArea(p.area)}. I get money where most lenders get stuck. Would love to connect.`;
 };
 
