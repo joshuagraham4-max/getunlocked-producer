@@ -11,7 +11,8 @@ const PROJECT = "timgdgqyfbrpnpcojmmy";
 const daysBetween = (a, b) => Math.round((new Date(b) - new Date(a)) / 86400000);
 const allowsPromo = (g) => /^ok/i.test((g.promo_day || "").trim());
 const tenDay = (g) => /10/.test(g.promo_day || "");
-const isOffer = (p) => p.kind === "offer" || (p.body || "").includes("{SIGN}");
+const SEQ = ["hook", "qualify", "presell", "presell", "offer"];
+const STAGES = ["hook", "qualify", "presell", "offer"];
 
 // Value posts carry no contact info. Only posts with {SIGN} (soft offers) get the phone + NMLS block.
 export const SIGN_BLOCK = `Call or text: ${MY_PHONE}\n\n${SIGN}`;
@@ -33,20 +34,24 @@ export function buildAssignments({ posts, groups, log, day }) {
   }).sort((a, b) => (last[a.id] || "0000").localeCompare(last[b.id] || "0000"));
 
   const free = posts.filter((p) => p.active && !usedToday.has(p.id));
-  // One soft offer every 3 days, in a group that allows promo. Everything else is value.
-  const offerIds = new Set(posts.filter(isOffer).map((p) => p.id));
-  const offerDue = !log.some((x) => offerIds.has(x.post_id) && daysBetween(x.day, day) < 3);
-  const out = []; 
+  const byId = Object.fromEntries(posts.map((p) => [p.id, p]));
+  // Least-recently-used first, so the bank rotates evenly.
+  const lastUsed = {}; for (const x of log) if (!lastUsed[x.post_id] || x.day > lastUsed[x.post_id]) lastUsed[x.post_id] = x.day;
+  const lru = (a, b) => (lastUsed[a.id] || "0000").localeCompare(lastUsed[b.id] || "0000") || (a.sort || 0) - (b.sort || 0);
+  const out = [];
   for (const g of eligible) {
     if (out.length >= slots) break;
     const taken = new Set(out.map((a) => a.post.id));
-    const recentHere = new Set(log.filter((x) => x.group_id === g.id && daysBetween(x.day, day) < (tenDay(g) ? 10 : 7)).map((x) => x.post_id));
-    // Offers only where the rules allow promo; everyone else gets value posts. About 1 offer in 5.
-    const canOffer = offerDue && allowsPromo(g) && !out.some((a) => isOffer(a.post));
+    const recentHere = new Set(log.filter((x) => x.group_id === g.id && daysBetween(x.day, day) < (tenDay(g) ? 10 : 30)).map((x) => x.post_id));
+    // Each group walks the sequence: hook, qualify, presell, presell, offer. Old pre-sequence posts don't count.
+    const steps = log.filter((x) => x.group_id === g.id && STAGES.includes(byId[x.post_id]?.kind)).length;
+    let stage = SEQ[steps % SEQ.length];
+    if (stage === "offer" && !allowsPromo(g)) stage = "presell";
     const ok = (p) => !taken.has(p.id) && !recentHere.has(p.id);
-    const post = (canOffer ? free.find((p) => isOffer(p) && ok(p)) : null) || free.find((p) => !isOffer(p) && ok(p));
-    if (!post) { skipped.push(`${g.name}: no post it hasn't seen recently`); continue; }
-    out.push({ group:g, post, image: post.image ? SITE + post.image : null });
+    const pick = (k) => free.filter((p) => p.kind === k && ok(p)).sort(lru)[0];
+    const post = pick(stage) || (stage === "offer" ? null : pick("presell")) || pick("hook");
+    if (!post) { skipped.push(`${g.name}: no ${stage} post it hasn't seen recently`); continue; }
+    out.push({ group:g, post, stage, image: post.image ? SITE + post.image : null });
   }
   return { assignments: out, skipped, slots };
 }
@@ -73,7 +78,7 @@ export function buildJob({ assignments, userId, day }) {
     lines.push("", `=== ${i + 1}. ${a.group.name} ===`);
     if (a.group.url) lines.push(`Group: ${a.group.url}`);
     if (a.group.rules) lines.push(`Group rules: ${a.group.rules}`);
-    lines.push(`Post: ${a.post.title}`, `Image: ${a.image || "none (text only)"}`, "Text:", "---", postText(a.post.body), "---",
+    lines.push(`Stage: ${a.stage}`, `Post: ${a.post.title}`, `Image: ${a.image || "none (text only)"}`, "Text:", "---", postText(a.post.body), "---",
       `Log: insert into group_post_log (user_id, post_id, group_id, day) values ('${userId}', '${a.post.id}', '${a.group.id}', '${day}');`);
   });
   lines.push("", "When you're done, give Joshua a short report: what went out, what's pending admin approval, and anything skipped and why.");
