@@ -190,10 +190,18 @@ function Dupes({ contacts, setContacts, userId, close, open, reloadLinks }) {
     setContacts((prev) => prev.filter((c) => c.id !== drop).map((c) => (c.id === keep ? data : c)));
     setMsg(`Merged into ${fullName(data)}.`); reloadLinks(); await load(); setBusy(false);
   };
+  // The main record is the one with the most recent loan (then the most recently contacted, then the older record).
+  // Everything from both carries over either way; "main" only decides whose phone/email show first.
+  const mainOf = (a, b) => {
+    const score = (c) => [c?.funded_date || "", c?.last_contacted || ""];
+    const [fa, la] = score(a), [fb, lb] = score(b);
+    return fa !== fb ? (fa > fb ? a : b) : la !== lb ? (la > lb ? a : b) : a;
+  };
   const notSame = async (a, b) => { await supabase.from("contact_dupe_dismissed").insert({ user_id:userId, a, b }); setPairs((p) => p.filter((x) => !(x.a_id === a && x.b_id === b))); };
   const linkThem = async (a, b) => { await supabase.from("contact_links").insert({ user_id:userId, contact_id:a, linked_id:b, relation:"co-borrower" }); reloadLinks(); setPairs((p) => p.filter((x) => !(x.a_id === a && x.b_id === b))); };
-  const Side = ({ c }) => !c ? null : (
+  const Side = ({ c, main }) => !c ? null : (
     <div style={{flex:1, minWidth:0, fontFamily:F.body, fontSize:12, color:C.ink}}>
+      {main && <div style={{fontFamily:F.mono, fontSize:9, letterSpacing:"0.08em", color:C.green, marginBottom:2}}>MAIN</div>}
       <div onClick={() => open(c)} style={{fontFamily:F.cond, fontSize:16, fontWeight:700, color:C.blue, cursor:"pointer"}}>{fullName(c)}</div>
       <div>{TYPE_LABEL[typeOf(c)]}{c.subtype ? ` · ${c.subtype}` : ""}</div>
       <div>{c.phone || "no phone"}{c.phone_2 ? ` / ${c.phone_2}` : ""}</div>
@@ -209,22 +217,24 @@ function Dupes({ contacts, setContacts, userId, close, open, reloadLinks }) {
       <div style={box}>
         <div style={lbl}>Possible duplicates ({pairs ? pairs.length : "…"})</div>
         <div style={{fontFamily:F.body, fontSize:13, color:C.mid, lineHeight:1.5}}>
-          For each pair: <b>Keep left</b> or <b>Keep right</b> merges them into one person (phones, emails, loans, links and notes all carry over; the other record is removed). <b>Not the same</b> hides the pair for good. <b>They're co-borrowers</b> links them instead.
+          <b>Merge</b> combines both into one contact and keeps everything: phones, emails, loans, notes, tags and call history. The record with the most recent loan becomes the main one (marked below); every merge can be undone. <b>They're co-borrowers</b> links them instead. <b>Not the same</b> hides the pair for good.
         </div>
         {msg && <div style={{fontFamily:F.mono, fontSize:11, color:C.green, marginTop:8}}>{msg}</div>}
       </div>
-      {(pairs || []).map((p) => (
+      {(pairs || []).map((p) => {
+        const a = byId[p.a_id], b = byId[p.b_id]; if (!a || !b) return null;
+        const main = mainOf(a, b), other = main === a ? b : a;
+        return (
         <div key={p.a_id + p.b_id} style={box}>
           <div style={{marginBottom:8}}><Badge color={C.amber} bg={C.amberBg}>{p.reason}</Badge></div>
-          <div style={{display:"flex", gap:12}}><Side c={byId[p.a_id]}/><Side c={byId[p.b_id]}/></div>
-          <div style={{display:"flex", gap:6, flexWrap:"wrap", marginTop:10}}>
-            <button disabled={busy} onClick={() => merge(p.a_id, p.b_id)} style={primary}>← Keep left</button>
-            <button disabled={busy} onClick={() => merge(p.b_id, p.a_id)} style={primary}>Keep right →</button>
+          <div style={{display:"flex", gap:12}}><Side c={a} main={main === a}/><Side c={b} main={main === b}/></div>
+          <div style={{display:"flex", gap:6, flexWrap:"wrap", marginTop:10, alignItems:"center"}}>
+            <button disabled={busy} onClick={() => merge(main.id, other.id)} style={primary}>Merge into one</button>
             <button disabled={busy} onClick={() => linkThem(p.a_id, p.b_id)} style={ghost}>They're co-borrowers</button>
             <button disabled={busy} onClick={() => notSame(p.a_id, p.b_id)} style={ghost}>Not the same</button>
+            <button disabled={busy} onClick={() => merge(other.id, main.id)} style={{...ghost, border:"none", fontSize:11, color:C.light, textDecoration:"underline"}}>merge, but make the other one main</button>
           </div>
-        </div>
-      ))}
+        </div>); })}
     </div>
   );
 }

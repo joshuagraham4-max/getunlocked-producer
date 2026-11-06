@@ -28,9 +28,9 @@ export const GUIDES = {
   ] },
   dupes: { title: "How to review duplicates", steps: [
         <>Each card shows two records that look like the same person (same name, email or phone), side by side. Tap a name to open that record first if you need to check.</>,
-        <><b>← Keep left</b> or <b>Keep right →</b> merges them into the one you keep. The other's phone and email become Phone 2 / Email 2; loans, linked people, notes and call history all move over; the extra record is removed.</>,
+        <><b>Merge into one</b> combines both records and keeps everything: phones, emails, loans, notes, tags, call history and links. Extra phones or emails that don't fit go into the note. Do Not Contact carries over if either had it.</>,
+        <>The side marked <b>MAIN</b> (most recent loan) supplies the first phone and email. To flip that, use "merge, but make the other one main." Every merge is logged and can be undone.</>,
         <><b>They're co-borrowers</b> links the two people instead of merging (spouses, co-borrowers on the same loan).</>,
         <><b>Not the same</b> hides that pair for good (e.g., two different people named Jose Perez).</>,
-        <>Tip: start with Holly Romero — keep either side and you'll see one Holly with both phones and both loans.</>,
   ] },
 };
