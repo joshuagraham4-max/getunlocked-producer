@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "../supabase.js";
 import HowTo from "../HowTo.jsx";
 import { GUIDES } from "../howto/guides.jsx";
-import { today, digits, fullName, fmtMo, money, loadRadarData, computeRadar, reasonFor, bdayDue, DEFAULT_SETTINGS } from "./engine.js";
+import { today, digits, fullName, fmtMo, money, loadRadarData, computeRadar, bdayDue, DEFAULT_SETTINGS } from "./engine.js";
 
 const C = { bg:"#f5f0e8", card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc", green:"#1e6e4a", amber:"#b05e0d", amberBg:"#fdf0e0", red:"#9e3020", purple:"#5b3fa6", teal:"#1a6570", blue:"#1a4f8a" };
 const F = { mono:"'DM Mono',monospace", cond:"'Barlow Condensed',sans-serif", body:"'Barlow',sans-serif" };

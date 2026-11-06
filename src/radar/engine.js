@@ -29,10 +29,16 @@ export async function loadRadarData(userId) {
   return data;
 }
 async function fetchRadarData(userId) {
-  const { data: s } = await supabase.from("radar_settings").select("*").eq("user_id", userId).maybeSingle();
-  const { data: r } = await supabase.from("market_rates").select("*").eq("user_id", userId).order("day", { ascending:false }).limit(1);
-  const all = [];
-  for (let from = 0; ; from += 1000) {
+  // Settings, rates and the first loans pages all at once.
+  const LOAN_COLS = "contact_id,note_rate,loan_amount,ltv_orig,funded_date,loan_type,loan_type_source,loan_term_months,appraised_value,loan_purpose";
+  const page = (i) => supabase.from("loans").select(LOAN_COLS).eq("is_current", true).range(i * 1000, i * 1000 + 999);
+  const [{ data: s }, { data: r }, ...first] = await Promise.all([
+    supabase.from("radar_settings").select("*").eq("user_id", userId).maybeSingle(),
+    supabase.from("market_rates").select("*").eq("user_id", userId).order("day", { ascending:false }).limit(1),
+    page(0), page(1), page(2),
+  ]);
+  const all = first.flatMap((x) => x.data || []);
+  for (let from = 3000; first[2].data?.length === 1000; from += 1000) {
     const { data } = await supabase.from("loans").select("contact_id,note_rate,loan_amount,ltv_orig,funded_date,loan_type,loan_type_source,loan_term_months,appraised_value,loan_purpose").eq("is_current", true).range(from, from + 999);
     all.push(...(data || [])); if (!data || data.length < 1000) break;
   }

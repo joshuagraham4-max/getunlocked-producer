@@ -8,7 +8,7 @@
 //   onLog(sessionData) — called when a task is marked complete
 //   sessionData = { name, estimateMins, actualMins, date }
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const FC = {
   bg:"#f5f0e8", card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358",

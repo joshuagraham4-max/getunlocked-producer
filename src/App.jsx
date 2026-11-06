@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { supabase } from "./supabase.js";
 import FocusMode from "./FocusMode.jsx";
 import ContactsTab from "./contacts/ContactsTab.jsx";
@@ -429,15 +428,15 @@ function IOITab() {
 
 // CSV/TSV header → DB column mapping (supports legacy exports)
 // Supabase returns max 1,000 rows per request — page through all of them.
+// Count first, then fetch every page at once (was one page after another: 7 round trips for 6,000+ contacts).
 async function loadAllContacts(userId) {
-  const all = [];
-  for (let from = 0; ; from += 1000) {
-    const { data, error } = await supabase.from("contacts").select("*").eq("user_id", userId)
-      .order("last_name").order("id").range(from, from + 999);
-    if (error) { console.error("loadAllContacts:", error); return all.length ? all : null; }
-    all.push(...data);
-    if (data.length < 1000) return all;
-  }
+  const { count, error: cErr } = await supabase.from("contacts").select("id", { count:"exact", head:true }).eq("user_id", userId);
+  if (cErr) { console.error("loadAllContacts:", cErr); return null; }
+  const pages = Math.max(1, Math.ceil((count || 0) / 1000) + 1);   // +1 covers contacts added mid-load
+  const res = await Promise.all([...Array(pages)].map((_, i) => supabase.from("contacts").select("*").eq("user_id", userId)
+    .order("last_name").order("id").range(i * 1000, i * 1000 + 999)));
+  const bad = res.find((r) => r.error); if (bad) { console.error("loadAllContacts:", bad.error); return null; }
+  return res.flatMap((r) => r.data || []);
 }
 // Only these columns are sent on import; anything else in a file is skipped instead of failing the batch.
 const CONTACT_COLUMNS = new Set(["first_name","last_name","phone","phone_2","email","email_2","address","city","state","zip",
@@ -514,8 +513,6 @@ export default function App() {
   const [rebuildOk, setRebuildOk] = useState(false);
   const [counts, setCounts] = useState({});
   const [pb, setPb] = useState(false);
-  const [focusSessions, setFocusSessions] = useState(0);
-  const [focusMins, setFocusMins] = useState(0);
   const [tomorrow, setTomorrow] = useState(["","",""]);
   const [copied, setCopied] = useState(false);
   const [streak, setStreak] = useState(0);
@@ -600,6 +597,7 @@ export default function App() {
   // ── Load all user data ────────────────────────────────────────────────────────
   async function loadUserData(userId) {
     setDataLoading(true);
+    const contactsP = loadAllContacts(userId);   // biggest download: start it now, in parallel with the rest
     try {
       const { data: pData } = await supabase.from("profiles").select("*").eq("id", userId).single();
       if (pData) {
@@ -657,7 +655,7 @@ export default function App() {
         .maybeSingle();
       setAgreementSigned(!!existingAgreement);
       setAgreementChecked(true);
-      const ctData = await loadAllContacts(userId);
+      const ctData = await contactsP;
       if (ctData) setContacts(ctData);
     } catch(e) { console.error("loadUserData:",e); }
     finally { setDataLoading(false); setAuthReady(true); }
@@ -837,7 +835,6 @@ export default function App() {
   }
   function copyReport() { navigator.clipboard.writeText(genReport()).then(()=>{setCopied(true);setTimeout(()=>setCopied(false),2500);}); }
 
-  const phoneOk = (v) => /^\d{3}-\d{3}-\d{4}$/.test((v||"").trim());
   function formatPhone(raw) {
     const d=raw.replace(/\D/g,"").slice(0,10);
     if(d.length<=3) return d; if(d.length<=6) return `${d.slice(0,3)}-${d.slice(3)}`;
@@ -903,15 +900,6 @@ export default function App() {
   }
 
   // ── Chart ─────────────────────────────────────────────────────────────────────
-  function buildChart() {
-    const months={};
-    history.forEach(e=>{const mo=e.date.slice(0,7);if(!months[mo])months[mo]={month:mo,closings:0};months[mo].closings+=e.counts?.closings||0;});
-    return Object.values(months).sort((a,b)=>a.month.localeCompare(b.month)).map(m=>({...m,label:new Date(m.month+"-01").toLocaleDateString("en-US",{month:"short",year:"2-digit"})}));
-  }
-  const chartData=buildChart();
-  const totDays=history.length;
-  const compDays=history.filter(e=>ACTS.filter(a=>a.goal>0).every(a=>(e.counts?.[a.id]||0)>=a.goal)&&e.pb).length;
-  const compRate=totDays>0?Math.round((compDays/totDays)*100):0;
 
   // ── Onboarding save ───────────────────────────────────────────────────────────
   async function saveOnboarding() {
@@ -1764,8 +1752,6 @@ export default function App() {
     {/* ── FOCUS MODE — standalone floating panel ── */}
     <FocusMode onLog={(session) => {
       // Update local state
-      setFocusSessions(prev => prev + 1);
-      setFocusMins(prev => prev + session.actualMins);
       // Save to Supabase daily log as focus_sessions / focus_mins keys in counts
       if (userRef.current) {
         supabase.from("daily_logs").upsert({
