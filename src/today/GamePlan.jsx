@@ -105,9 +105,10 @@ export default function GamePlan({ userId, avgCommission, onGoCalls }) {
   const m = day.manual || {};
   const earnedParts = settings ? [
     ["dial", auto.dials, "dials"], ["conv", auto.conv, "conversations"], ["email", auto.emails, "emails"], ["post", auto.posts, "group posts"], ["dm", auto.dms, "agent DMs"],
-    ["app", m.apps || 0, "apps"], ["video", m.videos || 0, "videos"],
+    ["appt", m.agentAppts || 0, "agent appointments"], ["app", m.apps || 0, "apps"], ["video", m.videos || 0, "videos"],
   ] : [];
-  const val = (k) => (v[k] ?? (k === "dm" ? 10 : 0));   // agent DMs default to $10 each
+  const DEFAULT_VAL = { dm:10, appt:200 };   // agent DMs $10 each, agent appointments set $200 each
+  const val = (k) => (v[k] ?? DEFAULT_VAL[k] ?? 0);
   const earned = earnedParts.reduce((s, [k, n]) => s + n * val(k), 0);
 
   const evaluate = useCallback((rec, a) => {
@@ -225,6 +226,7 @@ export default function GamePlan({ userId, avgCommission, onGoCalls }) {
               <Count label="Emails sent" n={auto.emails} goal={emailTarget} autoTag/>
               <Count label="Posts (profile + groups)" n={auto.posts} goal={settings.targets.posts} autoTag/>
               <Count label="Agent DMs" n={auto.dms} goal={10} autoTag/>
+              <Count label="Agent appts set" n={m.agentAppts || 0} k="agentAppts"/>
               <Count label="Booked" n={auto.booked} autoTag/>
               {(settings.extraCounters || []).map((k) => <Count key={k} label={EXTRA[k] || k} n={m[k] || 0} k={k}/>)}
             </div>
@@ -332,7 +334,7 @@ function Settings({ settings, save, tpl }) {
       <div>
         <div style={lbl}>Dollar value of each activity</div>
         <div style={{display:"flex", gap:8, flexWrap:"wrap", marginTop:6}}>
-          {[["dial","Dial"],["conv","Conversation"],["email","Email"],["post","Group post"],["dm","Agent DM"],["app","App"],["video","Video"]].map(([k, l]) => field(l, <input key={k} type="number" value={s.values[k] ?? (k === "dm" ? 10 : 0)} onChange={(e) => setS({ ...s, values:{ ...s.values, [k]:Number(e.target.value) } })} style={{...inp, width:90}}/>))}
+          {[["dial","Dial"],["conv","Conversation"],["email","Email"],["post","Group post"],["dm","Agent DM"],["appt","Agent appointment"],["app","App"],["video","Video"]].map(([k, l]) => field(l, <input key={k} type="number" value={s.values[k] ?? ({ dm:10, appt:200 })[k] ?? 0} onChange={(e) => setS({ ...s, values:{ ...s.values, [k]:Number(e.target.value) } })} style={{...inp, width:90}}/>))}
         </div>
       </div>
       <div>
