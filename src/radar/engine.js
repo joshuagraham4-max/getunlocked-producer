@@ -15,6 +15,7 @@ export const MY_PHONE = "720-468-6872";
 export const DEFAULT_SETTINGS = { refi_threshold:0.5, appreciation_pct:4, equity_ltv_max:70, seasoning_months:7 };
 
 // Load settings, latest market rates and current loans for a user.
+import { PLAYBOOKS, investorFollowUps } from "./investorPlaybook.js";
 // Radar data is kept in memory so switching tabs doesn't re-download every loan. Screens show the saved copy
 // right away (peekRadarData) and refresh it quietly in the background (loadRadarData).
 let radarCache = null;
@@ -229,6 +230,8 @@ export function scriptsFor(c, i, reason, me = "Joshua Graham") {
   const vmText = `Hi ${first}, it's ${me}. Just tried you. ${short}. Call or text me back at ${MY_PHONE} when you have a minute, or grab a time here: ${BOOKING}`;
   const emailSubject = reason?.key === "bday" ? "Happy birthday!" : reason?.key === "rate" ? "Quick rate check" : "Checking in";
   const emailBody = `Hi ${first},\n\nI just tried giving you a call. ${short}.\n\nGive me a call or text at ${MY_PHONE}, or pick a time that works for you: ${BOOKING}\n\n${me}\nGraham Financial`;
+  const invKind = reason?.key === "newlead" && tags.includes("investor lead") ? (tags.includes("maturing_hard_money") ? "maturing_hard_money" : tags.includes("dead_money") ? "dead_money" : null) : null;
+  if (invKind) { const f = investorFollowUps(c, invKind, me, MY_PHONE, BOOKING); return { say, vmText:f.vmText, emailSubject:f.emailSubject, emailBody:f.emailBody, playbook:PLAYBOOKS[invKind] }; }
   return { say, vmText, emailSubject, emailBody };
 }
 

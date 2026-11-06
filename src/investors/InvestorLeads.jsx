@@ -55,8 +55,14 @@ const fmtPhone = (s) => { const d = digits(s); return d.length === 10 ? `(${d.sl
 const monthsSince = (d) => { if (!d) return null; const a = new Date(d), b = new Date(); return (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth()); };
 const k$ = (n) => (n == null ? "" : "$" + (Math.abs(n) >= 1e6 ? (n / 1e6).toFixed(1) + "M" : Math.round(n / 1000) + "K"));
 
+// Lenders known for short-term investor loans. A match means a real hard money note, not a guess from loan type.
+const HARD_MONEY = /kiavi|lima one|limaone|rcn capital|corevest|lendingone|lending one|visio|easy street|anchor loans|roc capital|genesis capital|civic|groundfloor|fund that flip|patch of land|new silver|renovo|temple view|park place|builders capital|sherman bridge|bridge|private|capital fund|asset based|hard money|investor loan|fix.?flip|rehab|tidal|dominion|bayport|express capital/i;
+export const isHardMoneyLender = (name) => !!name && HARD_MONEY.test(name);
+
 export function scoreLead(l) {
   let s = 0;
+  if (l.lead_type === "maturing_hard_money" && isHardMoneyLender(l.lender)) s += 35;
+  if (l.lead_type === "maturing_hard_money" && l.lender && /bank|credit union|mortgage|home loans|federal|wells|chase|rocket|freedom|pennymac|lakeview/i.test(l.lender) && !isHardMoneyLender(l.lender)) s -= 25;
   if (l.lead_type === "maturing_hard_money") { const m = monthsSince(l.recording_date); s += 50; if (m != null) s += m >= 9 && m <= 15 ? 40 : m > 15 ? 30 : m >= 6 ? 15 : 0; }
   const eq = l.est_equity ?? (l.est_value != null && l.loan_balance != null ? l.est_value - l.loan_balance : null);
   if (eq != null) s += eq >= 500000 ? 30 : eq >= 250000 ? 22 : eq >= 100000 ? 14 : eq > 0 ? 5 : 0;
