@@ -24,11 +24,13 @@ const dayKey = (d = new Date()) => { const x = new Date(d); if (x.getHours() * 6
 const tzAhead = (tz) => { try { const d = new Date(); return Math.round((new Date(d.toLocaleString("en-US", { timeZone:tz })) - new Date(d.toLocaleString("en-US"))) / 60000 / 15) * 15; } catch { return 0; } };
 const TZ = [["America/New_York","Eastern"],["America/Chicago","Central"],["America/Denver","Mountain"],["America/Los_Angeles","Pacific"]];
 
+const BLANK_DAY = { gym:"630", missed:false, pool:false, done:{}, manual:{}, notes:"", med:[] };
+
 export default function GamePlan({ userId, avgCommission, onGoCalls }) {
   const KEY = dayKey();
   const me = userId === JOSHUA_ID;
   const [settings, setSettings] = useState(null);
-  const [day, setDay] = useState({ gym:"630", missed:false, pool:false, done:{}, manual:{}, notes:"", med:[] });
+  const [day, setDay] = useState(BLANK_DAY);
   const [history, setHistory] = useState({});
   const [auto, setAuto] = useState({ dials:0, conv:0, booked:0, emails:0, posts:0, dms:0 });
   const [showSet, setShowSet] = useState(false);
@@ -37,14 +39,15 @@ export default function GamePlan({ userId, avgCommission, onGoCalls }) {
   const loaded = useRef(false); const saveT = useRef(null); const prevEarned = useRef(null); const lastLine = useRef("");
 
   // ---------- load ----------
-  useEffect(() => { if (!userId) return; (async () => {
+  useEffect(() => { if (!userId) return; loaded.current = false; (async () => {
     const [{ data:s }, { data:d }, { data:h }] = await Promise.all([
       supabase.from("game_plan_settings").select("settings").eq("user_id", userId).maybeSingle(),
       supabase.from("game_plan_days").select("data").eq("user_id", userId).eq("day", KEY).maybeSingle(),
       supabase.from("game_plan_days").select("day,data").eq("user_id", userId).order("day", { ascending:false }).limit(120),
     ]);
     setSettings({ ...defaultSettings(userId, avgCommission), ...(s?.settings || {}) });
-    if (d?.data) setDay((x) => ({ ...x, ...d.data }));
+    // Start each day from a blank slate. Merging onto the old state carried yesterday's checkmarks into today.
+    setDay({ ...BLANK_DAY, ...(d?.data || {}) });
     setHistory(Object.fromEntries((h || []).map((r) => [r.day, r.data])));
     loaded.current = true;
   })(); }, [userId, KEY]); // eslint-disable-line react-hooks/exhaustive-deps

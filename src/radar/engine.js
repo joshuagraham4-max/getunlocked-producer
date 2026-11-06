@@ -148,7 +148,7 @@ export const priorityScore = (c, reason) => {
   return tier + reason.score + (reason.also?.length || 0) * 15;
 };
 export function buildQueue(contacts, radar, target = 20) {
-  const t = today(); const nAgents = Math.round(target * 0.3), nClients = target - nAgents;
+  const t = today(); const nAgents = Math.round(target * 0.4), nClients = target - nAgents;
   const pool = { clients:[], agents:[] }; const bdays = [];
   for (const c of contacts) {
     const ty = c.contact_type || "past_client";
