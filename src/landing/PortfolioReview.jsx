@@ -21,14 +21,17 @@ const Q = [
   { k:"scenario", q:"Your scenario, in your own words.", sub:"Ask me anything. Weird deals welcome.", long:true, optional:true },
 ];
 // Equity bracket -> usable cash (keeping 25% equity in every property) -> more rentals.
-// Example math: each purchase needs 25% down plus ~3% closing; $800/mo cash flow per door after the payment.
-const PER_DOOR = 800, DOWN = 0.25, COSTS = 0.03;
+// Example math: 15% down plus ~3% closing per purchase; $600-$1,500/mo cash flow per door after the payment.
+// Doors = how many purchases the equity covers. Change these numbers here; the page and disclaimer follow.
+const FLOW_LO = 600, FLOW_HI = 1500, DOWN = 0.15, COSTS = 0.03;
 const PLAY = {
-  "Under $100K": { cash:60000,  doors:1, price:200000 },
-  "$100-250K":   { cash:130000, doors:1, price:400000 },
-  "$250-500K":   { cash:280000, doors:2, price:400000 },
-  "$500K+":      { cash:375000, doors:3, price:400000, plus:true },
+  "Under $100K": { cash:60000,  price:300000 },
+  "$100-250K":   { cash:130000, price:350000 },
+  "$250-500K":   { cash:280000, price:350000 },
+  "$500K+":      { cash:375000, price:350000, plus:true },
 };
+for (const p of Object.values(PLAY)) p.doors = Math.max(1, Math.floor(p.cash / (p.price * (DOWN + COSTS))));
+const pct = (n) => Math.round(n * 100) + "%";
 const money = (n) => "$" + Math.round(n).toLocaleString("en-US");
 const k$ = (n) => "$" + (n >= 1000000 ? (n / 1000000).toFixed(1).replace(/\.0$/, "") + "M" : Math.round(n / 1000) + "K");
 
@@ -87,7 +90,7 @@ export default function PortfolioReview() {
     const pl = PLAY[a.equity];
     const need = pl ? pl.price * (DOWN + COSTS) : 0;
     const left = pl ? Math.max(0, pl.cash - need * pl.doors) : 0;
-    const mo = pl ? PER_DOOR * pl.doors : 0;
+    const lo = pl ? FLOW_LO * pl.doors : 0, hi = pl ? FLOW_HI * pl.doors : 0;
     return (
       <Shell>
         <div style={{ background:C.card, border:`1px solid ${C.line}`, borderRadius:14, padding:24 }}>
@@ -96,10 +99,10 @@ export default function PortfolioReview() {
             <h2 style={{ fontFamily:F.display, fontWeight:800, fontSize:28, lineHeight:1.2, margin:"8px 0" }}>Your equity could buy <span style={{ color:C.good }}>{pl.doors}{pl.plus ? "+" : ""} more {k$(pl.price)} rental{pl.doors > 1 || pl.plus ? "s" : ""}</span>.</h2>
             <div style={{ display:"grid", gridTemplateColumns:"minmax(0,1fr) minmax(0,1fr)", gap:10, margin:"14px 0" }}>
               <div style={{ background:"#EAF5EE", borderRadius:10, padding:"14px 16px" }}>
-                <div style={{ fontFamily:F.display, fontWeight:800, fontSize:"clamp(22px, 6vw, 30px)", color:C.good }}>{money(mo)}{pl.plus ? "+" : ""}/mo</div>
+                <div style={{ fontFamily:F.display, fontWeight:800, fontSize:"clamp(18px, 5vw, 28px)", color:C.good, lineHeight:1.15 }}>{money(lo)}-{money(hi)}{pl.plus ? "+" : ""}<span style={{ fontSize:"0.6em" }}>/mo</span></div>
                 <div style={{ fontSize:14, color:C.muted }}>new cash flow</div></div>
               <div style={{ background:"#EAF5EE", borderRadius:10, padding:"14px 16px" }}>
-                <div style={{ fontFamily:F.display, fontWeight:800, fontSize:"clamp(22px, 6vw, 30px)", color:C.good }}>{money(mo * 12)}{pl.plus ? "+" : ""}/yr</div>
+                <div style={{ fontFamily:F.display, fontWeight:800, fontSize:"clamp(18px, 5vw, 28px)", color:C.good, lineHeight:1.15 }}>{k$(lo * 12)}-{k$(hi * 12)}{pl.plus ? "+" : ""}<span style={{ fontSize:"0.6em" }}>/yr</span></div>
                 <div style={{ fontSize:14, color:C.muted }}>every year you hold them</div></div>
             </div>
             <p style={{ fontSize:16, lineHeight:1.55, margin:"0 0 14px" }}>Without selling anything or putting in your own cash. You'd still keep 25% equity in every property you own now{left >= 10000 ? <>, with about <b>{k$(left)}</b> left over for reserves</> : ""}.</p>
@@ -125,7 +128,7 @@ export default function PortfolioReview() {
             <a href={BOOKING} style={{ ...btn, display:"flex", alignItems:"center", justifyContent:"center", textDecoration:"none" }}>Book my deep dive</a>
             <a href={`sms:${BRAND.phone.replace(/\D/g, "")}?body=${encodeURIComponent(`Hi Joshua, it's ${f.first}. I just did the portfolio review.`)}`} style={{ ...btn, background:"#fff", color:C.blue, border:`2px solid ${C.blue}`, display:"flex", alignItems:"center", justifyContent:"center", textDecoration:"none" }}>Text Joshua now</a>
           </div>
-          <p style={{ fontSize:13, color:C.muted, marginTop:14 }}>Example only: about {money(need || 112000)} per purchase (25% down plus about 3% closing costs) and $800/mo cash flow per door after the payment. Your values, rents and terms will differ. Business-purpose loans, for scenario review only. Not an offer to lend.</p>
+          <p style={{ fontSize:13, color:C.muted, marginTop:14 }}>Example only: about {money(need || 63000)} per purchase ({pct(DOWN)} down plus about {pct(COSTS)} closing costs) and {money(FLOW_LO)}-{money(FLOW_HI)}/mo cash flow per door after the payment. {pct(DOWN)} down is available on qualifying purchases; credit, property and reserves apply. Your values, rents and terms will differ. Business-purpose loans, for scenario review only. Not an offer to lend.</p>
         </div>
       </Shell>
     );
