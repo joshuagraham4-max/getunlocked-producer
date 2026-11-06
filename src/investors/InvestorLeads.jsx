@@ -3,14 +3,18 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "../supabase.js";
 import { today } from "../radar/engine.js";
+import { ANGLES, angleFromName } from "../radar/investorPlaybook.js";
+import HowTo from "../HowTo.jsx";
+import { GUIDES } from "../howto/guides.jsx";
 
-const C = { bg:"#f5f0e8", card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc", green:"#1e6e4a", greenBg:"#e8f4ee", amber:"#b05e0d", amberBg:"#fdf0e0", red:"#9e3020", redBg:"#fbeae7", purple:"#5b3fa6", purpleBg:"#eeebf8" };
+const C = { bg:"#f5f0e8", card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc", green:"#1e6e4a", greenBg:"#e8f4ee", amber:"#b05e0d", amberBg:"#fdf0e0", red:"#9e3020", redBg:"#fbeae7", purple:"#5b3fa6", purpleBg:"#eeebf8", blue:"#1d4f91" };
 const F = { mono:"'DM Mono',monospace", cond:"'Barlow Condensed',sans-serif", body:"'Barlow',sans-serif" };
 const card = { background:C.card, border:`1px solid ${C.rule}`, borderRadius:10 };
 const btn = { fontFamily:F.cond, fontWeight:700, fontSize:14, padding:"7px 13px", borderRadius:7, border:`1px solid ${C.rule}`, background:C.card, color:C.mid, cursor:"pointer" };
 const btnG = { ...btn, background:C.green, borderColor:C.green, color:"#fff" };
 const inp = { padding:"7px 9px", borderRadius:6, border:`1px solid ${C.rule}`, background:"#fff", fontFamily:F.body, fontSize:14, color:C.ink, boxSizing:"border-box" };
-const TYPES = { maturing_hard_money:["Hard money due", C.red, C.redBg], dead_money:["Dead money", C.green, C.greenBg], portfolio_review:["Portfolio review", C.purple, C.purpleBg] };
+const TYPES = { maturing_hard_money:["Hard money due", C.red, C.redBg], dead_money:["Dead money", C.green, C.greenBg], portfolio_review:["Portfolio review", C.purple, C.purpleBg],
+  ...Object.fromEntries(ANGLES.slice(2).map(([k, l]) => [k, [l, C.blue, "#eef3fb"]])) };
 const STATUS = ["new","queued","talked","booked","dead"];
 const ORIGIN = typeof window !== "undefined" ? window.location.origin : "";
 
@@ -100,7 +104,7 @@ export default function InvestorLeads({ userId, contacts, setContacts }) {
     const headers = rows[0].map(norm);
     const map = {};
     for (const [field, names] of Object.entries(MAP)) { const i = headers.findIndex((h) => names.includes(h)); if (i >= 0) map[field] = i; }
-    setImp({ rows:rows.slice(1), headers:rows[0], map, lead_type: /hard|bridge|matur/i.test(file.name) ? "maturing_hard_money" : "dead_money", batch:`${file.name} · ${today()}` });
+    setImp({ rows:rows.slice(1), headers:rows[0], map, lead_type: angleFromName(file.name), batch:`${file.name} · ${today()}` });
   };
   const runImport = async () => {
     setBusy(true); setMsg("");
@@ -160,8 +164,9 @@ export default function InvestorLeads({ userId, contacts, setContacts }) {
   const wide = typeof window !== "undefined" && window.innerWidth >= 900;
   return (
     <div>
+      <HowTo id="pull-leads" {...GUIDES.pullLeads} defaultOpen={false}/>
       <div style={{display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(170px,1fr))", gap:12, marginBottom:14}}>
-        {Object.entries(TYPES).map(([k, [l, c, bg]]) => (
+        {Object.entries(TYPES).filter(([k]) => k in counts && (counts[k] > 0 || ["maturing_hard_money","dead_money"].includes(k))).map(([k, [l, c, bg]]) => (
           <div key={k} onClick={() => setType(type === k ? "all" : k)} style={{...card, padding:"12px 16px", cursor:"pointer", borderColor: type === k ? c : C.rule, background: type === k ? bg : C.card}}>
             <div style={{fontFamily:F.cond, fontWeight:800, fontSize:30, color:c, lineHeight:1}}>{counts[k] || 0}</div>
             <div style={{fontFamily:F.mono, fontSize:11, color:C.mid, marginTop:4}}>{l.toUpperCase()} · OPEN</div>
@@ -187,7 +192,7 @@ export default function InvestorLeads({ userId, contacts, setContacts }) {
           <div style={{fontFamily:F.mono, fontSize:11, color:C.mid, margin:"4px 0 10px"}}>Matched columns: {Object.keys(imp.map).join(", ") || "none"}.{!("phone" in imp.map) && " No phone column found: run skip tracing in PropStream first, or these won't be callable."}</div>
           <div style={{display:"flex", gap:8, flexWrap:"wrap", alignItems:"center"}}>
             <span style={{fontFamily:F.mono, fontSize:12}}>These are:</span>
-            {[["maturing_hard_money","Hard money coming due"],["dead_money","Dead money (equity-rich owners)"]].map(([k, l]) => <button key={k} onClick={() => setImp({ ...imp, lead_type:k })} style={imp.lead_type === k ? btnG : btn}>{l}</button>)}
+            {ANGLES.map(([k, l]) => <button key={k} onClick={() => setImp({ ...imp, lead_type:k })} style={imp.lead_type === k ? btnG : btn}>{l}</button>)}
             <button disabled={busy} onClick={runImport} style={{...btnG, marginLeft:"auto"}}>{busy ? "Importing..." : "Import"}</button>
             <button onClick={() => setImp(null)} style={btn}>Cancel</button>
           </div>

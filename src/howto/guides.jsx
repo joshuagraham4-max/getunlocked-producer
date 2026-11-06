@@ -26,6 +26,13 @@ export const GUIDES = {
         <>Each row has a <b>Why now</b> pill (rate gap, birthday, anniversary, equity, inherited file, follow-up). Edit a contact's <b>Book</b> (My client / Past LO) and <b>Buckets</b> inside the contact.</>,
         <><b>Duplicates</b> (above the table) reviews look-alike records — merge, link, or mark "not the same".</>,
   ] },
+  pullLeads: { title: "How to pull leads (PropStream)", steps: [
+        <><b>Every search:</b> Residential (single family, duplex, 2-4 units), Owner Occupied = No. Save it as <b>Angle - County</b> (e.g., "Cash buyer - Sarasota") with weekly email alerts.</>,
+        <><b>The angles:</b> Cash buyer (Lead Lists: Cash Buyers, last sale 12 months) · Stuck flipper (Flippers + MLS Failed) · Failed listing · Out of state (Absentee: Out of State, owns 3+) · Tired landlord · ARM (Mortgage: Adjustable Rate) · Pre-foreclosure. Plus Hard money due and Dead money.</>,
+        <><b>Order:</b> Sarasota, then Manatee. Add Hillsborough and Pinellas once you see which angles work.</>,
+        <><b>Into GUP:</b> select the properties, Save them to a list with the same name, skip trace the list, export the CSV, then Import it here. The file name sets the angle, so each call card opens with the right playbook.</>,
+        <>PropStream allows one login at a time. Close it on your phone before Claude works in it.</>,
+  ] },
   dupes: { title: "How to review duplicates", steps: [
         <>Each card shows two records that look like the same person (same name, email or phone), side by side. Tap a name to open that record first if you need to check.</>,
         <><b>Merge into one</b> combines both records and keeps everything: phones, emails, loans, notes, tags, call history and links. Extra phones or emails that don't fit go into the note. Do Not Contact carries over if either had it.</>,

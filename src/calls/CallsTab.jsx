@@ -7,7 +7,7 @@ import { supabase } from "../supabase.js";
 import EmailDesk from "./EmailDesk.jsx";
 import QuickUpdate from "./QuickUpdate.jsx";
 
-const C = { bg:"#f5f0e8", card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc", green:"#1e6e4a", amber:"#b05e0d", amberBg:"#fdf0e0" };
+const C = { bg:"#f5f0e8", card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc", green:"#1e6e4a", amber:"#b05e0d", amberBg:"#fdf0e0", greenBg:"#e6f2ea" };
 const F = { mono:"'DM Mono',monospace", cond:"'Barlow Condensed',sans-serif", body:"'Barlow',sans-serif" };
 const card = { background:C.card, border:`1px solid ${C.rule}`, borderRadius:10 };
 const lbl = { fontFamily:F.cond, fontWeight:700, fontSize:12, letterSpacing:"0.16em", textTransform:"uppercase", color:C.light };
@@ -140,6 +140,18 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
   };
   const sentFollow = async (channel) => {
     await supabase.from("contact_touches").insert({ user_id:userId, contact_id:sel.id, channel, outcome:"sent follow-up" });
+    setDepBump((n) => n + 1);
+  };
+  // Deposits: every contact attempt (calls, voicemails, texts, emails, handwritten notes) before asking for business.
+  const [deposits, setDeposits] = useState(null); const [depBump, setDepBump] = useState(0);
+  useEffect(() => { if (!sel?.id) return; let live = true;
+    supabase.from("contact_touches").select("id", { count:"exact", head:true }).eq("contact_id", sel.id).neq("channel", "update")
+      .then(({ count }) => { if (live) setDeposits({ id:sel.id, n:count || 0 }); });
+    return () => { live = false; };
+  }, [sel?.id, depBump, calledToday]); // eslint-disable-line react-hooks/exhaustive-deps
+  const logCard = async () => {
+    await supabase.from("contact_touches").insert({ user_id:userId, contact_id:sel.id, channel:"card", outcome:"handwritten note" });
+    setDepBump((n) => n + 1);
   };
   const skip = () => { try { localStorage.setItem(skipKey, JSON.stringify([...skipped, selId])); } catch {} setNonce((n) => n + 1); next(); };
   const rebuild = () => { try { localStorage.removeItem(qKey); } catch {} setSelId(null); setNonce((n) => n + 1); };
@@ -200,6 +212,11 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
   const Focus = !sel ? <div style={{...card, padding:30, fontFamily:F.mono, color:C.light}}>Pick someone from the list.</div> : (
     <div ref={focusRef} style={{...card, padding: wide ? "26px 30px" : "18px", scrollMarginTop:10}}>
       {!wide && <button onClick={() => listRef.current?.scrollIntoView({ behavior:"smooth", block:"start" })} style={{...btn, padding:"5px 12px", fontSize:13, marginBottom:12}}>Back to list</button>}
+      {deposits?.id === sel.id && (() => { const n = deposits.n; const [txt, col, bg] = n < 3 ? [`Deposit ${n} of 3-7. Keep giving.`, C.amber, C.amberBg] : n <= 7 ? [`Deposit ${n} of 3-7. Ready to ask.`, C.green, C.greenBg] : [`Deposit ${n}. Make the ask.`, C.green, C.greenBg]; return (
+        <div style={{display:"flex", alignItems:"center", gap:8, flexWrap:"wrap", marginBottom:10}}>
+          <span style={{fontFamily:F.mono, fontSize:12, fontWeight:700, color:col, background:bg, padding:"4px 10px", borderRadius:12}}>{txt}</span>
+          <button onClick={logCard} style={{...btn, padding:"3px 10px", fontSize:12}}>+ Handwritten note</button>
+        </div>); })()}
       {pinned === sel.id && <div style={{fontFamily:F.mono, fontSize:11, color:C.amber, marginBottom:8}}>Not on today's call list. Opened from search.</div>}
       <div style={{display:"flex", justifyContent:"space-between", gap:16, flexWrap:"wrap"}}>
         <div>

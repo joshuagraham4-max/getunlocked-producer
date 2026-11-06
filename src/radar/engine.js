@@ -243,7 +243,7 @@ export function scriptsFor(c, i, reason, me = "Joshua Graham") {
   const vmText = `Hi ${first}, it's ${me}. Just tried you. ${short}. Call or text me back at ${MY_PHONE} when you have a minute, or grab a time here: ${BOOKING}`;
   const emailSubject = reason?.key === "bday" ? "Happy birthday!" : reason?.key === "rate" ? "Quick rate check" : "Checking in";
   const emailBody = `Hi ${first},\n\nI just tried giving you a call. ${short}.\n\nGive me a call or text at ${MY_PHONE}, or pick a time that works for you: ${BOOKING}\n\n${me}\nGraham Financial`;
-  const invKind = reason?.key === "newlead" && tags.includes("investor lead") ? (tags.includes("maturing_hard_money") ? "maturing_hard_money" : tags.includes("dead_money") ? "dead_money" : null) : null;
+  const invKind = tags.includes("investor lead") ? Object.keys(PLAYBOOKS).find((k) => tags.includes(k)) || null : null;
   if (invKind) { const f = investorFollowUps(c, invKind, me, MY_PHONE, BOOKING); return { say, vmText:f.vmText, emailSubject:f.emailSubject, emailBody:f.emailBody, playbook:PLAYBOOKS[invKind] }; }
   return { say, vmText, emailSubject, emailBody };
 }
