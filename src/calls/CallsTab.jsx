@@ -74,7 +74,7 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
   const loadCalled = useCallback(async () => {
     if (!userId) return;
     const start = new Date(); start.setHours(0, 0, 0, 0);
-    const { data: t } = await supabase.from("contact_touches").select("contact_id,created_at,outcome").eq("user_id", userId).eq("channel", "call").gte("created_at", start.toISOString()).order("created_at", { ascending:false }).limit(300);
+    const { data: t } = await supabase.from("contact_touches").select("contact_id,touched_at,outcome").eq("user_id", userId).eq("channel", "call").gte("touched_at", start.toISOString()).order("touched_at", { ascending:false }).limit(300);
     const seen = new Set(); setCalledToday((t || []).filter((x) => !seen.has(x.contact_id) && seen.add(x.contact_id)));
   }, [userId]);
   useEffect(() => { loadCalled(); }, [loadCalled]);
@@ -297,7 +297,7 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
           <div style={{display:"flex", gap:6, overflowX:"auto", paddingBottom:4}}>
             {calledToday.map((x) => { const c = byId[x.contact_id]; if (!c) return null; return (
               <button key={x.contact_id} onClick={() => openPerson(c.id)} style={{...(selId === c.id ? btnG : btn), whiteSpace:"nowrap", flex:"0 0 auto", padding:"6px 11px", fontSize:13}}>
-                {fullName(c)} <span style={{opacity:0.7, fontWeight:400}}>{new Date(x.created_at).toLocaleTimeString("en-US", { hour:"numeric", minute:"2-digit" })}</span>
+                {fullName(c)} <span style={{opacity:0.7, fontWeight:400}}>{new Date(x.touched_at).toLocaleTimeString("en-US", { hour:"numeric", minute:"2-digit" })}</span>
               </button>); })}
           </div></>}
       </div>

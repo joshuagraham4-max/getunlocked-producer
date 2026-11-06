@@ -36,7 +36,8 @@ const C = {
   olive:"#7a6a1e", oliveBg:"#f8f4e3", oliveBd:"#dcd890",
 };
 const F = { mono:"'DM Mono',monospace", cond:"'Barlow Condensed',sans-serif", body:"'Barlow',sans-serif" };
-const todayKey = () => new Date().toISOString().slice(0,10);
+const localYmd = ((d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`);
+const todayKey = () => localYmd(new Date());   // local day, not UTC
 const toMins = (h,m=0) => h*60+m;
 const fmt = (mins) => {
   const h=Math.floor(mins/60)%24, m=mins%60, ap=h>=12?"PM":"AM", h12=h>12?h-12:h===0?12:h;
@@ -484,7 +485,7 @@ export default function App() {
   const [tab, setTab] = useState("calls");
   const [callsSeen, setCallsSeen] = useState(false);
   useEffect(() => { if (tab === "calls") setCallsSeen(true); }, [tab]);
-  const gpDay = () => { const x=new Date(); if (x.getHours()*60+x.getMinutes()<300) x.setDate(x.getDate()-1); return x.toISOString().slice(0,10); };
+  const gpDay = () => { const x=new Date(); if (x.getHours()*60+x.getMinutes()<300) x.setDate(x.getDate()-1); return localYmd(x); };
   const [dayMode, setDayMode] = useState(() => { try { return localStorage.getItem("gupDayMode:"+gpDay()) || "prospect"; } catch { return "prospect"; } });
   const setDayModeSaved = (k) => { setDayMode(k); try { localStorage.setItem("gupDayMode:"+gpDay(), k); } catch {} };
   // Stripped-down nav: Calls, Contacts, Radar. Everything else is hidden behind "More" (nothing deleted).
@@ -521,6 +522,26 @@ export default function App() {
   const [history, setHistory] = useState([]);
   const [ydayP, setYdayP] = useState([]);
   const [contacts, setContacts] = useState([]);
+  // Coming back to the app (phone unlocked, tab refocused): pull contacts touched since yesterday so calls
+  // logged on another device show as done here too.
+  useEffect(() => {
+    let last = Date.now();
+    const sync = async () => {
+      if (document.visibilityState !== "visible" || !user?.id || Date.now() - last < 30000) return;
+      last = Date.now();
+      const y = new Date(); y.setDate(y.getDate() - 1);
+      const { data } = await supabase.from("contacts").select("*").eq("user_id", user.id).gte("last_contacted", localYmd(y));
+      if (data?.length) setContacts((p) => { const m = new Map(data.map((c) => [c.id, c])); return p.map((c) => m.get(c.id) || c); });
+    };
+    // New day while the app stayed open (phone left it running overnight): reload so the schedule,
+    // checkmarks, counts and call list all start fresh instead of carrying yesterday forward.
+    const bootDay = todayKey();
+    const rollover = () => { if (todayKey() !== bootDay && document.visibilityState === "visible") window.location.reload(); };
+    const tick = setInterval(rollover, 60000);
+    const onShow = () => { rollover(); sync(); };
+    document.addEventListener("visibilitychange", onShow); window.addEventListener("focus", onShow);
+    return () => { clearInterval(tick); document.removeEventListener("visibilitychange", onShow); window.removeEventListener("focus", onShow); };
+  }, [user?.id]);
   const [openContactId, setOpenContactId] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(null);
   const [uploadPending, setUploadPending] = useState(null);
@@ -595,7 +616,7 @@ export default function App() {
       }
       // Yesterday's priorities + streak check
       const yd = new Date(); yd.setDate(yd.getDate()-1);
-      const ydStr = yd.toISOString().slice(0,10);
+      const ydStr = localYmd(yd);
       const { data: ydData } = await supabase.from("daily_logs").select("tomorrow,counts,pb").eq("user_id",userId).eq("date",ydStr).maybeSingle();
       if (ydData?.tomorrow) {
         const yp = Array.isArray(ydData.tomorrow) ? ydData.tomorrow.filter(p=>p&&p.trim()) : [];

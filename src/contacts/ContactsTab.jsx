@@ -23,7 +23,7 @@ const money = (v) => (v || v === 0) && !isNaN(v) ? `$${Math.round(Number(v)).toL
 const fullName = (c) => [c.first_name, c.last_name].filter(Boolean).join(" ") || c.company || c.email || "(no name)";
 const year = (d) => (d ? String(d).slice(0, 4) : "");
 const typeOf = (c) => c.contact_type || "past_client";
-const today = () => new Date().toISOString().slice(0, 10);
+const today = () => ((d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`)(new Date());   // local day, not UTC
 
 function Chip({ children, selected, onClick, color = C.green, small }) {
   return <button onClick={onClick} style={{padding: small ? "6px 10px" : "9px 14px", borderRadius:6, border:`1.5px solid ${selected ? color : C.rule}`, background: selected ? color : C.card, color: selected ? "#fff" : C.mid, fontFamily:F.mono, fontSize: small ? 10 : 11, cursor:"pointer"}}>{children}</button>;
@@ -425,7 +425,7 @@ export default function ContactsTab({ userId, contacts, setContacts, profileName
   const buckets = useMemo(() => { const m = {}; for (const c of inCat) for (const b of c.buckets || []) m[b] = (m[b] || 0) + 1; return Object.entries(m).sort((a, b) => b[1] - a[1]); }, [inCat]);
   const brokerages = useMemo(() => { if (cat !== "agent") return []; const m = {}; for (const c of inCat) if (c.company) m[c.company] = (m[c.company] || 0) + 1; return Object.entries(m).sort((a, b) => b[1] - a[1]).slice(0, 80); }, [inCat, cat]);
 
-  const t = new Date().toISOString().slice(0, 10);
+  const t = today();
   const test = (c, f) => {
     const r = parseFloat(c.note_rate), tags = c.tags || [], y = year(c.funded_date);
     switch (f) {

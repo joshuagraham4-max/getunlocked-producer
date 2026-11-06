@@ -183,7 +183,7 @@ export default function FocusMode({ onLog }) {
         name: task.name,
         estimateMins: task.estimateMins,
         actualMins,
-        date: new Date().toISOString().slice(0, 10),
+        date: ((d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`)(new Date()),
       });
     }
     // Auto-advance to next undone task

@@ -1,8 +1,11 @@
 // Shared Radar math + daily call queue + call scripts (used by the Calls and Radar tabs).
 import { supabase } from "../supabase.js";
 
-export const today = () => new Date().toISOString().slice(0, 10);
-export const addDays = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
+// Dates are the phone's local calendar day. UTC (toISOString) flips to tomorrow at 8 PM Eastern, which
+// made contacts called earlier that evening look "not called today" and show up again.
+const ymd = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+export const today = () => ymd(new Date());
+export const addDays = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return ymd(d); };
 export const digits = (s) => String(s || "").replace(/\D/g, "");
 export const fullName = (c) => [c.first_name, c.last_name].filter(Boolean).join(" ") || c.company || c.email || "(no name)";
 export const monthsSince = (d) => { if (!d) return null; const a = new Date(d), b = new Date(); return (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth()); };
@@ -89,7 +92,7 @@ const mmddOf = (b) => { if (!b) return null; const s = String(b); return s.lengt
 export function bdayDue(c, t = today()) {
   const mmdd = mmddOf(c.birthday); if (!mmdd) return null;
   const dow = new Date(t + "T12:00:00").getDay();       // 0 Sun ... 5 Fri, 6 Sat
-  const shift = (n) => { const d = new Date(t + "T12:00:00"); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
+  const shift = (n) => { const d = new Date(t + "T12:00:00"); d.setDate(d.getDate() + n); return ymd(d); };
   if (t.slice(5) === mmdd) return { when:"today", date:t };
   if (dow === 5) for (const n of [1, 2]) if (shift(n).slice(5) === mmdd) return { when: n === 1 ? "Saturday" : "Sunday", date:shift(n) };
   for (const n of [1, 2, 3]) {                          // missed catch-up (up to 3 days back)
@@ -146,8 +149,12 @@ export function buildQueue(contacts, radar, target = 20) {
     if (c.do_not_contact) continue;
     if (!["past_client","lead","agent","referral_partner"].includes(ty)) continue;
     // Birthdays: always on the list, on top of the target, even if called recently or no phone.
-    if (bdayDue(c, t)) { const reason = reasonFor(c, radar.info[c.id], t); bdays.push({ id:c.id, reason, group:segmentOf(c), bday:true, s:9000 + (c.book === "mine" ? 100 : 0) }); continue; }
+    // Birthdays go on top of the target, but not for a bad number or someone already called this week
+    // (Friday lists weekend birthdays, so without this the same person showed up Fri, Sat and Sun).
+    const calledThisWeek = c.last_contacted && c.last_contacted < t && daysSince(c.last_contacted) <= 6;
+    if (bdayDue(c, t) && c.outcome !== "wrong number" && !calledThisWeek) { const reason = reasonFor(c, radar.info[c.id], t); bdays.push({ id:c.id, reason, group:segmentOf(c), bday:true, s:9000 + (c.book === "mine" ? 100 : 0) }); continue; }
     if (!c.phone || ty === "referral_partner") continue;              // calls first: needs a phone number
+    if (c.outcome === "wrong number") continue;                        // bad number: off the list until Quick Update adds a new one
     const due = c.follow_up_date && c.follow_up_date <= t;
     if (c.follow_up_date && c.follow_up_date > t) continue;
     if (ty === "lead" && !due) continue;
