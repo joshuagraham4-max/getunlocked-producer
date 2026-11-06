@@ -23,7 +23,8 @@ const TOOLS = [
 ];
 const COMING = ["Equity Unlock Estimator", "Income Qualifier", "DPA estimator", "Medical Pro Buying-Power Check"];
 const IMAGES = [ { name:"Plum suit", src:"/groups/JG-SaveDeals-plum.png" }, { name:"Plaid suit", src:"/groups/JG-SaveDeals-plaid.png" } ];
-const fill = (t) => t.replaceAll("{CALC}", CALC).replaceAll("{BOOK}", BOOKING);
+import { SIGN_BLOCK } from "./askClaude.js";
+const fill = (t) => t.replaceAll("{CALC}", CALC).replaceAll("{BOOK}", BOOKING).replaceAll("{SIGN}", SIGN_BLOCK);
 const copy = (t) => navigator.clipboard?.writeText(t);
 
 export default function GroupsTab({ userId, onContact }) {
@@ -171,8 +172,8 @@ export default function GroupsTab({ userId, onContact }) {
 
       {view === "bank" && (
         <div style={{display:"grid", gap:12}}>
-          <div><button onClick={() => setEdit({ title:"", body:"", image:IMAGES[0].src, active:true })} style={btnG}>+ New post</button>
-            <span style={{fontFamily:F.mono, fontSize:11, color:C.light, marginLeft:10}}>Use {"{CALC}"} for the calculator link and {"{BOOK}"} for your booking link.</span></div>
+          <div><button onClick={() => setEdit({ title:"", body:"", image:"", active:true })} style={btnG}>+ New post</button>
+            <span style={{fontFamily:F.mono, fontSize:11, color:C.light, marginLeft:10}}>Use {"{CALC}"} for the calculator link, {"{BOOK}"} for your booking link, and {"{SIGN}"} for your phone + NMLS (soft offers only).</span></div>
           {edit && (
             <div style={{...card, padding:14, display:"grid", gap:8}}>
               <input value={edit.title} onChange={(e) => setEdit((x) => ({ ...x, title:e.target.value }))} placeholder="Short name" style={inp}/>
