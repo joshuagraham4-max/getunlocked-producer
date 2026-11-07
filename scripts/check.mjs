@@ -87,6 +87,20 @@ try {
     assert(g({ sales_12m: 0 }) === "C" && g({ sales_12m: 3, volume_12m: 900000 }) === "C", "C");
     for (const r of [{ sales_12m: "abc" }, { volume_12m: 0 }, { sales_12m: 5 }]) { const x = O.agentRating(r); assert(x.grade in O.RATING_ORDER && typeof x.label === "string", "bad rating"); }
   });
+  check("Agent outreach: Thursday weekly touch picks the right agents and builds text", () => {
+    const now = new Date("2026-11-12T21:00:00Z");
+    const due = (r) => O.weeklyTouchDue(r, now);
+    assert(due({ channel: "facebook", status: "replied", sent_at: "2026-11-05T15:00:00Z" }), "replied agent should be due");
+    assert(due({ channel: "facebook", status: "no reply" }), "finished sequence should be due");
+    assert(!due({ channel: "facebook", status: "messaging" }), "agent still in sequence got a touch");
+    assert(!due({ channel: "facebook", status: "replied", weekly_touch: false }), "opted-out agent got a touch");
+    assert(!due({ channel: "facebook", status: "replied", last_touch_at: "2026-11-11T15:00:00Z" }), "touched 1 day ago");
+    assert(!due({ channel: "linkedin", status: "replied" }) && !due(null), "wrong channel / empty row");
+    const a = O.weeklyTouchFor({ id: "x", first_name: "Paige" }, new Date("2026-11-12"));
+    const b = O.weeklyTouchFor({ id: "x", first_name: "Paige" }, new Date("2026-11-19"));
+    assert(a !== b, "wording should rotate week to week");
+    for (const r of [{}, null, { full_name: "Kayte Foster" }]) { const x = O.weeklyTouchFor(r); assert(x && !/undefined|null/.test(x), "bad touch text"); }
+  });
   check("Agent outreach: reply suggestions build with or without details", () => {
     for (const x of [{ first: "Kayte", area: "Denver metro", news: "the Brighton and Castle Rock listings." }, {}, undefined, { first: null, area: null, news: null }]) {
       const s = O.replySuggestions(x);

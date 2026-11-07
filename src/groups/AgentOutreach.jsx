@@ -3,7 +3,7 @@
 // Claude fills the batch (name, area, a hook from their posts). Replies come to you and go on today's call list.
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../supabase.js";
-import { STEPS, TAKEOVER, CHANNELS, REPLY_FRAMEWORK, messageFor, linkedInNote, replySuggestions, agentRating, RATING_ORDER } from "./outreachScripts.js";
+import { STEPS, TAKEOVER, CHANNELS, REPLY_FRAMEWORK, messageFor, linkedInNote, replySuggestions, agentRating, RATING_ORDER, WEEKLY_TOUCH } from "./outreachScripts.js";
 
 const C = { card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc", green:"#1e6e4a", greenBg:"#e8f4ee", amber:"#b05e0d", amberBg:"#fdf0e0", red:"#9e3020" };
 const F = { mono:"'DM Mono',monospace", cond:"'Barlow Condensed',sans-serif", body:"'Barlow',sans-serif" };
@@ -186,6 +186,11 @@ export default function AgentOutreach({ userId, onContact }) {
               {g.lines.map((l) => <div key={l} style={{display:"flex", gap:8, alignItems:"center", marginTop:4}}><div style={{fontSize:14, flex:1}}>{l}</div><button onClick={() => copy(l)} style={{...btn, padding:"3px 9px", fontSize:12}}>Copy</button></div>)}
             </div>))}
           <div style={{fontFamily:F.mono, fontSize:11, color:C.light, marginTop:12}}>Leads you send agents are never tied to loans coming back to you (RESPA).</div>
+        </div>
+        <div style={{...card, padding:14}}>
+          <div style={lbl}>Weekly touch · Thursdays, late day, on Messenger</div>
+          <div style={{fontSize:13, color:C.mid, marginTop:4}}>Goes to agents who replied or finished the sequence. Not agents still in the sequence, or anyone messaged in the last 3 days. Wording rotates each week. Claude lines them up Thursday afternoon and sends after your go.</div>
+          {WEEKLY_TOUCH.map((v, i) => <div key={i} style={{fontSize:14, whiteSpace:"pre-wrap", lineHeight:1.5, marginTop:6, padding:10, background:"#fff", borderRadius:6, border:`1px solid ${C.rule}`}}>{v({ first:"Paige" })}</div>)}
         </div>
       </div>}
     </div>

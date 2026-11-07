@@ -85,6 +85,28 @@ And when I've got a buyer${a ? ` in ${a}` : ""}, what's the best way to get them
   ];
 }
 
+// Thursday late-day weekly touch on Messenger, for agents Joshua met through outreach.
+// Who: replied agents and agents who finished the 3-message sequence ("no reply"), weekly_touch not false.
+// Not agents still in the sequence, and not anyone messaged in the last 3 days. Rotates wording week to week.
+export const WEEKLY_TOUCH = [
+  (p) => `Hey ${p.first}! Just making sure you know you can get me on the weekends for preapprovals, open house flyers, etc. I'm here! ${PHONE}`,
+  (p) => `Hey ${p.first}, heading into the weekend: if a buyer needs a preapproval Saturday or Sunday, or you want help with an open house flyer, I'm around. Just text ${PHONE}.`,
+  (p) => `Happy Thursday ${p.first}! Quick reminder I work weekends. Preapprovals, open house flyers, a file that's stuck, whatever comes up. ${PHONE}`,
+  (p) => `Hey ${p.first}! Got open houses this weekend? I can turn a preapproval around same day and I'm happy to help with the flyer. I'm here: ${PHONE}`,
+];
+const weekNo = (d) => { const x = new Date(d); x.setHours(0, 0, 0, 0); return Math.floor((x - new Date(2026, 0, 5)) / (7 * 86400000)); };
+export function weeklyTouchFor(row, date = new Date()) {
+  const first = (row?.first_name || (row?.full_name || "").split(" ")[0] || "").trim() || "there";
+  const i = ((pick(String(row?.id || ""), WEEKLY_TOUCH.length) + weekNo(date)) % WEEKLY_TOUCH.length + WEEKLY_TOUCH.length) % WEEKLY_TOUCH.length;
+  return WEEKLY_TOUCH[i]({ first });
+}
+export function weeklyTouchDue(row, now = new Date()) {
+  if (!row || row.weekly_touch === false || row.channel !== "facebook") return false;
+  if (!["replied", "no reply"].includes(row.status)) return false;
+  const last = [row.last_touch_at, row.sent_at].filter(Boolean).map((x) => new Date(x).getTime()).sort((a, b) => b - a)[0];
+  return !last || now.getTime() - last >= 3 * 86400000;
+}
+
 // Joshua's takeover lines once an agent replies. Reference only; he writes the conversation.
 // RESPA: qualify partners on how they work leads; never tie leads to loans coming back.
 export const TAKEOVER = [
