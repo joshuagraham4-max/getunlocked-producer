@@ -101,6 +101,15 @@ try {
     assert(a !== b, "wording should rotate week to week");
     for (const r of [{}, null, { full_name: "Kayte Foster" }]) { const x = O.weeklyTouchFor(r); assert(x && !/undefined|null/.test(x), "bad touch text"); }
   });
+  check("Agent outreach: warm-up promotes at the right time", () => {
+    const d = new Date("2026-11-16T12:00:00");
+    const r = (x) => ({ status: "warming", ...x });
+    assert(O.warmupReady(r({ warm_first_at: "2026-11-09", warm_comments: 2 }), d), "2 days over 7 should be ready");
+    assert(!O.warmupReady(r({ warm_first_at: "2026-11-12", warm_comments: 3 }), d), "only 4 days in");
+    assert(!O.warmupReady(r({ warm_first_at: "2026-11-09", warm_comments: 1 }), d), "1 comment day, 7 days");
+    assert(O.warmupReady(r({ warm_first_at: "2026-11-02", warm_comments: 1 }), d), "1 comment day, 14 days");
+    assert(!O.warmupReady({ status: "ready", warm_first_at: "2026-10-01", warm_comments: 5 }, d) && !O.warmupReady(r({}), d) && !O.warmupReady(null, d), "wrong status / blanks");
+  });
   check("Agent outreach: reply suggestions build with or without details", () => {
     for (const x of [{ first: "Kayte", area: "Denver metro", news: "the Brighton and Castle Rock listings." }, {}, undefined, { first: null, area: null, news: null }]) {
       const s = O.replySuggestions(x);

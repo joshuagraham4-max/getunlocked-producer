@@ -85,6 +85,17 @@ And when I've got a buyer${a ? ` in ${a}` : ""}, what's the best way to get them
   ];
 }
 
+// Warm-up before outreach: Joshua comments on an agent's listings himself ("Lovely home!") for a week or two.
+// The 9:45 run reads his Facebook activity log on Mondays and Thursdays and loads those agents as status 'warming'.
+// Ready for the opener after 2+ comment days and 7+ days since the first, or 14+ days with any comment.
+export const WARM_DAYS = 7, WARM_MAX_DAYS = 14, WARM_MIN_COMMENTS = 2;
+export function warmupReady(row, today = new Date()) {
+  if (!row || row.status !== "warming" || !row.warm_first_at) return false;
+  const days = Math.floor((new Date(today).setHours(0, 0, 0, 0) - new Date(row.warm_first_at + "T00:00:00").getTime()) / 86400000);
+  const n = Number(row.warm_comments) || 0;
+  return (n >= WARM_MIN_COMMENTS && days >= WARM_DAYS) || (n >= 1 && days >= WARM_MAX_DAYS);
+}
+
 // Thursday late-day weekly touch on Messenger, for agents Joshua met through outreach.
 // Who: replied agents and agents who finished the 3-message sequence ("no reply"), weekly_touch not false.
 // Not agents still in the sequence, and not anyone messaged in the last 3 days. Rotates wording week to week.

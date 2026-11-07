@@ -3,7 +3,7 @@
 // Claude fills the batch (name, area, a hook from their posts). Replies come to you and go on today's call list.
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../supabase.js";
-import { STEPS, TAKEOVER, CHANNELS, REPLY_FRAMEWORK, messageFor, linkedInNote, replySuggestions, agentRating, RATING_ORDER, WEEKLY_TOUCH } from "./outreachScripts.js";
+import { STEPS, TAKEOVER, CHANNELS, REPLY_FRAMEWORK, messageFor, linkedInNote, replySuggestions, agentRating, RATING_ORDER, WEEKLY_TOUCH, warmupReady } from "./outreachScripts.js";
 
 const C = { card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc", green:"#1e6e4a", greenBg:"#e8f4ee", amber:"#b05e0d", amberBg:"#fdf0e0", red:"#9e3020" };
 const F = { mono:"'DM Mono',monospace", cond:"'Barlow Condensed',sans-serif", body:"'Barlow',sans-serif" };
@@ -33,6 +33,7 @@ export default function AgentOutreach({ userId, onContact }) {
   const replied = mine.filter((r) => r.status === "replied").sort((a, b) => RATING_ORDER[agentRating(a).grade] - RATING_ORDER[agentRating(b).grade]);
   const due = mine.filter((r) => ["ready", "messaging"].includes(r.status) && (!r.next_date || r.next_date <= t));
   const requested = mine.filter((r) => r.status === "requested");
+  const warming = mine.filter((r) => r.status === "warming").sort((a, b) => (b.warm_last_at || "").localeCompare(a.warm_last_at || ""));
   const later = mine.filter((r) => r.status === "messaging" && r.next_date > t);
   const closed = mine.filter((r) => ["no reply", "skipped"].includes(r.status));
   const sentToday = rows.filter((r) => r.sent_at && localDay(new Date(r.sent_at)) === t).length;
@@ -95,7 +96,7 @@ export default function AgentOutreach({ userId, onContact }) {
         {replied.length > 0 && <div style={{fontFamily:F.cond, fontWeight:800, fontSize:20, color:C.amber}}>{replied.length} replied</div>}
       </div>
       <div style={{display:"flex", gap:8, flexWrap:"wrap", marginBottom:12}}>
-        <Tab k="today" l={`To message ${due.length}`}/><Tab k="requested" l={`Requests out ${requested.length}`}/><Tab k="replied" l={`Replied ${replied.length}`}/>
+        <Tab k="today" l={`To message ${due.length}`}/><Tab k="warming" l={`Warming up ${warming.length}`}/><Tab k="requested" l={`Requests out ${requested.length}`}/><Tab k="replied" l={`Replied ${replied.length}`}/>
         <Tab k="later" l={`Waiting ${later.length}`}/><Tab k="closed" l={`Done ${closed.length}`}/><Tab k="scripts" l="Scripts"/>
         <select value={chan} onChange={(e) => setChan(e.target.value)} style={{...inp, width:"auto"}}><option value="all">All channels</option>{CHANNELS.map((c) => <option key={c.k} value={c.k}>{c.l}</option>)}</select>
         <button onClick={() => setAdd(add ? null : { ...EMPTY })} style={btn}>{add ? "Cancel" : "Add agent"}</button>
@@ -129,6 +130,19 @@ export default function AgentOutreach({ userId, onContact }) {
             </div>
           </div>))}
         {requested.length === 0 && <div style={{...card, padding:14, color:C.mid}}>No requests waiting.</div>}
+      </div>}
+
+      {view === "warming" && <div style={{display:"grid", gap:8}}>
+        <div style={{fontFamily:F.mono, fontSize:12, color:C.mid}}>Agents whose listings you've commented on. Claude picks these up from your Facebook activity on Mondays and Thursdays. They move into outreach after 2+ comment days over a week (or 2 weeks with any comment).</div>
+        {warming.map((r) => { const ready = warmupReady(r); return (
+          <div key={r.id} style={{...card, padding:10, display:"flex", justifyContent:"space-between", gap:8, flexWrap:"wrap", alignItems:"center", borderColor: ready ? C.green : C.rule}}>
+            <div><b>{r.full_name}</b><Meta r={r}/></div>
+            <span style={{fontFamily:F.mono, fontSize:11, color: ready ? C.green : C.mid}}>{r.warm_comments || 0} comment day{(r.warm_comments || 0) === 1 ? "" : "s"} · since {(r.warm_first_at || "").slice(5)}{ready ? " · ready" : ""}</span>
+            <div style={{display:"flex", gap:6}}><Profile r={r}/>
+              <button onClick={() => upd(r, { status:"ready", next_date:t })} style={ready ? btnG : btn}>Start outreach</button>
+              <button onClick={() => upd(r, { status:"skipped", next_date:null })} style={{...btn, color:C.red}}>Skip</button></div>
+          </div>); })}
+        {warming.length === 0 && <div style={{...card, padding:14, color:C.mid}}>Nobody warming up. Comment on a few agents' listings and they'll show here after the next Monday or Thursday run.</div>}
       </div>}
 
       {view === "replied" && <div style={{display:"grid", gap:10}}>
