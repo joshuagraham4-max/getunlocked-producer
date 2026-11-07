@@ -99,7 +99,7 @@ export default function GroupsTab({ userId, onContact }) {
               {plan.assignments.length > 0 && <button onClick={() => setShowJob((x) => !x)} style={btn}>{showJob ? "Hide job" : "See job"}</button>}
             </div>
             {plan.assignments.length > 0 && <div style={{marginTop:10, display:"grid", gap:4}}>
-              {plan.assignments.map((a) => <div key={a.group.id} style={{fontFamily:F.mono, fontSize:12, color:C.ink}}>{a.group.name} <span style={{color:C.light}}>gets</span> {a.post.title} <span style={{color:C.light}}>with {a.image.includes("plaid") ? "plaid" : a.image.includes("plum") ? "plum" : "post"} image</span></div>)}
+              {plan.assignments.map((a) => <div key={a.group.id} style={{fontFamily:F.mono, fontSize:12, color:C.ink}}>{a.group.name} <span style={{color:C.light}}>gets</span> {a.post.title} <span style={{color:C.light}}>({a.stage}, {!a.image ? "text only" : `${a.image.includes("plaid") ? "plaid" : a.image.includes("plum") ? "plum" : "post"} image`})</span></div>)}
             </div>}
             {plan.skipped.length > 0 && <div style={{marginTop:8, fontFamily:F.mono, fontSize:11, color:C.amber}}>Skipped: {plan.skipped.join(" · ")}</div>}
             {sent && <div style={{marginTop:8, fontFamily:F.mono, fontSize:12, color:C.green}}>The job is copied and Claude is opening. If the message box is empty, paste it in. Posts show here as Posted once Claude logs them.</div>}
