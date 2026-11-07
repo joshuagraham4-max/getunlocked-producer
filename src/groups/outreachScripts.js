@@ -44,6 +44,32 @@ export function messageFor(row) {
   return { stepName: s.name, wait: s.wait, text: s.variants[pick(row.id + s.step, s.variants.length)](p) };
 }
 
+// First reply to an agent who wrote back. The framework that worked with Kayte Foster (Nov 7):
+// mirror what they shared, give value right away, end on one easy question. Save the phone ask for their next reply.
+export const REPLY_FRAMEWORK = [
+  "Mirror what they shared: congrats on the listing, area or news they mentioned.",
+  "Give value right away: if a buyer on one of their listings gets stuck on financing, you'll tell them same day if you can close it.",
+  "End on one easy question: how do they want referrals (text, call, or email)?",
+  "Save the phone ask for their next reply.",
+];
+
+// Drafts for the Replied card. news = what they mentioned, e.g. "the Brighton and Castle Rock listings".
+export function replySuggestions({ first, area, news } = {}) {
+  const f = (first || "").trim() || "there";
+  const n = (news || "").trim().replace(/[.!]+$/, "");
+  const a = (area || "").trim();
+  return [
+    { title: "First reply (mirror, value, one question)", text:
+`Love that, ${f}!${n ? ` Congrats on ${n}.` : ""} If a buyer on one of your listings gets stuck on financing (self-employed, investor, a lender who said no), send them my way and I'll tell you same day if I can close it.
+
+And when I've got a buyer${a ? ` in ${a}` : ""}, what's the best way to get them to you: text, call, or email?` },
+    { title: "Their next reply: move it to a call", text:
+`Easier to learn how you work on the phone than over Messenger. Got 10 minutes this week? ${PHONE}` },
+    { title: "They have something stuck", text:
+`Send me the scenario, no names needed. I'll tell you today if I can close it and how fast.` },
+  ];
+}
+
 // Joshua's takeover lines once an agent replies. Reference only; he writes the conversation.
 // RESPA: qualify partners on how they work leads; never tie leads to loans coming back.
 export const TAKEOVER = [

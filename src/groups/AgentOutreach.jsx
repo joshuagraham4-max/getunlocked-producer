@@ -3,7 +3,7 @@
 // Claude fills the batch (name, area, a hook from their posts). Replies come to you and go on today's call list.
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../supabase.js";
-import { STEPS, TAKEOVER, CHANNELS, messageFor, linkedInNote } from "./outreachScripts.js";
+import { STEPS, TAKEOVER, CHANNELS, REPLY_FRAMEWORK, messageFor, linkedInNote, replySuggestions } from "./outreachScripts.js";
 
 const C = { card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc", green:"#1e6e4a", greenBg:"#e8f4ee", amber:"#b05e0d", amberBg:"#fdf0e0", red:"#9e3020" };
 const F = { mono:"'DM Mono',monospace", cond:"'Barlow Condensed',sans-serif", body:"'Barlow',sans-serif" };
@@ -21,7 +21,7 @@ const EMPTY = { full_name:"", area:"", state:"FL", brokerage:"", profile_url:"",
 
 export default function AgentOutreach({ userId, onContact }) {
   const [rows, setRows] = useState([]); const [view, setView] = useState("today"); const [chan, setChan] = useState("all");
-  const [drafts, setDrafts] = useState({}); const [add, setAdd] = useState(null); const [msg, setMsg] = useState("");
+  const [drafts, setDrafts] = useState({}); const [news, setNews] = useState({}); const [add, setAdd] = useState(null); const [msg, setMsg] = useState("");
   const t = localDay();
   const load = useCallback(async () => {
     const { data, error } = await supabase.from("agent_outreach").select("*").order("created_at");
@@ -128,7 +128,20 @@ export default function AgentOutreach({ userId, onContact }) {
             <div style={{fontFamily:F.cond, fontWeight:800, fontSize:17}}>{r.full_name}</div><Meta r={r}/>
             {r.last_message && <div style={{fontSize:13, color:C.mid, marginTop:6, whiteSpace:"pre-wrap"}}>Last sent: {r.last_message.slice(0, 160)}{r.last_message.length > 160 ? "..." : ""}</div>}
             <div style={{display:"flex", gap:8, marginTop:8}}><Profile r={r}/></div>
+            <div style={{marginTop:10}}>
+              <div style={lbl}>Reply suggestions</div>
+              <input placeholder="What did they mention? e.g. the Brighton and Castle Rock listings" value={news[r.id] || ""} onChange={(e) => setNews((x) => ({ ...x, [r.id]:e.target.value }))} style={{...inp, marginTop:4}}/>
+              {replySuggestions({ first:r.first_name || (r.full_name || "").split(" ")[0], area:r.area, news:news[r.id] }).map((s) => (
+                <div key={s.title} style={{marginTop:8}}>
+                  <div style={{fontFamily:F.cond, fontWeight:700, fontSize:14, color:C.mid}}>{s.title}</div>
+                  <div style={{display:"flex", gap:8, alignItems:"flex-start", marginTop:3}}>
+                    <div style={{fontSize:14, flex:1, whiteSpace:"pre-wrap", lineHeight:1.45, padding:8, background:"#fff", borderRadius:6, border:`1px solid ${C.rule}`}}>{s.text}</div>
+                    <button onClick={() => copy(s.text)} style={{...btn, padding:"3px 9px", fontSize:12}}>Copy</button>
+                  </div>
+                </div>))}
+            </div>
           </div>))}
+        {replied.length > 0 && <div style={{fontFamily:F.mono, fontSize:11, color:C.light}}>Leads you send agents are never tied to loans coming back to you (RESPA).</div>}
       </div>}
 
       {(view === "later" || view === "closed") && <div style={{display:"grid", gap:8}}>
@@ -153,6 +166,9 @@ export default function AgentOutreach({ userId, onContact }) {
         </div>
         <div style={{...card, padding:14}}>
           <div style={lbl}>When they reply, you take over</div>
+          <div style={{fontFamily:F.cond, fontWeight:800, fontSize:16, marginTop:10}}>First reply framework</div>
+          <ol style={{margin:"4px 0 0 18px", padding:0, fontSize:14, lineHeight:1.5}}>{REPLY_FRAMEWORK.map((x) => <li key={x}>{x}</li>)}</ol>
+          <div style={{fontSize:14, whiteSpace:"pre-wrap", lineHeight:1.5, marginTop:6, padding:10, background:"#fff", borderRadius:6, border:`1px solid ${C.rule}`}}>{replySuggestions({ first:"Kayte", area:"Denver metro", news:"the Brighton and Castle Rock listings" })[0].text}</div>
           {TAKEOVER.map((g) => (
             <div key={g.title} style={{marginTop:10}}>
               <div style={{fontFamily:F.cond, fontWeight:800, fontSize:16}}>{g.title}</div>

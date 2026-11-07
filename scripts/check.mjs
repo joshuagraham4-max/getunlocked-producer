@@ -79,6 +79,13 @@ try {
     for (const r of rows) { const m = O.messageFor(r); assert(m.text && !m.text.includes("undefined") && !m.text.includes("null"), `bad text for ${r.id}: ${m.text}`); }
     assert(O.linkedInNote({ first: "Ann", area: "", hook: "" }).length <= 300, "LinkedIn note over 300 characters");
   });
+  check("Agent outreach: reply suggestions build with or without details", () => {
+    for (const x of [{ first: "Kayte", area: "Denver metro", news: "the Brighton and Castle Rock listings." }, {}, undefined, { first: null, area: null, news: null }]) {
+      const s = O.replySuggestions(x);
+      assert(s.length >= 2 && s.every((y) => y.text && !/undefined|null/.test(y.text)), `bad suggestion for ${JSON.stringify(x)}`);
+    }
+    assert(O.replySuggestions({ news: "the Brighton listing!" })[0].text.includes("Congrats on the Brighton listing."), "news not mirrored");
+  });
 } catch (e) {
   failed++; console.error("  FAIL could not load the app code:", e?.message || e);
 } finally {
