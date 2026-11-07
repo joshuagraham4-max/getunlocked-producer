@@ -56,6 +56,13 @@ export function buildAssignments({ posts, groups, log, day }) {
   return { assignments: out, skipped, slots };
 }
 
+// Short label for a queued post: its stage and whether it carries an image. Posts can be text only (image null).
+export function assignmentLabel(a) {
+  const img = a?.image || a?.post?.image || "";
+  const kind = !img ? "text only" : `${img.includes("plaid") ? "plaid" : img.includes("plum") ? "plum" : "post"} image`;
+  return [a?.stage, kind].filter(Boolean).join(", ");
+}
+
 export function buildJob({ assignments, userId, day }) {
   const lines = [
     `Group-posting job from the Get Unlocked Producer app, ${day}. You are posting for Joshua Graham in Facebook groups.`,

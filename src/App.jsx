@@ -5,6 +5,7 @@ import ContactsTab from "./contacts/ContactsTab.jsx";
 import RadarTab from "./radar/RadarTab.jsx";
 import CallsTab from "./calls/CallsTab.jsx";
 import GroupsTab from "./groups/GroupsTab.jsx";
+import ErrorBoundary from "./ErrorBoundary.jsx";
 import GamePlan from "./today/GamePlan.jsx";
 import InvestorLeads from "./investors/InvestorLeads.jsx";
 import HowTo from "./HowTo.jsx";
@@ -1259,7 +1260,7 @@ export default function App() {
             ))}
             <span style={{fontFamily:F.mono,fontSize:10,color:C.light}}>{dayMode==="prospect"?"Call block locked, everything else fits around it.":"Build your own day: the scheduler places your time where you need it."}</span>
           </div>
-          {dayMode==="prospect" ? <GamePlan userId={user?.id} avgCommission={profile.avgCommission} onGoCalls={()=>setTab("calls")}/> : (<>
+          {dayMode==="prospect" ? <ErrorBoundary label="Game Plan"><GamePlan userId={user?.id} avgCommission={profile.avgCommission} onGoCalls={()=>setTab("calls")}/></ErrorBoundary> : (<>
           {ydayP.length>0 && (
             <div style={{background:C.amberBg,border:`1px solid ${C.amberBd}`,borderRadius:8,padding:"12px 16px",marginBottom:16}}>
               <div style={{fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.15em",textTransform:"uppercase",color:C.amber,marginBottom:8}}>From yesterday</div>
@@ -1578,23 +1579,23 @@ export default function App() {
           ) : (
             <>
               <input ref={fRef} type="file" accept=".csv,.txt,.tsv" onChange={handleFile} style={{display:"none"}}/>
-              <ContactsTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onUpload={startUpload} openId={openContactId} onOpened={()=>setOpenContactId(null)} onGoCalls={()=>setTab("calls")}/>
+              <ErrorBoundary label="Contacts"><ContactsTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onUpload={startUpload} openId={openContactId} onOpened={()=>setOpenContactId(null)} onGoCalls={()=>setTab("calls")}/></ErrorBoundary>
             </>
           )}
         </div>
       )}
 
       {/* Calls stays loaded after the first visit so coming back is instant (hidden, not rebuilt). */}
-      {(tab==="calls" || callsSeen) && <div style={{display:tab==="calls"?"block":"none"}}><CallsTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onOpen={(c)=>{setOpenContactId(c.id);setTab("contacts");}} onGoRadar={()=>setTab("radar")}/></div>}
-      {tab==="radar" && <RadarTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onOpen={(c)=>{setOpenContactId(c.id);setTab("contacts");}} onGoCalls={()=>setTab("calls")}/>}
-      {tab==="groups" && <GroupsTab userId={user?.id} onContact={(c) => setContacts((p) => p.some((x) => x.id === c.id) ? p.map((x) => (x.id === c.id ? c : x)) : [...p, c])}/>}
-      {tab==="investors" && <InvestorLeads userId={user?.id} contacts={contacts} setContacts={setContacts}/>}
-      {tab==="scripts" && <ScriptsTab/>}
-      {tab==="ioi" && <IOITab/>}
+      {(tab==="calls" || callsSeen) && <div style={{display:tab==="calls"?"block":"none"}}><ErrorBoundary label="Calls"><CallsTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onOpen={(c)=>{setOpenContactId(c.id);setTab("contacts");}} onGoRadar={()=>setTab("radar")}/></ErrorBoundary></div>}
+      {tab==="radar" && <ErrorBoundary label="Radar"><RadarTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onOpen={(c)=>{setOpenContactId(c.id);setTab("contacts");}} onGoCalls={()=>setTab("calls")}/></ErrorBoundary>}
+      {tab==="groups" && <ErrorBoundary label="Groups"><GroupsTab userId={user?.id} onContact={(c) => setContacts((p) => p.some((x) => x.id === c.id) ? p.map((x) => (x.id === c.id ? c : x)) : [...p, c])}/></ErrorBoundary>}
+      {tab==="investors" && <ErrorBoundary label="Investor Leads"><InvestorLeads userId={user?.id} contacts={contacts} setContacts={setContacts}/></ErrorBoundary>}
+      {tab==="scripts" && <ErrorBoundary label="Scripts"><ScriptsTab/></ErrorBoundary>}
+      {tab==="ioi" && <ErrorBoundary label="IOI"><IOITab/></ErrorBoundary>}
       {tab==="posts" && isAdmin && (
         <PostsBoundary>
           <Suspense fallback={<div style={{fontFamily:F.mono,fontSize:11,color:C.light}}>Loading posts…</div>}>
-            <SmartMoney userId={user?.id} embedded />
+            <ErrorBoundary label="Smart Money Posts"><SmartMoney userId={user?.id} embedded /></ErrorBoundary>
           </Suspense>
         </PostsBoundary>
       )}

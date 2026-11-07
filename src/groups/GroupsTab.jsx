@@ -5,7 +5,8 @@ import { supabase } from "../supabase.js";
 import { today, BOOKING } from "../radar/engine.js";
 import ProfilePosts from "./ProfilePosts.jsx";
 import AgentOutreach from "./AgentOutreach.jsx";
-import { buildAssignments, buildJob, sendToClaude, DAILY_MAX } from "./askClaude.js";
+import ErrorBoundary from "../ErrorBoundary.jsx";
+import { buildAssignments, buildJob, sendToClaude, assignmentLabel, DAILY_MAX } from "./askClaude.js";
 
 const C = { bg:"#f5f0e8", card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc", green:"#1e6e4a", amber:"#b05e0d", amberBg:"#fdf0e0", red:"#9e3020" };
 const F = { mono:"'DM Mono',monospace", cond:"'Barlow Condensed',sans-serif", body:"'Barlow',sans-serif" };
@@ -82,8 +83,8 @@ export default function GroupsTab({ userId, onContact }) {
       </div>
       {msg && <div style={{fontFamily:F.mono, fontSize:12, color:C.red, marginBottom:10}}>{msg}</div>}
 
-      {view === "profile" && <ProfilePosts userId={userId}/>}
-      {view === "outreach" && <AgentOutreach userId={userId} onContact={onContact}/>}
+      {view === "profile" && <ErrorBoundary label="Profile posts"><ProfilePosts userId={userId}/></ErrorBoundary>}
+      {view === "outreach" && <ErrorBoundary label="Agent outreach"><AgentOutreach userId={userId} onContact={onContact}/></ErrorBoundary>}
 
       {view === "today" && (
         <>
@@ -99,7 +100,7 @@ export default function GroupsTab({ userId, onContact }) {
               {plan.assignments.length > 0 && <button onClick={() => setShowJob((x) => !x)} style={btn}>{showJob ? "Hide job" : "See job"}</button>}
             </div>
             {plan.assignments.length > 0 && <div style={{marginTop:10, display:"grid", gap:4}}>
-              {plan.assignments.map((a) => <div key={a.group.id} style={{fontFamily:F.mono, fontSize:12, color:C.ink}}>{a.group.name} <span style={{color:C.light}}>gets</span> {a.post.title} <span style={{color:C.light}}>({a.stage}, {!a.image ? "text only" : `${a.image.includes("plaid") ? "plaid" : a.image.includes("plum") ? "plum" : "post"} image`})</span></div>)}
+              {plan.assignments.map((a) => <div key={a.group.id} style={{fontFamily:F.mono, fontSize:12, color:C.ink}}>{a.group.name} <span style={{color:C.light}}>gets</span> {a.post.title} <span style={{color:C.light}}>({assignmentLabel(a)})</span></div>)}
             </div>}
             {plan.skipped.length > 0 && <div style={{marginTop:8, fontFamily:F.mono, fontSize:11, color:C.amber}}>Skipped: {plan.skipped.join(" · ")}</div>}
             {sent && <div style={{marginTop:8, fontFamily:F.mono, fontSize:12, color:C.green}}>The job is copied and Claude is opening. If the message box is empty, paste it in. Posts show here as Posted once Claude logs them.</div>}
