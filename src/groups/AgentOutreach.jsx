@@ -3,7 +3,7 @@
 // Claude fills the batch (name, area, a hook from their posts). Replies come to you and go on today's call list.
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../supabase.js";
-import { STEPS, TAKEOVER, CHANNELS, REPLY_FRAMEWORK, messageFor, linkedInNote, replySuggestions, agentRating, RATING_ORDER, WEEKLY_TOUCH, warmupReady } from "./outreachScripts.js";
+import { STEPS, TAKEOVER, CHANNELS, REPLY_FRAMEWORK, messageFor, linkedInNote, replySuggestions, agentRating, RATING_ORDER, WEEKLY_TOUCH, warmupReady, PREF_CHANNELS, prefLabel } from "./outreachScripts.js";
 
 const C = { card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc", green:"#1e6e4a", greenBg:"#e8f4ee", amber:"#b05e0d", amberBg:"#fdf0e0", red:"#9e3020" };
 const F = { mono:"'DM Mono',monospace", cond:"'Barlow Condensed',sans-serif", body:"'Barlow',sans-serif" };
@@ -60,8 +60,16 @@ export default function AgentOutreach({ userId, onContact }) {
   const Tab = ({ k, l }) => <button onClick={() => setView(k)} style={{...(view === k ? btnG : btn), padding:"6px 14px"}}>{l}</button>;
   const Badge = ({ r }) => { const x = agentRating(r); const col = { A:C.green, B:C.amber, C:C.mid, "?":C.light }[x.grade];
     return <span title={x.label} style={{fontFamily:F.mono, fontSize:10, fontWeight:700, color:"#fff", background:col, borderRadius:4, padding:"1px 6px", marginRight:6}}>{x.grade}</span>; };
-  const Meta = ({ r }) => <div style={{fontFamily:F.mono, fontSize:10, color:C.mid, marginTop:2}}><Badge r={r}/>{[chName(r.channel).toUpperCase(), r.area, r.brokerage, r.source, agentRating(r).label].filter(Boolean).join(" · ")}</div>;
+  const Meta = ({ r }) => <div style={{fontFamily:F.mono, fontSize:10, color:C.mid, marginTop:2}}><Badge r={r}/>{[chName(r.channel).toUpperCase(), r.area, r.brokerage, r.source, agentRating(r).label, prefLabel(r)].filter(Boolean).join(" · ")}</div>;
   const num = (v) => { const x = String(v).replace(/[$,\s]/g, ""); if (!x) return null; const m = x.match(/^([\d.]+)([mk])?$/i); if (!m) return null; return Math.round(parseFloat(m[1]) * (m[2]?.toLowerCase() === "m" ? 1e6 : m[2]?.toLowerCase() === "k" ? 1e3 : 1)); };
+  const PrefRow = ({ r }) => (
+    <div style={{display:"flex", gap:8, alignItems:"center", flexWrap:"wrap", marginTop:8}}>
+      <div style={lbl}>Reach them by</div>
+      <select value={r.pref_channel || ""} onChange={(e) => upd(r, { pref_channel:e.target.value || null })} style={{...inp, width:"auto"}}>
+        <option value="">Not said yet</option>{PREF_CHANNELS.map((c) => <option key={c.k} value={c.k}>{c.l}</option>)}
+      </select>
+      <input defaultValue={r.pref_value || ""} placeholder="Number or email" onBlur={(e) => { const v = e.target.value.trim() || null; if (v !== (r.pref_value || null)) upd(r, { pref_value:v }); }} style={{...inp, width:220}}/>
+    </div>);
   const RateRow = ({ r }) => (
     <div style={{display:"flex", gap:8, alignItems:"center", flexWrap:"wrap", marginTop:8}}>
       <div style={lbl}>Last 12 months</div>
@@ -150,8 +158,10 @@ export default function AgentOutreach({ userId, onContact }) {
         {replied.map((r) => (
           <div key={r.id} style={{...card, padding:12, borderColor:C.amber}}>
             <div style={{fontFamily:F.cond, fontWeight:800, fontSize:17}}>{r.full_name}</div><Meta r={r}/>
+            <div style={{fontFamily:F.cond, fontWeight:800, fontSize:15, color: r.pref_channel ? C.green : C.amber, marginTop:4}}>{prefLabel(r) || "How they want to hear from you: not noted yet"}</div>
             {r.last_message && <div style={{fontSize:13, color:C.mid, marginTop:6, whiteSpace:"pre-wrap"}}>Last sent: {r.last_message.slice(0, 160)}{r.last_message.length > 160 ? "..." : ""}</div>}
             <div style={{display:"flex", gap:8, marginTop:8}}><Profile r={r}/></div>
+            <PrefRow r={r}/>
             <RateRow r={r}/>
             <div style={{marginTop:10}}>
               <div style={lbl}>Reply suggestions</div>

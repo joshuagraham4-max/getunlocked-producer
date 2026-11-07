@@ -110,6 +110,12 @@ try {
     assert(O.warmupReady(r({ warm_first_at: "2026-11-02", warm_comments: 1 }), d), "1 comment day, 14 days");
     assert(!O.warmupReady({ status: "ready", warm_first_at: "2026-10-01", warm_comments: 5 }, d) && !O.warmupReady(r({}), d) && !O.warmupReady(null, d), "wrong status / blanks");
   });
+  check("Agent outreach: contact preference label", () => {
+    assert(O.prefLabel({ pref_channel: "text", pref_value: "303-620-6677" }) === "Prefers text: 303-620-6677", "text label");
+    assert(O.prefLabel({ pref_channel: "email", pref_value: " kayte@kaytefosterhomes.com " }) === "Prefers email: kayte@kaytefosterhomes.com", "email label");
+    assert(O.prefLabel({ pref_channel: "text" }) === "Prefers text", "no number yet");
+    assert(O.prefLabel({}) === "" && O.prefLabel(null) === "" && O.prefLabel({ pref_channel: "fax" }) === "", "blank / unknown");
+  });
   check("Agent outreach: reply suggestions build with or without details", () => {
     for (const x of [{ first: "Kayte", area: "Denver metro", news: "the Brighton and Castle Rock listings." }, {}, undefined, { first: null, area: null, news: null }]) {
       const s = O.replySuggestions(x);

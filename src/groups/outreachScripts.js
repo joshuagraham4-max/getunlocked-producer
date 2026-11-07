@@ -85,6 +85,15 @@ And when I've got a buyer${a ? ` in ${a}` : ""}, what's the best way to get them
   ];
 }
 
+// How the agent wants Joshua to reach them and send referrals. Shown on every card; saved in agent_outreach.pref_channel / pref_value.
+export const PREF_CHANNELS = [{ k:"text", l:"Text" }, { k:"email", l:"Email" }, { k:"call", l:"Call" }, { k:"messenger", l:"Messenger" }];
+export function prefLabel(row) {
+  const c = PREF_CHANNELS.find((x) => x.k === row?.pref_channel);
+  if (!c) return "";
+  const v = (row?.pref_value || "").trim();
+  return `Prefers ${c.l.toLowerCase()}${v ? `: ${v}` : ""}`;
+}
+
 // Warm-up before outreach: Joshua comments on an agent's listings himself ("Lovely home!") for a week or two.
 // The 9:45 run reads his Facebook activity log on Mondays and Thursdays and loads those agents as status 'warming'.
 // Ready for the opener after 2+ comment days and 7+ days since the first, or 14+ days with any comment.
