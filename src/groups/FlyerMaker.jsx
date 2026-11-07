@@ -12,7 +12,7 @@ const BUYDOWNS = { none:[], "1/0":[1], "2/1":[2, 1] };   // points below the not
 const SERIF = "'Playfair Display', Georgia, serif";
 const JOSHUA = { name:"Joshua Graham", title:"AVP / Regional Loan Originator · NMLS 169809", contact:"720.468.6872 · approvedbyjoshua.com", photo:"/brand/joshua-headshot.jpg", logo:"/brand/gf-logo.png" };
 const BLANK = { agentName:"", brokerage:"", agentPhone:"", agentEmail:"", agentPhoto:"", address:"", city:"", price:"", beds:"", baths:"", sqft:"",
-  extraValue:"", extraLabel:"", openHouse:"", photo:"", rate:"6.375", buydown:"2/1", credit:"", apr:"", fees:"", score:"", asOf:"", headline:"", accent:"#1e5a42" };
+  extraValue:"", extraLabel:"", openHouse:"", photo:"", rate:"6.375", buydown:"2/1", credit:"", apr:"", financeCharges:"6500", fees:"", score:"740", asOf:"", headline:"", accent:"#1e5a42" };
 
 const num = (v) => { const n = parseFloat(String(v || "").replace(/[^0-9.]/g, "")); return isFinite(n) ? n : 0; };
 const usd = (n) => "$" + Math.round(n).toLocaleString("en-US");
@@ -41,7 +41,13 @@ export function flyerMath(f) {
     return { d, down:price * d / 100, loan, pays, cost };
   });
   const costs = rows.map((r) => r.cost); const credit = num(f.credit);
-  return { price, rate, years, rows, costLo:Math.min(...costs), costHi:Math.max(...costs), credit };
+  // APR on the 20%-down row: rate that makes the payments worth (loan - prepaid finance charges). Matches the LOS within a few thousandths.
+  const fc = num(f.financeCharges), L = rows[0].loan, P = pmt(L, rate);
+  let aprAuto = "";
+  if (L > 0 && rate > 0 && fc > 0) { let lo = 0, hi = 0.03;
+    for (let k = 0; k < 100; k++) { const i = (lo + hi) / 2, pv = P * (1 - Math.pow(1 + i, -360)) / i; if (pv > L - fc) lo = i; else hi = i; }
+    aprAuto = (lo * 1200).toFixed(3); }
+  return { price, rate, years, rows, costLo:Math.min(...costs), costHi:Math.max(...costs), credit, aprAuto };
 }
 
 const defaultHeadline = (f, m) => {
@@ -160,7 +166,9 @@ export default function FlyerMaker({ userId }) {
     const list = [entry, ...saved.filter((s) => s.id !== entry.id)].slice(0, 8);
     try { localStorage.setItem(KEY, JSON.stringify(list)); setSaved(list); setF(entry); setMsg("Saved on this device."); }
     catch { try { localStorage.setItem(KEY, JSON.stringify(list.map((s) => ({ ...s, photo:"" })))); setSaved(list); setMsg("Saved (without the listing photo; this device is out of space)."); } catch { setMsg("Couldn't save on this device."); } } };
-  const canPrint = !!(f.apr && m.price && f.address);
+  // What the flyer shows: a typed APR wins, else the calculated one; fees text defaults to the finance charges used.
+  const fx = { ...f, apr: f.apr || m.aprAuto, fees: f.fees || (num(f.financeCharges) ? `${usd(num(f.financeCharges))} in prepaid finance charges (20% down example)` : "") };
+  const canPrint = !!(fx.apr && m.price && f.address);
   const print = () => { if (!canPrint) return; setTimeout(() => window.print(), 50); };
 
   const inp = { border:`1px solid ${C.rule}`, borderRadius:6, padding:"8px 10px", fontFamily:F.body, fontSize:15, background:"#fff", width:"100%", boxSizing:"border-box" };
@@ -197,8 +205,9 @@ export default function FlyerMaker({ userId }) {
           {lb("Note rate %", <input value={f.rate} onChange={set("rate")} inputMode="decimal" style={inp}/>)}
           {lb("Buydown", <select value={f.buydown} onChange={set("buydown")} style={inp}><option value="2/1">2/1</option><option value="1/0">1/0</option><option value="none">None</option></select>)}
           {lb("Seller credit $ (optional)", <input value={f.credit} onChange={set("credit")} inputMode="numeric" placeholder="10000" style={inp}/>)}
-          {lb("APR % (required to print)", <input value={f.apr} onChange={set("apr")} inputMode="decimal" style={{ ...inp, borderColor: f.apr ? C.rule : C.red }}/>)}
-          {lb("APR based on (points/fees)", <input value={f.fees} onChange={set("fees")} placeholder="0 points, $1,995 lender fee" style={inp}/>)}
+          {lb("Prepaid finance charges $", <input value={f.financeCharges} onChange={set("financeCharges")} inputMode="numeric" placeholder="6500" style={inp}/>)}
+          {lb(`APR % (calculated: ${m.aprAuto || "—"}; type to override)`, <input value={f.apr} onChange={set("apr")} inputMode="decimal" placeholder={m.aprAuto || ""} style={{ ...inp, borderColor: fx.apr ? C.rule : C.red }}/>)}
+          {lb("APR note on flyer (optional)", <input value={f.fees} onChange={set("fees")} placeholder={fx.fees || "e.g. 0 points, $6,500 finance charges"} style={inp}/>, true)}
           {lb("Credit score assumed", <input value={f.score} onChange={set("score")} placeholder="740" style={inp}/>)}
           {lb("Rates as of", <input value={f.asOf} onChange={set("asOf")} placeholder={localDate()} style={inp}/>)}
           {lb("Accent", <select value={f.accent} onChange={set("accent")} style={inp}>{ACCENTS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>)}
@@ -216,7 +225,7 @@ export default function FlyerMaker({ userId }) {
           <div style={{ gridColumn:"1 / -1", fontFamily:F.mono, fontSize:11, color:C.light }}>In the print dialog choose Letter, margins None, and turn on Background graphics. Co-marketing: split the print or ad cost with the agent (RESPA).</div>
         </div>
         <div style={{ flex:"0 0 auto", width: 816 * scale, height: 1056 * scale, overflow:"hidden", border:`1px solid ${C.rule}`, borderRadius:4 }}>
-          <div id="gup-flyer-wrap" style={{ transform:`scale(${scale})`, transformOrigin:"top left", width:816, height:1056 }}><Flyer f={f} m={m}/></div>
+          <div id="gup-flyer-wrap" style={{ transform:`scale(${scale})`, transformOrigin:"top left", width:816, height:1056 }}><Flyer f={fx} m={m}/></div>
         </div>
       </div>
     </div>
