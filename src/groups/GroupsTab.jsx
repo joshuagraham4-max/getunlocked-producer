@@ -5,6 +5,7 @@ import { supabase } from "../supabase.js";
 import { today, BOOKING } from "../radar/engine.js";
 import ProfilePosts from "./ProfilePosts.jsx";
 import AgentOutreach from "./AgentOutreach.jsx";
+import FlyerMaker from "./FlyerMaker.jsx";
 import ErrorBoundary from "../ErrorBoundary.jsx";
 import { buildAssignments, buildJob, sendToClaude, assignmentLabel, DAILY_MAX } from "./askClaude.js";
 
@@ -79,12 +80,13 @@ export default function GroupsTab({ userId, onContact }) {
   return (
     <div>
       <div style={{display:"flex", gap:8, marginBottom:14, flexWrap:"wrap"}}>
-        <Tab k="profile" l="Profile posts"/><Tab k="today" l={`Group posts ${postedToday}/${active.length}`}/><Tab k="groups" l={`Groups ${joined.length}/${groups.length}`}/><Tab k="outreach" l="Agent outreach"/><Tab k="tools" l="Tools & links"/><Tab k="bank" l="Post bank"/>
+        <Tab k="profile" l="Profile posts"/><Tab k="today" l={`Group posts ${postedToday}/${active.length}`}/><Tab k="groups" l={`Groups ${joined.length}/${groups.length}`}/><Tab k="outreach" l="Agent outreach"/><Tab k="flyers" l="Flyers"/><Tab k="tools" l="Tools & links"/><Tab k="bank" l="Post bank"/>
       </div>
       {msg && <div style={{fontFamily:F.mono, fontSize:12, color:C.red, marginBottom:10}}>{msg}</div>}
 
       {view === "profile" && <ErrorBoundary label="Profile posts"><ProfilePosts userId={userId}/></ErrorBoundary>}
       {view === "outreach" && <ErrorBoundary label="Agent outreach"><AgentOutreach userId={userId} onContact={onContact}/></ErrorBoundary>}
+      {view === "flyers" && <ErrorBoundary label="Flyers"><FlyerMaker userId={userId}/></ErrorBoundary>}
 
       {view === "today" && (
         <>
