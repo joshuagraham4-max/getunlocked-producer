@@ -79,6 +79,14 @@ try {
     for (const r of rows) { const m = O.messageFor(r); assert(m.text && !m.text.includes("undefined") && !m.text.includes("null"), `bad text for ${r.id}: ${m.text}`); }
     assert(O.linkedInNote({ first: "Ann", area: "", hook: "" }).length <= 300, "LinkedIn note over 300 characters");
   });
+  check("Agent outreach: rating from volume, including blanks", () => {
+    const g = (r) => O.agentRating(r).grade;
+    assert(g({}) === "?" && g(null) === "?" && g({ sales_12m: null, volume_12m: null }) === "?", "unrated");
+    assert(g({ sales_12m: 30 }) === "A" && g({ volume_12m: 12000000 }) === "A", "A");
+    assert(g({ sales_12m: 12 }) === "B" && g({ volume_12m: "4500000" }) === "B", "B");
+    assert(g({ sales_12m: 0 }) === "C" && g({ sales_12m: 3, volume_12m: 900000 }) === "C", "C");
+    for (const r of [{ sales_12m: "abc" }, { volume_12m: 0 }, { sales_12m: 5 }]) { const x = O.agentRating(r); assert(x.grade in O.RATING_ORDER && typeof x.label === "string", "bad rating"); }
+  });
   check("Agent outreach: reply suggestions build with or without details", () => {
     for (const x of [{ first: "Kayte", area: "Denver metro", news: "the Brighton and Castle Rock listings." }, {}, undefined, { first: null, area: null, news: null }]) {
       const s = O.replySuggestions(x);

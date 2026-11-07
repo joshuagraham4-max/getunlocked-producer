@@ -44,6 +44,21 @@ export function messageFor(row) {
   return { stepName: s.name, wait: s.wait, text: s.variants[pick(row.id + s.step, s.variants.length)](p) };
 }
 
+// Simple agent rating from the last 12 months of closed business (Zillow / Realtor.com / brokerage profile).
+// A: 24+ sales or $10M+. B: 10+ sales or $4M+. C: some activity. "?": not checked yet.
+export function agentRating(r) {
+  const n = Number(r?.sales_12m); const v = Number(r?.volume_12m);
+  const hasN = r?.sales_12m !== null && r?.sales_12m !== undefined && r?.sales_12m !== "" && !Number.isNaN(n);
+  const hasV = r?.volume_12m !== null && r?.volume_12m !== undefined && r?.volume_12m !== "" && !Number.isNaN(v);
+  if (!hasN && !hasV) return { grade:"?", label:"not rated" };
+  const sales = hasN ? n : 0, vol = hasV ? v : 0;
+  const parts = [hasN ? `${sales} sales` : "", hasV ? `$${vol >= 1e6 ? (vol / 1e6).toFixed(1) + "M" : Math.round(vol / 1e3) + "K"}` : ""].filter(Boolean).join(" · ");
+  if (sales >= 24 || vol >= 10e6) return { grade:"A", label:parts };
+  if (sales >= 10 || vol >= 4e6) return { grade:"B", label:parts };
+  return { grade:"C", label:parts };
+}
+export const RATING_ORDER = { A:0, B:1, C:2, "?":3 };
+
 // First reply to an agent who wrote back. The framework that worked with Kayte Foster (Nov 7):
 // mirror what they shared, give value right away, end on one easy question. Save the phone ask for their next reply.
 export const REPLY_FRAMEWORK = [
@@ -63,7 +78,7 @@ export function replySuggestions({ first, area, news } = {}) {
 `Love that, ${f}!${n ? ` Congrats on ${n}.` : ""} If a buyer on one of your listings gets stuck on financing (self-employed, investor, a lender who said no), send them my way and I'll tell you same day if I can close it.
 
 And when I've got a buyer${a ? ` in ${a}` : ""}, what's the best way to get them to you: text, call, or email?` },
-    { title: "Their next reply: move it to a call", text:
+    { title: "Second message, after they answer: invite to a call", text:
 `Easier to learn how you work on the phone than over Messenger. Got 10 minutes this week? ${PHONE}` },
     { title: "They have something stuck", text:
 `Send me the scenario, no names needed. I'll tell you today if I can close it and how fast.` },

@@ -3,7 +3,7 @@
 // Claude fills the batch (name, area, a hook from their posts). Replies come to you and go on today's call list.
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../supabase.js";
-import { STEPS, TAKEOVER, CHANNELS, REPLY_FRAMEWORK, messageFor, linkedInNote, replySuggestions } from "./outreachScripts.js";
+import { STEPS, TAKEOVER, CHANNELS, REPLY_FRAMEWORK, messageFor, linkedInNote, replySuggestions, agentRating, RATING_ORDER } from "./outreachScripts.js";
 
 const C = { card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc", green:"#1e6e4a", greenBg:"#e8f4ee", amber:"#b05e0d", amberBg:"#fdf0e0", red:"#9e3020" };
 const F = { mono:"'DM Mono',monospace", cond:"'Barlow Condensed',sans-serif", body:"'Barlow',sans-serif" };
@@ -30,7 +30,7 @@ export default function AgentOutreach({ userId, onContact }) {
   useEffect(() => { if (userId) load(); }, [userId, load]);
 
   const mine = rows.filter((r) => chan === "all" || r.channel === chan);
-  const replied = mine.filter((r) => r.status === "replied");
+  const replied = mine.filter((r) => r.status === "replied").sort((a, b) => RATING_ORDER[agentRating(a).grade] - RATING_ORDER[agentRating(b).grade]);
   const due = mine.filter((r) => ["ready", "messaging"].includes(r.status) && (!r.next_date || r.next_date <= t));
   const requested = mine.filter((r) => r.status === "requested");
   const later = mine.filter((r) => r.status === "messaging" && r.next_date > t);
@@ -57,7 +57,17 @@ export default function AgentOutreach({ userId, onContact }) {
   };
 
   const Tab = ({ k, l }) => <button onClick={() => setView(k)} style={{...(view === k ? btnG : btn), padding:"6px 14px"}}>{l}</button>;
-  const Meta = ({ r }) => <div style={{fontFamily:F.mono, fontSize:10, color:C.mid, marginTop:2}}>{[chName(r.channel).toUpperCase(), r.area, r.brokerage, r.source].filter(Boolean).join(" · ")}</div>;
+  const Badge = ({ r }) => { const x = agentRating(r); const col = { A:C.green, B:C.amber, C:C.mid, "?":C.light }[x.grade];
+    return <span title={x.label} style={{fontFamily:F.mono, fontSize:10, fontWeight:700, color:"#fff", background:col, borderRadius:4, padding:"1px 6px", marginRight:6}}>{x.grade}</span>; };
+  const Meta = ({ r }) => <div style={{fontFamily:F.mono, fontSize:10, color:C.mid, marginTop:2}}><Badge r={r}/>{[chName(r.channel).toUpperCase(), r.area, r.brokerage, r.source, agentRating(r).label].filter(Boolean).join(" · ")}</div>;
+  const num = (v) => { const x = String(v).replace(/[$,\s]/g, ""); if (!x) return null; const m = x.match(/^([\d.]+)([mk])?$/i); if (!m) return null; return Math.round(parseFloat(m[1]) * (m[2]?.toLowerCase() === "m" ? 1e6 : m[2]?.toLowerCase() === "k" ? 1e3 : 1)); };
+  const RateRow = ({ r }) => (
+    <div style={{display:"flex", gap:8, alignItems:"center", flexWrap:"wrap", marginTop:8}}>
+      <div style={lbl}>Last 12 months</div>
+      <input defaultValue={r.sales_12m ?? ""} placeholder="Sales" onBlur={(e) => { const n = num(e.target.value); if (n !== (r.sales_12m ?? null)) upd(r, { sales_12m:n, volume_checked:t }); }} style={{...inp, width:80}}/>
+      <input defaultValue={r.volume_12m ?? ""} placeholder="$ volume, e.g. 6.5M" onBlur={(e) => { const n = num(e.target.value); if (n !== (r.volume_12m === null ? null : Number(r.volume_12m))) upd(r, { volume_12m:n, volume_checked:t }); }} style={{...inp, width:150}}/>
+      {r.volume_checked && <span style={{fontFamily:F.mono, fontSize:10, color:C.light}}>checked {r.volume_checked.slice(5)}{r.volume_source ? ` · ${r.volume_source}` : ""}</span>}
+    </div>);
   const Profile = ({ r }) => r.profile_url ? <a href={r.profile_url} target="_blank" rel="noreferrer" style={btn}>Open profile</a> : null;
 
   const DueCard = ({ r }) => { const m = messageFor(r); return (
@@ -122,12 +132,13 @@ export default function AgentOutreach({ userId, onContact }) {
       </div>}
 
       {view === "replied" && <div style={{display:"grid", gap:10}}>
-        <div style={{fontFamily:F.mono, fontSize:12, color:C.mid}}>These are yours now. Pick up the conversation in Messenger. They're tagged "outreach: replied" in Contacts.</div>
+        <div style={{fontFamily:F.mono, fontSize:12, color:C.mid}}>These are yours now. Pick up the conversation in Messenger. They're tagged "outreach: replied" in Contacts. Best-rated first: A is 24+ sales or $10M+ in the last 12 months, B is 10+ or $4M+, C is less.</div>
         {replied.map((r) => (
           <div key={r.id} style={{...card, padding:12, borderColor:C.amber}}>
             <div style={{fontFamily:F.cond, fontWeight:800, fontSize:17}}>{r.full_name}</div><Meta r={r}/>
             {r.last_message && <div style={{fontSize:13, color:C.mid, marginTop:6, whiteSpace:"pre-wrap"}}>Last sent: {r.last_message.slice(0, 160)}{r.last_message.length > 160 ? "..." : ""}</div>}
             <div style={{display:"flex", gap:8, marginTop:8}}><Profile r={r}/></div>
+            <RateRow r={r}/>
             <div style={{marginTop:10}}>
               <div style={lbl}>Reply suggestions</div>
               <input placeholder="What did they mention? e.g. the Brighton and Castle Rock listings" value={news[r.id] || ""} onChange={(e) => setNews((x) => ({ ...x, [r.id]:e.target.value }))} style={{...inp, marginTop:4}}/>
