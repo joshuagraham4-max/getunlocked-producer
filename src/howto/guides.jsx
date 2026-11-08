@@ -27,10 +27,11 @@ export const GUIDES = {
         <><b>Duplicates</b> (above the table) reviews look-alike records — merge, link, or mark "not the same".</>,
   ] },
   pullLeads: { title: "How to pull leads (PropStream)", steps: [
-        <><b>Every search:</b> Residential (single family, duplex, 2-4 units), Owner Occupied = No. Save it as <b>Angle - County</b> (e.g., "Cash buyer - Sarasota") with weekly email alerts.</>,
-        <><b>The angles:</b> Cash buyer (Lead Lists: Cash Buyers, last sale 12 months) · Stuck flipper (Flippers + MLS Failed) · Failed listing · Out of state (Absentee: Out of State, owns 3+) · Tired landlord · ARM (Mortgage: Adjustable Rate) · Pre-foreclosure. Plus Hard money due and Dead money.</>,
-        <><b>Order:</b> Sarasota, then Manatee. Add Hillsborough and Pinellas once you see which angles work.</>,
-        <><b>Into GUP:</b> select the properties, Save them to a list with the same name, skip trace the list, export the CSV, then Import it here. The file name sets the angle, so each call card opens with the right playbook.</>,
+        <><b>Searches are already saved.</b> In PropStream, click <b>All Searches</b> (orange folder, top bar) and pick one. Each is named <b>Angle - County</b> for Sarasota and Manatee, rentals only, with weekly email alerts.</>,
+        <><b>The angles:</b> Hard money due · Dead money · Pre-foreclosure · Stuck flipper · Failed listing · Cash buyer · ARM · Tired landlord · Out of state.</>,
+        <><b>Work them in this order:</b> small, high-pain lists first (Pre-foreclosure, Stuck flipper, Failed listing), then Cash buyer and ARM. Tired landlord and Out of state are big, so sort by equity first.</>,
+        <><b>Into GUP:</b> select the properties, Save them to a list with the same name as the search, skip trace the list, export the CSV, then Import it here. The file name sets the angle, so each call card opens with the right playbook.</>,
+        <><b>To call them:</b> click <b>Send top 10 to calls</b>. They land on Calls under Customers with the script, voicemail and email ready.</>,
         <>PropStream allows one login at a time. Close it on your phone before Claude works in it.</>,
   ] },
   dupes: { title: "How to review duplicates", steps: [
