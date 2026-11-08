@@ -21,8 +21,12 @@ I'm Joshua Graham, AVP at Zero Point Mortgage. Not a lender, a wholesale broker,
 I generate buyer and investor leads and I'm looking for a few good agents to send them to. How do you like to get referrals, and what areas do you work?`,
   ]},
   { step:2, name:"Stuck deal nudge", wait:2, variants:[
-    (p) => `No pressure ${p.first}. If you've got a buyer or investor stuck right now, that's exactly what I fix. Even just the scenario, no names needed.`,
-    (p) => `Hey ${p.first}, one quick one: anything stuck right now? Self-employed buyer, investor, credit issue, a file another lender bailed on. That's my lane.`,
+    (p) => `Hey ${p.first}, I know you're busy and didn't get a chance to get back to me. Just want to make sure you have access to me, know who I am, and how to find me in a pinch: ${PHONE}.
+
+Anything stuck right now? Self-employed buyer, investor, a file another lender bailed on. That's my lane.`,
+    (p) => `Hey ${p.first}, I know things get busy and you didn't get back to me, totally fine. Just want to make sure you know who I am and how to reach me in a pinch: ${PHONE}.
+
+Got anything stuck right now? Even just the scenario, no names needed.`,
   ]},
   { step:3, name:"Last touch", wait:null, variants:[
     (p) => `Last one from me ${p.first}. If you want to be on my list for buyer and investor leads${inArea(p.area)}, just reply "in." Either way, if a deal ever gets stuck, I'm the call: ${PHONE}.`,
