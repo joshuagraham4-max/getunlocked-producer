@@ -139,10 +139,10 @@ export function investorFollowUps(c, kind, me, phone, booking) {
   const first = c.first_name || "there";
   const where = c.property_address ? ` on ${c.property_address}` : "";
   if (kind === "maturing_hard_money") return {
-    short: `I'm reaching out about the short-term loan${where}. If it's coming due, I can roll it into a long-term loan where the rent qualifies it, no tax returns`,
-    vmText: `Hi ${first}, it's ${me} with Zero Point Mortgage Services. I tried you about the short-term loan${where}. If it's coming due, I can roll it into a long-term loan where the rent qualifies it, no tax returns. Worth a quick call? ${phone}`,
-    emailSubject: c.property_address ? `Your loan on ${c.property_address}` : "Your short-term loan",
-    emailBody: `Hi ${first},\n\nI tried giving you a call. Public records show a short-term loan${where} that's likely coming due soon.\n\nIf you want a clean exit, I can refinance it into a long-term loan where the rent qualifies it. No tax returns. Send me the payoff and what it rents for, and I'll have numbers back the same day.\n\nCall or text: ${phone}\nOr grab a time: ${booking}\n\n${SIGN(me, phone)}`,
+    short: `I help investors move short-term loans into stable long-term financing, fast. Are you done getting the property${where} ready?`,
+    vmText: `Hi ${first}, it's ${me}. Love the property${where}. I help investors move short-term loans into stable long-term financing, fast, and I'm local here in Florida. If you've got any time crunch on it, call or text me: ${phone}`,
+    emailSubject: c.property_address ? `Your property on ${c.property_address}` : "Your property",
+    emailBody: `Hi ${first},\n\nLove the property${where}. Are you done getting it ready for market?\n\nI specialize in moving investors out of short-term loans and into stable, long-term financing, fast. I'm who people call when their financing is in a crunch, and because I'm a wholesale broker, I can shop dozens of lenders to keep your cost down. I lend nationwide, but I'm local: I live and work right here in Florida.\n\nAre you running into any challenges or time crunches I can help with? What's the best time to reach you?\n\nCall or text: ${phone}\nOr grab a time: ${booking}\n\n${SIGN(me, phone)}`,
   };
   if (kind !== "dead_money") return {
     short: `I work with rental owners on getting equity working`,
