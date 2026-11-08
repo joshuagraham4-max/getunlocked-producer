@@ -7,6 +7,7 @@ import { supabase } from "../supabase.js";
 import EmailDesk from "./EmailDesk.jsx";
 import QuickUpdate from "./QuickUpdate.jsx";
 import Playbook from "./Playbook.jsx";
+import { personFirst, sunbizUrl, isEntity } from "../radar/investorPlaybook.js";
 
 const C = { bg:"#f5f0e8", card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc", green:"#1e6e4a", amber:"#b05e0d", amberBg:"#fdf0e0", greenBg:"#e6f2ea" };
 const F = { mono:"'DM Mono',monospace", cond:"'Barlow Condensed',sans-serif", body:"'Barlow',sans-serif" };
@@ -226,12 +227,20 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
       <div style={lbl}>Say this</div>
       <textarea value={say} onChange={(e) => setSay(e.target.value)} rows={4} style={{...inp, width:"100%", marginTop:6, fontSize:15, lineHeight:1.55, resize:"vertical", fontFamily:F.body}}/>
       {sel.phone ? <a href={`tel:${digits(sel.phone)}`} style={{display:"block", textAlign:"center", fontFamily:F.cond, fontWeight:800, fontSize:22, letterSpacing:"0.06em", background:C.green, color:"#fff", borderRadius:9, padding:14, margin:"16px 0 12px", textDecoration:"none"}}>
-        CALL {(sel.first_name || "").toUpperCase()}
+        CALL {(personFirst(sel) || "").toUpperCase()}
       </a> : (
         <div style={{margin:"16px 0 12px", padding:"12px 14px", borderRadius:9, background:C.amberBg, color:C.amber, fontFamily:F.mono, fontSize:12, display:"flex", gap:8, alignItems:"center", flexWrap:"wrap"}}>
           <span>No phone on file.</span>
           {sel.email && <a href={`mailto:${sel.email}?subject=${encodeURIComponent(scripts.emailSubject)}&body=${encodeURIComponent(scripts.emailBody)}`} onClick={() => logOutcome(userId, sel, "emailed", "", undefined, "email").then((u) => u && setContacts((p) => p.map((x) => (x.id === u.id ? u : x))))} style={btnG}>Send email</a>}
           <button onClick={() => onOpen(sel)} style={btn}>Add a phone number</button>
+        </div>
+      )}
+      {isInvestor(sel) && (
+        <div style={{display:"flex", gap:8, flexWrap:"wrap", alignItems:"center", marginBottom:12}}>
+          {sel.email && <a href={`mailto:${sel.email}?subject=${encodeURIComponent(scripts.emailSubject)}&body=${encodeURIComponent(scripts.emailBody)}`} onClick={() => logOutcome(userId, sel, "emailed", "", undefined, "email").then((u) => u && setContacts((p) => p.map((x) => (x.id === u.id ? u : x))))} style={btnG}>Send email</a>}
+          <button onClick={() => navigator.clipboard?.writeText(`Subject: ${scripts.emailSubject}\n\n${scripts.emailBody}`)} style={btn}>Copy email</button>
+          {(sel.company || isEntity(sel.first_name)) && <a href={sunbizUrl(sel.company || sel.first_name)} target="_blank" rel="noreferrer" style={btn}>Look up owner (Sunbiz)</a>}
+          {!personFirst(sel) && <span style={{fontFamily:F.mono, fontSize:11, color:C.amber}}>No owner name yet: add it in Open full contact</span>}
         </div>
       )}
       {scripts?.playbook && <Playbook pb={scripts.playbook}/>}

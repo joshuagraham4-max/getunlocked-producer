@@ -1,5 +1,12 @@
 // Investor call playbook: what to listen for, the pain under it, and how the financing fixes it fast.
 // Shown on the Calls card for investor leads. Education, not a pitch. No rate promises in writing.
+// A person's first name for greetings. Never greet a company: "Hi Emerald Bay 11th St LLC" becomes "Hi there".
+const ENTITY = /\b(llc|l\.l\.c|inc|corp|co|ltd|lp|llp|trust|holdings|properties|investments|investors|capital|group|enterprises|ventures|management|partners|homes|realty|fund|bank)\b/i;
+export const personFirst = (c) => { const f = (c?.first_name || "").trim(); if (!f) return null;
+  if (ENTITY.test(f) || (c.company && f.toLowerCase() === String(c.company).trim().toLowerCase())) return null; return f.split(/\s+/)[0]; };
+export const sunbizUrl = (name) => `https://search.sunbiz.org/Inquiry/CorporationSearch/SearchResults?inquiryType=EntityName&searchTerm=${encodeURIComponent(String(name || "").replace(/[.,]/g, "").trim())}`;
+export const isEntity = (s) => ENTITY.test(String(s || ""));
+
 const SIGN = (me, phone) => `${me}\nAVP / Regional Loan Originator\nGraham Financial powered by Zero Point Mortgage Services\nNMLS 169809 | ${phone}`;
 
 export const PLAYBOOKS = {
@@ -136,7 +143,7 @@ export const PLAYBOOKS = {
 };
 
 export function investorFollowUps(c, kind, me, phone, booking) {
-  const first = c.first_name || "there";
+  const first = personFirst(c) || "there";
   const where = c.property_address ? ` on ${c.property_address}` : "";
   if (kind === "maturing_hard_money") return {
     short: `I help investors move short-term loans into stable long-term financing, fast. Are you done getting the property${where} ready?`,

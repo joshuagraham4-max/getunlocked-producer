@@ -18,7 +18,8 @@ export const MY_PHONE = "720-468-6872";
 export const DEFAULT_SETTINGS = { refi_threshold:0.5, appreciation_pct:4, equity_ltv_max:70, seasoning_months:7 };
 
 // Load settings, latest market rates and current loans for a user.
-import { PLAYBOOKS, investorFollowUps } from "./investorPlaybook.js";
+import { PLAYBOOKS, investorFollowUps, personFirst } from "./investorPlaybook.js";
+export { personFirst };
 // Radar data is kept in memory so switching tabs doesn't re-download every loan. Screens show the saved copy
 // right away (peekRadarData) and refresh it quietly in the background (loadRadarData).
 let radarCache = null;
@@ -206,7 +207,7 @@ export function buildQueue(contacts, radar, target = 20) {
 
 // Call script + voicemail follow-ups for a contact and reason.
 export function scriptsFor(c, i, reason, me = "Joshua Graham") {
-  const first = c.first_name || "there"; const yr = i?.funded ? i.funded.slice(0, 4) : "";
+  const first = personFirst(c) || "there"; const yr = i?.funded ? i.funded.slice(0, 4) : "";
   const inherited = c.book === "past LO";
   const hi = inherited ? `Hi ${first}, this is ${me}, AVP at Zero Point Mortgage Services. I'm the loan originator now taking care of your home loan.` : `Hey ${first}, ${me}.`;
   const years = Math.max(1, Math.round((i?.months || 12) / 12));
@@ -307,7 +308,7 @@ export async function undoOutcome(userId, id) {
 
 // Wrong number: ask for the new number by email.
 export function wrongNumberEmail(c, me = "Joshua Graham") {
-  const first = c.first_name || "there";
+  const first = personFirst(c) || "there";
   return {
     subject: "Trying to reach you",
     body: `Hi ${first},\n\nI tried calling you at ${c.phone || "the number I have on file"}, and it looks like that number isn't yours anymore. What's the best number to reach you?\n\nThanks,\n${me}\nAVP / Regional Loan Originator\nGraham Financial powered by Zero Point Mortgage Services\nNMLS 169809 | ${MY_PHONE}`,

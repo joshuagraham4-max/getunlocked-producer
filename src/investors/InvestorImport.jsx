@@ -145,6 +145,7 @@ export default function InvestorImport({ userId, contacts, setContacts }) {
     }
     setImp(null); const fresh = await load();
     const n = await toContacts(fresh.filter(contactable));
+    const fresh2 = await load(); await addListingAgents(fresh2.filter((l) => l.contact_id && FAILED.test(l.ps_detail?.detail?.mlsListingStatus || "") && agentOf(l) && !(agentLinked || new Set()).has(l.contact_id)));
     setMsg(`Loan and owner details added to ${updates.length} leads you had.${out.length ? ` ${out.length} new.` : ""} ${n} added to Contacts → Investor Leads.`);
   };
 
@@ -204,7 +205,7 @@ export default function InvestorImport({ userId, contacts, setContacts }) {
       l.lender && `lender ${l.lender}`, l.recording_date && `recorded ${l.recording_date}`, l.est_maturity && `due ${l.est_maturity}`,
       l.est_equity != null && `equity ${k$(l.est_equity)}`, l.ps_detail?.detail?.mlsListingStatus && `MLS ${l.ps_detail.detail.mlsListingStatus.toLowerCase()}`,
       l.properties_owned && `${l.properties_owned} properties`, l.company && `owner ${l.company}`].filter(Boolean).join(" · ");
-    return { user_id:userId, first_name:l.first_name || l.company || null, last_name:l.last_name, phone:l.phone, phone_2:l.phone_2, email:l.email,
+    return { user_id:userId, first_name:l.first_name || null, last_name:l.last_name, phone:l.phone, phone_2:l.phone_2, email:l.email,
       address:l.mailing_address, city:l.mailing_city, state:l.mailing_state, zip:l.mailing_zip, property_address:l.property_address, property_city:l.property_city,
       property_state:l.property_state, property_zip:l.property_zip, company:l.company, contact_type:"lead", subtype:"investor lead", follow_up_date:followUp,
       contact_note:note, tags:["investor lead", l.lead_type], source_category:"investor leads", source_file:l.import_batch || l.source, external_id:"inv-" + l.id, do_not_contact:false };
@@ -220,13 +221,52 @@ export default function InvestorImport({ userId, contacts, setContacts }) {
     setBusy(false); return n;
   };
 
+  // ---------- listing agents on failed listings → their own Agent contacts, linked to the investor contact ----------
+  const [agentLinked, setAgentLinked] = useState(null);   // Set of investor contact ids that already have a linked listing agent
+  const loadAgentLinks = useCallback(async () => {
+    const { data } = await supabase.from("contact_links").select("linked_id").eq("relation", "listing agent");
+    setAgentLinked(new Set((data || []).map((x) => x.linked_id)));
+  }, []);
+  useEffect(() => { if (userId) loadAgentLinks(); }, [userId, loadAgentLinks]);
+  const agentOf = (l) => { const d = l.ps_detail?.detail || {}, m = d.mlsListing || {};
+    const name = (m.agentName || d.mlsAgentName || "").trim(); if (!name) return null;
+    return { name, email:(m.agentEmail || d.mlsAgentEmail || "").trim().toLowerCase() || null, phone:fmtPhone(m.agentPhone || d.mlsAgentPhone) || null, office:m.officeName || d.mlsOfficeName || null }; };
+  const FAILED = /^(FAIL|EXPIRED|WITHDRAWN|CANCELLED|CANCELED)$/i;
+  const needsAgent = (l) => l.contact_id && FAILED.test(l.ps_detail?.detail?.mlsListingStatus || "") && agentOf(l) && agentLinked && !agentLinked.has(l.contact_id);
+  const addListingAgents = async (list) => {
+    setBusy(true); let made = 0, linked = 0; const known = [...contacts];
+    for (const l of list) {
+      const a = agentOf(l); if (!a) continue;
+      const addr = [l.property_address, l.property_city].filter(Boolean).join(", ");
+      const owner = l.company || [l.first_name, l.last_name].filter(Boolean).join(" ");
+      const line = `${today()}: Listing agent · ${addr} (listing ${String(l.ps_detail.detail.mlsListingStatus).toLowerCase()}) · owner ${owner}`;
+      let agent = known.find((c) => (a.email && [c.email, c.email_2].includes(a.email)) || (a.phone && [c.phone, c.phone_2].some((p) => digits(p) === digits(a.phone))));
+      if (agent) {
+        const { data } = await supabase.from("contacts").update({ tags:[...new Set([...(agent.tags || []), "listing agent"])], contact_note:[agent.contact_note, line].filter(Boolean).join("\n") }).eq("id", agent.id).select().single();
+        if (data) { agent = data; setContacts((p) => p.map((x) => (x.id === data.id ? data : x))); }
+      } else {
+        const parts = a.name.split(/\s+/); const cap = (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+        const { data, error } = await supabase.from("contacts").insert({ user_id:userId, first_name:cap(parts[0]), last_name:parts.slice(1).map(cap).join(" ") || null, email:a.email, phone:a.phone,
+          company:a.office, contact_type:"agent", subtype:"listing agent", agent_role:"seller", tags:["listing agent"], contact_note:line, source_category:"investor leads",
+          source_file:"PropStream listing agent", external_id:"lagent-" + (a.email || digits(a.phone) || a.name.toLowerCase().replace(/\W+/g, "-")), do_not_contact:false }).select().single();
+        if (error) { setMsg("Couldn't add agent " + a.name + ": " + error.message); continue; }
+        agent = data; known.push(data); setContacts((p) => [...p, data]); made++;
+      }
+      const { error } = await supabase.from("contact_links").insert({ user_id:userId, contact_id:agent.id, linked_id:l.contact_id, relation:"listing agent" });
+      if (!error || /duplicate/i.test(error.message)) linked++;
+    }
+    setBusy(false); loadAgentLinks(); return { made, linked };
+  };
+
   const waiting = leads.filter(contactable);
+  const agentsWaiting = leads.filter(needsAgent);
   return (
     <div style={{marginBottom:14}}>
       <HowTo id="pull-leads" {...GUIDES.pullLeads} defaultOpen={false}/>
       <HowTo id="lead-score" {...GUIDES.leadScore} defaultOpen={false}/>
       <div style={{display:"flex", gap:8, flexWrap:"wrap", alignItems:"center", marginBottom:8}}>
         <label style={{...btnG, display:"inline-block"}}>Import PropStream file<input type="file" accept=".csv,text/csv,.json,application/json" onChange={onFile} style={{display:"none"}}/></label>
+        {agentsWaiting.length > 0 && <button disabled={busy} onClick={async () => { const r = await addListingAgents(agentsWaiting); setMsg(`${r.made} listing agents added to Contacts, ${r.linked} linked to their property's owner.`); }} style={btn}>Add {agentsWaiting.length} listing agents</button>}
         {waiting.length > 0 && <button disabled={busy} onClick={async () => { const n = await toContacts(waiting); load(); setMsg(`${n} added to Contacts → Investor Leads.`); }} style={btn}>Add {waiting.length} waiting to Contacts</button>}
         <span style={{fontFamily:F.mono, fontSize:11, color:C.mid}}>Portfolio Review link: {ORIGIN}/review</span>
         <button onClick={() => navigator.clipboard?.writeText(`${ORIGIN}/review`)} style={{...btn, padding:"3px 10px", fontSize:12}}>Copy</button>

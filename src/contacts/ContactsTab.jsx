@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "../supabase.js";
 import HowTo from "../HowTo.jsx";
 import { GUIDES } from "../howto/guides.jsx";
-import InvestorPanel, { isInvestorLead } from "./InvestorPanel.jsx";
+import InvestorPanel, { isInvestorLead, ListingAgentPanel, isListingAgent } from "./InvestorPanel.jsx";
 import InvestorImport from "../investors/InvestorImport.jsx";
 import { loadRadarData, peekRadarData, computeRadar, reasonFor, priorityScore, REASON_COLOR, REASON_BG } from "../radar/engine.js";
 
@@ -334,6 +334,7 @@ function Detail({ c, contacts, setContacts, userId, profileName, back, open, lin
       </div>
 
       {isInvestorLead(c) && <InvestorPanel c={c} profileName={profileName}/>}
+      {isListingAgent(c) && <ListingAgentPanel c={c} contacts={contacts} links={links}/>}
       {["past_client","lead"].includes(typeOf(c)) && <Loans contact={c} userId={userId}/>}
       <Linked contact={c} contacts={contacts} userId={userId} open={open} links={links} reloadLinks={reloadLinks} onCreate={createContact}/>
 
