@@ -5,6 +5,7 @@ import HowTo from "../HowTo.jsx";
 import { GUIDES } from "../howto/guides.jsx";
 import InvestorPanel, { isInvestorLead, ListingAgentPanel, isListingAgent } from "./InvestorPanel.jsx";
 import InvestorImport from "../investors/InvestorImport.jsx";
+import AgentResearch, { emailMismatch } from "./AgentResearch.jsx";
 import { loadRadarData, peekRadarData, computeRadar, reasonFor, priorityScore, REASON_COLOR, REASON_BG } from "../radar/engine.js";
 
 const C = {
@@ -333,6 +334,7 @@ function Detail({ c, contacts, setContacts, userId, profileName, back, open, lin
         )}
       </div>
 
+      {typeOf(c) === "agent" && <AgentResearch c={c}/>}
       {isInvestorLead(c) && <InvestorPanel c={c} profileName={profileName} contacts={contacts} onOpen={open}/>}
       {isListingAgent(c) && <ListingAgentPanel c={c} contacts={contacts} links={links}/>}
       {["past_client","lead"].includes(typeOf(c)) && <Loans contact={c} userId={userId}/>}
@@ -379,7 +381,7 @@ const FILTERS = [
   ["Rate", [["rate7","7%+"],["rate65","6.5–7%"],["rate6","6–6.5%"]]],
   ["Loan", [["conv","Conventional"],["fha","FHA"],["va","VA"],["purchase","Purchase"],["refi","Refinance"]]],
   ["Funded", [["y2022","2022"],["y2023","2023"],["y2024","2024"],["y2025","2025+"],["pre2022","Before 2022"]]],
-  ["Agents", [["closed","Closed deals together"],["active","Active partner"],["buyer","Buyer agents"],["seller","Seller agents"]]],
+  ["Agents", [["closed","Closed deals together"],["active","Active partner"],["buyer","Buyer agents"],["seller","Seller agents"],["mismatch","Check: email ≠ brokerage"]]],
   ["Contact", [["phone","Has phone"],["nophone","No phone"],["addr","Has address"],["noaddr","No address"],["never","Never contacted"],["cold","90+ days since call"],["follow","Follow-up due"],["review","Needs review"],["cob","Co-borrowers"]]],
 ];
 const FLABEL = Object.fromEntries(FILTERS.flatMap(([, xs]) => xs));
@@ -449,6 +451,7 @@ export default function ContactsTab({ userId, contacts, setContacts, profileName
       case "purchase": return c.loan_purpose === "purchase"; case "refi": return c.loan_purpose === "refinance";
       case "y2022": return y === "2022"; case "y2023": return y === "2023"; case "y2024": return y === "2024"; case "y2025": return y >= "2025"; case "pre2022": return y && y < "2022";
       case "closed": return tags.includes("closed deal together"); case "active": return c.subtype === "active partner";
+      case "mismatch": return !!emailMismatch(c);
       case "buyer": return (c.agent_role || "").includes("buyer"); case "seller": return (c.agent_role || "").includes("seller");
       case "phone": return !!c.phone; case "nophone": return !c.phone;
       case "addr": return !!(c.address || c.property_address); case "noaddr": return !(c.address || c.property_address);

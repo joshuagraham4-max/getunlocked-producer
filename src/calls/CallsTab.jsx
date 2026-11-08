@@ -9,6 +9,7 @@ import QuickUpdate from "./QuickUpdate.jsx";
 import Playbook from "./Playbook.jsx";
 import { personFirst, sunbizUrl, isEntity } from "../radar/investorPlaybook.js";
 import { LeadStory, useLead } from "../contacts/InvestorPanel.jsx";
+import AgentResearch from "../contacts/AgentResearch.jsx";
 
 const C = { bg:"#f5f0e8", card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc", green:"#1e6e4a", amber:"#b05e0d", amberBg:"#fdf0e0", greenBg:"#e6f2ea" };
 const F = { mono:"'DM Mono',monospace", cond:"'Barlow Condensed',sans-serif", body:"'Barlow',sans-serif" };
@@ -251,6 +252,7 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
           {!personFirst(sel) && <span style={{fontFamily:F.mono, fontSize:11, color:C.amber}}>No owner name yet: add it in Open full contact</span>}
         </div>
       )}
+      {(sel.contact_type || "") === "agent" && <AgentResearch c={sel} compact/>}
       {isInvestor(sel) && <LeadStory c={sel} lead={invLead} contacts={contacts} onOpen={onOpen}/>}
       {scripts?.playbook && <Playbook pb={scripts.playbook}/>}
       {sel.last_contacted === today() && !follow && (
