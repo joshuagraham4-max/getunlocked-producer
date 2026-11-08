@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "../supabase.js";
 import HowTo from "../HowTo.jsx";
 import { GUIDES } from "../howto/guides.jsx";
-import { today, digits, fullName, fmtMo, money, loadRadarData, computeRadar, bdayDue, DEFAULT_SETTINGS } from "./engine.js";
+import { today, digits, fullName, fmtMo, money, loadRadarData, computeRadar, bdayDue, bdayCallable, DEFAULT_SETTINGS } from "./engine.js";
 
 const C = { bg:"#f5f0e8", card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc", green:"#1e6e4a", amber:"#b05e0d", amberBg:"#fdf0e0", red:"#9e3020", purple:"#5b3fa6", teal:"#1a6570", blue:"#1a4f8a" };
 const F = { mono:"'DM Mono',monospace", cond:"'Barlow Condensed',sans-serif", body:"'Barlow',sans-serif" };
@@ -80,7 +80,7 @@ export default function RadarTab({ userId, contacts, onOpen, onGoCalls }) {
     const { out, info } = radar;
     const rate = [...out.conv, ...out.fha, ...out.va].filter(inBook).sort((a, b) => mineFirst(a, b) || info[b.id].gap - info[a.id].gap);
     const live = contacts.filter((c) => !c.do_not_contact && c.contact_type !== "rolodex" && inBook(c));
-    const bdays = live.filter((c) => bdayDue(c, t)).sort(mineFirst);
+    const bdays = live.filter((c) => bdayCallable(c, t)).sort(mineFirst);
     const follow = [...bdays, ...live.filter((c) => !bdayDue(c, t) && c.follow_up_date && c.follow_up_date <= t).sort((a, b) => mineFirst(a, b) || a.follow_up_date.localeCompare(b.follow_up_date))];
     const life = live.filter((c) => c.contact_type === "past_client" && info[c.id]?.funded && info[c.id].funded.slice(5, 7) === t.slice(5, 7) && info[c.id].months >= 11).sort(mineFirst);
     const equity = out.equity.filter(inBook).sort((a, b) => mineFirst(a, b) || info[a.id].estLtv - info[b.id].estLtv);

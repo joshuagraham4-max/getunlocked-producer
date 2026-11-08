@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import HowTo from "../HowTo.jsx";
 import { GUIDES } from "../howto/guides.jsx";
-import { today, addDays, digits, fullName, fmtMo, loadRadarData, peekRadarData, wrongNumberEmail, computeRadar, buildQueue, reasonFor, scriptsFor, logOutcome, undoOutcome, canUndo, segmentOf, REASON_COLOR, REASON_BG } from "../radar/engine.js";
+import { today, addDays, digits, fullName, fmtMo, loadRadarData, peekRadarData, wrongNumberEmail, computeRadar, buildQueue, bdayCallable, reasonFor, scriptsFor, logOutcome, undoOutcome, canUndo, segmentOf, REASON_COLOR, REASON_BG } from "../radar/engine.js";
 import { supabase } from "../supabase.js";
 import EmailDesk from "./EmailDesk.jsx";
 import QuickUpdate from "./QuickUpdate.jsx";
@@ -86,7 +86,7 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
   const queue = useMemo(() => {
     if (!radar) return null;
     let saved = null; try { saved = JSON.parse(localStorage.getItem(qKey) || "null"); } catch {}
-    if (saved && saved.target === target && Array.isArray(saved.items)) return saved.items.filter((x) => byId[x.id]).map((x) => ({ ...x, group: x.group || segmentOf(byId[x.id]) }));
+    if (saved && saved.target === target && Array.isArray(saved.items)) return saved.items.filter((x) => byId[x.id] && (!x.bday || byId[x.id].last_contacted === today() || bdayCallable(byId[x.id]))).map((x) => ({ ...x, group: x.group || segmentOf(byId[x.id]) }));
     const items = buildQueue(contacts, radar, target);
     try { localStorage.setItem(qKey, JSON.stringify({ target, items })); } catch {}
     return items;

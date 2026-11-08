@@ -107,6 +107,12 @@ export function bdayDue(c, t = today()) {
   }
   return null;
 }
+// A due birthday only goes on a list if the number isn't bad and they haven't been contacted this week
+// (today counts as done, so a call already made doesn't bring them back on a rebuilt list).
+export function bdayCallable(c, t = today()) {
+  if (!bdayDue(c, t) || c.outcome === "wrong number") return false;
+  return !(c.last_contacted && c.last_contacted < t && daysSince(c.last_contacted) <= 6);
+}
 export const segmentOf = (c) => ((c.contact_type || "past_client") === "agent" ? "agents" : "customers");
 
 // One "why now" reason per contact: { key, title, detail, score }
@@ -157,8 +163,7 @@ export function buildQueue(contacts, radar, target = 20) {
     // Birthdays: always on the list, on top of the target, even if called recently or no phone.
     // Birthdays go on top of the target, but not for a bad number or someone already called this week
     // (Friday lists weekend birthdays, so without this the same person showed up Fri, Sat and Sun).
-    const calledThisWeek = c.last_contacted && c.last_contacted < t && daysSince(c.last_contacted) <= 6;
-    if (bdayDue(c, t) && c.outcome !== "wrong number" && !calledThisWeek) { const reason = reasonFor(c, radar.info[c.id], t); bdays.push({ id:c.id, reason, group:segmentOf(c), bday:true, s:9000 + (c.book === "mine" ? 100 : 0) }); continue; }
+    if (bdayCallable(c, t)) { const reason = reasonFor(c, radar.info[c.id], t); bdays.push({ id:c.id, reason, group:segmentOf(c), bday:true, s:9000 + (c.book === "mine" ? 100 : 0) }); continue; }
     if (!c.phone || ty === "referral_partner") continue;              // calls first: needs a phone number
     if (c.outcome === "wrong number") continue;                        // bad number: off the list until Quick Update adds a new one
     const due = c.follow_up_date && c.follow_up_date <= t;
