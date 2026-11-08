@@ -49,6 +49,7 @@ const MAP = {
   loan_balance:["est. remaining balance of open loans","open mortgage balance","total loan balance","loan balance","est. loan balance","mortgage balance"],
   lender:["lender name","lender","mortgage lender","1st mortgage lender","lender 1"],
   loan_amount:["loan amount","mortgage amount","1st mortgage amount","original loan amount"],
+  est_maturity:["loan due date","maturity date","due date","loan maturity date"],
   recording_date:["recording date","mortgage recording date","loan recording date","1st mortgage recording date","last sale recording date"],
 };
 const norm = (s) => String(s || "").toLowerCase().replace(/[^a-z0-9#. ]/g, " ").replace(/\s+/g, " ").trim();
@@ -67,7 +68,12 @@ export function scoreLead(l) {
   let s = 0;
   if (l.lead_type === "maturing_hard_money" && isHardMoneyLender(l.lender)) s += 35;
   if (l.lead_type === "maturing_hard_money" && l.lender && /bank|credit union|mortgage|home loans|federal|wells|chase|rocket|freedom|pennymac|lakeview/i.test(l.lender) && !isHardMoneyLender(l.lender)) s -= 25;
-  if (l.lead_type === "maturing_hard_money") { const m = monthsSince(l.recording_date); s += 50; if (m != null) s += m >= 9 && m <= 15 ? 40 : m > 15 ? 30 : m >= 6 ? 15 : 0; }
+  if (l.lead_type === "maturing_hard_money") {
+    s += 50;
+    const due = l.est_maturity_given ? -monthsSince(l.est_maturity) : null;   // months until the real due date
+    if (due != null) s += due <= 0 ? 45 : due <= 6 ? 40 : due <= 12 ? 25 : due <= 36 ? 5 : -60;   // 3+ years out = already in long-term financing
+    else { const m = monthsSince(l.recording_date); if (m != null) s += m >= 9 && m <= 15 ? 40 : m > 15 ? 30 : m >= 6 ? 15 : 0; }
+  }
   const eq = l.est_equity ?? (l.est_value != null && l.loan_balance != null ? l.est_value - l.loan_balance : null);
   if (eq != null) s += eq >= 500000 ? 30 : eq >= 250000 ? 22 : eq >= 100000 ? 14 : eq > 0 ? 5 : 0;
   if (l.properties_owned) s += l.properties_owned >= 10 ? 20 : l.properties_owned >= 5 ? 15 : l.properties_owned >= 2 ? 10 : 0;
@@ -110,7 +116,7 @@ export default function InvestorLeads({ userId, contacts, setContacts }) {
     setBusy(true); setMsg("");
     const seen = new Set(leads.flatMap((l) => [digits(l.phone), (l.email || "").toLowerCase(), norm(l.property_address)]).filter(Boolean));
     const cSeen = new Set(contacts.flatMap((c) => [digits(c.phone), digits(c.phone_2), (c.email || "").toLowerCase()]).filter(Boolean));
-    const out = []; let dup = 0, known = 0;
+    const out = [], updates = []; let dup = 0, known = 0;
     for (const r of imp.rows) {
       const g = (f) => (imp.map[f] != null ? String(r[imp.map[f]] || "").trim() : "");
       const l = {
@@ -124,19 +130,30 @@ export default function InvestorLeads({ userId, contacts, setContacts }) {
         lender:g("lender") || null, loan_amount:money(g("loan_amount")), recording_date:dateOf(g("recording_date")),
       };
       if (!l.first_name && !l.last_name && !l.company && !l.property_address) continue;
-      if (l.recording_date && imp.lead_type === "maturing_hard_money") { const d = new Date(l.recording_date); d.setMonth(d.getMonth() + 12); l.est_maturity = d.toISOString().slice(0, 10); }
+      const dueGiven = dateOf(g("est_maturity"));
+      if (dueGiven) l.est_maturity = dueGiven;
+      else if (l.recording_date && imp.lead_type === "maturing_hard_money") { const d = new Date(l.recording_date); d.setMonth(d.getMonth() + 12); l.est_maturity = d.toISOString().slice(0, 10); }
       const keys = [digits(l.phone), l.email, norm(l.property_address)].filter(Boolean);
-      if (keys.some((k) => seen.has(k))) { dup++; continue; }
+      if (keys.some((k) => seen.has(k))) {
+        // Same property already here: fill in what this file adds (lender, dates, equity) and re-score.
+        const old = leads.find((o) => l.property_address && norm(o.property_address) === norm(l.property_address));
+        if (old) {
+          const patch = {}; for (const f of ["lender","loan_amount","recording_date","est_maturity","est_value","est_equity","loan_balance","properties_owned","email","phone_2"]) if (l[f] != null && l[f] !== old[f]) patch[f] = l[f];
+          if (Object.keys(patch).length) { patch.score = scoreLead({ ...old, ...patch, est_maturity_given: !!dueGiven }); updates.push([old.id, patch]); }
+        } else dup++;
+        continue;
+      }
       if ([digits(l.phone), l.email].filter(Boolean).some((k) => cSeen.has(k))) known++;
       keys.forEach((k) => seen.add(k));
-      l.score = scoreLead(l); out.push(l);
+      l.score = scoreLead({ ...l, est_maturity_given: !!dueGiven }); out.push(l);
     }
     for (let i = 0; i < out.length; i += 500) {
       const { error } = await supabase.from("investor_leads").insert(out.slice(i, i + 500));
       if (error) { setBusy(false); return setMsg("Import stopped: " + error.message); }
     }
+    for (const [id, patch] of updates) await supabase.from("investor_leads").update(patch).eq("id", id);
     setBusy(false); setImp(null); load();
-    setMsg(`Imported ${out.length} leads.${dup ? ` Skipped ${dup} duplicates.` : ""}${known ? ` ${known} are already in your Contacts.` : ""}`);
+    setMsg(`Imported ${out.length} leads.${updates.length ? ` Updated ${updates.length} you already had.` : ""}${dup ? ` Skipped ${dup} duplicates.` : ""}${known ? ` ${known} are already in your Contacts.` : ""}`);
   };
 
   // ---------- send to call list ----------
@@ -165,6 +182,7 @@ export default function InvestorLeads({ userId, contacts, setContacts }) {
   return (
     <div>
       <HowTo id="pull-leads" {...GUIDES.pullLeads} defaultOpen={false}/>
+      <HowTo id="lead-score" {...GUIDES.leadScore} defaultOpen={false}/>
       <div style={{display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(170px,1fr))", gap:12, marginBottom:14}}>
         {Object.entries(TYPES).filter(([k]) => k in counts && (counts[k] > 0 || ["maturing_hard_money","dead_money"].includes(k))).map(([k, [l, c, bg]]) => (
           <div key={k} onClick={() => setType(type === k ? "all" : k)} style={{...card, padding:"12px 16px", cursor:"pointer", borderColor: type === k ? c : C.rule, background: type === k ? bg : C.card}}>

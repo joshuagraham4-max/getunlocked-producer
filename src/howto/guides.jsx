@@ -34,6 +34,15 @@ export const GUIDES = {
         <><b>To call them:</b> click <b>Send top 10 to calls</b>. They land on Calls under Customers with the script, voicemail and email ready.</>,
         <>PropStream allows one login at a time. Close it on your phone before Claude works in it.</>,
   ] },
+  leadScore: { title: "What the score means", steps: [
+        <>The number on the left of each lead is its <b>score</b>. Higher = call first. The list is sorted by it.</>,
+        <><b>Hard money due:</b> +50 to start. Then the due date: <b>past due +45</b> · due within 6 months +40 · within 12 months +25 · 1-3 years +5 · <b>3+ years away −60</b> (they already refinanced into a long-term loan). No due date on file: loan age instead, +40 at 9-15 months old.</>,
+        <><b>Lender:</b> known hard money lender (Kiavi, Lima One, Groundfloor, etc.) +35 · regular bank or mortgage company −25.</>,
+        <><b>Equity:</b> $500K+ +30 · $250K+ +22 · $100K+ +14 · any +5.</>,
+        <><b>Doors owned:</b> 10+ +20 · 5+ +15 · 2+ +10.</>,
+        <><b>Owned in an LLC, Inc or trust:</b> +5. <b>Phone on file:</b> +10, no phone −20.</>,
+        <><b>Rough guide:</b> 150+ call today · 100-150 this week · under 60 email or mail first.</>,
+  ] },
   dupes: { title: "How to review duplicates", steps: [
         <>Each card shows two records that look like the same person (same name, email or phone), side by side. Tap a name to open that record first if you need to check.</>,
         <><b>Merge into one</b> combines both records and keeps everything: phones, emails, loans, notes, tags, call history and links. Extra phones or emails that don't fit go into the note. Do Not Contact carries over if either had it.</>,
