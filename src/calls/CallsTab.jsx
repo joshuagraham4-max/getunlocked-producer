@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import HowTo from "../HowTo.jsx";
 import { GUIDES } from "../howto/guides.jsx";
-import { today, addDays, digits, fullName, fmtMo, loadRadarData, peekRadarData, wrongNumberEmail, computeRadar, buildQueue, investorQueue, isInvestor, bdayCallable, reasonFor, scriptsFor, logOutcome, undoOutcome, canUndo, segmentOf, REASON_COLOR, REASON_BG } from "../radar/engine.js";
+import { today, addDays, digits, fullName, fmtMo, loadRadarData, peekRadarData, wrongNumberEmail, computeRadar, buildQueue, investorQueue, APPLY, isInvestor, bdayCallable, reasonFor, scriptsFor, logOutcome, undoOutcome, canUndo, segmentOf, REASON_COLOR, REASON_BG } from "../radar/engine.js";
 import { supabase } from "../supabase.js";
 import EmailDesk from "./EmailDesk.jsx";
 import QuickUpdate from "./QuickUpdate.jsx";
@@ -237,6 +237,12 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
           <button onClick={() => onOpen(sel)} style={btn}>Add a phone number</button>
         </div>
       )}
+      <div style={{display:"flex", gap:8, flexWrap:"wrap", alignItems:"center", marginBottom:12}}>
+        <span style={{fontFamily:F.mono, fontSize:11, color:C.mid}}>Ready? Apply link:</span>
+        {sel.phone && <a href={`sms:${digits(sel.phone)}?body=${encodeURIComponent(`Here's the link to get started: https://${APPLY} . It takes about 10 minutes, and I'm right here if you get stuck. - Joshua`)}`} style={btnG}>Text apply link</a>}
+        {sel.email && <a href={`mailto:${sel.email}?subject=${encodeURIComponent("Your application link")}&body=${encodeURIComponent(`Hi ${personFirst(sel) || "there"},\n\nHere's the link to get started: https://${APPLY}\n\nIt takes about 10 minutes, and I'm right here if you get stuck.\n\nJoshua Graham\n${"720-468-6872"}`)}`} style={btn}>Email apply link</a>}
+        <button onClick={() => navigator.clipboard?.writeText(`https://${APPLY}`)} style={btn}>Copy</button>
+      </div>
       {isInvestor(sel) && (
         <div style={{display:"flex", gap:8, flexWrap:"wrap", alignItems:"center", marginBottom:12}}>
           {sel.email && <a href={`mailto:${sel.email}?subject=${encodeURIComponent(scripts.emailSubject)}&body=${encodeURIComponent(scripts.emailBody)}`} onClick={() => logOutcome(userId, sel, "emailed", "", undefined, "email").then((u) => u && setContacts((p) => p.map((x) => (x.id === u.id ? u : x))))} style={btnG}>Send email</a>}

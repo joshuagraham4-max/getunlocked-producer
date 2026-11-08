@@ -2,7 +2,7 @@
 // Priority: agents and clients he has worked with, then his other clients, then other agents, leads, past LO fundings last.
 import { useState, useMemo, useEffect } from "react";
 import { supabase } from "../supabase.js";
-import { today, addDays, fullName, BOOKING, MY_PHONE, isInvestor } from "../radar/engine.js";
+import { today, addDays, fullName, BOOKING, MY_PHONE, CTA, isInvestor } from "../radar/engine.js";
 import { PLAYBOOKS, investorFollowUps, personFirst } from "../radar/investorPlaybook.js";
 
 const C = { bg:"#f5f0e8", card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc", green:"#1e6e4a", amber:"#b05e0d", amberBg:"#fdf0e0", red:"#9e3020" };
@@ -48,6 +48,8 @@ ${w ? "It's been too long since our last closing together." : "It's been a while
 
 I'm updating my partner list and want to make sure I have you right. ${c.company ? `Still with ${c.company}? ` : ""}Best cell for you?
 
+${CTA}
+
 ${SIG}` };
     if (step === 2) return { subject:"One more closing this year", body:`Hi ${first},
 
@@ -55,12 +57,14 @@ Quick thought. A lot of the buyers I talk to think they can't buy yet: they thin
 
 I'd like to send some of those buyers your way and make sure the ones you already have get to the closing table. Worth a quick conversation?
 
+${CTA}
+
 ${SIG}` };
     return { subject:"15 minutes?", body:`Hi ${first},
 
 I'd love 15 minutes to hear what you're working on and show you how I take care of the buyers you send me. No pitch, just two people who should be doing more business together.
 
-Grab any time that works for you here: ${BOOKING}
+${CTA}
 
 ${SIG}
 
@@ -79,6 +83,8 @@ I'm also updating my info on you. Did anything change? New number, new email, a 
 
 No agenda, just checking in.
 
+${CTA}
+
 ${SIG}` };
   }
   if (step === 2) return { subject:"Want to see what your home is worth now?", body:`Hi ${first},
@@ -87,6 +93,8 @@ As a mortgage broker I have access to the property value tool lenders use, which
 
 Want me to run it? Just reply "yes."
 
+${CTA}
+
 ${SIG}` };
   return { subject:"What's next for you?", body:`Hi ${first},
 
@@ -94,7 +102,7 @@ Whatever is next, whether that's moving up, downsizing, using your equity, buyin
 
 I'm a real person, not an automated email, and it's free advice. No pressure.
 
-Book 15 minutes with me here: ${BOOKING}
+${CTA}
 
 ${SIG}
 

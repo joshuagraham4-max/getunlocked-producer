@@ -4,6 +4,7 @@ import React, { useMemo, useState } from "react";
 import { supabase } from "../supabase.js";
 import { BRAND, FOOTERS } from "../smart-money/data.js";
 import BrandBar, { NoSpam } from "./BrandBar.jsx";
+import CtaRow from "./CtaRow.jsx";
 
 const STATES = "AL AK AZ AR CA CO CT DE DC FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY".split(" ");
 const UNLOCK_KEY = "gf_equity_unlocked";
@@ -150,10 +151,7 @@ function Results({ v }) {
         <h3 style={{ fontFamily:F.display, margin:"0 0 6px", fontSize:18 }}>The catch most people hit</h3>
         <p style={{ margin:"0 0 8px" }}>Your equity is stuck in your house until it sells, but you need it to buy the next one. There are ways to use it <b>before</b> you sell, so you move once, on your timeline, without two mortgages or a rush sale.</p>
         <p style={{ margin:"0 0 8px", color:C.muted }}>Every situation is different. I'll walk you through which path fits yours.</p>
-        <div style={{ display:"flex", gap:10, flexWrap:"wrap" }}>
-          <a href={BRAND.booking} target="_blank" rel="noreferrer" style={{ ...btnS, textDecoration:"none", display:"inline-block" }}>Book 15 minutes with me</a>
-          <a href={`tel:${BRAND.phone.replace(/\D/g, "")}`} style={{ ...btnS, background:"#fff", color:C.blue, border:`1px solid ${C.blue}`, textDecoration:"none", display:"inline-block" }}>Call {BRAND.phone}</a>
-        </div>
+        <CtaRow/>
       </div>
     </div>
   );

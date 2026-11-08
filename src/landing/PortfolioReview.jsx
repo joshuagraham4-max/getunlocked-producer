@@ -127,6 +127,7 @@ export default function PortfolioReview() {
           <div style={{ display:"grid", gap:10 }}>
             <a href={BOOKING} style={{ ...btn, display:"flex", alignItems:"center", justifyContent:"center", textDecoration:"none" }}>Book my deep dive</a>
             <a href={`sms:${BRAND.phone.replace(/\D/g, "")}?body=${encodeURIComponent(`Hi Joshua, it's ${f.first}. I just did the portfolio review.`)}`} style={{ ...btn, background:"#fff", color:C.blue, border:`2px solid ${C.blue}`, display:"flex", alignItems:"center", justifyContent:"center", textDecoration:"none" }}>Text Joshua now</a>
+            <a href={BRAND.apply} target="_blank" rel="noreferrer" style={{ ...btn, display:"flex", alignItems:"center", justifyContent:"center", textDecoration:"none" }}>Apply here</a>
           </div>
           <p style={{ fontSize:13, color:C.muted, marginTop:14 }}>Example only: about {money(need || 63000)} per purchase ({pct(DOWN)} down plus about {pct(COSTS)} closing costs) and {money(FLOW_LO)}-{money(FLOW_HI)}/mo cash flow per door after the payment. {pct(DOWN)} down is available on qualifying purchases; credit, property and reserves apply. Your values, rents and terms will differ. Business-purpose loans, for scenario review only. Not an offer to lend.</p>
         </div>

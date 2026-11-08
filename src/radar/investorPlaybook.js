@@ -147,21 +147,21 @@ export function investorFollowUps(c, kind, me, phone, booking) {
   const where = c.property_address ? ` on ${c.property_address}` : "";
   if (kind === "maturing_hard_money") return {
     short: `I help investors move short-term loans into stable long-term financing, fast. Are you done getting the property${where} ready?`,
-    vmText: `Hi ${first}, it's ${me}. Love the property${where}. I help investors move short-term loans into stable long-term financing, fast, and I'm local here in Florida. If you've got any time crunch on it, call or text me: ${phone}`,
+    vmText: `Hi ${first}, it's ${me}. Love the property${where}. I help investors move short-term loans into stable long-term financing, fast, and I'm local here in Florida. If you've got any time crunch on it, call me at ${phone} or apply at approvedbyjoshua.com`,
     emailSubject: c.property_address ? `Your property on ${c.property_address}` : "Your property",
-    emailBody: `Hi ${first},\n\nLove the property${where}. Are you done getting it ready for market?\n\nI specialize in moving investors out of short-term loans and into stable, long-term financing, fast. I'm who people call when their financing is in a crunch, and I'm the most cost-effective option out there because I'm a wholesale broker. I lend nationwide, but I'm local: I live and work right here in Florida.\n\nAre you running into any challenges or time crunches I can help with on this one? What's the best time to reach you?\n\nCall or text: ${phone}\nOr grab a time: ${booking}\n\n${SIGN(me, phone)}`,
+    emailBody: `Hi ${first},\n\nLove the property${where}. Are you done getting it ready for market?\n\nI specialize in moving investors out of short-term loans and into stable, long-term financing, fast. I'm who people call when their financing is in a crunch, and I'm the most cost-effective option out there because I'm a wholesale broker. I lend nationwide, but I'm local: I live and work right here in Florida.\n\nAre you running into any challenges or time crunches I can help with on this one? What's the best time to reach you?\n\nCall me: ${phone}\nBook me: ${booking}\nApply here: approvedbyjoshua.com\n\n${SIGN(me, phone)}`,
   };
   if (kind !== "dead_money") return {
     short: `I work with rental owners on getting equity working`,
-    vmText: `Hi ${first}, it's ${me} with Zero Point Mortgage Services. I tried you about your property${where}. I help rental owners get cash out or lock in long-term financing without tax returns. Worth a quick call? ${phone}`,
+    vmText: `Hi ${first}, it's ${me} with Zero Point Mortgage Services. I tried you about your property${where}. I help rental owners get cash out or lock in long-term financing without tax returns. Worth a quick call? ${phone}, or apply at approvedbyjoshua.com`,
     emailSubject: c.property_address ? `Your property on ${c.property_address}` : "Your rental",
-    emailBody: `Hi ${first},\n\nI tried giving you a call about your property${where}.\n\nI work with rental owners on getting cash out or locking in long-term financing where the rent qualifies the loan. No tax returns.\n\nIf it's useful, I can run a free portfolio review: approvedbyjoshua.com/review\n\nCall or text: ${phone}\nOr grab a time: ${booking}\n\n${SIGN(me, phone)}`,
+    emailBody: `Hi ${first},\n\nI tried giving you a call about your property${where}.\n\nI work with rental owners on getting cash out or locking in long-term financing where the rent qualifies the loan. No tax returns.\n\nIf it's useful, I can run a free portfolio review: approvedbyjoshua.com/review\n\nCall me: ${phone}\nBook me: ${booking}\nApply here: approvedbyjoshua.com\n\n${SIGN(me, phone)}`,
   };
   return {
     short: `I do free portfolio reviews for rental owners, showing where your equity could be working harder`,
     vmText: `Hi ${first}, it's ${me} with Zero Point Mortgage Services. I tried you about the equity in your rental${where}. I do free portfolio reviews for owners: approvedbyjoshua.com/review. Or call me, ${phone}.`,
     emailSubject: "The equity in your rentals",
-    emailBody: `Hi ${first},\n\nI tried giving you a call. I work with rental owners, and it looks like you have real equity${where} that isn't earning you anything.\n\nI do free portfolio reviews: what you own, where the cash is stuck, and how to pull it out for the next property without your tax returns. It takes two minutes: approvedbyjoshua.com/review\n\nCall or text: ${phone}\nOr grab a time: ${booking}\n\n${SIGN(me, phone)}`,
+    emailBody: `Hi ${first},\n\nI tried giving you a call. I work with rental owners, and it looks like you have real equity${where} that isn't earning you anything.\n\nI do free portfolio reviews: what you own, where the cash is stuck, and how to pull it out for the next property without your tax returns. It takes two minutes: approvedbyjoshua.com/review\n\nCall me: ${phone}\nBook me: ${booking}\nApply here: approvedbyjoshua.com\n\n${SIGN(me, phone)}`,
   };
 }
 

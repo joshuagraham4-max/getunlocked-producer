@@ -9,6 +9,7 @@ export const BRAND = {
   phone: "720-468-6872",
   site: "approvedbyjoshua.com",
   booking: "https://calendar.app.google/nz1sdrnBGK1D4LXh7",
+  apply: "https://approvedbyjoshua.com",
   bookingCta: "Book your 15 min with me. NOT a sales call. It's free to find out 👉 https://calendar.app.google/nz1sdrnBGK1D4LXh7",
 };
 

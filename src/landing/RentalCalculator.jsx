@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { supabase } from "../supabase.js";
 import { BRAND, FOOTERS } from "../smart-money/data.js";
 import BrandBar, { NoSpam } from "./BrandBar.jsx";
+import CtaRow from "./CtaRow.jsx";
 
 const SKOOL_URL = ""; // add the Smart Money Skool invite link when it's ready
 const TAX_RATE = 0.0125, INS_RATE = 0.002; // estimates when taxes/insurance are left blank
@@ -156,7 +157,8 @@ function Calculator({ estLoan }) {
         </div>
         <div style={panel}>
           <h3 style={{ fontFamily: F.display, margin: "0 0 6px" }}>Want a real quote?</h3>
-          <p style={{ margin: "0 0 8px", color: C.muted }}>I'll price this scenario across my lenders and tell you where it lands.</p>
+          <p style={{ margin: "0 0 12px", color: C.muted }}>I'll price this scenario across my lenders and tell you where it lands.</p>
+          <CtaRow/>
           <p style={{ margin: 0, fontWeight: 700, userSelect: "all" }}>Joshua Graham · {BRAND.phone}</p>
           <p style={{ margin: 0, userSelect: "all" }}>{BRAND.email}</p>
         </div>

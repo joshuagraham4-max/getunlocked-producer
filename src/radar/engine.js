@@ -15,6 +15,9 @@ export const fmtMo = (d) => d ? new Date(d + "T12:00:00").toLocaleDateString("en
 export const money = (v) => `$${Math.round(v).toLocaleString()}`;
 export const BOOKING = "https://calendar.app.google/nz1sdrnBGK1D4LXh7";
 export const MY_PHONE = "720-468-6872";
+export const APPLY = "approvedbyjoshua.com";   // where people apply
+// The three ways in, on everything people receive.
+export const CTA = `Call me: ${MY_PHONE}\nBook me: ${BOOKING}\nApply here: ${APPLY}`;
 export const DEFAULT_SETTINGS = { refi_threshold:0.5, appreciation_pct:4, equity_ltv_max:70, seasoning_months:7 };
 
 // Load settings, latest market rates and current loans for a user.
@@ -269,9 +272,9 @@ export function scriptsFor(c, i, reason, me = "Joshua Graham") {
         : `Hey ${first}, ${me}. You were on my mind and I hadn't heard from you in a while. How's life? Anything going on with the house?`;
       short = `Quick check-in, you were on my mind`;
   }
-  const vmText = `Hi ${first}, it's ${me}. Just tried you. ${short}. Call or text me back at ${MY_PHONE} when you have a minute, or grab a time here: ${BOOKING}`;
+  const vmText = `Hi ${first}, it's ${me}. Just tried you. ${short}. Call me back at ${MY_PHONE}, book a time at ${BOOKING}, or apply anytime at ${APPLY}`;
   const emailSubject = reason?.key === "bday" ? "Happy birthday!" : reason?.key === "rate" ? "Quick rate check" : "Checking in";
-  const emailBody = `Hi ${first},\n\nI just tried giving you a call. ${short}.\n\nGive me a call or text at ${MY_PHONE}, or pick a time that works for you: ${BOOKING}\n\n${me}\nGraham Financial`;
+  const emailBody = `Hi ${first},\n\nI just tried giving you a call. ${short}.\n\n${CTA}\n\n${me}\nGraham Financial`;
   const invKind = tags.includes("investor lead") ? Object.keys(PLAYBOOKS).find((k) => tags.includes(k)) || null : null;
   if (invKind) { const f = investorFollowUps(c, invKind, me, MY_PHONE, BOOKING); return { say, vmText:f.vmText, emailSubject:f.emailSubject, emailBody:f.emailBody, playbook:PLAYBOOKS[invKind] }; }
   return { say, vmText, emailSubject, emailBody };
