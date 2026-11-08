@@ -128,6 +128,7 @@ export default function InvestorLeads({ userId, contacts, setContacts }) {
     const out = [], updates = [];
     for (const rec of imp.rows) {
       const f = leadFieldsFromDetail(rec);
+      if (/confidential/i.test(`${f.last_name || ""} ${f.company || ""} ${rec.detail?.owner1FullName || ""}`)) continue;   // protected owner records stay out
       const old = byId.get(String(f.ps_property_id)) || byAddr.get(norm(f.property_address) + "|" + String(f.property_zip || "").slice(0, 5));
       if (old) {
         // Detail wins for property, loan and mailing data. Keep names, phones and emails already on the lead; fill them only if blank.
