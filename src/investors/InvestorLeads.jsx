@@ -199,20 +199,37 @@ export default function InvestorLeads({ userId, contacts, setContacts }) {
     setMsg(`Imported ${out.length} leads.${updates.length ? ` Updated ${updates.length} you already had.` : ""}${dup ? ` Skipped ${dup} duplicates.` : ""}${known ? ` ${known} are already in your Contacts.` : ""}`);
   };
 
+  // ---------- add to Contacts (own category "Investor leads"; no forced follow-up, so they don't jump onto Calls) ----------
+  const SELLING = /^(ACTIVE|PENDING|ACTIVE UNDER CONTRACT|UNDER CONTRACT|CONTINGENT)$/i;
+  const contactable = (l) => !l.contact_id && l.status !== "dead" && !SELLING.test(l.ps_detail?.detail?.mlsListingStatus || "");
+  const contactRow = (l, followUp) => {
+    const t = TYPES[l.lead_type]?.[0] || "Investor";
+    const note = [`${today()}: Investor lead · ${t}`, l.property_address && `${l.property_address}, ${l.property_city || ""} ${l.property_state || ""}`,
+      l.lender && `lender ${l.lender}`, l.recording_date && `recorded ${l.recording_date}`, l.est_maturity && `due ${l.est_maturity}`,
+      l.est_equity != null && `equity ${k$(l.est_equity)}`, l.ps_detail?.detail?.mlsListingStatus && `MLS ${l.ps_detail.detail.mlsListingStatus.toLowerCase()}`,
+      l.properties_owned && `${l.properties_owned} properties`, l.company && `owner ${l.company}`].filter(Boolean).join(" · ");
+    return { user_id:userId, first_name:l.first_name || l.company || null, last_name:l.last_name, phone:l.phone, phone_2:l.phone_2, email:l.email,
+      address:l.mailing_address, city:l.mailing_city, state:l.mailing_state, zip:l.mailing_zip, property_address:l.property_address, property_city:l.property_city,
+      property_state:l.property_state, property_zip:l.property_zip, company:l.company, contact_type:"lead", subtype:"investor lead", follow_up_date:followUp,
+      contact_note:note, tags:["investor lead", l.lead_type], source_category:"investor leads", source_file:l.import_batch || l.source, external_id:"inv-" + l.id, do_not_contact:false };
+  };
+  const toContacts = async (list) => {
+    setBusy(true); let n = 0;
+    for (const l of list) {
+      const { data, error } = await supabase.from("contacts").insert(contactRow(l, null)).select().single();
+      if (error) { setMsg("Couldn't add " + (l.first_name || l.company) + ": " + error.message); continue; }
+      await supabase.from("investor_leads").update({ contact_id:data.id }).eq("id", l.id);
+      setContacts((p) => [...p, data]); n++;
+    }
+    setBusy(false); load(); setMsg(`${n} added to Contacts → Investor Leads. Scripts, email and loan details are on each contact.`);
+  };
+
   // ---------- send to call list ----------
   const toCalls = async (list) => {
     setBusy(true); let n = 0;
     for (const l of list) {
       if (l.contact_id) { await supabase.from("contacts").update({ follow_up_date:today() }).eq("id", l.contact_id); await supabase.from("investor_leads").update({ status:"queued" }).eq("id", l.id); n++; continue; }
-      const t = TYPES[l.lead_type]?.[0] || "Investor";
-      const note = [`${today()}: Investor lead · ${t}`, l.property_address && `${l.property_address}, ${l.property_city || ""} ${l.property_state || ""}`,
-        l.lender && `lender ${l.lender}`, l.recording_date && `recorded ${l.recording_date}`, l.est_maturity && `est. due ${l.est_maturity}`,
-        l.est_equity != null && `equity ${k$(l.est_equity)}`, l.properties_owned && `${l.properties_owned} properties`, l.company && `owner ${l.company}`].filter(Boolean).join(" · ");
-      const row = { user_id:userId, first_name:l.first_name || (l.company ? l.company : null), last_name:l.last_name, phone:l.phone, phone_2:l.phone_2, email:l.email,
-        address:l.mailing_address, city:l.mailing_city, state:l.mailing_state, zip:l.mailing_zip, property_address:l.property_address, property_city:l.property_city,
-        property_state:l.property_state, property_zip:l.property_zip, company:l.company, contact_type:"lead", subtype:"investor lead", follow_up_date:today(),
-        contact_note:note, tags:["investor lead", l.lead_type], source_category:"investor leads", source_file:l.import_batch || l.source, external_id:"inv-" + l.id, do_not_contact:false };
-      const { data, error } = await supabase.from("contacts").insert(row).select().single();
+      const { data, error } = await supabase.from("contacts").insert(contactRow(l, today())).select().single();
       if (error) { setMsg("Couldn't add " + (l.first_name || l.company) + ": " + error.message); continue; }
       await supabase.from("investor_leads").update({ status:"queued", contact_id:data.id }).eq("id", l.id);
       setContacts((p) => [...p, data]); n++;
@@ -243,6 +260,7 @@ export default function InvestorLeads({ userId, contacts, setContacts }) {
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, address, lender" style={{...inp, flex:"1 1 220px"}}/>
         <select value={status} onChange={(e) => setStatus(e.target.value)} style={inp}><option value="open">Open (new + queued)</option>{STATUS.map((s) => <option key={s} value={s}>{s}</option>)}<option value="all">All</option></select>
         <label style={{...btnG, display:"inline-block"}}>Import PropStream CSV<input type="file" accept=".csv,text/csv,.json,application/json" onChange={onFile} style={{display:"none"}}/></label>
+        {leads.some(contactable) && <button disabled={busy} onClick={() => toContacts(leads.filter(contactable))} style={btnG}>Add {leads.filter(contactable).length} to Contacts</button>}
         <button disabled={busy} onClick={() => toCalls(shown.filter((l) => l.status === "new" && l.phone).slice(0, 10))} style={btn}>Send top 10 to calls</button>
       </div>
       {msg && <div style={{fontFamily:F.mono, fontSize:12, color: /fail|stopped|Couldn't/.test(msg) ? C.red : C.green, marginBottom:10}}>{msg}</div>}
@@ -293,7 +311,7 @@ export default function InvestorLeads({ userId, contacts, setContacts }) {
 // ---------- Property & loans (from the PropStream detail record) ----------
 const pct = (r) => (r == null ? "" : (r * 100).toFixed(2).replace(/\.?0+$/, "") + "%");
 const usd = (n) => (n == null ? "" : "$" + Math.round(n).toLocaleString());
-function PsDetail({ ps }) {
+export function PsDetail({ ps }) {
   const d = ps.detail || {}, loans = openLoans(d), ml = d.mlsListing || {};
   const head = { fontFamily:F.mono, fontSize:10, color:C.light, marginTop:8 };
   const owners = [d.owner1FullName, d.owner2FullName].filter(Boolean).join(" & ");

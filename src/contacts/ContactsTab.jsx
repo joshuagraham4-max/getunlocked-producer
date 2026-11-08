@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "../supabase.js";
 import HowTo from "../HowTo.jsx";
 import { GUIDES } from "../howto/guides.jsx";
+import InvestorPanel, { isInvestorLead } from "./InvestorPanel.jsx";
 import { loadRadarData, peekRadarData, computeRadar, reasonFor, priorityScore, REASON_COLOR, REASON_BG } from "../radar/engine.js";
 
 const C = {
@@ -331,6 +332,7 @@ function Detail({ c, contacts, setContacts, userId, profileName, back, open, lin
         )}
       </div>
 
+      {isInvestorLead(c) && <InvestorPanel c={c} profileName={profileName}/>}
       {["past_client","lead"].includes(typeOf(c)) && <Loans contact={c} userId={userId}/>}
       <Linked contact={c} contacts={contacts} userId={userId} open={open} links={links} reloadLinks={reloadLinks} onCreate={createContact}/>
 
@@ -364,7 +366,8 @@ const CATS = [
   ["mine","My Clients", (c) => typeOf(c) === "past_client" && c.book !== "past LO"],
   ["pastlo","Past LO Fundings", (c) => typeOf(c) === "past_client" && c.book === "past LO"],
   ["agent","Agents", (c) => typeOf(c) === "agent"],
-  ["lead","Leads", (c) => typeOf(c) === "lead"],
+  ["investor","Investor Leads", (c) => isInvestorLead(c)],
+  ["lead","Leads", (c) => typeOf(c) === "lead" && !isInvestorLead(c)],
   ["referral_partner","Referral Partners", (c) => typeOf(c) === "referral_partner"],
   ["rolodex","Rolodex", (c) => typeOf(c) === "rolodex"],
   ["any","Everyone", () => true],
@@ -431,7 +434,7 @@ export default function ContactsTab({ userId, contacts, setContacts, profileName
   };
 
   const counts = useMemo(() => Object.fromEntries(CATS.map(([k, , fn]) => [k, contacts.filter(fn).length])), [contacts]);
-  const inCat = useMemo(() => contacts.filter((CATS.find((x) => x[0] === cat) || CATS[6])[2]), [contacts, cat]);
+  const inCat = useMemo(() => contacts.filter((CATS.find((x) => x[0] === cat) || CATS[CATS.length - 1])[2]), [contacts, cat]);
   const buckets = useMemo(() => { const m = {}; for (const c of inCat) for (const b of c.buckets || []) m[b] = (m[b] || 0) + 1; return Object.entries(m).sort((a, b) => b[1] - a[1]); }, [inCat]);
   const brokerages = useMemo(() => { if (cat !== "agent") return []; const m = {}; for (const c of inCat) if (c.company) m[c.company] = (m[c.company] || 0) + 1; return Object.entries(m).sort((a, b) => b[1] - a[1]).slice(0, 80); }, [inCat, cat]);
 

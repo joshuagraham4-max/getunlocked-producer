@@ -6,6 +6,7 @@ import { today, addDays, digits, fullName, fmtMo, loadRadarData, peekRadarData, 
 import { supabase } from "../supabase.js";
 import EmailDesk from "./EmailDesk.jsx";
 import QuickUpdate from "./QuickUpdate.jsx";
+import Playbook from "./Playbook.jsx";
 
 const C = { bg:"#f5f0e8", card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc", green:"#1e6e4a", amber:"#b05e0d", amberBg:"#fdf0e0", greenBg:"#e6f2ea" };
 const F = { mono:"'DM Mono',monospace", cond:"'Barlow Condensed',sans-serif", body:"'Barlow',sans-serif" };
@@ -30,26 +31,6 @@ function useWide() {
   const [w, setW] = useState(typeof window !== "undefined" ? window.innerWidth : 1200);
   useEffect(() => { const f = () => setW(window.innerWidth); window.addEventListener("resize", f); return () => window.removeEventListener("resize", f); }, []);
   return w >= 900;
-}
-
-// Investor playbook on the call card: questions, pain to fix, pushback, close.
-function Playbook({ pb }) {
-  const [open, setOpen] = useState("pains");
-  const Sec = ({ k, t, children }) => (
-    <div style={{borderTop:`1px solid ${C.rule}`}}>
-      <button onClick={() => setOpen(open === k ? null : k)} style={{all:"unset", cursor:"pointer", display:"flex", justifyContent:"space-between", width:"100%", padding:"9px 0", fontFamily:F.cond, fontWeight:800, fontSize:16, color:C.ink}}>
-        <span>{t}</span><span style={{color:C.light}}>{open === k ? "-" : "+"}</span></button>
-      {open === k && <div style={{paddingBottom:10}}>{children}</div>}
-    </div>);
-  return (
-    <div style={{background:"#fff", border:`1px solid ${C.rule}`, borderRadius:9, padding:"10px 14px", margin:"0 0 14px"}}>
-      <div style={lbl}>Playbook: {pb.label}</div>
-      <div style={{fontSize:14, color:C.ink, margin:"4px 0 8px"}}>{pb.goal}</div>
-      <Sec k="ask" t="Ask">{pb.ask.map((q) => <div key={q} style={{fontSize:14, lineHeight:1.45, padding:"3px 0"}}>{q}</div>)}</Sec>
-      <Sec k="pains" t="Pain → fix">{pb.pains.map(([p, f]) => <div key={p} style={{padding:"5px 0"}}><div style={{fontFamily:F.cond, fontWeight:700, fontSize:15, color:C.amber}}>{p}</div><div style={{fontSize:14, lineHeight:1.45}}>{f}</div></div>)}</Sec>
-      <Sec k="obj" t="Pushback">{pb.objections.map(([o, a]) => <div key={o} style={{padding:"5px 0"}}><div style={{fontFamily:F.cond, fontWeight:700, fontSize:15}}>"{o}"</div><div style={{fontSize:14, lineHeight:1.45}}>{a}</div></div>)}</Sec>
-      <Sec k="close" t="Close"><div style={{fontSize:14, lineHeight:1.45}}>{pb.close}</div></Sec>
-    </div>);
 }
 
 export default function CallsTab({ userId, contacts, setContacts, profileName, onOpen, onGoRadar }) {
