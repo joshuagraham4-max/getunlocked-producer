@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "../supabase.js";
 import { scriptsFor } from "../radar/engine.js";
 import Playbook from "../calls/Playbook.jsx";
-import { PsDetail } from "../investors/InvestorLeads.jsx";
+import { PsDetail } from "../investors/InvestorImport.jsx";
 
 const C = { card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc", green:"#1e6e4a" };
 const F = { mono:"'DM Mono',monospace", cond:"'Barlow Condensed',sans-serif", body:"'Barlow',sans-serif" };

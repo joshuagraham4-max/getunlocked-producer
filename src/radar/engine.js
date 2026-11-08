@@ -113,7 +113,26 @@ export function bdayCallable(c, t = today()) {
   if (!bdayDue(c, t) || c.outcome === "wrong number") return false;
   return !(c.last_contacted && c.last_contacted < t && daysSince(c.last_contacted) <= 6);
 }
-export const segmentOf = (c) => ((c.contact_type || "past_client") === "agent" ? "agents" : "customers");
+export const isInvestor = (c) => (c.tags || []).includes("investor lead");
+export const segmentOf = (c) => (isInvestor(c) ? "investors" : (c.contact_type || "past_client") === "agent" ? "agents" : "customers");
+
+// Investors (Calls → Investors): every callable investor lead, on top of the daily target.
+// Off the list while a future follow-up is set, or for 7 days after a touch with no follow-up. Called today stays (shows done).
+export function investorCallable(c, t = today()) {
+  if (!isInvestor(c) || c.do_not_contact || !c.phone || c.outcome === "wrong number") return false;
+  if (c.follow_up_date && c.follow_up_date > t) return false;
+  if (c.follow_up_date && c.follow_up_date <= t) return true;
+  return !c.last_contacted || c.last_contacted === t || daysSince(c.last_contacted) >= 7;
+}
+const invRank = (c) => { const n = c.contact_note || ""; return (/MLS fail/i.test(n) ? 0 : /MLS (sold|hold)/i.test(n) ? 1 : 2) * 1e9
+  + (Date.parse((n.match(/due (\d{4}-\d{2}-\d{2})/) || [])[1] || "2100-01-01") / 864e5); };
+export function investorQueue(contacts, t = today()) {
+  return contacts.filter((c) => investorCallable(c, t)).sort((a, b) => invRank(a) - invRank(b)).map((c) => {
+    const tg = c.tags || []; const n = c.contact_note || "";
+    const title = tg.includes("maturing_hard_money") ? (/MLS fail/i.test(n) ? "Hard money due · listing failed" : "Hard money due") : tg.includes("dead_money") ? "Dead money in equity" : "Investor lead";
+    return { id:c.id, group:"investors", reason:{ key:"newlead", score:1350, title, detail:(n.split("\n").slice(-1)[0] || "").split(" · ").slice(1, 4).join(" · "), also:[] } };
+  });
+}
 
 // One "why now" reason per contact: { key, title, detail, score }
 export function reasonFor(c, i, t = today()) {
@@ -160,6 +179,7 @@ export function buildQueue(contacts, radar, target = 20) {
     const ty = c.contact_type || "past_client";
     if (c.do_not_contact) continue;
     if (!["past_client","lead","agent","referral_partner"].includes(ty)) continue;
+    if (isInvestor(c)) continue;                                      // investors have their own tab (investorQueue)
     // Birthdays: always on the list, on top of the target, even if called recently or no phone.
     // Birthdays go on top of the target, but not for a bad number or someone already called this week
     // (Friday lists weekend birthdays, so without this the same person showed up Fri, Sat and Sun).

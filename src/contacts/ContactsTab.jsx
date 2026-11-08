@@ -4,6 +4,7 @@ import { supabase } from "../supabase.js";
 import HowTo from "../HowTo.jsx";
 import { GUIDES } from "../howto/guides.jsx";
 import InvestorPanel, { isInvestorLead } from "./InvestorPanel.jsx";
+import InvestorImport from "../investors/InvestorImport.jsx";
 import { loadRadarData, peekRadarData, computeRadar, reasonFor, priorityScore, REASON_COLOR, REASON_BG } from "../radar/engine.js";
 
 const C = {
@@ -537,6 +538,7 @@ export default function ContactsTab({ userId, contacts, setContacts, profileName
         <button onClick={() => setShowHelp((s) => !s)} title="How to use Contacts" style={{...ghost, padding:"8px 11px", fontWeight:700}}>?</button>
       </div>
       {showHelp && <HowTo id="contacts-help" {...GUIDES.contacts}/>}
+      {cat === "investor" && <InvestorImport userId={userId} contacts={contacts} setContacts={setContacts}/>}
 
       {showFilters && (
         <div style={{...box, padding:"12px 14px"}}>

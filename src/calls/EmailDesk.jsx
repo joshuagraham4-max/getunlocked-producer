@@ -2,7 +2,8 @@
 // Priority: agents and clients he has worked with, then his other clients, then other agents, leads, past LO fundings last.
 import { useState, useMemo, useEffect } from "react";
 import { supabase } from "../supabase.js";
-import { today, addDays, fullName, BOOKING, MY_PHONE } from "../radar/engine.js";
+import { today, addDays, fullName, BOOKING, MY_PHONE, isInvestor } from "../radar/engine.js";
+import { PLAYBOOKS, investorFollowUps } from "../radar/investorPlaybook.js";
 
 const C = { bg:"#f5f0e8", card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc", green:"#1e6e4a", amber:"#b05e0d", amberBg:"#fdf0e0", red:"#9e3020" };
 const F = { mono:"'DM Mono',monospace", cond:"'Barlow Condensed',sans-serif", body:"'Barlow',sans-serif" };
@@ -24,6 +25,7 @@ const workedWith = (c) => (c.tags || []).includes("closed deal together") || (c.
 const kind = (c) => (c.contact_type === "agent" ? "agent" : c.contact_type === "lead" ? "lead" : c.book === "past LO" ? "pastlo" : "client");
 function priority(c) {
   const k = kind(c), w = workedWith(c);
+  if (isInvestor(c) && !c.phone) return 3500;    // email-only investor leads: email is the only way in
   if ((k === "agent" || k === "client") && w) return 4000;
   if (k === "client") return 3000;
   if (k === "agent") return 2000 + (c.subtype === "active partner" ? 500 : 0);
@@ -33,6 +35,11 @@ function priority(c) {
 
 export function emailFor(c) {
   const first = c.first_name || "there"; const k = kind(c); const step = (c.email_step || 0) + 1; const w = workedWith(c);
+  if (isInvestor(c) && step === 1) {
+    const ik = Object.keys(PLAYBOOKS).find((x) => (c.tags || []).includes(x)) || "maturing_hard_money";
+    const f = investorFollowUps(c, ik, "Joshua Graham", MY_PHONE, BOOKING);
+    return { subject:f.emailSubject, body:f.emailBody };
+  }
   const yr = c.funded_date ? String(c.funded_date).slice(0, 4) : "";
   if (k === "agent") {
     if (step === 1) return { subject:"Catching up", body:`Hi ${first},

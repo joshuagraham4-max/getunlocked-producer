@@ -1,6 +1,4 @@
-// Investor Leads (bolt-on): PropStream imports + Portfolio Review funnel leads. Score, review, and send the best
-// to the call list (they become leads in Contacts with a follow-up due today, so they show up on Calls).
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../supabase.js";
 import { today } from "../radar/engine.js";
 import { ANGLES, angleFromName } from "../radar/investorPlaybook.js";
@@ -16,7 +14,6 @@ const btnG = { ...btn, background:C.green, borderColor:C.green, color:"#fff" };
 const inp = { padding:"7px 9px", borderRadius:6, border:`1px solid ${C.rule}`, background:"#fff", fontFamily:F.body, fontSize:14, color:C.ink, boxSizing:"border-box" };
 const TYPES = { maturing_hard_money:["Hard money due", C.red, C.redBg], dead_money:["Dead money", C.green, C.greenBg], portfolio_review:["Portfolio review", C.purple, C.purpleBg],
   ...Object.fromEntries(ANGLES.slice(2).map(([k, l]) => [k, [l, C.blue, "#eef3fb"]])) };
-const STATUS = ["new","queued","talked","booked","dead"];
 const ORIGIN = typeof window !== "undefined" ? window.location.origin : "";
 
 // ---------- CSV ----------
@@ -84,11 +81,12 @@ export function scoreLead(l) {
   return s + detailScore(l.ps_detail);
 }
 
-export default function InvestorLeads({ userId, contacts, setContacts }) {
+// Investor lead import, shown in Contacts → Investor Leads. PropStream CSV or detail JSON → investor_leads (full record kept)
+// → Contacts in the Investor Leads category. Skips properties listed for sale, confidential owners and DNC numbers.
+// Callable investors show up on Calls → Investors automatically.
+export default function InvestorImport({ userId, contacts, setContacts }) {
   const [leads, setLeads] = useState([]); const [msg, setMsg] = useState(""); const [busy, setBusy] = useState(false);
-  const [type, setType] = useState("all"); const [status, setStatus] = useState("open"); const [q, setQ] = useState("");
-  const [imp, setImp] = useState(null);   // { rows, headers, map, lead_type, batch }
-  const [sel, setSel] = useState(null);
+  const [imp, setImp] = useState(null);   // { rows, headers, map, lead_type, batch, json }
 
   const load = useCallback(async () => {
     const all = [];
@@ -96,14 +94,9 @@ export default function InvestorLeads({ userId, contacts, setContacts }) {
       const { data } = await supabase.from("investor_leads").select("*").order("score", { ascending:false }).range(from, from + 999);
       all.push(...(data || [])); if (!data || data.length < 1000) break;
     }
-    setLeads(all);
+    setLeads(all); return all;
   }, []);
   useEffect(() => { if (userId) load(); }, [userId, load]);
-
-  const shown = useMemo(() => leads.filter((l) => (type === "all" || l.lead_type === type)
-    && (status === "all" || (status === "open" ? ["new","queued"].includes(l.status) : l.status === status))
-    && (!q || [l.first_name, l.last_name, l.company, l.property_address, l.property_city, l.lender, l.phone].join(" ").toLowerCase().includes(q.toLowerCase()))), [leads, type, status, q]);
-  const counts = useMemo(() => Object.fromEntries(Object.keys(TYPES).map((k) => [k, leads.filter((l) => l.lead_type === k && ["new","queued"].includes(l.status)).length])), [leads]);
 
   // ---------- import ----------
   const onFile = async (e) => {
@@ -150,8 +143,9 @@ export default function InvestorLeads({ userId, contacts, setContacts }) {
       const { error } = await supabase.from("investor_leads").update(patch).eq("id", id);
       if (error) { setBusy(false); return setMsg("Import stopped: " + error.message); }
     }
-    setBusy(false); setImp(null); load();
-    setMsg(`Loan and owner details added to ${updates.length} leads you had.${out.length ? ` Added ${out.length} new leads.` : ""}`);
+    setImp(null); const fresh = await load();
+    const n = await toContacts(fresh.filter(contactable));
+    setMsg(`Loan and owner details added to ${updates.length} leads you had.${out.length ? ` ${out.length} new.` : ""} ${n} added to Contacts → Investor Leads.`);
   };
 
   const runImport = async () => {
@@ -173,6 +167,7 @@ export default function InvestorLeads({ userId, contacts, setContacts }) {
         lender:g("lender") || null, loan_amount:money(g("loan_amount")), recording_date:dateOf(g("recording_date")),
       };
       if (!l.first_name && !l.last_name && !l.company && !l.property_address) continue;
+      if (/confidential/i.test(`${l.last_name || ""} ${l.company || ""}`)) continue;   // protected owner records stay out
       const dueGiven = dateOf(g("est_maturity"));
       if (dueGiven) l.est_maturity = dueGiven;
       else if (l.recording_date && imp.lead_type === "maturing_hard_money") { const d = new Date(l.recording_date); d.setMonth(d.getMonth() + 12); l.est_maturity = d.toISOString().slice(0, 10); }
@@ -195,8 +190,9 @@ export default function InvestorLeads({ userId, contacts, setContacts }) {
       if (error) { setBusy(false); return setMsg("Import stopped: " + error.message); }
     }
     for (const [id, patch] of updates) await supabase.from("investor_leads").update(patch).eq("id", id);
-    setBusy(false); setImp(null); load();
-    setMsg(`Imported ${out.length} leads.${updates.length ? ` Updated ${updates.length} you already had.` : ""}${dup ? ` Skipped ${dup} duplicates.` : ""}${known ? ` ${known} are already in your Contacts.` : ""}`);
+    setImp(null); const fresh = await load();
+    const nc = await toContacts(fresh.filter(contactable));
+    setMsg(`Imported ${out.length} leads, ${nc} added to Contacts → Investor Leads.${updates.length ? ` Updated ${updates.length} you already had.` : ""}${dup ? ` Skipped ${dup} duplicates.` : ""}${known ? ` ${known} are already in your Contacts.` : ""}`);
   };
 
   // ---------- add to Contacts (own category "Investor leads"; no forced follow-up, so they don't jump onto Calls) ----------
@@ -214,57 +210,28 @@ export default function InvestorLeads({ userId, contacts, setContacts }) {
       contact_note:note, tags:["investor lead", l.lead_type], source_category:"investor leads", source_file:l.import_batch || l.source, external_id:"inv-" + l.id, do_not_contact:false };
   };
   const toContacts = async (list) => {
-    setBusy(true); let n = 0;
+    setBusy(true); let n = 0;   // returns how many were added
     for (const l of list) {
       const { data, error } = await supabase.from("contacts").insert(contactRow(l, null)).select().single();
       if (error) { setMsg("Couldn't add " + (l.first_name || l.company) + ": " + error.message); continue; }
       await supabase.from("investor_leads").update({ contact_id:data.id }).eq("id", l.id);
       setContacts((p) => [...p, data]); n++;
     }
-    setBusy(false); load(); setMsg(`${n} added to Contacts → Investor Leads. Scripts, email and loan details are on each contact.`);
+    setBusy(false); return n;
   };
 
-  // ---------- send to call list ----------
-  const toCalls = async (list) => {
-    setBusy(true); let n = 0;
-    for (const l of list) {
-      if (l.contact_id) { await supabase.from("contacts").update({ follow_up_date:today() }).eq("id", l.contact_id); await supabase.from("investor_leads").update({ status:"queued" }).eq("id", l.id); n++; continue; }
-      const { data, error } = await supabase.from("contacts").insert(contactRow(l, today())).select().single();
-      if (error) { setMsg("Couldn't add " + (l.first_name || l.company) + ": " + error.message); continue; }
-      await supabase.from("investor_leads").update({ status:"queued", contact_id:data.id }).eq("id", l.id);
-      setContacts((p) => [...p, data]); n++;
-    }
-    setBusy(false); load(); setMsg(`${n} sent to today's call list. They're on the Customers list on Calls, ranked as new leads.`);
-  };
-  const setStat = async (l, s) => { await supabase.from("investor_leads").update({ status:s }).eq("id", l.id); load(); };
-
-  const wide = typeof window !== "undefined" && window.innerWidth >= 900;
+  const waiting = leads.filter(contactable);
   return (
-    <div>
+    <div style={{marginBottom:14}}>
       <HowTo id="pull-leads" {...GUIDES.pullLeads} defaultOpen={false}/>
       <HowTo id="lead-score" {...GUIDES.leadScore} defaultOpen={false}/>
-      <div style={{display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(170px,1fr))", gap:12, marginBottom:14}}>
-        {Object.entries(TYPES).filter(([k]) => k in counts && (counts[k] > 0 || ["maturing_hard_money","dead_money"].includes(k))).map(([k, [l, c, bg]]) => (
-          <div key={k} onClick={() => setType(type === k ? "all" : k)} style={{...card, padding:"12px 16px", cursor:"pointer", borderColor: type === k ? c : C.rule, background: type === k ? bg : C.card}}>
-            <div style={{fontFamily:F.cond, fontWeight:800, fontSize:30, color:c, lineHeight:1}}>{counts[k] || 0}</div>
-            <div style={{fontFamily:F.mono, fontSize:11, color:C.mid, marginTop:4}}>{l.toUpperCase()} · OPEN</div>
-          </div>))}
-        <div style={{...card, padding:"12px 16px"}}>
-          <div style={{fontFamily:F.mono, fontSize:10, color:C.light}}>PORTFOLIO REVIEW FUNNEL</div>
-          <div style={{fontSize:13, wordBreak:"break-all", margin:"4px 0 6px"}}>{ORIGIN}/review</div>
-          <button onClick={() => navigator.clipboard?.writeText(`${ORIGIN}/review`)} style={{...btn, padding:"3px 10px", fontSize:12}}>Copy link</button>
-        </div>
-      </div>
-
-      <div style={{display:"flex", gap:8, flexWrap:"wrap", alignItems:"center", marginBottom:12}}>
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, address, lender" style={{...inp, flex:"1 1 220px"}}/>
-        <select value={status} onChange={(e) => setStatus(e.target.value)} style={inp}><option value="open">Open (new + queued)</option>{STATUS.map((s) => <option key={s} value={s}>{s}</option>)}<option value="all">All</option></select>
-        <label style={{...btnG, display:"inline-block"}}>Import PropStream CSV<input type="file" accept=".csv,text/csv,.json,application/json" onChange={onFile} style={{display:"none"}}/></label>
-        {leads.some(contactable) && <button disabled={busy} onClick={() => toContacts(leads.filter(contactable))} style={btnG}>Add {leads.filter(contactable).length} to Contacts</button>}
-        <button disabled={busy} onClick={() => toCalls(shown.filter((l) => l.status === "new" && l.phone).slice(0, 10))} style={btn}>Send top 10 to calls</button>
+      <div style={{display:"flex", gap:8, flexWrap:"wrap", alignItems:"center", marginBottom:8}}>
+        <label style={{...btnG, display:"inline-block"}}>Import PropStream file<input type="file" accept=".csv,text/csv,.json,application/json" onChange={onFile} style={{display:"none"}}/></label>
+        {waiting.length > 0 && <button disabled={busy} onClick={async () => { const n = await toContacts(waiting); load(); setMsg(`${n} added to Contacts → Investor Leads.`); }} style={btn}>Add {waiting.length} waiting to Contacts</button>}
+        <span style={{fontFamily:F.mono, fontSize:11, color:C.mid}}>Portfolio Review link: {ORIGIN}/review</span>
+        <button onClick={() => navigator.clipboard?.writeText(`${ORIGIN}/review`)} style={{...btn, padding:"3px 10px", fontSize:12}}>Copy</button>
       </div>
       {msg && <div style={{fontFamily:F.mono, fontSize:12, color: /fail|stopped|Couldn't/.test(msg) ? C.red : C.green, marginBottom:10}}>{msg}</div>}
-
       {imp && (
         <div style={{...card, padding:"14px 16px", marginBottom:14}}>
           <div style={{fontFamily:F.cond, fontWeight:800, fontSize:18}}>Import {imp.rows.length} {imp.json ? "PropStream detail records" : "rows"}</div>
@@ -279,31 +246,6 @@ export default function InvestorLeads({ userId, contacts, setContacts }) {
         </div>
       )}
 
-      <div style={{...card, overflow:"hidden"}}>
-        {shown.slice(0, 200).map((l) => { const t = TYPES[l.lead_type] || TYPES.dead_money; const eq = l.est_equity ?? (l.est_value != null && l.loan_balance != null ? l.est_value - l.loan_balance : null); return (
-          <div key={l.id}>
-            <div onClick={() => setSel(sel === l.id ? null : l.id)} style={{display:"grid", gridTemplateColumns: wide ? "52px 1.4fr 1.6fr 1fr 130px" : "44px 1fr auto", gap:10, alignItems:"center", padding:"10px 16px", borderTop:"1px solid #ece5d9", cursor:"pointer"}}>
-              <div style={{fontFamily:F.cond, fontWeight:800, fontSize:20, color:t[1]}}>{l.score}</div>
-              <div><div style={{fontFamily:F.cond, fontWeight:700, fontSize:16}}>{[l.first_name, l.last_name].filter(Boolean).join(" ") || l.company || "(no name)"}</div>
-                <div style={{fontFamily:F.mono, fontSize:10, color:C.light}}><span style={{background:t[2], color:t[1], padding:"1px 6px", borderRadius:9, marginRight:6}}>{t[0].toUpperCase()}</span>{l.status.toUpperCase()}</div></div>
-              {wide && <div style={{fontSize:13}}>{l.property_address ? `${l.property_address}, ${l.property_city || ""} ${l.property_state || ""}` : (l.answers?.working_on || "")}<div style={{fontSize:12, color:C.mid}}>{[l.lender && `lender ${l.lender}`, l.est_maturity && `due ~${l.est_maturity.slice(0, 7)}`, eq != null && `equity ${k$(eq)}`, l.properties_owned && `${l.properties_owned} props`, l.answers?.equity && `equity ${l.answers.equity}`].filter(Boolean).join(" · ")}</div></div>}
-              {wide && <div style={{fontSize:13}}>{l.phone || <span style={{color:C.red, fontFamily:F.mono, fontSize:11}}>no phone</span>}</div>}
-              <div onClick={(e) => e.stopPropagation()}>{l.status === "new" ? <button disabled={busy || !l.phone} onClick={() => toCalls([l])} style={{...btnG, padding:"5px 10px", fontSize:13, opacity:l.phone ? 1 : 0.4}}>To calls</button>
-                : <select value={l.status} onChange={(e) => setStat(l, e.target.value)} style={{...inp, padding:"4px"}}>{STATUS.map((s) => <option key={s}>{s}</option>)}</select>}</div>
-            </div>
-            {sel === l.id && <div style={{padding:"4px 16px 14px 78px", fontSize:13, color:C.mid, lineHeight:1.6}}>
-              {l.company && <div>Owner: {l.company}</div>}
-              {l.mailing_address && <div>Mailing: {l.mailing_address}, {l.mailing_city} {l.mailing_state} {l.mailing_zip}</div>}
-              {l.est_value != null && <div>Value {k$(l.est_value)} · balance {k$(l.loan_balance)} · equity {k$(eq)}</div>}
-              {l.ps_detail ? <PsDetail ps={l.ps_detail}/> : l.loan_amount != null && <div>Loan {k$(l.loan_amount)} recorded {l.recording_date}</div>}
-              {l.answers && <div>Answers: {Object.entries(l.answers).filter(([, v]) => v !== null && v !== "").map(([k, v]) => `${k.replace("_", " ")}: ${v}`).join(" · ")}</div>}
-              {l.scenario && <div>Scenario: "{l.scenario}"</div>}
-              <div>{l.email} {l.phone_2 && `· alt ${l.phone_2}`} · source {l.source}</div>
-            </div>}
-          </div>); })}
-        {shown.length === 0 && <div style={{padding:18, fontFamily:F.mono, fontSize:12, color:C.light}}>No investor leads yet. Import a PropStream export (skip-traced), or share the Portfolio Review link.</div>}
-        {shown.length > 200 && <div style={{padding:12, fontFamily:F.mono, fontSize:11, color:C.light}}>Showing the top 200 of {shown.length} by score.</div>}
-      </div>
     </div>
   );
 }

@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import HowTo from "../HowTo.jsx";
 import { GUIDES } from "../howto/guides.jsx";
-import { today, addDays, digits, fullName, fmtMo, loadRadarData, peekRadarData, wrongNumberEmail, computeRadar, buildQueue, bdayCallable, reasonFor, scriptsFor, logOutcome, undoOutcome, canUndo, segmentOf, REASON_COLOR, REASON_BG } from "../radar/engine.js";
+import { today, addDays, digits, fullName, fmtMo, loadRadarData, peekRadarData, wrongNumberEmail, computeRadar, buildQueue, investorQueue, isInvestor, bdayCallable, reasonFor, scriptsFor, logOutcome, undoOutcome, canUndo, segmentOf, REASON_COLOR, REASON_BG } from "../radar/engine.js";
 import { supabase } from "../supabase.js";
 import EmailDesk from "./EmailDesk.jsx";
 import QuickUpdate from "./QuickUpdate.jsx";
@@ -75,25 +75,27 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
   }, [radar, target, qKey, nonce]);
   const skipped = useMemo(() => { try { return JSON.parse(localStorage.getItem(skipKey) || "[]"); } catch { return []; } }, [skipKey, nonce]);
 
-  const all = queue;
+  // Investors are live (not cached): new imports and follow-ups show up right away.
+  const invQ = useMemo(() => investorQueue(contacts), [contacts]);
+  const all = useMemo(() => queue ? [...queue.filter((x) => !isInvestor(byId[x.id])), ...invQ] : null, [queue, invQ, byId]);
   const segQ = useMemo(() => all ? all.filter((x) => x.group === seg) : null, [all, seg]);
   const isDone = useCallback((id) => byId[id]?.last_contacted === today() || skipped.includes(id), [byId, skipped]);
   const segDone = (g) => all ? all.filter((x) => x.group === g && byId[x.id]?.last_contacted === today()).length : 0;
   const segN = (g) => all ? all.filter((x) => x.group === g).length : 0;
-  const made = queue ? queue.filter((x) => byId[x.id]?.last_contacted === today()).length : 0;
-  const talked = queue ? queue.filter((x) => byId[x.id]?.last_contacted === today() && byId[x.id]?.outcome === "talked").length : 0;
-  const booked = queue ? queue.filter((x) => byId[x.id]?.last_contacted === today() && byId[x.id]?.outcome === "booked").length : 0;
+  const made = all ? all.filter((x) => byId[x.id]?.last_contacted === today()).length : 0;
+  const talked = all ? all.filter((x) => byId[x.id]?.last_contacted === today() && byId[x.id]?.outcome === "talked").length : 0;
+  const booked = all ? all.filter((x) => byId[x.id]?.last_contacted === today() && byId[x.id]?.outcome === "booked").length : 0;
 
   useEffect(() => { if (segQ && selId !== pinned && (!selId || !segQ.find((x) => x.id === selId))) { const n = segQ.find((x) => !isDone(x.id)); setSelId(n ? n.id : segQ[0]?.id || null); } }, [segQ, selId, isDone, pinned]);
   const sel = selId ? byId[selId] : null;
-  const item = queue?.find((x) => x.id === selId);
+  const item = all?.find((x) => x.id === selId);
   const info = sel ? radar?.info[sel.id] : null;
   const reason = sel ? (reasonFor(sel, info) || item?.reason) : null;
   const scripts = sel ? scriptsFor(sel, info, item?.reason || reason, profileName || "Joshua Graham") : null;
   useEffect(() => { setSay(scripts?.say || ""); setNote(""); setFu(""); setFollow(null); }, [selId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const openPerson = (id) => {
-    const inQ = queue?.find((x) => x.id === id);
+    const inQ = all?.find((x) => x.id === id);
     if (inQ && inQ.group !== seg) setSeg(inQ.group);
     if (!inQ && seg === "emails") setSeg("customers");
     setPinned(inQ ? null : id); setSelId(id); setFind("");
@@ -150,9 +152,9 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
         </div>
         {(() => { const b = callBlock(); return <div style={{marginTop:8, fontFamily:F.mono, fontSize:11, padding:"5px 8px", borderRadius:6, background: b.live ? C.green : C.bg, color: b.live ? "#fff" : C.mid}}>{b.text}</div>; })()}
         <div style={{display:"flex", justifyContent:"space-between", margin:"10px 0 6px", fontFamily:F.mono, fontSize:11, color:C.ink}}>
-          <span>{made} of {queue.length} calls made</span><span>{talked} talked · {booked} booked</span>
+          <span>{made} of {all.length} calls made</span><span>{talked} talked · {booked} booked</span>
         </div>
-        <div style={{height:8, borderRadius:4, background:C.rule, overflow:"hidden"}}><div style={{height:"100%", width:`${queue.length ? (made / queue.length) * 100 : 0}%`, background:C.green}}/></div>
+        <div style={{height:8, borderRadius:4, background:C.rule, overflow:"hidden"}}><div style={{height:"100%", width:`${all.length ? (made / all.length) * 100 : 0}%`, background:C.green}}/></div>
         <div style={{display:"flex", gap:8, alignItems:"center", marginTop:12}}>
           <span style={{fontFamily:F.mono, fontSize:11, color:C.mid}}>Daily target</span>
           <select value={target} onChange={(e) => changeTarget(Number(e.target.value))} style={{...inp, padding:"4px 6px"}}>{TARGETS.map((t) => <option key={t} value={t}>{t}</option>)}</select>
@@ -300,11 +302,11 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
           </div></>}
       </div>
       <div style={{display:"flex", gap:8, marginBottom:14, flexWrap:"wrap"}}>
-        {[["customers",`Customers ${segDone("customers")}/${segN("customers")}`],["agents",`Agents ${segDone("agents")}/${segN("agents")}`],["emails","Emails"]].map(([k, l]) => (
+        {[["customers",`Customers ${segDone("customers")}/${segN("customers")}`],["agents",`Agents ${segDone("agents")}/${segN("agents")}`],["investors",`Investors ${segDone("investors")}/${segN("investors")}`],["emails","Emails"]].map(([k, l]) => (
           <button key={k} onClick={() => { setSeg(k); setSelId(null); }} style={{...(seg === k ? btnG : btn), padding:"9px 18px", fontSize:15}}>{l}</button>
         ))}
       </div>
-      {seg === "emails" ? <EmailDesk userId={userId} contacts={contacts} setContacts={setContacts} callIds={(queue || []).map((x) => x.id)} wide={wide}/> : (
+      {seg === "emails" ? <EmailDesk userId={userId} contacts={contacts} setContacts={setContacts} callIds={(all || []).map((x) => x.id)} wide={wide}/> : (
       <div style={{display:"grid", gridTemplateColumns: wide ? "400px 1fr" : "1fr", gap:18}}>
         {wide ? <>{List}{Focus}</> : <>{Focus}{List}</>}
       </div>)}

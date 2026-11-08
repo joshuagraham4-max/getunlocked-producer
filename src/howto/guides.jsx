@@ -30,8 +30,9 @@ export const GUIDES = {
         <><b>Searches are already saved.</b> In PropStream, click <b>All Searches</b> (orange folder, top bar) and pick one. Each is named <b>Angle - County</b> for Sarasota and Manatee, rentals only, with weekly email alerts.</>,
         <><b>The angles:</b> Hard money due · Dead money · Pre-foreclosure · Stuck flipper · Failed listing · Cash buyer · ARM · Tired landlord · Out of state.</>,
         <><b>Work them in this order:</b> small, high-pain lists first (Pre-foreclosure, Stuck flipper, Failed listing), then Cash buyer and ARM. Tired landlord and Out of state are big, so sort by equity first.</>,
-        <><b>Into GUP:</b> select the properties, Save them to a list with the same name as the search, skip trace the list, export the CSV, then Import it here. The file name sets the angle, so each call card opens with the right playbook.</>,
-        <><b>To call them:</b> click <b>Send top 10 to calls</b>. They land on Calls under Customers with the script, voicemail and email ready.</>,
+        <><b>Before saving anything:</b> check the MLS status. Only save properties that are not listed, pending or under contract (failed listings are the best). Saved properties use up your PropStream allowance.</>,
+        <><b>Into GUP:</b> Save them to a list with the same name as the search, skip trace the list, export the CSV, then click <b>Import PropStream file</b> here. The file name sets the angle, so each lead gets the right playbook.</>,
+        <><b>What happens:</b> each lead lands in Contacts → Investor Leads. Ones with a phone show up on <b>Calls → Investors</b>; email-only ones go to <b>Calls → Emails</b>. Listed-for-sale properties, confidential owners and DNC numbers are skipped.</>,
         <>PropStream allows one login at a time. Close it on your phone before Claude works in it.</>,
   ] },
   leadScore: { title: "What the score means", steps: [
