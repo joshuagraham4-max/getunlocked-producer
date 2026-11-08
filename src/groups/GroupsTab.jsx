@@ -21,9 +21,10 @@ const CALC = `${ORIGIN}/rental-calculator`;
 // Tools and links. Add new tools here as they go live.
 const TOOLS = [
   { name:"Rental Property Calculator", url:CALC, note:"Cash flow and whether the rent qualifies the loan. Saves the lead to Contacts." },
+  { name:"Equity Unlock Estimator", url:`${ORIGIN}/equity-unlock`, note:"Homeowners: equity after selling, debt payoff, and down payment toward the next home (BBYS-01). Saves the lead to Contacts." },
   { name:"Book a call with Joshua", url:BOOKING, note:"Google booking page." },
 ];
-const COMING = ["Equity Unlock Estimator", "Income Qualifier", "DPA estimator", "Medical Pro Buying-Power Check"];
+const COMING = ["Income Qualifier", "DPA estimator", "Medical Pro Buying-Power Check"];
 const IMAGES = [ { name:"Plum suit", src:"/groups/JG-SaveDeals-plum.png" }, { name:"Plaid suit", src:"/groups/JG-SaveDeals-plaid.png" } ];
 import { SIGN_BLOCK } from "./askClaude.js";
 const fill = (t) => t.replaceAll("{CALC}", CALC).replaceAll("{BOOK}", BOOKING).replaceAll("{SIGN}", SIGN_BLOCK);

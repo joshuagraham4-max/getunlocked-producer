@@ -10,6 +10,7 @@ export default defineConfig({
         'rental-calculator': resolve(__dirname, 'rental-calculator.html'),
         'smart-money': resolve(__dirname, 'smart-money.html'),
         review: resolve(__dirname, 'review.html'),
+        'equity-unlock': resolve(__dirname, 'equity-unlock.html'),
       },
     },
   },
