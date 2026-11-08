@@ -8,6 +8,7 @@ import EmailDesk from "./EmailDesk.jsx";
 import QuickUpdate from "./QuickUpdate.jsx";
 import Playbook from "./Playbook.jsx";
 import { personFirst, sunbizUrl, isEntity } from "../radar/investorPlaybook.js";
+import { LeadStory, useLead } from "../contacts/InvestorPanel.jsx";
 
 const C = { bg:"#f5f0e8", card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc", green:"#1e6e4a", amber:"#b05e0d", amberBg:"#fdf0e0", greenBg:"#e6f2ea" };
 const F = { mono:"'DM Mono',monospace", cond:"'Barlow Condensed',sans-serif", body:"'Barlow',sans-serif" };
@@ -89,6 +90,7 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
 
   useEffect(() => { if (segQ && selId !== pinned && (!selId || !segQ.find((x) => x.id === selId))) { const n = segQ.find((x) => !isDone(x.id)); setSelId(n ? n.id : segQ[0]?.id || null); } }, [segQ, selId, isDone, pinned]);
   const sel = selId ? byId[selId] : null;
+  const invLead = useLead(sel && isInvestor(sel) ? sel.id : null);
   const item = all?.find((x) => x.id === selId);
   const info = sel ? radar?.info[sel.id] : null;
   const reason = sel ? (reasonFor(sel, info) || item?.reason) : null;
@@ -243,6 +245,7 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
           {!personFirst(sel) && <span style={{fontFamily:F.mono, fontSize:11, color:C.amber}}>No owner name yet: add it in Open full contact</span>}
         </div>
       )}
+      {isInvestor(sel) && <LeadStory c={sel} lead={invLead} contacts={contacts} onOpen={onOpen}/>}
       {scripts?.playbook && <Playbook pb={scripts.playbook}/>}
       {sel.last_contacted === today() && !follow && (
         <div style={{display:"flex", gap:8, alignItems:"center", marginBottom:10, padding:"9px 12px", borderRadius:8, background:"#fff", border:`1px solid ${C.rule}`}}>

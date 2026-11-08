@@ -333,7 +333,7 @@ function Detail({ c, contacts, setContacts, userId, profileName, back, open, lin
         )}
       </div>
 
-      {isInvestorLead(c) && <InvestorPanel c={c} profileName={profileName}/>}
+      {isInvestorLead(c) && <InvestorPanel c={c} profileName={profileName} contacts={contacts} onOpen={open}/>}
       {isListingAgent(c) && <ListingAgentPanel c={c} contacts={contacts} links={links}/>}
       {["past_client","lead"].includes(typeOf(c)) && <Loans contact={c} userId={userId}/>}
       <Linked contact={c} contacts={contacts} userId={userId} open={open} links={links} reloadLinks={reloadLinks} onCreate={createContact}/>

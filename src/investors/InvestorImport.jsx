@@ -3,7 +3,7 @@ import { supabase } from "../supabase.js";
 import { today } from "../radar/engine.js";
 import { ANGLES, angleFromName } from "../radar/investorPlaybook.js";
 import HowTo from "../HowTo.jsx";
-import { leadFieldsFromDetail, detailScore, openLoans, isArm } from "./psDetail.js";
+import { leadFieldsFromDetail, detailScore, openLoans, isArm, isSaleListed, listingOf } from "./psDetail.js";
 import { GUIDES } from "../howto/guides.jsx";
 
 const C = { bg:"#f5f0e8", card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc", green:"#1e6e4a", greenBg:"#e8f4ee", amber:"#b05e0d", amberBg:"#fdf0e0", red:"#9e3020", redBg:"#fbeae7", purple:"#5b3fa6", purpleBg:"#eeebf8", blue:"#1d4f91" };
@@ -197,8 +197,8 @@ export default function InvestorImport({ userId, contacts, setContacts, onLinksC
   };
 
   // ---------- add to Contacts (own category "Investor leads"; no forced follow-up, so they don't jump onto Calls) ----------
-  const SELLING = /^(ACTIVE|PENDING|ACTIVE UNDER CONTRACT|UNDER CONTRACT|CONTINGENT)$/i;
-  const contactable = (l) => !l.contact_id && l.status !== "dead" && !SELLING.test(l.ps_detail?.detail?.mlsListingStatus || "");
+  // Skip only properties listed FOR SALE (active/pending/under contract). Units listed for rent = owner is holding: keep.
+  const contactable = (l) => !l.contact_id && l.status !== "dead" && !isSaleListed(l.ps_detail?.detail);
   const contactRow = (l, followUp) => {
     const t = TYPES[l.lead_type]?.[0] || "Investor";
     const note = [`${today()}: Investor lead · ${t}`, l.property_address && `${l.property_address}, ${l.property_city || ""} ${l.property_state || ""}`,
@@ -224,7 +224,7 @@ export default function InvestorImport({ userId, contacts, setContacts, onLinksC
   // ---------- listing agents on failed listings → their own Agent contacts, linked to the investor contact ----------
   const [agentLinked, setAgentLinked] = useState(null);   // Set of investor contact ids that already have a linked listing agent
   const loadAgentLinks = useCallback(async () => {
-    const { data } = await supabase.from("contact_links").select("linked_id").eq("relation", "listing agent");
+    const { data } = await supabase.from("contact_links").select("linked_id").in("relation", ["listing agent", "leasing agent"]);
     setAgentLinked(new Set((data || []).map((x) => x.linked_id)));
   }, []);
   useEffect(() => { if (userId) loadAgentLinks(); }, [userId, loadAgentLinks]);
@@ -237,22 +237,23 @@ export default function InvestorImport({ userId, contacts, setContacts, onLinksC
     setBusy(true); let made = 0, linked = 0; const known = [...contacts];
     for (const l of list) {
       const a = agentOf(l); if (!a) continue;
+      const leasing = !!listingOf(l.ps_detail?.detail)?.rental; const role = leasing ? "leasing agent" : "listing agent";
       const addr = [l.property_address, l.property_city].filter(Boolean).join(", ");
       const owner = l.company || [l.first_name, l.last_name].filter(Boolean).join(" ");
-      const line = `${today()}: Listing agent · ${addr} (listing ${/^FAIL$/i.test(l.ps_detail.detail.mlsListingStatus) ? "failed" : String(l.ps_detail.detail.mlsListingStatus).toLowerCase()}) · owner ${owner}`;
+      const line = `${today()}: ${leasing ? "LEASING agent (unit for rent)" : "Listing agent"} · ${addr} (listing ${/^FAIL$/i.test(l.ps_detail.detail.mlsListingStatus) ? "failed" : String(l.ps_detail.detail.mlsListingStatus).toLowerCase()}) · owner ${owner}`;
       let agent = known.find((c) => (a.email && [c.email, c.email_2].includes(a.email)) || (a.phone && [c.phone, c.phone_2].some((p) => digits(p) === digits(a.phone))));
       if (agent) {
-        const { data } = await supabase.from("contacts").update({ tags:[...new Set([...(agent.tags || []), "listing agent"])], contact_note:[agent.contact_note, line].filter(Boolean).join("\n") }).eq("id", agent.id).select().single();
+        const { data } = await supabase.from("contacts").update({ tags:[...new Set([...(agent.tags || []), role])], contact_note:[agent.contact_note, line].filter(Boolean).join("\n") }).eq("id", agent.id).select().single();
         if (data) { agent = data; setContacts((p) => p.map((x) => (x.id === data.id ? data : x))); }
       } else {
         const parts = a.name.split(/\s+/); const cap = (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
         const { data, error } = await supabase.from("contacts").insert({ user_id:userId, first_name:cap(parts[0]), last_name:parts.slice(1).map(cap).join(" ") || null, email:a.email, phone:a.phone,
-          company:a.office, contact_type:"agent", subtype:"listing agent", agent_role:"seller", tags:["listing agent"], contact_note:line, source_category:"investor leads",
+          company:a.office, contact_type:"agent", subtype:role, agent_role: leasing ? null : "seller", tags:[role], contact_note:line, source_category:"investor leads",
           source_file:"PropStream listing agent", external_id:"lagent-" + (a.email || digits(a.phone) || a.name.toLowerCase().replace(/\W+/g, "-")), do_not_contact:false }).select().single();
         if (error) { setMsg("Couldn't add agent " + a.name + ": " + error.message); continue; }
         agent = data; known.push(data); setContacts((p) => [...p, data]); made++;
       }
-      const { error } = await supabase.from("contact_links").insert({ user_id:userId, contact_id:agent.id, linked_id:l.contact_id, relation:"listing agent" });
+      const { error } = await supabase.from("contact_links").insert({ user_id:userId, contact_id:agent.id, linked_id:l.contact_id, relation:role });
       if (!error || /duplicate/i.test(error.message)) linked++;
     }
     setBusy(false); loadAgentLinks(); onLinksChanged?.(); return { made, linked };
