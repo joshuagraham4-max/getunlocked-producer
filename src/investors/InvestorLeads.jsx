@@ -5,6 +5,7 @@ import { supabase } from "../supabase.js";
 import { today } from "../radar/engine.js";
 import { ANGLES, angleFromName } from "../radar/investorPlaybook.js";
 import HowTo from "../HowTo.jsx";
+import { leadFieldsFromDetail, detailScore, openLoans, isArm } from "./psDetail.js";
 import { GUIDES } from "../howto/guides.jsx";
 
 const C = { bg:"#f5f0e8", card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc", green:"#1e6e4a", greenBg:"#e8f4ee", amber:"#b05e0d", amberBg:"#fdf0e0", red:"#9e3020", redBg:"#fbeae7", purple:"#5b3fa6", purpleBg:"#eeebf8", blue:"#1d4f91" };
@@ -70,7 +71,8 @@ export function scoreLead(l) {
   if (l.lead_type === "maturing_hard_money" && l.lender && /bank|credit union|mortgage|home loans|federal|wells|chase|rocket|freedom|pennymac|lakeview/i.test(l.lender) && !isHardMoneyLender(l.lender)) s -= 25;
   if (l.lead_type === "maturing_hard_money") {
     s += 50;
-    const due = l.est_maturity_given ? -monthsSince(l.est_maturity) : null;   // months until the real due date
+    const given = l.est_maturity_given ?? !!(l.ps_detail && l.est_maturity);   // PropStream detail due dates are real
+    const due = given ? -monthsSince(l.est_maturity) : null;   // months until the real due date
     if (due != null) s += due <= 0 ? 45 : due <= 6 ? 40 : due <= 12 ? 25 : due <= 36 ? 5 : -60;   // 3+ years out = already in long-term financing
     else { const m = monthsSince(l.recording_date); if (m != null) s += m >= 9 && m <= 15 ? 40 : m > 15 ? 30 : m >= 6 ? 15 : 0; }
   }
@@ -79,7 +81,7 @@ export function scoreLead(l) {
   if (l.properties_owned) s += l.properties_owned >= 10 ? 20 : l.properties_owned >= 5 ? 15 : l.properties_owned >= 2 ? 10 : 0;
   if (l.company && /llc|inc|trust|holdings|properties|investments/i.test(l.company)) s += 5;
   if (l.phone) s += 10; else s -= 20;
-  return s;
+  return s + detailScore(l.ps_detail);
 }
 
 export default function InvestorLeads({ userId, contacts, setContacts }) {
@@ -106,13 +108,53 @@ export default function InvestorLeads({ userId, contacts, setContacts }) {
   // ---------- import ----------
   const onFile = async (e) => {
     const file = e.target.files?.[0]; e.target.value = ""; if (!file) return;
-    const rows = parseCSV(await file.text()); if (rows.length < 2) return setMsg("That file has no rows.");
+    const text = await file.text();
+    if (/\.json$/i.test(file.name) || text.trim().startsWith("{")) {
+      let j; try { j = JSON.parse(text); } catch { return setMsg("That JSON file couldn't be read."); }
+      if (j.format !== "propstream-detail-v1" || !Array.isArray(j.leads)) return setMsg("That isn't a PropStream detail file.");
+      return setImp({ json:true, rows:j.leads.map((r) => ({ ...r, pulled:j.pulled })), headers:[], map:{}, lead_type: angleFromName(file.name), batch:`${file.name} · ${today()}` });
+    }
+    const rows = parseCSV(text); if (rows.length < 2) return setMsg("That file has no rows.");
     const headers = rows[0].map(norm);
     const map = {};
     for (const [field, names] of Object.entries(MAP)) { const i = headers.findIndex((h) => names.includes(h)); if (i >= 0) map[field] = i; }
     setImp({ rows:rows.slice(1), headers:rows[0], map, lead_type: angleFromName(file.name), batch:`${file.name} · ${today()}` });
   };
+  // Full PropStream detail: update the leads already here (matched by PropStream id or address), add the rest.
+  const runDetailImport = async () => {
+    setBusy(true); setMsg("");
+    const byId = new Map(leads.filter((l) => l.ps_property_id).map((l) => [String(l.ps_property_id), l]));
+    const byAddr = new Map(leads.filter((l) => l.property_address).map((l) => [norm(l.property_address) + "|" + String(l.property_zip || "").slice(0, 5), l]));
+    const out = [], updates = [];
+    for (const rec of imp.rows) {
+      const f = leadFieldsFromDetail(rec);
+      const old = byId.get(String(f.ps_property_id)) || byAddr.get(norm(f.property_address) + "|" + String(f.property_zip || "").slice(0, 5));
+      if (old) {
+        // Detail wins for property, loan and mailing data. Keep names, phones and emails already on the lead; fill them only if blank.
+        const patch = { ...f };
+        for (const k of ["first_name","last_name","company","phone","phone_2","email"]) if (old[k]) delete patch[k];
+        for (const k of Object.keys(patch)) if (patch[k] == null) delete patch[k];
+        patch.score = scoreLead({ ...old, ...patch });
+        updates.push([old.id, patch]);
+      } else {
+        const l = { user_id:userId, lead_type:imp.lead_type, source:"propstream", import_batch:imp.batch, ...f };
+        l.score = scoreLead(l); out.push(l);
+      }
+    }
+    for (let i = 0; i < out.length; i += 200) {
+      const { error } = await supabase.from("investor_leads").insert(out.slice(i, i + 200));
+      if (error) { setBusy(false); return setMsg("Import stopped: " + error.message); }
+    }
+    for (const [id, patch] of updates) {
+      const { error } = await supabase.from("investor_leads").update(patch).eq("id", id);
+      if (error) { setBusy(false); return setMsg("Import stopped: " + error.message); }
+    }
+    setBusy(false); setImp(null); load();
+    setMsg(`Loan and owner details added to ${updates.length} leads you had.${out.length ? ` Added ${out.length} new leads.` : ""}`);
+  };
+
   const runImport = async () => {
+    if (imp.json) return runDetailImport();
     setBusy(true); setMsg("");
     const seen = new Set(leads.flatMap((l) => [digits(l.phone), (l.email || "").toLowerCase(), norm(l.property_address)]).filter(Boolean));
     const cSeen = new Set(contacts.flatMap((c) => [digits(c.phone), digits(c.phone_2), (c.email || "").toLowerCase()]).filter(Boolean));
@@ -199,15 +241,16 @@ export default function InvestorLeads({ userId, contacts, setContacts }) {
       <div style={{display:"flex", gap:8, flexWrap:"wrap", alignItems:"center", marginBottom:12}}>
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, address, lender" style={{...inp, flex:"1 1 220px"}}/>
         <select value={status} onChange={(e) => setStatus(e.target.value)} style={inp}><option value="open">Open (new + queued)</option>{STATUS.map((s) => <option key={s} value={s}>{s}</option>)}<option value="all">All</option></select>
-        <label style={{...btnG, display:"inline-block"}}>Import PropStream CSV<input type="file" accept=".csv,text/csv" onChange={onFile} style={{display:"none"}}/></label>
+        <label style={{...btnG, display:"inline-block"}}>Import PropStream CSV<input type="file" accept=".csv,text/csv,.json,application/json" onChange={onFile} style={{display:"none"}}/></label>
         <button disabled={busy} onClick={() => toCalls(shown.filter((l) => l.status === "new" && l.phone).slice(0, 10))} style={btn}>Send top 10 to calls</button>
       </div>
       {msg && <div style={{fontFamily:F.mono, fontSize:12, color: /fail|stopped|Couldn't/.test(msg) ? C.red : C.green, marginBottom:10}}>{msg}</div>}
 
       {imp && (
         <div style={{...card, padding:"14px 16px", marginBottom:14}}>
-          <div style={{fontFamily:F.cond, fontWeight:800, fontSize:18}}>Import {imp.rows.length} rows</div>
-          <div style={{fontFamily:F.mono, fontSize:11, color:C.mid, margin:"4px 0 10px"}}>Matched columns: {Object.keys(imp.map).join(", ") || "none"}.{!("phone" in imp.map) && " No phone column found: run skip tracing in PropStream first, or these won't be callable."}</div>
+          <div style={{fontFamily:F.cond, fontWeight:800, fontSize:18}}>Import {imp.rows.length} {imp.json ? "PropStream detail records" : "rows"}</div>
+          <div style={{fontFamily:F.mono, fontSize:11, color:C.mid, margin:"4px 0 10px"}}>{imp.json ? "Adds every open loan, owner and mailing data to leads you already have (matched by address). New properties come in as new leads; DNC numbers are left off."
+            : <>Matched columns: {Object.keys(imp.map).join(", ") || "none"}.{!("phone" in imp.map) && " No phone column found: run skip tracing in PropStream first, or these won't be callable."}</>}</div>
           <div style={{display:"flex", gap:8, flexWrap:"wrap", alignItems:"center"}}>
             <span style={{fontFamily:F.mono, fontSize:12}}>These are:</span>
             {ANGLES.map(([k, l]) => <button key={k} onClick={() => setImp({ ...imp, lead_type:k })} style={imp.lead_type === k ? btnG : btn}>{l}</button>)}
@@ -233,7 +276,7 @@ export default function InvestorLeads({ userId, contacts, setContacts }) {
               {l.company && <div>Owner: {l.company}</div>}
               {l.mailing_address && <div>Mailing: {l.mailing_address}, {l.mailing_city} {l.mailing_state} {l.mailing_zip}</div>}
               {l.est_value != null && <div>Value {k$(l.est_value)} · balance {k$(l.loan_balance)} · equity {k$(eq)}</div>}
-              {l.loan_amount != null && <div>Loan {k$(l.loan_amount)} recorded {l.recording_date}</div>}
+              {l.ps_detail ? <PsDetail ps={l.ps_detail}/> : l.loan_amount != null && <div>Loan {k$(l.loan_amount)} recorded {l.recording_date}</div>}
               {l.answers && <div>Answers: {Object.entries(l.answers).filter(([, v]) => v !== null && v !== "").map(([k, v]) => `${k.replace("_", " ")}: ${v}`).join(" · ")}</div>}
               {l.scenario && <div>Scenario: "{l.scenario}"</div>}
               <div>{l.email} {l.phone_2 && `· alt ${l.phone_2}`} · source {l.source}</div>
@@ -242,6 +285,40 @@ export default function InvestorLeads({ userId, contacts, setContacts }) {
         {shown.length === 0 && <div style={{padding:18, fontFamily:F.mono, fontSize:12, color:C.light}}>No investor leads yet. Import a PropStream export (skip-traced), or share the Portfolio Review link.</div>}
         {shown.length > 200 && <div style={{padding:12, fontFamily:F.mono, fontSize:11, color:C.light}}>Showing the top 200 of {shown.length} by score.</div>}
       </div>
+    </div>
+  );
+}
+
+// ---------- Property & loans (from the PropStream detail record) ----------
+const pct = (r) => (r == null ? "" : (r * 100).toFixed(2).replace(/\.?0+$/, "") + "%");
+const usd = (n) => (n == null ? "" : "$" + Math.round(n).toLocaleString());
+function PsDetail({ ps }) {
+  const d = ps.detail || {}, loans = openLoans(d), ml = d.mlsListing || {};
+  const head = { fontFamily:F.mono, fontSize:10, color:C.light, marginTop:8 };
+  const owners = [d.owner1FullName, d.owner2FullName].filter(Boolean).join(" & ");
+  const linked = d.linkedPropertyTotal ?? (d.linkedProperties || []).length;
+  return (
+    <div style={{color:C.ink}}>
+      <div style={head}>OWNER</div>
+      <div>{owners}{d.ownerType && ` · ${d.ownerType.toLowerCase()}`}{d.ownerOccupancy && ` · ${d.ownerOccupancy.toLowerCase()}`}{d.propertiesOwned ? ` · owns ${d.propertiesOwned}` : ""}{linked > 1 ? ` · ${linked} properties at this mailing address` : ""}</div>
+      <div style={head}>OPEN LOANS ({loans.length})</div>
+      {loans.length === 0 && <div>None on record (free and clear).</div>}
+      {loans.map((x, i) => (
+        <div key={i} style={{marginBottom:4}}>
+          <b>{x.lender || "Unknown lender"}</b> · {usd(x.amount)}{x.rate ? ` at ${pct(x.rate)}` : ""}{isArm(x) ? <span style={{color:C.amber}}> · ARM</span> : x.financing ? ` · ${x.financing}` : ""}
+          <div style={{fontSize:12, color:C.mid}}>{[x.loanType, x.detail, x.recorded && `recorded ${x.recorded}`, x.due && `due ${x.due}`, x.termMonths && `${x.termMonths} mo term`,
+            x.balance != null && `est. balance ${usd(x.balance)}`, x.payment != null && `est. payment ${usd(x.payment)}/mo`].filter(Boolean).join(" · ")}</div>
+        </div>))}
+      <div style={head}>VALUE</div>
+      <div>{[d.estimatedValue != null && `value ${usd(d.estimatedValue)}`, d.estimatedEquity != null && `equity ${usd(d.estimatedEquity)}`, d.ltvRatio != null && `LTV ${Math.round(d.ltvRatio)}%`,
+        d.lastSaleAmount && `last sale ${usd(d.lastSaleAmount)}${d.lastSaleDate ? " on " + (typeof d.lastSaleDate === "number" ? new Date(d.lastSaleDate).toLocaleDateString() : d.lastSaleDate) : ""}`,
+        d.residentialUnits > 1 && `${d.residentialUnits} units`].filter(Boolean).join(" · ")}</div>
+      {(d.mlsListingStatus || (d.foreclosureStatus && d.foreclosureStatus !== "NONE")) && <>
+        <div style={head}>LISTING / DISTRESS</div>
+        <div>{[d.mlsListingStatus && `MLS ${d.mlsListingStatus.toLowerCase()}${ml.amount ? " at " + usd(ml.amount) : ""}`, d.foreclosureStatus && d.foreclosureStatus !== "NONE" && <span key="f" style={{color:C.red}}>{d.foreclosureStatus.replace("_", "-").toLowerCase()}</span>]
+          .filter(Boolean).reduce((a, x, i) => [...a, i ? " · " : "", x], [])}</div>
+        {(ml.agentName || d.mlsAgentName) && <div style={{fontSize:12, color:C.mid}}>Listing agent: {[ml.agentName || d.mlsAgentName, ml.officeName || d.mlsOfficeName, ml.agentPhone || d.mlsAgentPhone, ml.agentEmail || d.mlsAgentEmail].filter(Boolean).join(" · ")}</div>}
+      </>}
     </div>
   );
 }
