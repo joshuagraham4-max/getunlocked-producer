@@ -539,7 +539,7 @@ export default function ContactsTab({ userId, contacts, setContacts, profileName
         <button onClick={() => setShowHelp((s) => !s)} title="How to use Contacts" style={{...ghost, padding:"8px 11px", fontWeight:700}}>?</button>
       </div>
       {showHelp && <HowTo id="contacts-help" {...GUIDES.contacts}/>}
-      {cat === "investor" && <InvestorImport userId={userId} contacts={contacts} setContacts={setContacts}/>}
+      {cat === "investor" && <InvestorImport userId={userId} contacts={contacts} setContacts={setContacts} onLinksChanged={reloadLinks}/>}
 
       {showFilters && (
         <div style={{...box, padding:"12px 14px"}}>

@@ -84,7 +84,7 @@ export function scoreLead(l) {
 // Investor lead import, shown in Contacts → Investor Leads. PropStream CSV or detail JSON → investor_leads (full record kept)
 // → Contacts in the Investor Leads category. Skips properties listed for sale, confidential owners and DNC numbers.
 // Callable investors show up on Calls → Investors automatically.
-export default function InvestorImport({ userId, contacts, setContacts }) {
+export default function InvestorImport({ userId, contacts, setContacts, onLinksChanged }) {
   const [leads, setLeads] = useState([]); const [msg, setMsg] = useState(""); const [busy, setBusy] = useState(false);
   const [imp, setImp] = useState(null);   // { rows, headers, map, lead_type, batch, json }
 
@@ -239,7 +239,7 @@ export default function InvestorImport({ userId, contacts, setContacts }) {
       const a = agentOf(l); if (!a) continue;
       const addr = [l.property_address, l.property_city].filter(Boolean).join(", ");
       const owner = l.company || [l.first_name, l.last_name].filter(Boolean).join(" ");
-      const line = `${today()}: Listing agent · ${addr} (listing ${String(l.ps_detail.detail.mlsListingStatus).toLowerCase()}) · owner ${owner}`;
+      const line = `${today()}: Listing agent · ${addr} (listing ${/^FAIL$/i.test(l.ps_detail.detail.mlsListingStatus) ? "failed" : String(l.ps_detail.detail.mlsListingStatus).toLowerCase()}) · owner ${owner}`;
       let agent = known.find((c) => (a.email && [c.email, c.email_2].includes(a.email)) || (a.phone && [c.phone, c.phone_2].some((p) => digits(p) === digits(a.phone))));
       if (agent) {
         const { data } = await supabase.from("contacts").update({ tags:[...new Set([...(agent.tags || []), "listing agent"])], contact_note:[agent.contact_note, line].filter(Boolean).join("\n") }).eq("id", agent.id).select().single();
@@ -255,7 +255,7 @@ export default function InvestorImport({ userId, contacts, setContacts }) {
       const { error } = await supabase.from("contact_links").insert({ user_id:userId, contact_id:agent.id, linked_id:l.contact_id, relation:"listing agent" });
       if (!error || /duplicate/i.test(error.message)) linked++;
     }
-    setBusy(false); loadAgentLinks(); return { made, linked };
+    setBusy(false); loadAgentLinks(); onLinksChanged?.(); return { made, linked };
   };
 
   const waiting = leads.filter(contactable);
