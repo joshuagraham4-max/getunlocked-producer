@@ -218,7 +218,7 @@ export default function EmailDesk({ userId, contacts, setContacts, callIds, wide
         <div key={id} onClick={() => setSelId(id)} style={{display:"flex", gap:12, padding:"10px 18px", borderBottom:`1px solid ${C.rule}`, cursor:"pointer", background:on ? "#fff" : "transparent", borderLeft:on ? `4px solid ${C.green}` : "4px solid transparent", opacity:d && !on ? 0.45 : 1}}>
           <div style={{fontFamily:F.mono, fontSize:11, color:C.light, width:18, paddingTop:3}}>{n + 1}</div>
           <div><div style={{fontFamily:F.cond, fontWeight:700, fontSize:17, textDecoration:d ? "line-through" : "none"}}>{fullName(c)}</div>
-            <div style={{fontFamily:F.mono, fontSize:10, color:C.mid}}>{label(c)} · EMAIL {Math.min((c.email_step || 0) + (d ? 0 : 1), 3)} OF 3</div></div>
+            <div style={{fontFamily:F.mono, fontSize:10, color:C.mid}}>{label(c)} · EMAIL {Math.max(1, Math.min((c.email_step || 0) + (d ? 0 : 1), 3))} OF 3{c.email_bad ? " · BOUNCED" : ""}</div></div>
         </div>); })}
       {queue.length === 0 && <div style={{padding:18, fontFamily:F.mono, fontSize:12, color:C.light}}>{tab === "first" ? "Everyone has had email 1." : "No follow-ups due today."}</div>}
     </div>
