@@ -19,8 +19,9 @@ export const MAGNETS = {
   "income-qualifier": { name: "How Lenders See Your Income (quick qualifier)", path: null, live: false },
   "medical-power": { name: "Medical Pro Buying-Power Check", path: null, live: false },
   "dpa-calc": { name: "Down Payment Assistance Calculator", path: null, live: false },
-  "equity-unlock": { name: "Equity Unlock Estimator", path: null, live: false },
-  "portfolio-review": { name: "Portfolio Strategy Review (Show me how)", path: null, live: false },
+  "equity-unlock": { name: "Equity Unlock Estimator", path: "/equity-unlock", live: true },
+  "portfolio-review": { name: "Portfolio Strategy Review (Show me how)", path: "/review", live: true },
+  "portfolio-snapshot": { name: "Free Portfolio Snapshot (no credit pull)", path: "/portfolio-snapshot", live: true },
   "fthb-class": { name: "First-Time Homebuyer Class", path: null, live: false },
   "fthb-dpa": { name: "Down Payment Help Check (then Skool: Homebuyers)", path: null, live: false },
   "agent-strategy": { name: "Free Agent Deal Strategies (then Skool: Agents)", path: null, live: false },
@@ -46,6 +47,7 @@ export const PAIN_POINTS = [
   { id: "renting", label: "Renting and wants to own, but doesn't know where to start" },
   { id: "move-up", label: "Found the next home, but the current one hasn't sold" },
   { id: "equity-trapped", label: "Equity sitting in their rentals — needs a down payment for the next deal" },
+  { id: "no-credit-pull", label: "Won't let anyone pull credit or fill out a big application just to see options" },
   { id: "low-rate-locked", label: "Has a low-rate first mortgage they won't give up, but needs the equity" },
   { id: "priced-out", label: "Wants to buy or move, but the monthly payment doesn't make sense at today's prices" },
   { id: "no-down-payment", label: "Could afford the payment, but hasn't saved the down payment and closing costs" },
@@ -162,6 +164,43 @@ Your equity, deployed. Your portfolio, expanded. Run the REAL numbers on your pr
       hook: "Your next down payment might already be sitting in a rental you own.",
       points: ["How a rental cash-out loan qualifies on the rent, not your tax returns", "What 80% LTV really means in dollars (and why 720+ FICO matters)", "Interest-only and 40-year terms: protecting cash flow after you pull cash"],
       cta: "Run your rental through the calculator — link in the post.",
+    },
+  },
+  {
+    ref: "PORT-01", bank: "nonqm", name: "Free Portfolio Snapshot: No Credit Pull", lender: "",
+    audience: "investor", license: "none", flyer: null, footer: "business",
+    painPoints: ["no-credit-pull", "equity-trapped", "low-rate-locked"], magnet: "portfolio-snapshot", skool: "Investors",
+    highlights: ["No credit pull", "No application", "Just send the spreadsheet you already keep", "Equity, cash-out and cash flow by property", "Back to you in about 24 hours"],
+    notes: "Landing page: /portfolio-snapshot (?ref=PORT-01). Lead lands in Contacts tagged 'portfolio snapshot lead' with a phone alert; the contact shows the Snapshot panel (column mapping, per-property math, print to PDF). Business purpose. Flyer not made yet.",
+    short: `Investors: stop handing out your credit just to see your options.
+
+Send me the spreadsheet you already keep on your rentals. Address, value, loan, rate, rent. Messy is fine.
+
+✔ No credit pull
+✔ No application
+✔ Equity you could put to work, property by property
+✔ Where your cash flow could improve
+✔ Back to you in about 24 hours
+
+Your numbers, no strings 👇`,
+    long: `Every investor I talk to has the same two complaints about lenders.
+
+One: they want to pull your credit before they'll tell you anything. Two: they hand you a 40-page application to find out if a deal is even worth doing.
+
+You shouldn't have to do either just to see your options.
+
+Most of you already keep a spreadsheet on your rentals: address, value, what you owe, the rate, the rent. Send me that. Messy is fine.
+
+I'll send back a snapshot of your whole portfolio: the equity you could put to work, which properties have dead money in them, where an interest-only payment would free up cash flow, and which loans are worth a second look before they come due.
+
+No credit pull. No application. Usually within 24 hours.
+
+Investment properties, business purpose. Send yours here 👇`,
+    video: {
+      title: "Don't let a lender pull your credit just to look",
+      hook: "Investors, you don't need a credit pull or an application to find out what your portfolio can do.",
+      points: ["Why most lenders ask for credit and an app first (and why you don't have to start there)", "What I can see from the spreadsheet you already keep", "A real example: equity, dead money and cash flow on one page"],
+      cta: "Send your property list for a free snapshot, link in the post.",
     },
   },
   {

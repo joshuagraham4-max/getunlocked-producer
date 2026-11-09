@@ -146,7 +146,7 @@ export function reasonFor(c, i, t = today()) {
   const r = [];
   const inv = tags.includes("investor lead");
   const invTitle = tags.includes("maturing_hard_money") ? "Investor: hard money coming due" : tags.includes("dead_money") ? "Investor: dead money in equity" : "Investor: portfolio review";
-  if (ty === "lead" && due) r.push({ key:"newlead", score: inv ? 1350 : 1300, title: c.email_bad ? "Email bounced: get a new email" : inv ? invTitle : tags.includes("calculator lead") ? "New calculator lead" : tags.includes("equity unlock lead") ? "New Equity Unlock lead" : "Lead follow-up due", detail: (c.contact_note || "").split("\n").slice(-1)[0] || c.subtype || "" });
+  if (ty === "lead" && due) r.push({ key:"newlead", score: inv ? 1350 : 1300, title: c.email_bad ? "Email bounced: get a new email" : inv ? invTitle : tags.includes("calculator lead") ? "New calculator lead" : tags.includes("equity unlock lead") ? "New Equity Unlock lead" : tags.includes("portfolio snapshot lead") ? "Portfolio Snapshot: sent their spreadsheet" : "Lead follow-up due", detail: (c.contact_note || "").split("\n").slice(-1)[0] || c.subtype || "" });
   else if (due) r.push({ key:"followup", score:1200, title: c.email_bad ? "Email bounced: get a new email" : (c.tags || []).includes("messenger reply") ? "Agent replied on messenger" : "Follow-up due", detail: c.outcome ? `last outcome: ${c.outcome}` : (c.contact_note || "").split("\n").slice(-1)[0] || "" });
   if (ty === "past_client" && i) {
     if (["conv","fha","va"].includes(i.bucket)) r.push({ key:"rate", score:600 + i.gap * 100, title:`Rate gap +${i.gap.toFixed(2)}%`,
@@ -250,6 +250,9 @@ export function scriptsFor(c, i, reason, me = "Joshua Graham") {
       else say = `Hey ${first}, ${me}. You filled out my portfolio review. Thanks. I looked at what you sent${t.includes("maturing_hard_money") ? ", and that hard money loan is the first thing I want to solve" : ""}. Walk me through your properties for a minute: what's the one you'd most like to pull cash out of?`;
       short = `I'd like to walk you through your free portfolio review and where your equity could be working harder`; break;
     } else {
+      if (tags.includes("portfolio snapshot lead")) {
+        say = `Hey ${first}, ${me}. Got your property list, thanks for sending it. I ran a quick snapshot and found a couple of things worth a look. Got 10 minutes to walk through it?`;
+        short = `Got your property list. Your portfolio snapshot is ready and there are a couple of things worth a look`; break; }
       if (tags.includes("equity unlock lead")) {
         say = `Hey ${first}, ${me}. You ran your numbers on my Equity Unlock estimator. Smart move. What's got you thinking about the next house?`;
         short = `Thanks for running your equity numbers. I'd love to walk you through how to use it before you sell`; break; }

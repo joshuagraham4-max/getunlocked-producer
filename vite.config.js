@@ -11,6 +11,7 @@ export default defineConfig({
         'smart-money': resolve(__dirname, 'smart-money.html'),
         review: resolve(__dirname, 'review.html'),
         'equity-unlock': resolve(__dirname, 'equity-unlock.html'),
+        'portfolio-snapshot': resolve(__dirname, 'portfolio-snapshot.html'),
       },
     },
   },

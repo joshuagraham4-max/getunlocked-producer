@@ -6,6 +6,7 @@ import { GUIDES } from "../howto/guides.jsx";
 import InvestorPanel, { isInvestorLead, ListingAgentPanel, isListingAgent } from "./InvestorPanel.jsx";
 import InvestorImport from "../investors/InvestorImport.jsx";
 import AgentResearch, { emailMismatch } from "./AgentResearch.jsx";
+import SnapshotPanel, { isSnapshotLead } from "./SnapshotPanel.jsx";
 import { loadRadarData, peekRadarData, computeRadar, reasonFor, priorityScore, REASON_COLOR, REASON_BG } from "../radar/engine.js";
 
 const C = {
@@ -335,6 +336,7 @@ function Detail({ c, contacts, setContacts, userId, profileName, back, open, lin
       </div>
 
       {typeOf(c) === "agent" && <AgentResearch c={c}/>}
+      {isSnapshotLead(c) && <SnapshotPanel c={c}/>}
       {isInvestorLead(c) && <InvestorPanel c={c} profileName={profileName} contacts={contacts} onOpen={open}/>}
       {isListingAgent(c) && <ListingAgentPanel c={c} contacts={contacts} links={links}/>}
       {["past_client","lead"].includes(typeOf(c)) && <Loans contact={c} userId={userId}/>}
