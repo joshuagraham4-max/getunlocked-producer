@@ -46,6 +46,7 @@ export const PAIN_POINTS = [
   { id: "renting", label: "Renting and wants to own, but doesn't know where to start" },
   { id: "move-up", label: "Found the next home, but the current one hasn't sold" },
   { id: "equity-trapped", label: "Equity sitting in their rentals — needs a down payment for the next deal" },
+  { id: "low-rate-locked", label: "Has a low-rate first mortgage they won't give up, but needs the equity" },
   { id: "priced-out", label: "Wants to buy or move, but the monthly payment doesn't make sense at today's prices" },
   { id: "no-down-payment", label: "Could afford the payment, but hasn't saved the down payment and closing costs" },
   { id: "portfolio-audit", label: "Owns rentals that could be cash flowing with a better loan structure" },
@@ -161,6 +162,41 @@ Your equity, deployed. Your portfolio, expanded. Run the REAL numbers on your pr
       hook: "Your next down payment might already be sitting in a rental you own.",
       points: ["How a rental cash-out loan qualifies on the rent, not your tax returns", "What 80% LTV really means in dollars (and why 720+ FICO matters)", "Interest-only and 40-year terms: protecting cash flow after you pull cash"],
       cta: "Run your rental through the calculator — link in the post.",
+    },
+  },
+  {
+    ref: "HEL-01", bank: "nonqm", name: "Keep Your Low Rate: Rental Equity Second", lender: "RISE TPO",
+    audience: "investor", license: "none", flyer: null, footer: "business",
+    painPoints: ["low-rate-locked", "equity-trapped", "str", "self-employed"], magnet: "rental-calc", skool: "Investors",
+    highlights: ["Keep your low-rate first mortgage", "Standalone second on rentals, Airbnbs and more", "Up to 90% combined LTV, loans to $750K", "Qualify on the property's rent (1.00 ratio), 660 FICO", "Fixed terms; short prepay options"],
+    notes: "RISE Business Purpose Closed-End Second DSCR (AE email Nov 9, 2026; get the full matrix before quoting). Max CLTV 90%, to $750K, 660 FICO, 1.00 DSCR, primary/2nd home/NOO eligible, first-time investors and STR OK, 10/20/30-yr fixed, 1/2/3-yr prepay. Business purpose of proceeds required. Flyer not made yet. Business-purpose content: real numbers OK, mark investment property / business purpose.",
+    short: `Got a 3% mortgage you'll never give up? You don't have to.
+
+You can pull equity out of your rental WITHOUT refinancing the low-rate loan you already have. A second loan sits behind your first and qualifies on the property's rent, not your tax returns.
+
+✔ Keep your low-rate first mortgage
+✔ Up to 90% combined LTV, loans to $750K
+✔ Rentals and short-term rentals (Airbnb/VRBO)
+✔ Qualify on the rent, 660 FICO
+✔ Fixed terms, short prepay options
+
+Your equity, unlocked. Your rate, untouched 👇`,
+    long: `Got a 3% mortgage you'll never give up? You don't have to.
+
+A lot of investors are stuck. Their rental has real equity, but the first mortgage is at 3% and refinancing it would be crazy.
+
+A business-purpose second loan solves that. It sits behind your existing mortgage, so your low rate stays exactly where it is. It qualifies on the property's rent, not your tax returns, so a rough tax year or heavy write-offs don't sink it.
+
+Up to 90% combined LTV on loans to $750K, with a 660 FICO and a 1.00 rent-to-payment ratio. Long-term rentals and short-term rentals both qualify. Fixed terms, with prepay options as short as one year.
+
+Use it for the next down payment, a rehab, paying off high-interest business debt, or reserves.
+
+Investment property, business purpose. Run your rental's numbers 👇`,
+    video: {
+      title: "Keep the 3%, take the equity",
+      hook: "Don't refinance your 3% mortgage to get your equity out. There's a better way.",
+      points: ["How a second loan leaves your low-rate first mortgage untouched", "Qualifying on the rent, not your tax returns", "Short-term rentals count too, and what 90% combined LTV means in dollars"],
+      cta: "Run your rental through the calculator, link in the post.",
     },
   },
   {
