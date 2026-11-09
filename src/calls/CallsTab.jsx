@@ -326,7 +326,7 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
           <button key={k} onClick={() => { setSeg(k); setSelId(null); }} style={{...(seg === k ? btnG : btn), padding:"9px 18px", fontSize:15}}>{l}</button>
         ))}
       </div>
-      {seg === "emails" ? <EmailDesk userId={userId} contacts={contacts} setContacts={setContacts} callIds={(all || []).map((x) => x.id)} wide={wide}/> : (
+      {seg === "emails" ? <EmailDesk userId={userId} contacts={contacts} setContacts={setContacts} callIds={(all || []).map((x) => x.id)} wide={wide} onOpen={onOpen}/> : (
       <div style={{display:"grid", gridTemplateColumns: wide ? "400px 1fr" : "1fr", gap:18}}>
         {wide ? <>{List}{Focus}</> : <>{Focus}{List}</>}
       </div>)}

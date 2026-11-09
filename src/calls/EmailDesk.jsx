@@ -109,7 +109,7 @@ ${SIG}
 ${STOP}` };
 }
 
-export default function EmailDesk({ userId, contacts, setContacts, callIds, wide }) {
+export default function EmailDesk({ userId, contacts, setContacts, callIds, wide, onOpen }) {
   const t = today();
   // Two tabs: First emails (email 1 of 3, working through the database) and Follow-ups (emails 2-3 that are due).
   const [tab, setTab] = useState(() => { try { return localStorage.getItem(`gupEmailTab:${userId}`) || "first"; } catch { return "first"; } });
@@ -226,7 +226,10 @@ export default function EmailDesk({ userId, contacts, setContacts, callIds, wide
 
   const Focus = !sel ? <div style={{...card, padding:30, fontFamily:F.mono, color:C.light}}>Pick someone from the list.</div> : (
     <div style={{...card, padding: wide ? "24px 28px" : 18}}>
-      <div style={{fontFamily:F.cond, fontWeight:800, fontSize:30, lineHeight:1}}>{fullName(sel)}</div>
+      <div style={{display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:10}}>
+        <div style={{fontFamily:F.cond, fontWeight:800, fontSize:30, lineHeight:1}}>{fullName(sel)}</div>
+        {onOpen && <button onClick={() => onOpen(sel)} style={{...btn, padding:"5px 12px", fontSize:13, whiteSpace:"nowrap"}}>Go to client</button>}
+      </div>
       <div style={{fontFamily:F.mono, fontSize:12, color:C.mid, margin:"6px 0 14px"}}>{label(sel)}{sel.company ? ` · ${sel.company}` : ""} · {sel.email}</div>
       {done(sel.id) ? (<>
         <div style={{display:"flex", gap:8, alignItems:"center", padding:"10px 12px", borderRadius:8, background:"#fff", border:`1px solid ${C.rule}`}}>
