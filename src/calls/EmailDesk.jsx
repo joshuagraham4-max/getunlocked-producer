@@ -11,7 +11,7 @@ const card = { background:C.card, border:`1px solid ${C.rule}`, borderRadius:10 
 const btn = { fontFamily:F.cond, fontWeight:700, fontSize:14, padding:"8px 14px", borderRadius:7, border:`1px solid ${C.rule}`, background:C.card, color:C.mid, cursor:"pointer", textDecoration:"none", display:"inline-block" };
 const btnG = { ...btn, background:C.green, borderColor:C.green, color:"#fff" };
 const inp = { padding:"8px 10px", borderRadius:6, border:`1px solid ${C.rule}`, background:"#fff", fontFamily:F.body, fontSize:14, color:C.ink, boxSizing:"border-box", width:"100%" };
-const TARGETS = [5, 10, 15, 20];
+const TARGETS = [5, 10, 15, 20, 30, 40];
 const GAP = { 1:4, 2:7 };   // days to wait after email 1 and email 2
 
 const SIG = `Joshua Graham
@@ -111,7 +111,14 @@ ${STOP}` };
 
 export default function EmailDesk({ userId, contacts, setContacts, callIds, wide }) {
   const t = today();
-  const [target, setTarget] = useState(() => { try { return Number(localStorage.getItem(`gupEmailTarget:${userId}`)) || 10; } catch { return 10; } });
+  // Two tabs: First emails (email 1 of 3, working through the database) and Follow-ups (emails 2-3 that are due).
+  const [tab, setTab] = useState(() => { try { return localStorage.getItem(`gupEmailTab:${userId}`) || "first"; } catch { return "first"; } });
+  const tKey = (tb) => `gupEmailTarget:${userId}:${tb}`;
+  const [targets, setTargets] = useState(() => { const g = (tb, d) => { try { return Number(localStorage.getItem(tKey(tb))) || d; } catch { return d; } };
+    return { first:g("first", 10), follow:g("follow", 5) }; });
+  const target = targets[tab];
+  const setTarget = (v) => { setTargets((p) => ({ ...p, [tab]:v })); try { localStorage.setItem(tKey(tab), String(v)); } catch {} };
+  const pickTab = (tb) => { setTab(tb); setSelId(null); try { localStorage.setItem(`gupEmailTab:${userId}`, tb); } catch {} };
   const [nonce, setNonce] = useState(0);
   const [selId, setSelId] = useState(null);
   const [draft, setDraft] = useState({ subject:"", body:"" });
@@ -125,21 +132,24 @@ export default function EmailDesk({ userId, contacts, setContacts, callIds, wide
         const m = {}; (data || []).forEach((r) => { m[r.contact_id] = r; }); setSentToday(m);
       });
   }, [userId]);
-  const key = `gupEmails:${userId}:${t}`;
+  const key = `gupEmails:${userId}:${t}:${tab}`;
+  const eligible = (c) => !c.do_not_contact && !c.email_bad && c.email && /@/.test(c.email)
+    && ["past_client","agent","lead"].includes(c.contact_type || "past_client") && (c.email_step || 0) < 3 && !(callIds || []).includes(c.id);
+  const firstLeft = useMemo(() => contacts.filter((c) => eligible(c) && !(c.email_step || 0) && !sentToday[c.id]).length, [contacts, sentToday]); // eslint-disable-line react-hooks/exhaustive-deps
+  const followDue = useMemo(() => contacts.filter((c) => eligible(c) && (c.email_step || 0) > 0 && c.email_next && c.email_next <= t && !sentToday[c.id]).length, [contacts, sentToday]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const queue = useMemo(() => {
     let saved = null; try { saved = JSON.parse(localStorage.getItem(key) || "null"); } catch {}
     if (saved && saved.target === target) return saved.ids.filter((id) => byId[id]);
-    const skip = new Set(callIds || []);
-    const due = contacts.filter((c) => !c.do_not_contact && !c.email_bad && c.email && /@/.test(c.email)
-      && ["past_client","agent","lead"].includes(c.contact_type || "past_client")
-      && (c.email_step || 0) < 3 && (!c.email_next || c.email_next <= t) && !skip.has(c.id) && c.last_contacted !== t);
-    due.sort((a, b) => (priority(b) - priority(a)) || ((b.email_step || 0) - (a.email_step || 0)) || String(b.funded_date || "").localeCompare(String(a.funded_date || "")));
+    const due = contacts.filter((c) => eligible(c) && c.last_contacted !== t
+      && (tab === "first" ? !(c.email_step || 0) : (c.email_step || 0) > 0 && c.email_next && c.email_next <= t));
+    if (tab === "first") due.sort((a, b) => (priority(b) - priority(a)) || String(b.funded_date || "").localeCompare(String(a.funded_date || "")));
+    else due.sort((a, b) => String(a.email_next).localeCompare(String(b.email_next)) || (priority(b) - priority(a)));   // oldest due first
     const ids = due.slice(0, target).map((c) => c.id);
     try { localStorage.setItem(key, JSON.stringify({ target, ids })); } catch {}
     return ids;
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [target, key, nonce, contacts.length]);
+  }, [target, key, nonce, contacts.length, tab]);
 
   const done = (id) => { const c = byId[id]; return !!c && (!!sentToday[id] || c.__emailedToday || c.email_bad || (c.email_next && c.email_next > t) || c.email_step >= 3); };
   useEffect(() => { if (!selId || !queue.includes(selId)) { const n = queue.find((id) => !done(id)); setSelId(n || queue[0] || null); } }, [queue]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -191,8 +201,12 @@ export default function EmailDesk({ userId, contacts, setContacts, callIds, wide
   const List = (
     <div style={{...card, overflow:"hidden", alignSelf:"start"}}>
       <div style={{padding:"14px 18px", borderBottom:`1px solid ${C.rule}`}}>
+        <div style={{display:"flex", gap:6, marginBottom:10}}>
+          {[["first", `First emails · ${firstLeft} left`], ["follow", `Follow-ups · ${followDue} due`]].map(([k, l]) =>
+            <button key={k} onClick={() => pickTab(k)} style={{...btn, padding:"5px 10px", fontSize:13, flex:1, ...(tab === k ? { background:C.green, borderColor:C.green, color:"#fff" } : {})}}>{l}</button>)}
+        </div>
         <div style={{display:"flex", justifyContent:"space-between", fontFamily:F.mono, fontSize:11}}><span>{doneCount} of {queue.length} emails sent</span>
-          <span>Daily <select value={target} onChange={(e) => { const v = Number(e.target.value); setTarget(v); try { localStorage.setItem(`gupEmailTarget:${userId}`, String(v)); localStorage.removeItem(key); } catch {} }} style={{...inp, width:"auto", padding:"2px 4px", fontSize:12}}>{TARGETS.map((x) => <option key={x}>{x}</option>)}</select></span></div>
+          <span>Daily <select value={target} onChange={(e) => { const v = Number(e.target.value); setTarget(v); try { localStorage.removeItem(key); } catch {} }} style={{...inp, width:"auto", padding:"2px 4px", fontSize:12}}>{TARGETS.map((x) => <option key={x}>{x}</option>)}</select></span></div>
         <div style={{height:8, borderRadius:4, background:C.rule, overflow:"hidden", marginTop:8}}><div style={{height:"100%", width:`${queue.length ? doneCount / queue.length * 100 : 0}%`, background:C.green}}/></div>
         <button onClick={() => { try { localStorage.removeItem(key); } catch {} setSelId(null); setNonce((n) => n + 1); }} style={{...btn, padding:"3px 9px", fontSize:12, marginTop:10}}>Rebuild list</button>
         <input value={find} onChange={(e) => setFind(e.target.value)} placeholder="Got a bounce? Type their name or email" style={{...inp, marginTop:10, fontSize:13}}/>
@@ -206,7 +220,7 @@ export default function EmailDesk({ userId, contacts, setContacts, callIds, wide
           <div><div style={{fontFamily:F.cond, fontWeight:700, fontSize:17, textDecoration:d ? "line-through" : "none"}}>{fullName(c)}</div>
             <div style={{fontFamily:F.mono, fontSize:10, color:C.mid}}>{label(c)} · EMAIL {Math.min((c.email_step || 0) + (d ? 0 : 1), 3)} OF 3</div></div>
         </div>); })}
-      {queue.length === 0 && <div style={{padding:18, fontFamily:F.mono, fontSize:12, color:C.light}}>Nobody due today.</div>}
+      {queue.length === 0 && <div style={{padding:18, fontFamily:F.mono, fontSize:12, color:C.light}}>{tab === "first" ? "Everyone has had email 1." : "No follow-ups due today."}</div>}
     </div>
   );
 
