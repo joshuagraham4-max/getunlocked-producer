@@ -11,6 +11,16 @@ const C = { navy:"#0E1B2A", sky:"#4FB0EA", ink:"#0E1B2A", muted:"#51647A", line:
 const F = { display:"'Montserrat', Arial, sans-serif", body:"'Public Sans', system-ui, sans-serif" };
 const STATES = "AL AK AZ AR CA CO CT DE DC FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY".split(" ");
 const MAX_ROWS = 80, MAX_COLS = 30;
+// Optional template for investors who don't keep a sheet yet (downloads as CSV; opens in Excel or Google Sheets).
+const TEMPLATE = [
+  ["Address", "Est. Value", "Loan Balance", "Rate", "Monthly Payment (P&I)", "Monthly Rent", "Taxes (yr)", "Insurance (yr)", "HOA (mo)", "Loan Due / Maturity", "Lender", "Prepay Ends"],
+  ["123 Example St, Sarasota FL", "450000", "210000", "3.25%", "1450", "2600", "5200", "3100", "0", "", "Example Bank", "2027-06-01"],
+];
+const downloadTemplate = () => {
+  const csv = TEMPLATE.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\r\n");
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type:"text/csv" }));
+  a.download = "Rental-Portfolio-Template.csv"; document.body.appendChild(a); a.click(); a.remove();
+};
 const getRef = () => { try { return new URLSearchParams(location.search).get("ref") || "PORT-01"; } catch { return "PORT-01"; } };
 
 const input = { font:"inherit", fontSize:16, color:C.ink, background:"#fff", border:`1px solid ${C.line}`, borderRadius:8, padding:"10px 12px", width:"100%", boxSizing:"border-box" };
@@ -96,6 +106,7 @@ export default function PortfolioSnapshot() {
             <div style={{ gridColumn:"1/-1", border:`2px dashed ${C.line}`, borderRadius:12, padding:18, background:"#FAFCFE" }}>
               <label style={{ ...labelS, cursor:"pointer" }}>Upload your spreadsheet <span style={{ fontWeight:400, color:C.muted, fontSize:13 }}>Excel or CSV</span>
                 <input type="file" accept=".xlsx,.xls,.csv" onChange={onFile} style={{ fontSize:15 }}/></label>
+              <p style={{ margin:"8px 0 0", fontSize:14, color:C.muted }}>Don't keep one yet? <button type="button" onClick={downloadTemplate} style={{ background:"none", border:0, padding:0, color:C.blue, fontWeight:700, cursor:"pointer", textDecoration:"underline", font:"inherit" }}>Download my simple template</button>. Fill in what you know; blanks are fine.</p>
               {rows && <p style={{ margin:"10px 0 0", color:C.good, fontWeight:600 }}>Read {fileName}: {Math.max(0, rows.length - 1)} rows found.</p>}
               <label style={{ ...labelS, marginTop:14 }}>Or paste a Google Sheets / Dropbox link <span style={{ fontWeight:400, color:C.muted, fontSize:13 }}>Optional</span>
                 <input value={f.link} onChange={set("link")} placeholder="https://" style={input}/></label>

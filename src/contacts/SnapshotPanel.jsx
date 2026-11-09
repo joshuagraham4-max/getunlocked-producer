@@ -25,6 +25,7 @@ const FIELDS = [
   ["hoa", "HOA (mo)", /hoa|assoc/i],
   ["due", "Due / maturity", /matur|due|balloon|term\s*end/i],
   ["lender", "Lender", /lender|bank|servicer|note\s*holder/i],
+  ["prepay", "Prepay ends", /prepay|ppp|penalty/i],
 ];
 const num = (v) => { const s = String(v ?? "").replace(/[$,\s]/g, ""); if (!s) return null; const n = parseFloat(s.replace(/%$/, "")); return isFinite(n) ? n : null; };
 const usd = (n) => (n == null ? "" : (n < 0 ? "-$" : "$") + Math.round(Math.abs(n)).toLocaleString());
@@ -54,6 +55,8 @@ export function analyze(row, map, a) {
   const ioHousing = maxLoan != null ? maxLoan * a.rate / 100 / 12 + escrow : null;
   const dscr = rent && housing ? rent / housing : null;
   const newDscr = rent && ioHousing ? rent / ioHousing : null;
+  const ppStr = g("prepay"); const ppD = ppStr ? new Date(ppStr) : null;
+  const ppMonths = ppD && !isNaN(ppD) ? (ppD.getFullYear() - new Date().getFullYear()) * 12 + ppD.getMonth() - new Date().getMonth() : null;
   const dueStr = g("due"); const dueD = dueStr ? new Date(dueStr) : null;
   const dueMonths = dueD && !isNaN(dueD) ? (dueD.getFullYear() - new Date().getFullYear()) * 12 + dueD.getMonth() - new Date().getMonth() : null;
   const flags = [];
@@ -61,6 +64,7 @@ export function analyze(row, map, a) {
   if (equity != null && value && equity / value >= 0.4) flags.push(["Dead money", C.green]);
   if (dueMonths != null && dueMonths <= 12) flags.push([dueMonths < 0 ? "Past due" : `Due in ${dueMonths} mo`, C.red]);
   if (rate != null && rate >= a.rate / 100) flags.push(["Rate above market", C.amber]);
+  if (ppMonths != null && ppMonths <= 6) flags.push([ppMonths < 0 ? "Prepay over" : `Prepay ends in ${ppMonths} mo`, ppMonths < 0 ? C.green : C.amber]);
   if (dscr != null && dscr < 1) flags.push(["Ratio under 1.0", C.amber]);
   if (cashOut != null && cashOut >= 25000 && newDscr != null && newDscr < 1) flags.push(["Cash-out tight on cash flow", C.amber]);
   return { address:g("address") || "", lender:g("lender") || "", value, balance, rate, rent, payment, housing, equity, maxLoan, cashOut, dscr, newDscr, flags };
