@@ -80,14 +80,14 @@ export default function PortfolioSnapshot() {
         <div style={{ maxWidth:960, margin:"0 auto", padding:"40px 16px 44px", display:"flex", flexDirection:"column", gap:10 }}>
           <p style={{ margin:0, fontFamily:F.display, fontWeight:700, fontSize:13, letterSpacing:"0.16em", textTransform:"uppercase", color:C.sky }}>Free Portfolio Snapshot</p>
           <h1 style={{ margin:0, fontFamily:F.display, fontWeight:800, fontSize:"clamp(30px, 5vw, 46px)", lineHeight:1.08 }}>No credit pull. No application. Just your spreadsheet.</h1>
-          <p style={{ margin:0, color:"#B9C8D8", fontSize:18, maxWidth:"62ch" }}>Send me the property list you already keep. I'll show you the equity you could put to work, where your cash flow could improve, and which loans are worth a second look. Usually within 24 hours.</p>
+          <p style={{ margin:0, color:"#B9C8D8", fontSize:18, maxWidth:"62ch" }}>Send me the property list you already keep. I'll show you the equity you could put to work, where your cash flow could improve, and which loans are worth a second look. Same day or within 24 hours.</p>
         </div>
       </header>
       <main style={{ maxWidth:960, margin:"0 auto", padding:"32px 16px 48px" }}>
         {done ? (
           <div style={{ ...panel, display:"flex", flexDirection:"column", gap:14 }}>
             <h2 style={{ fontFamily:F.display, margin:0, fontSize:24 }}>Got it, {f.first.trim()}. Your snapshot is in the works.</h2>
-            <p style={{ margin:0 }}>I'll review your properties and reach out with your snapshot, usually within 24 hours. No credit pull, nothing to sign. If anything's unclear in the sheet, I'll text you a quick question.</p>
+            <p style={{ margin:0 }}>I'll review your properties and reach out with your snapshot, same day or within 24 hours. No credit pull, nothing to sign. If anything's unclear in the sheet, I'll text you a quick question.</p>
             <p style={{ margin:0, color:C.muted }}>Want to talk sooner?</p>
             <CtaRow/>
           </div>

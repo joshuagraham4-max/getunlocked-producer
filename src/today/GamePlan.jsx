@@ -43,7 +43,9 @@ export default function GamePlan({ userId, avgCommission, onGoCalls }) {
     const [{ data:s }, { data:d }, { data:h }] = await Promise.all([
       supabase.from("game_plan_settings").select("settings").eq("user_id", userId).maybeSingle(),
       supabase.from("game_plan_days").select("data").eq("user_id", userId).eq("day", KEY).maybeSingle(),
-      supabase.from("game_plan_days").select("day,data").eq("user_id", userId).order("day", { ascending:false }).limit(120),
+      supabase.from("game_plan_days").select("day,data").eq("user_id", userId)
+        .gte("day", (() => { const a = new Date(KEY + "T12:00:00"); a.setDate(a.getDate() - 120); const jan = KEY.slice(0, 4) + "-01-01"; const b = ymd(a); return b < jan ? b : jan; })())
+        .order("day", { ascending:false }),
     ]);
     setSettings({ ...defaultSettings(userId, avgCommission), ...(s?.settings || {}) });
     // Start each day from a blank slate. Merging onto the old state carried yesterday's checkmarks into today.
@@ -136,6 +138,17 @@ export default function GamePlan({ userId, avgCommission, onGoCalls }) {
     return n;
   }, [history, ev.perfect, KEY]);
 
+  // ---------- running totals: this week (Mon-Sun), month, year. Today is live; past days come from saved history. ----------
+  const totals = useMemo(() => {
+    const now = new Date(KEY + "T12:00:00"), mon = new Date(now); mon.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+    const wk = ymd(mon), mo = KEY.slice(0, 7), yr = KEY.slice(0, 4); const t = { wtd:earned, mtd:earned, ytd:earned };
+    for (const [k, rec] of Object.entries(history)) {
+      if (k === KEY || k > KEY) continue; const e = Number(rec?.earned) || 0;
+      if (k >= wk) t.wtd += e; if (k.startsWith(mo)) t.mtd += e; if (k.startsWith(yr)) t.ytd += e;
+    }
+    return t;
+  }, [history, earned, KEY]);
+
   // ---------- save ----------
   const persist = useCallback((next) => {
     if (!loaded.current) return;
@@ -212,6 +225,11 @@ export default function GamePlan({ userId, avgCommission, onGoCalls }) {
                 <div style={{...lbl, color:C.green}}>Earned today</div>
                 <div style={{fontFamily:F.cond, fontWeight:800, fontSize:54, color:C.green, lineHeight:1}}>${earned.toLocaleString()}</div>
                 <div style={{fontFamily:F.mono, fontSize:10, color:C.mid, marginTop:4}}>{earnedParts.filter(([, n]) => n).map(([k, n, l]) => `${n} ${l} x $${val(k).toLocaleString()}`).join(" · ") || "Every call counts. Start the scoreboard."}</div>
+                <div style={{display:"grid", gridTemplateColumns:"repeat(3, 1fr)", gap:8, marginTop:10, borderTop:`1px solid ${C.greenBd}`, paddingTop:8}}>
+                  {[["This week", totals.wtd], ["This month", totals.mtd], ["This year", totals.ytd]].map(([l, v]) => (
+                    <div key={l}><div style={{fontFamily:F.mono, fontSize:9, color:C.mid, textTransform:"uppercase", letterSpacing:"0.1em"}}>{l}</div>
+                      <div style={{fontFamily:F.cond, fontWeight:800, fontSize:22, color:C.green, lineHeight:1.1}}>${Math.round(v).toLocaleString()}</div></div>))}
+                </div>
               </div>
               <div style={{padding:"4px"}}>
                 <div style={lbl}>Perfect-day streak</div>

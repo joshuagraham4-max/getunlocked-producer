@@ -170,7 +170,7 @@ Your equity, deployed. Your portfolio, expanded. Run the REAL numbers on your pr
     ref: "PORT-01", bank: "nonqm", name: "Free Portfolio Snapshot: No Credit Pull", lender: "",
     audience: "investor", license: "none", flyer: null, footer: "business",
     painPoints: ["no-credit-pull", "equity-trapped", "low-rate-locked"], magnet: "portfolio-snapshot", skool: "Investors",
-    highlights: ["No credit pull", "No application", "Just send the spreadsheet you already keep", "Equity, cash-out and cash flow by property", "Back to you in about 24 hours"],
+    highlights: ["No credit pull", "No application", "Just send the spreadsheet you already keep", "Equity, cash-out and cash flow by property", "Back to you same day or within 24 hours"],
     notes: "Landing page: /portfolio-snapshot (?ref=PORT-01). Lead lands in Contacts tagged 'portfolio snapshot lead' with a phone alert; the contact shows the Snapshot panel (column mapping, per-property math, print to PDF). Business purpose. Flyer not made yet.",
     short: `Investors: stop handing out your credit just to see your options.
 
@@ -180,7 +180,7 @@ Send me the spreadsheet you already keep on your rentals. Address, value, loan, 
 ✔ No application
 ✔ Equity you could put to work, property by property
 ✔ Where your cash flow could improve
-✔ Back to you in about 24 hours
+✔ Back to you same day or within 24 hours
 
 Your numbers, no strings 👇`,
     long: `Every investor I talk to has the same two complaints about lenders.
@@ -193,7 +193,7 @@ Most of you already keep a spreadsheet on your rentals: address, value, what you
 
 I'll send back a snapshot of your whole portfolio: the equity you could put to work, which properties have dead money in them, where an interest-only payment would free up cash flow, and which loans are worth a second look before they come due.
 
-No credit pull. No application. Usually within 24 hours.
+No credit pull. No application. Same day or within 24 hours.
 
 Investment properties, business purpose. Send yours here 👇`,
     video: {
