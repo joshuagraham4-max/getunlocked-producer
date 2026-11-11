@@ -20,7 +20,10 @@ export const SEED = [
   { name:"Russo's Restaurant Equipment & Supply", niche:"Restaurant", address:"1537 Northgate Blvd, Sarasota, FL 34234", phone:"(941) 554-8315", notes:"Family-operated 10,000 sq ft showroom, new and used commercial kitchen gear." },
   { name:"Restaurant City Sarasota", niche:"Restaurant", address:"7810 25th Ct E #106, Sarasota, FL 34243", phone:"(941) 358-9555", notes:"Commercial refrigeration and cooking showroom near SRQ airport." },
   { name:"Kesco Kitchen Equipment & Supply Co", niche:"Restaurant", address:"816 Manatee Ave E Ste 13, Bradenton, FL 34208", phone:"(941) 417-0200", notes:"Independent Bradenton supplier: ovens, ice machines, refrigeration." },
-  { name:"Glade & Grove Supply Co", niche:"Construction", address:"6150 Porter Rd, Sarasota, FL 34240", phone:"(941) 526-0726", notes:"" },
+  { name:"Glade & Grove Supply Co", niche:"Construction", address:"6150 Porter Rd, Sarasota, FL 34240", phone:"(941) 526-0726", notes:"Independent dealer off Fruitville Rd. Wacker Neuson excavators, wheel loaders, trailers." },
+  { name:"Brower Equipment Sales", niche:"Construction", address:"3215 1st St, Bradenton, FL 34208", phone:"(941) 720-5591", notes:"Independent Bradenton dealer buying and selling new and used construction gear." },
+  { name:"Coastal Machinery & Attachments Inc.", niche:"Construction", address:"1121 Lewis Ave, Sarasota, FL 34237", phone:"(941) 223-4578", notes:"Skid steers and attachments, often financed as add-on packages." },
+  { name:"USA-RIPPA.COM Small Heavy Equipment", niche:"Construction", address:"1860 N Washington Blvd Unit 2, Sarasota, FL 34234", phone:"(941) 538-1026", notes:"Regional sales office: mini excavators and compact skid steers ($15K-$35K tickets)." },
 ];
 
 const PHONE = `Hi [Name], I'm Joshua with Graham Financial right here in Sarasota. I specialize in equipment financing for [landscaping/restaurant/construction] dealers in the area. I know most of your cash buyers are easy, and you probably already have a primary bank for your top-tier credit buyers.
@@ -59,9 +62,12 @@ export default function EquipmentTab({ userId }) {
   const load = useCallback(async () => {
     const { data, error } = await supabase.from("equipment_prospects").select("*").order("created_at");
     if (error) { setMissing(true); setRows(SEED.map((s, i) => ({ ...s, id:"seed"+i, status:"new", next_date:today(), calls:0 }))); return; }
-    if (!data.length) {
-      const { error: e2 } = await supabase.from("equipment_prospects").insert(SEED.map((s) => ({ ...s, user_id:userId })));
-      if (e2) { setMsg(e2.message); return; }
+    const have = new Set(data.map((r) => r.name));
+    const add = SEED.filter((x) => !have.has(x.name));
+    const blank = data.filter((r) => !r.notes && SEED.find((x) => x.name === r.name)?.notes);
+    if (add.length || blank.length) {
+      if (add.length) { const { error: e2 } = await supabase.from("equipment_prospects").insert(add.map((x) => ({ ...x, user_id:userId }))); if (e2) { setMsg(e2.message); return; } }
+      for (const r of blank) await supabase.from("equipment_prospects").update({ notes:SEED.find((x) => x.name === r.name).notes }).eq("id", r.id);
       return load();
     }
     setMissing(false); setRows(data);
