@@ -266,7 +266,7 @@ function BucketEditor({ c, contacts, save }) {
   );
 }
 
-function Detail({ c, contacts, setContacts, userId, profileName, back, open, links, reloadLinks, createContact }) {
+function Detail({ c, contacts, setContacts, userId, profileName, back, backLabel, open, links, reloadLinks, createContact }) {
   const save = async (fields) => {
     const { data, error } = await supabase.from("contacts").update(fields).eq("id", c.id).select().single();
     if (error) { alert("Save failed: " + error.message); return; }
@@ -281,7 +281,7 @@ function Detail({ c, contacts, setContacts, userId, profileName, back, open, lin
   };
   return (
     <div>
-      <button onClick={back} style={{...ghost, marginBottom:12}}>← Back</button>
+      <button onClick={back} style={{...ghost, marginBottom:12}}>← {backLabel || "Back"}</button>
       <div style={box}>
         <div style={{fontFamily:F.cond, fontSize:26, fontWeight:800, color:C.ink, lineHeight:1.1}}>{fullName(c)}</div>
         <div style={{fontFamily:F.mono, fontSize:10, color:C.mid, margin:"4px 0 10px"}}>{c.company || ""}{c.subtype ? ` · ${c.subtype}` : ""}</div>
@@ -388,7 +388,7 @@ const FILTERS = [
 ];
 const FLABEL = Object.fromEntries(FILTERS.flatMap(([, xs]) => xs));
 
-export default function ContactsTab({ userId, contacts, setContacts, profileName, onUpload, openId, onOpened, onGoCalls }) {
+export default function ContactsTab({ userId, contacts, setContacts, profileName, onUpload, openId, onOpened, onGoCalls, onReturn, returnLabel }) {
   const [q, setQ] = useState("");
   const [cat, setCat] = useState("mine");
   const [filters, setFilters] = useState([]);
@@ -500,7 +500,7 @@ export default function ContactsTab({ userId, contacts, setContacts, profileName
   }, [byId, userId, t]);
 
   if (view === "dupes") return <Dupes contacts={contacts} setContacts={setContacts} userId={userId} close={() => { setView("list"); reloadLinks(); }} open={open} reloadLinks={reloadLinks}/>;
-  if (view === "detail" && selC) return <Detail c={selC} contacts={contacts} setContacts={setContacts} userId={userId} profileName={profileName} back={() => setView("list")} open={open} links={links} reloadLinks={reloadLinks} createContact={createContact}/>;
+  if (view === "detail" && selC) return <Detail c={selC} contacts={contacts} setContacts={setContacts} userId={userId} profileName={profileName} back={() => { setView("list"); if (returnLabel && onReturn) onReturn(); }} backLabel={returnLabel ? `Back to ${returnLabel}` : null} open={open} links={links} reloadLinks={reloadLinks} createContact={createContact}/>;
 
   const toggleF = (f) => setFilters((p) => (p.includes(f) ? p.filter((x) => x !== f) : [...p, f]));
   const sel2 = { ...inp, width:"auto", padding:"9px 12px", fontFamily:F.cond, fontWeight:700, fontSize:15, cursor:"pointer" };

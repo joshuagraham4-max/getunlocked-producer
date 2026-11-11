@@ -541,6 +541,9 @@ export default function App() {
     return () => { clearInterval(tick); document.removeEventListener("visibilitychange", onShow); window.removeEventListener("focus", onShow); };
   }, [user?.id]);
   const [openContactId, setOpenContactId] = useState(null);
+  const [returnTab, setReturnTab] = useState(null);   // where Back goes after opening a contact from Radar / Calls
+  const [radarSeen, setRadarSeen] = useState(false);
+  useEffect(() => { if (tab === "radar") setRadarSeen(true); }, [tab]);
   const [uploadProgress, setUploadProgress] = useState(null);
   const [uploadPending, setUploadPending] = useState(null);
   const fRef = useRef();
@@ -1195,7 +1198,7 @@ export default function App() {
           </div>
           <nav style={{padding:"16px 0",flex:1}}>
             {navTabs.map(([id,lbl])=>(
-              <button key={id} onClick={()=>{ if(id==="__more"){toggleMore();return;} setTab(id);setRebuildOk(false);}}
+              <button key={id} onClick={()=>{ if(id==="__more"){toggleMore();return;} setTab(id);setReturnTab(null);setRebuildOk(false);}}
                 style={{display:"block",width:"100%",padding:"11px 20px",border:"none",textAlign:"left",background:tab===id?C.green:"transparent",color:tab===id?"#fff":"#888",fontFamily:F.cond,fontSize:14,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer",transition:"all 0.15s",borderLeft:tab===id?"3px solid #fff":"3px solid transparent"}}>
                 {lbl}
               </button>
@@ -1240,7 +1243,7 @@ export default function App() {
       {!isWide && (
       <div style={{display:"grid",gridTemplateColumns:`repeat(${isAdmin?4:4},1fr)`,gap:3,marginBottom:12,background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:4}}>
         {navTabs.map(([id,lbl])=>(
-          <button key={id} onClick={()=>{ if(id==="__more"){toggleMore();return;} setTab(id);setRebuildOk(false);}} style={{padding:"8px 2px",borderRadius:6,border:"none",background:tab===id?C.green:"transparent",color:tab===id?"#fff":C.mid,fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.03em",textTransform:"uppercase",cursor:"pointer",transition:"all 0.15s"}}>{lbl}</button>
+          <button key={id} onClick={()=>{ if(id==="__more"){toggleMore();return;} setTab(id);setReturnTab(null);setRebuildOk(false);}} style={{padding:"8px 2px",borderRadius:6,border:"none",background:tab===id?C.green:"transparent",color:tab===id?"#fff":C.mid,fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.03em",textTransform:"uppercase",cursor:"pointer",transition:"all 0.15s"}}>{lbl}</button>
         ))}
       </div>
       )}
@@ -1579,15 +1582,15 @@ export default function App() {
           ) : (
             <>
               <input ref={fRef} type="file" accept=".csv,.txt,.tsv" onChange={handleFile} style={{display:"none"}}/>
-              <ErrorBoundary label="Contacts"><ContactsTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onUpload={startUpload} openId={openContactId} onOpened={()=>setOpenContactId(null)} onGoCalls={()=>setTab("calls")}/></ErrorBoundary>
+              <ErrorBoundary label="Contacts"><ContactsTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onUpload={startUpload} openId={openContactId} onOpened={()=>setOpenContactId(null)} returnLabel={returnTab==="radar"?"Radar":returnTab==="calls"?"Calls":null} onReturn={()=>{const t=returnTab;setReturnTab(null);if(t)setTab(t);}} onGoCalls={()=>setTab("calls")}/></ErrorBoundary>
             </>
           )}
         </div>
       )}
 
       {/* Calls stays loaded after the first visit so coming back is instant (hidden, not rebuilt). */}
-      {(tab==="calls" || callsSeen) && <div style={{display:tab==="calls"?"block":"none"}}><ErrorBoundary label="Calls"><CallsTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onOpen={(c)=>{setOpenContactId(c.id);setTab("contacts");}} onGoRadar={()=>setTab("radar")}/></ErrorBoundary></div>}
-      {tab==="radar" && <ErrorBoundary label="Radar"><RadarTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onOpen={(c)=>{setOpenContactId(c.id);setTab("contacts");}} onGoCalls={()=>setTab("calls")}/></ErrorBoundary>}
+      {(tab==="calls" || callsSeen) && <div style={{display:tab==="calls"?"block":"none"}}><ErrorBoundary label="Calls"><CallsTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onOpen={(c)=>{setOpenContactId(c.id);setReturnTab("calls");setTab("contacts");}} onGoRadar={()=>setTab("radar")}/></ErrorBoundary></div>}
+      {(tab==="radar" || radarSeen) && <div style={{display:tab==="radar"?"block":"none"}}><ErrorBoundary label="Radar"><RadarTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onOpen={(c)=>{setOpenContactId(c.id);setReturnTab("radar");setTab("contacts");}} onGoCalls={()=>setTab("calls")}/></ErrorBoundary></div>}
       {tab==="groups" && <ErrorBoundary label="Groups"><GroupsTab userId={user?.id} onContact={(c) => setContacts((p) => p.some((x) => x.id === c.id) ? p.map((x) => (x.id === c.id ? c : x)) : [...p, c])}/></ErrorBoundary>}
       {tab==="equipment" && isAdmin && <ErrorBoundary label="Equipment"><EquipmentTab userId={user?.id}/></ErrorBoundary>}
       {tab==="scripts" && <ErrorBoundary label="Scripts"><ScriptsTab/></ErrorBoundary>}
