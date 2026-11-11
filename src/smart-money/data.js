@@ -98,7 +98,7 @@ export const CARDS = [
   },
   {
     ref: "EQP-02", bank: "equipment", name: "Equipment: Too New for the Bank", lender: "",
-    audience: "business", license: "none", flyer: null, footer: "equipment", cta: "Book with me. 5 minutes to find out 👉 https://calendar.app.google/nz1sdrnBGK1D4LXh7",
+    audience: "business", license: "none", flyer: "/smart-money/flyers/EQP-02.png", footer: "equipment", cta: "Book with me. 5 minutes to find out 👉 https://calendar.app.google/nz1sdrnBGK1D4LXh7",
     painPoints: ["too-new"], magnet: "book-5", skool: null,
     highlights: ["Under 2 years in business? There are lenders for that", "Startup and new-authority trucking programs", "The equipment helps secure the deal", "Application only on most deals", "No upfront fees"],
     hooks: ["Too new for the bank?", "Banks want 2 years. You need the truck now.", "New business, real equipment needs.", "Year one shouldn't stop your growth."],
@@ -109,7 +109,7 @@ export const CARDS = [
   },
   {
     ref: "EQP-03", bank: "equipment", name: "Equipment: Credit Took a Hit", lender: "",
-    audience: "business", license: "none", flyer: null, footer: "equipment", cta: "Book with me. 5 minutes to find out 👉 https://calendar.app.google/nz1sdrnBGK1D4LXh7",
+    audience: "business", license: "none", flyer: "/smart-money/flyers/EQP-03.png", footer: "equipment", cta: "Book with me. 5 minutes to find out 👉 https://calendar.app.google/nz1sdrnBGK1D4LXh7",
     painPoints: ["bruised-credit"], magnet: "book-5", skool: null,
     highlights: ["A rough patch doesn't have to stop your business", "Lenders for less-than-perfect credit", "Cash flow and the equipment count too", "Application only on most deals", "No upfront fees"],
     hooks: ["One bad year shouldn't freeze your business.", "Credit took a hit. Business didn't stop.", "The bank saw your score. Not your business."],
@@ -120,7 +120,7 @@ export const CARDS = [
   },
   {
     ref: "EQP-04", bank: "equipment", name: "Equipment: Bank Is Too Slow", lender: "",
-    audience: "business", license: "none", flyer: null, footer: "equipment", cta: "Book with me. 5 minutes to find out 👉 https://calendar.app.google/nz1sdrnBGK1D4LXh7",
+    audience: "business", license: "none", flyer: "/smart-money/flyers/EQP-04.png", footer: "equipment", cta: "Book with me. 5 minutes to find out 👉 https://calendar.app.google/nz1sdrnBGK1D4LXh7",
     painPoints: ["too-slow"], magnet: "book-5", skool: null,
     highlights: ["Decisions in days, not weeks", "Short application on most deals under $150K", "No tax-return hunt for most deals", "Funding paid to your vendor", "No upfront fees"],
     hooks: ["The bank wants 6 weeks. The job starts Monday.", "Stop losing jobs to slow approvals.", "40 pages of paperwork for one machine?"],
@@ -131,7 +131,7 @@ export const CARDS = [
   },
   {
     ref: "EQP-05", bank: "equipment", name: "Equipment: Year-End Section 179", lender: "",
-    audience: "business", license: "none", flyer: null, footer: "equipment", cta: "Book with me. 5 minutes to find out 👉 https://calendar.app.google/nz1sdrnBGK1D4LXh7",
+    audience: "business", license: "none", flyer: "/smart-money/flyers/EQP-05.png", footer: "equipment", cta: "Book with me. 5 minutes to find out 👉 https://calendar.app.google/nz1sdrnBGK1D4LXh7",
     painPoints: ["year-end"], magnet: "book-5", skool: null,
     highlights: ["Buying equipment before Dec 31? Ask your CPA about Section 179", "Finance it and keep your cash", "Put it in service this year", "Decisions in days", "No upfront fees"],
     hooks: ["Buying before Dec 31?", "Year-end equipment, without draining your cash.", "Ask your CPA about Section 179. Then call me."],
@@ -142,7 +142,7 @@ export const CARDS = [
   },
   {
     ref: "EQP-06", bank: "equipment", name: "Equipment: It's Breaking Down", lender: "",
-    audience: "business", license: "none", flyer: null, footer: "equipment", cta: "Book with me. 5 minutes to find out 👉 https://calendar.app.google/nz1sdrnBGK1D4LXh7",
+    audience: "business", license: "none", flyer: "/smart-money/flyers/EQP-06.png", footer: "equipment", cta: "Book with me. 5 minutes to find out 👉 https://calendar.app.google/nz1sdrnBGK1D4LXh7",
     painPoints: ["breaking-down"], magnet: "book-5", skool: null,
     highlights: ["Old equipment costing you jobs?", "Replace or upgrade without a big cash hit", "Used equipment often eligible", "Decisions in days", "No upfront fees"],
     hooks: ["It broke down again.", "What's your old machine really costing you?", "Patch it again, or replace it?"],
@@ -164,7 +164,7 @@ export const CARDS = [
   },
   {
     ref: "EQP-P2", bank: "equipment", name: "Partners: Equipment Dealers & Vendors", lender: "",
-    audience: "partner", license: "none", flyer: null, footer: "equipment", cta: "Book with me. 5 minutes to find out 👉 https://calendar.app.google/nz1sdrnBGK1D4LXh7",
+    audience: "partner", license: "none", flyer: "/smart-money/flyers/EQP-P2.png", footer: "equipment", cta: "Book with me. 5 minutes to find out 👉 https://calendar.app.google/nz1sdrnBGK1D4LXh7",
     painPoints: ["partner-dealers"], magnet: "book-5", skool: null,
     highlights: ["Stop losing sales when the bank says no", "Financing for the buyers your bank won't take", "Fast decisions so the sale doesn't cool off", "Funding paid straight to you", "No cost to you"],
     hooks: ["Lost a sale because their bank said no?", "Your customer wants it. Their bank doesn't.", "Save the sale."],
@@ -175,7 +175,7 @@ export const CARDS = [
   },
   {
     ref: "EQP-P3", bank: "equipment", name: "Partners: CPAs & Bookkeepers (Year-End)", lender: "",
-    audience: "partner", license: "none", flyer: null, footer: "equipment", cta: "Book with me. 5 minutes to find out 👉 https://calendar.app.google/nz1sdrnBGK1D4LXh7",
+    audience: "partner", license: "none", flyer: "/smart-money/flyers/EQP-P3.png", footer: "equipment", cta: "Book with me. 5 minutes to find out 👉 https://calendar.app.google/nz1sdrnBGK1D4LXh7",
     painPoints: ["partner-cpa"], magnet: "book-5", skool: null,
     highlights: ["Clients buying equipment before year-end?", "Financing that keeps their cash", "Fast decisions before Dec 31", "You handle the tax side, I handle the financing", "No cost to your client upfront"],
     hooks: ["Clients buying equipment before Dec 31?", "Keep your client's cash. Finance the equipment."],
