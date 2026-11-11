@@ -28,16 +28,16 @@ export const SEED = [
 
 const PHONE = `Hi [Name], I'm Joshua with Graham Financial right here in Sarasota. I specialize in equipment financing for [landscaping/restaurant/construction] dealers in the area. I know most of your cash buyers are easy, and you probably already have a primary bank for your top-tier credit buyers.
 
-Where I help dealers like you is catching the deals that fall through the cracks: startups, buyers with a few credit dings, or customers who want to bundle attachments and delivery into one monthly payment so they don't walk off the lot. You get paid the full invoice before the equipment leaves your lot. Next time you have a buyer sitting on the fence over price, can I run a soft-pull quote for you to help save the sale?`;
+Where I help dealers like you is catching the deals that fall through the cracks: startups, buyers with a few credit dings, or customers who want to bundle attachments and delivery into one monthly payment so they don't walk off the lot. We get approvals back in about two hours, and you get wired 100% of the invoice upfront. Next time you have a buyer sitting on the fence over price, can I run a soft-pull quote for you to help save the sale?`;
 const EMAIL = `Subject: Helping you close more [mowers/ovens/skid steers] this month
 
 Hi [Name],
 
 I'm with Graham Financial here in Sarasota, and I work with local [industry] dealers to help convert buyers who stall on upfront cash or get turned down by traditional banks.
 
-- Fast turns: app-only approvals on smaller deals.
+- Fast turns: app-only approvals up to $75K in 2 to 4 hours.
 - Full spectrum: programs for A-credit down to startups and challenged credit.
-- Zero hassle: I handle the customer paperwork, and you get paid in full before equipment leaves your lot.
+- Zero hassle: I handle all customer paperwork, and you get paid in full via wire before equipment leaves your lot.
 
 Do you have a stalled quote on your desk right now that I can take a look at to show you how fast we move?
 
@@ -45,6 +45,29 @@ Best,
 Joshua Graham
 Graham Financial | Sarasota, FL
 720-468-6872`;
+const OWNER = `Hi [Name], this is Joshua over at Graham Financial here in Sarasota. I work specifically with [landscaping/construction/restaurant] owners across Southwest Florida. I'm reaching out because a lot of owners I talk to right now are trying to add another [mower/truck/piece of kitchen gear] before the busy season hits without draining their cash reserves.
+
+We set up simple equipment financing, usually just a one-page application with no hard credit pull to start, so the machine pays for itself out of the new revenue it brings in. Are you planning on adding or upgrading any gear over the next 60 days, or are you all set for the season?`;
+export const CHECKLIST = `Equipment Financing Fast-Track Checklist
+Graham Financial | Joshua Graham | 720-468-6872 | jgraham@zpmloans.com
+
+To get a same-day credit decision (typically within 2-4 hours for deals under $75,000), please send:
+
+DEALS UNDER $75,000 (APP-ONLY FAST TRACK)
+- Completed 1-page credit application: signed and dated by all owners holding 20% or more.
+- Equipment quote / pro-forma invoice: vendor business name and contact, equipment year/make/model, serial number or VIN (if available), and total price including tax and shipping.
+- 3 months of most recent business bank statements: full PDF downloads (all pages, including blank pages; no screenshots).
+
+ADDITIONAL ITEMS FOR DEALS OVER $75,000 (OR TITLED VEHICLES / STARTUPS)
+- Driver's license: clear front-and-back photo of the primary owner's ID.
+- Voided business check: from the operating account where payments will be drafted.
+- Most recent business tax return and year-to-date financials: P&L and balance sheet (for requests over $100K-$150K).
+- Proof of time in business: Secretary of State filing or business license (especially for businesses under 2 years old).`;
+const HABITS = ["5 dealer calls a day.", "Ask for the sales manager, not the front desk.", "Ask for one stalled quote, not 'business.'", "Skip big chains with captive finance arms (e.g. John Deere corporate stores). Independents within 50 miles.", "Pitch saving the sale, not rates."];
+const OBJ_OWNER = [
+  ["What are your interest rates?", "For top-tier credit, rates start in the single digits, and for newer businesses they adjust based on time in business. Because equipment payments are typically 100% tax-deductible under Section 179, the real question is whether the machine makes you more per month than the payment. What's the price of the gear you're looking at so I can give you an exact ballpark?"],
+  ["I don't want my credit pulled right now.", "I completely understand. We start with a soft credit pull that has zero impact on your credit score just to get your terms locked in. We only do a formal pull once you see the monthly payment and tell me you want to move forward."],
+];
 const OBJ = [
   ["We already have a financing company / bank.", "That's great, keep sending your A-credit buyers to them. I'm not trying to replace your main bank. I catch the buyers they turn down (startups, 600 scores, private-party sales) so you don't lose a sale you already worked hard to close. Fair enough?"],
   ["Just drop off brochures / send an email.", "I can email my one-page flyer. Before I hang up: out of the quotes on your desk right now, is there one buyer who's stalled on cash or got a no from their bank? Let me run that one deal to show you how fast we move."],
@@ -87,6 +110,7 @@ export default function EquipmentTab({ userId }) {
   };
 
   const t = today();
+  const callsToday = rows.filter((r) => r.last_called_at && new Date(r.last_called_at).toDateString() === new Date().toDateString()).length;
   const list = rows.filter((r) => niche === "All" || r.niche === niche);
   const due = list.filter((r) => !r.next_date || r.next_date <= t).sort((a, b) => (a.next_date || "").localeCompare(b.next_date || ""));
   const later = list.filter((r) => r.next_date && r.next_date > t).sort((a, b) => a.next_date.localeCompare(b.next_date));
@@ -118,6 +142,7 @@ export default function EquipmentTab({ userId }) {
     <div>
       <div style={{ ...card, background:"#fff" }}>
         <div style={lbl}>Equipment finance · local dealers</div>
+        <div style={{ fontFamily:F.cond, fontWeight:800, fontSize:22, color: callsToday >= 5 ? C.green : C.ink, marginTop:4 }}>{callsToday} / 5 dealer calls today</div>
         <div style={{ fontFamily:F.body, fontSize:14, color:C.mid, marginTop:4 }}>Dealers who lose sales when the buyer's bank says no. Kept separate from Contacts. Outcome buttons log the call and set the next date.</div>
         {missing && <div style={{ fontFamily:F.body, fontSize:14, color:C.amber, background:C.amberBg, borderRadius:6, padding:8, marginTop:8 }}>The list shows, but calls won't save until equipment_prospects_v1.sql is run in Supabase.</div>}
         {msg && <div style={{ fontFamily:F.mono, fontSize:12, color:C.amber, marginTop:8 }}>{msg}</div>}
@@ -125,6 +150,7 @@ export default function EquipmentTab({ userId }) {
           {niches.map((n) => <button key={n} style={niche===n?btnG:btn} onClick={() => setNiche(n)}>{n}</button>)}
           <button style={btn} onClick={() => setOpen(open==="scripts"?"":"scripts")}>{open==="scripts"?"Hide scripts":"Scripts"}</button>
           {!missing && <button style={btn} onClick={() => setAdd(add ? null : { name:"", niche:"", address:"", phone:"", contact_name:"", email:"", notes:"" })}>{add ? "Cancel" : "Add dealer"}</button>}
+          <button style={btn} onClick={() => setOpen(open==="check"?"":"check")}>{open==="check"?"Hide checklist":"Checklist"}</button>
           <a href="https://www.floridaucc.com/" target="_blank" rel="noreferrer" style={btn}>Florida UCC search</a>
         </div>
       </div>
@@ -135,15 +161,32 @@ export default function EquipmentTab({ userId }) {
         <button style={btnG} onClick={saveNew}>Save dealer</button>
       </div>}
 
+      {open === "check" && <div style={card}>
+        <div style={lbl}>Application checklist (send when they ask what you need)</div>
+        <div style={{ fontFamily:F.body, fontSize:15, color:C.ink, whiteSpace:"pre-wrap", margin:"6px 0 8px" }}>{CHECKLIST}</div>
+        <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+          <button style={btn} onClick={() => copy(CHECKLIST)}>Copy checklist</button>
+          <a href="/equipment/Graham_Financial_Equipment_Checklist.pdf" target="_blank" rel="noreferrer" style={btnG}>Open PDF</a>
+          <button style={btn} onClick={() => copy(window.location.origin + "/equipment/Graham_Financial_Equipment_Checklist.pdf")}>Copy PDF link</button>
+        </div>
+      </div>}
+
       {open === "scripts" && <div style={card}>
-        <div style={lbl}>Dealer call</div>
+        <div style={lbl}>Call habits</div>
+        {HABITS.map((h) => <div key={h} style={{ fontFamily:F.body, fontSize:15, color:C.ink, margin:"4px 0" }}>- {h}</div>)}
+        <div style={{ ...lbl, marginTop:14 }}>Dealer call</div>
         <div style={{ fontFamily:F.body, fontSize:15, color:C.ink, whiteSpace:"pre-wrap", margin:"6px 0 8px" }}>{PHONE}</div>
         <button style={btn} onClick={() => copy(PHONE)}>Copy call script</button>
-        <div style={{ ...lbl, marginTop:14 }}>Objections</div>
+        <div style={{ ...lbl, marginTop:14 }}>Dealer objections</div>
         {OBJ.map(([q, a]) => <div key={q} style={{ margin:"8px 0" }}><div style={{ fontFamily:F.cond, fontWeight:700, fontSize:16, color:C.ink }}>"{q}"</div><div style={{ fontFamily:F.body, fontSize:15, color:C.mid }}>{a}</div></div>)}
         <div style={{ ...lbl, marginTop:14 }}>Dealer email</div>
         <div style={{ fontFamily:F.body, fontSize:15, color:C.ink, whiteSpace:"pre-wrap", margin:"6px 0 8px" }}>{EMAIL}</div>
         <button style={btn} onClick={() => copy(EMAIL)}>Copy email</button>
+        <div style={{ ...lbl, marginTop:14 }}>Business owner call / LinkedIn</div>
+        <div style={{ fontFamily:F.body, fontSize:15, color:C.ink, whiteSpace:"pre-wrap", margin:"6px 0 8px" }}>{OWNER}</div>
+        <button style={btn} onClick={() => copy(OWNER)}>Copy owner script</button>
+        <div style={{ ...lbl, marginTop:14 }}>Owner objections</div>
+        {OBJ_OWNER.map(([q, a]) => <div key={q} style={{ margin:"8px 0" }}><div style={{ fontFamily:F.cond, fontWeight:700, fontSize:16, color:C.ink }}>"{q}"</div><div style={{ fontFamily:F.body, fontSize:15, color:C.mid }}>{a}</div></div>)}
       </div>}
 
       <div style={{ ...lbl, margin:"14px 0 8px" }}>Call today ({due.length})</div>
