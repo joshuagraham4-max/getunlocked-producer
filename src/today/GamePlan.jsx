@@ -105,16 +105,18 @@ export default function GamePlan({ userId, avgCommission, onGoCalls }) {
   const emailTarget = (() => { try { return Number(localStorage.getItem(`gupEmailTarget:${userId}`)) || 10; } catch { return 10; } })();
   const v = settings?.values || {};
   const m = day.manual || {};
+  const withAdj = (a, rec) => { const j = (rec && rec.adj) || {}; const o = { ...a }; for (const k of Object.keys(o)) o[k] = Math.max(0, (o[k] || 0) + (j[k] || 0)); return o; };
+  const tot = withAdj(auto, day);
   const earnedParts = settings ? [
-    ["dial", auto.dials, "dials"], ["conv", auto.conv, "conversations"], ["email", auto.emails, "emails"], ["post", auto.posts, "group posts"], ["dm", auto.dms, "agent DMs"],
+    ["dial", tot.dials, "dials"], ["conv", tot.conv, "conversations"], ["email", tot.emails, "emails"], ["post", tot.posts, "group posts"], ["dm", tot.dms, "agent DMs"],
     ["appt", m.agentAppts || 0, "agent appointments"], ["app", m.apps || 0, "apps"], ["video", m.videos || 0, "videos"],
   ] : [];
   const DEFAULT_VAL = { dm:10, appt:200 };   // agent DMs $10 each, agent appointments set $200 each
   const val = (k) => (v[k] ?? DEFAULT_VAL[k] ?? 0);
   const earned = earnedParts.reduce((s, [k, n]) => s + n * val(k), 0);
 
-  const evaluate = useCallback((rec, a) => {
-    const crit = [];
+  const evaluate = useCallback((rec, a0) => {
+    const a = withAdj(a0, rec); const crit = [];
     if (routine) crit.push(["Morning ritual done", !!rec.pool && !rec.missed]);
     if (routine && tpl.gymTiers.length) crit.push(["Gym done", !!(rec.done || {})["Gym"]]);
     crit.push(["Call block worked", !!(rec.done || {})["Call block"]]);
@@ -159,7 +161,7 @@ export default function GamePlan({ userId, avgCommission, onGoCalls }) {
     }, 500);
   }, [userId, KEY, evaluate, auto, earned]);
   const update = (fn) => setDay((d) => { const n = fn(d); persist(n); return n; });
-  useEffect(() => { if (loaded.current) persist(day); }, [auto.dials, auto.conv, auto.emails, auto.posts, auto.dms]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (loaded.current) persist(day); }, [auto.dials, auto.conv, auto.emails, auto.posts, auto.dms, earned]); // eslint-disable-line react-hooks/exhaustive-deps
   const saveSettings = async (patch) => {
     const n = { ...settings, ...patch }; setSettings(n);
     await supabase.from("game_plan_settings").upsert({ user_id:userId, settings:n, updated_at:new Date().toISOString() });
@@ -189,11 +191,15 @@ export default function GamePlan({ userId, avgCommission, onGoCalls }) {
   const cbLocal = plan.find((r) => r.f.lock);
   const tzName = (TZ.find(([z]) => z === settings.callBlock.tz) || [, "local"])[1];
 
-  const Count = ({ label, n, goal, autoTag, k }) => (
+  const Count = ({ label, n, goal, autoTag, k, adj }) => (
     <div style={{border:`1px solid ${C.rule}`, borderRadius:8, padding:"10px 12px", background:"#fff"}}>
-      <div style={{...lbl, fontSize:11}}>{label}{autoTag && <span style={{fontFamily:F.mono, fontSize:9, letterSpacing:0, color:C.green, background:C.greenBg, padding:"1px 6px", borderRadius:9, marginLeft:6}}>AUTO</span>}</div>
+      <div style={{...lbl, fontSize:11}}>{label}{autoTag && <span style={{fontFamily:F.mono, fontSize:9, letterSpacing:0, color:C.green, background:C.greenBg, padding:"1px 6px", borderRadius:9, marginLeft:6}}>AUTO</span>}{adj && ((day.adj || {})[adj] || 0) !== 0 && <span style={{fontFamily:F.mono, fontSize:9, letterSpacing:0, color:C.amber, marginLeft:6}}>{(day.adj[adj] > 0 ? "+" : "") + day.adj[adj]} MANUAL</span>}</div>
       <div style={{display:"flex", alignItems:"baseline", justifyContent:"space-between"}}>
         <div style={{fontFamily:F.cond, fontWeight:800, fontSize:26, color: goal && n >= goal ? C.green : C.ink}}>{n}{goal ? <span style={{fontSize:15, color:C.light, fontWeight:600}}> / {goal}</span> : null}</div>
+        {adj && <div style={{display:"flex", gap:4}}>
+          <button onClick={() => update((x) => ({ ...x, adj:{ ...x.adj, [adj]:((x.adj || {})[adj] || 0) - 1 } }))} style={{...btn, padding:"2px 9px"}} disabled={n <= 0}>-</button>
+          <button onClick={() => update((x) => ({ ...x, adj:{ ...x.adj, [adj]:((x.adj || {})[adj] || 0) + 1 } }))} style={{...btn, padding:"2px 9px"}}>+</button>
+        </div>}
         {k && <div style={{display:"flex", gap:4}}>
           <button onClick={() => update((x) => ({ ...x, manual:{ ...x.manual, [k]:Math.max(0, ((x.manual || {})[k] || 0) - 1) } }))} style={{...btn, padding:"2px 9px"}}>-</button>
           <button onClick={() => update((x) => ({ ...x, manual:{ ...x.manual, [k]:((x.manual || {})[k] || 0) + 1 } }))} style={{...btn, padding:"2px 9px"}}>+</button>
@@ -211,7 +217,7 @@ export default function GamePlan({ userId, avgCommission, onGoCalls }) {
       <div style={{background: callLive ? C.green : C.ink, color:"#fff", borderRadius:10, padding:"13px 18px", display:"flex", justifyContent:"space-between", alignItems:"center", gap:12, marginBottom:16, flexWrap:"wrap"}}>
         <div style={{fontFamily:F.cond, fontWeight:800, fontSize:22, letterSpacing:"0.03em", textTransform:"uppercase"}}>{callLive ? "Call block · live" : cur ? cur.n : "Between blocks"}</div>
         <div style={{display:"flex", gap:12, alignItems:"center", fontFamily:F.mono, fontSize:12}}>
-          {callLive ? <span>{fmt(settings.callBlock.start)}-{fmt(settings.callBlock.end)} {tzName} · {left} min left · {auto.dials} of {callTarget} calls</span>
+          {callLive ? <span>{fmt(settings.callBlock.start)}-{fmt(settings.callBlock.end)} {tzName} · {left} min left · {tot.dials} of {callTarget} calls</span>
             : <span>{cur ? `${left} min left` : ""}{cbLocal && !callLive ? ` · call block ${fmt(cbLocal.a)}` : ""}</span>}
           <button onClick={onGoCalls} style={{...btn, padding:"5px 12px", background:"#fff", color:C.ink, borderColor:"#fff"}}>Go to calls</button>
         </div>
@@ -239,13 +245,13 @@ export default function GamePlan({ userId, avgCommission, onGoCalls }) {
               </div>
             </div>
             <div style={{display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))", gap:10, marginTop:14}}>
-              <Count label="Dials" n={auto.dials} goal={callTarget} autoTag/>
-              <Count label="Conversations" n={auto.conv} goal={settings.targets.conv} autoTag/>
-              <Count label="Emails sent" n={auto.emails} goal={emailTarget} autoTag/>
-              <Count label="Posts (profile + groups)" n={auto.posts} goal={settings.targets.posts} autoTag/>
-              <Count label="Agent DMs" n={auto.dms} goal={10} autoTag/>
+              <Count label="Dials" n={tot.dials} goal={callTarget} autoTag adj="dials"/>
+              <Count label="Conversations" n={tot.conv} goal={settings.targets.conv} autoTag adj="conv"/>
+              <Count label="Emails sent" n={tot.emails} goal={emailTarget} autoTag adj="emails"/>
+              <Count label="Posts (profile + groups)" n={tot.posts} goal={settings.targets.posts} autoTag adj="posts"/>
+              <Count label="Agent DMs" n={tot.dms} goal={10} autoTag adj="dms"/>
               <Count label="Agent appts set" n={m.agentAppts || 0} k="agentAppts"/>
-              <Count label="Booked" n={auto.booked} autoTag/>
+              <Count label="Booked" n={tot.booked} autoTag adj="booked"/>
               {(settings.extraCounters || []).map((k) => <Count key={k} label={EXTRA[k] || k} n={m[k] || 0} k={k}/>)}
             </div>
             <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:"6px 14px", marginTop:14, fontSize:14}}>
@@ -288,7 +294,7 @@ export default function GamePlan({ userId, avgCommission, onGoCalls }) {
   );
 }
 
-function Timer({ options, label, onDone }) {
+function Timer({ options, label, onDone, checked, onCheck }) {
   const [left, setLeft] = useState(null); const total = useRef(0); const id = useRef(null);
   const stop = (log) => { clearInterval(id.current); id.current = null; if (log && onDone) onDone(Math.round((total.current - left) / 60)); setLeft(null); };
   const start = (mins) => { total.current = mins * 60; setLeft(mins * 60); clearInterval(id.current);
@@ -299,6 +305,7 @@ function Timer({ options, label, onDone }) {
       <span style={{fontFamily:F.cond, fontWeight:700, fontSize:14, minWidth:110}}>{label}</span>
       {left === null ? options.map((x) => <button key={x} onClick={() => start(x)} style={btn}>{x} min</button>)
         : <><span style={{fontFamily:F.mono, fontSize:16, minWidth:52, color: left === 0 ? C.red : C.ink}}>{left === 0 ? "Done" : `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`}</span><button onClick={() => stop(left > 0)} style={btn}>{left === 0 ? "Close" : "Stop"}</button></>}
+      {onCheck && <button onClick={onCheck} style={checked ? btnG : btn}>{checked ? "Done" : "Mark done"}</button>}
     </div>
   );
 }
@@ -313,9 +320,11 @@ function Routine({ day, update, tpl, cheer }) {
         <label style={{fontFamily:F.mono, fontSize:12, display:"flex", gap:6, alignItems:"center", color: day.missed ? C.red : C.mid}}><input type="checkbox" checked={!!day.missed} onChange={(e) => update((x) => ({ ...x, missed:e.target.checked, pool: e.target.checked ? false : x.pool }))} style={{accentColor:C.red}}/> I missed it today (adds the reset run)</label>
       </div>
       <div style={{display:"grid", gap:8, marginTop:12}}>
-        <Timer label="Meditation / prayer" options={[15, 20, 30]} onDone={(mins) => mins > 0 && update((x) => ({ ...x, med:[...(x.med || []), mins] }))}/>
-        <Timer label="X + Facebook" options={[5]}/>
-        <div style={{fontFamily:F.mono, fontSize:11, color:C.purple}}>{med.length ? `Today: ${med.reduce((a, b) => a + b, 0)} min across ${med.length} session${med.length > 1 ? "s" : ""}` : "No meditation logged yet today."}</div>
+        <Timer label="Meditation / prayer" options={[15, 20, 30]} onDone={(mins) => mins > 0 && update((x) => ({ ...x, med:[...(x.med || []), mins], checks:{ ...x.checks, med:true } }))}
+          checked={!!(day.checks || {}).med} onCheck={() => update((x) => ({ ...x, checks:{ ...x.checks, med:!(x.checks || {}).med } }))}/>
+        <Timer label="X + Facebook" options={[5]} onDone={() => update((x) => ({ ...x, checks:{ ...x.checks, fb:true } }))}
+          checked={!!(day.checks || {}).fb} onCheck={() => update((x) => ({ ...x, checks:{ ...x.checks, fb:!(x.checks || {}).fb } }))}/>
+        <div style={{fontFamily:F.mono, fontSize:11, color:C.purple}}>{med.length ? `Today: ${med.reduce((a, b) => a + b, 0)} min across ${med.length} session${med.length > 1 ? "s" : ""}` : (day.checks || {}).med ? "Meditation done today." : "No meditation logged yet today."}</div>
       </div>
       {tpl.gymTiers.length > 0 && <>
         <div style={{...lbl, marginTop:12}}>Gym today, ranked by what it costs</div>
