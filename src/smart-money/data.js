@@ -87,7 +87,7 @@ export const FOOTERS = {
 export const CARDS = [
   {
     ref: "EQP-01", bank: "equipment", name: "Equipment: The Bank Said No", lender: "",
-    audience: "business", license: "none", flyer: null, footer: "equipment", cta: "Book with me. 5 minutes to find out 👉 https://calendar.app.google/nz1sdrnBGK1D4LXh7",
+    audience: "business", license: "none", flyer: "/smart-money/flyers/EQP-01.png", footer: "equipment", cta: "Book with me. 5 minutes to find out 👉 https://calendar.app.google/nz1sdrnBGK1D4LXh7",
     painPoints: ["bank-no"], magnet: "book-5", skool: null,
     highlights: ["The bank said no. That's not the last word.", "Lenders who specialize in equipment, not one bank's checklist", "Most deals under $150K: application only", "Decisions in days, not weeks", "No upfront fees"],
     hooks: ["The bank said no. Now what?", "A bank no isn't the final answer.", "Your bank isn't the only lender.", "Turned down for the equipment you need?", "One no from one bank. That's all it was."],
@@ -153,7 +153,7 @@ export const CARDS = [
   },
   {
     ref: "EQP-P1", bank: "equipment", name: "Partners: Bankers & Credit Unions (Turn-Downs)", lender: "",
-    audience: "partner", license: "none", flyer: null, footer: "equipment", cta: "Book with me. 5 minutes to find out 👉 https://calendar.app.google/nz1sdrnBGK1D4LXh7",
+    audience: "partner", license: "none", flyer: "/smart-money/flyers/EQP-P1.png", footer: "equipment", cta: "Book with me. 5 minutes to find out 👉 https://calendar.app.google/nz1sdrnBGK1D4LXh7",
     painPoints: ["partner-turndowns"], magnet: "book-5", skool: null,
     highlights: ["Your turn-downs don't have to be dead ends", "I place equipment deals your bank can't", "Your client stays your client", "No cost to you or the client upfront", "A simple referral, no extra work"],
     hooks: ["What happens to the deals you turn down?", "Your no could be someone's yes.", "Turn-downs shouldn't cost you the relationship."],
