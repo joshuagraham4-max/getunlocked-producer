@@ -266,6 +266,7 @@ export default function InvestorImport({ userId, contacts, setContacts, onLinksC
       <HowTo id="pull-leads" {...GUIDES.pullLeads} defaultOpen={false}/>
       <HowTo id="lead-score" {...GUIDES.leadScore} defaultOpen={false}/>
       <div style={{display:"flex", gap:8, flexWrap:"wrap", alignItems:"center", marginBottom:8}}>
+        <a href="https://app.propstream.com/" target="_blank" rel="noreferrer" style={{...btn, display:"inline-block", textDecoration:"none"}}>Open PropStream</a>
         <label style={{...btnG, display:"inline-block"}}>Import PropStream file<input type="file" accept=".csv,text/csv,.json,application/json" onChange={onFile} style={{display:"none"}}/></label>
         {agentsWaiting.length > 0 && <button disabled={busy} onClick={async () => { const r = await addListingAgents(agentsWaiting); setMsg(`${r.made} listing agents added to Contacts, ${r.linked} linked to their property's owner.`); }} style={btn}>Add {agentsWaiting.length} listing agents</button>}
         {waiting.length > 0 && <button disabled={busy} onClick={async () => { const n = await toContacts(waiting); load(); setMsg(`${n} added to Contacts → Investor Leads.`); }} style={btn}>Add {waiting.length} waiting to Contacts</button>}
