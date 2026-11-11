@@ -69,8 +69,8 @@ function Tag({ children, tone = "neutral" }) {
   const t = { neutral: [C.bg, C.muted], investor: ["#E3F0FA", C.blue], consumer: ["#E4F5EE", C.teal], warn: [C.warnBg, C.warn], good: [C.goodBg, C.good] }[tone];
   return <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase", background: t[0], color: t[1], borderRadius: 999, padding: "3px 9px", whiteSpace: "nowrap" }}>{children}</span>;
 }
-const audTag = (c) => c.audience === "intro" ? <Tag tone="neutral">Intro · post once per group</Tag> : c.audience === "agent" ? <Tag tone="neutral">Real estate agents</Tag> : <Tag tone={c.audience}>{c.audience === "investor" ? "Investor" : "Consumer"}</Tag>;
-const licTag = (c) => (c.audience === "intro" || c.audience === "agent") ? null : c.license === "none" ? <Tag tone="good">No license needed · FL OK</Tag> : <Tag tone="warn">License required · CO only</Tag>;
+const audTag = (c) => c.audience === "intro" ? <Tag tone="neutral">Intro · post once per group</Tag> : c.audience === "agent" ? <Tag tone="neutral">Real estate agents</Tag> : c.audience === "business" ? <Tag tone="neutral">Business owners · equipment</Tag> : c.audience === "partner" ? <Tag tone="neutral">Referral partners · equipment</Tag> : <Tag tone={c.audience}>{c.audience === "investor" ? "Investor" : "Consumer"}</Tag>;
+const licTag = (c) => (c.audience === "intro" || c.audience === "agent") ? null : c.bank === "equipment" ? <Tag tone="warn">Nationwide · not CA</Tag> : c.license === "none" ? <Tag tone="good">No license needed · FL OK</Tag> : <Tag tone="warn">License required · CO only</Tag>;
 
 function Flyer({ card, size = "100%" }) {
   if (card.flyer) return <img src={card.flyer} alt={`${card.ref} flyer`} style={{ width: size, maxWidth: "100%", aspectRatio: "1/1", objectFit: "cover", borderRadius: 10, display: "block", border: `1px solid ${C.line}` }} />;
@@ -88,11 +88,16 @@ function PostKit({ card, copyKind = "short" }) {
   const m = MAGNETS[card.magnet];
   const body = card[copyKind];
   const footer = FOOTERS[card.footer];
-  const full = `${body}\n\n${link || BRAND.bookingCta}\n\n${footer}`;
-  const withBooking = `${body}${link ? `\n\n${link}` : ""}\n\n${BRAND.bookingCta}\n\n${footer}`;
+  const cta = card.cta || BRAND.bookingCta;
+  const full = `${body}\n\n${link || cta}\n\n${footer}`;
+  const withBooking = `${body}${link ? `\n\n${link}` : ""}\n\n${cta}\n\n${footer}`;
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12, minWidth: 0 }}>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>{audTag(card)}{licTag(card)}<Tag>REF {card.ref}</Tag>{card.was && <Tag>was {card.was}</Tag>}</div>
+      {card.hooks && <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 10, padding: 14 }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>Color-block test hooks</div>
+        {card.hooks.map((h) => <div key={h} style={{ fontSize: 14, marginBottom: 4 }}>{h} <CopyBtn text={h} label="Copy" /></div>)}
+      </div>}
       {m && <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 10, padding: 14 }}>
         <div style={{ fontSize: 12, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>Lead magnet</div>
         <div style={{ fontWeight: 700 }}>{m.name}</div>
@@ -191,7 +196,7 @@ function Flyers({ open }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-        <Pill v="all" cur={aud} set={setAud}>All</Pill><Pill v="investor" cur={aud} set={setAud}>Investor</Pill><Pill v="consumer" cur={aud} set={setAud}>Consumer</Pill>
+        <Pill v="all" cur={aud} set={setAud}>All</Pill><Pill v="investor" cur={aud} set={setAud}>Investor</Pill><Pill v="consumer" cur={aud} set={setAud}>Consumer</Pill><Pill v="business" cur={aud} set={setAud}>Equipment: owners</Pill><Pill v="partner" cur={aud} set={setAud}>Equipment: partners</Pill>
         <span style={{ width: 12 }} />
         <Pill v="all" cur={lic} set={setLic}>Any license</Pill><Pill v="none" cur={lic} set={setLic}>No license (FL OK)</Pill><Pill v="required" cur={lic} set={setLic}>CO only</Pill>
       </div>

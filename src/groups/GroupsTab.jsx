@@ -23,6 +23,7 @@ const TOOLS = [
   { name:"Rental Property Calculator", url:CALC, note:"Cash flow and whether the rent qualifies the loan. Saves the lead to Contacts." },
   { name:"Equity Unlock Estimator", url:`${ORIGIN}/equity-unlock`, note:"Homeowners: equity after selling, debt payoff, and down payment toward the next home (BBYS-01). Saves the lead to Contacts." },
   { name:"Free Portfolio Snapshot", url:`${ORIGIN}/portfolio-snapshot`, note:"Investors send the spreadsheet they already keep: no credit pull, no application (PORT-01). Saves to Contacts with the snapshot ready on the contact." },
+  { name:"Florida UCC search (equipment leads)", url:"https://www.floridaucc.com/", note:"Florida Secured Transaction Registry: search by debtor (business) name or secured party (a lender like an equipment finance company) to see who financed equipment and when. Filings 3-4 years old = replacement/upgrade candidates. Other states: each Secretary of State runs its own UCC search." },
   { name:"Book a call with Joshua", url:BOOKING, note:"Google booking page." },
 ];
 const COMING = ["Income Qualifier", "DPA estimator", "Medical Pro Buying-Power Check"];
