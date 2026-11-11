@@ -293,10 +293,10 @@ Your equity, deployed. Your portfolio, expanded. Run the REAL numbers on your pr
   },
   {
     ref: "PORT-01", bank: "nonqm", name: "Free Portfolio Snapshot: No Credit Pull", lender: "",
-    audience: "investor", license: "none", flyer: null, footer: "business",
+    audience: "investor", license: "none", flyer: "/smart-money/flyers/PORT-01.png", footer: "business",
     painPoints: ["no-credit-pull", "equity-trapped", "low-rate-locked"], magnet: "portfolio-snapshot", skool: "Investors",
     highlights: ["No credit pull", "No application", "Just send the spreadsheet you already keep", "Equity, cash-out and cash flow by property", "Back to you same day or within 24 hours"],
-    notes: "Landing page: /portfolio-snapshot (?ref=PORT-01). Lead lands in Contacts tagged 'portfolio snapshot lead' with a phone alert; the contact shows the Snapshot panel (column mapping, per-property math, print to PDF). Business purpose. Flyer not made yet.",
+    notes: "Landing page: /portfolio-snapshot (?ref=PORT-01). Lead lands in Contacts tagged 'portfolio snapshot lead' with a phone alert; the contact shows the Snapshot panel (column mapping, per-property math, print to PDF). Business purpose.",
     short: `Investors: stop handing out your credit just to see your options.
 
 Send me the spreadsheet you already keep on your rentals. Address, value, loan, rate, rent. Messy is fine.
@@ -330,10 +330,10 @@ Investment properties, business purpose. Send yours here 👇`,
   },
   {
     ref: "HEL-01", bank: "nonqm", name: "Keep Your Low Rate: Rental Equity Second", lender: "RISE TPO",
-    audience: "investor", license: "none", flyer: null, footer: "business",
+    audience: "investor", license: "none", flyer: "/smart-money/flyers/HEL-01.png", footer: "business",
     painPoints: ["low-rate-locked", "equity-trapped", "str", "self-employed"], magnet: "rental-calc", skool: "Investors",
     highlights: ["Keep your low-rate first mortgage", "Standalone second on rentals, Airbnbs and more", "Up to 90% combined LTV, loans to $750K", "Qualify on the property's rent (1.00 ratio), 660 FICO", "Fixed terms; short prepay options"],
-    notes: "RISE Business Purpose Closed-End Second DSCR (AE email Nov 9, 2026; get the full matrix before quoting). Max CLTV 90%, to $750K, 660 FICO, 1.00 DSCR, primary/2nd home/NOO eligible, first-time investors and STR OK, 10/20/30-yr fixed, 1/2/3-yr prepay. Business purpose of proceeds required. Flyer not made yet. Business-purpose content: real numbers OK, mark investment property / business purpose.",
+    notes: "RISE Business Purpose Closed-End Second DSCR (AE email Nov 9, 2026; get the full matrix before quoting). Max CLTV 90%, to $750K, 660 FICO, 1.00 DSCR, primary/2nd home/NOO eligible, first-time investors and STR OK, 10/20/30-yr fixed, 1/2/3-yr prepay. Business purpose of proceeds required. Business-purpose content: real numbers OK, mark investment property / business purpose.",
     short: `Got a 3% mortgage you'll never give up? You don't have to.
 
 You can pull equity out of your rental WITHOUT refinancing the low-rate loan you already have. A second loan sits behind your first and qualifies on the property's rent, not your tax returns.
