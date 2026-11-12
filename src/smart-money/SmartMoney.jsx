@@ -102,6 +102,7 @@ function PostKit({ card, copyKind = "short" }) {
         <div style={{ fontSize: 12, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>Lead magnet</div>
         <div style={{ fontWeight: 700 }}>{m.name}</div>
         {link ? <div style={{ fontSize: 13, color: C.blue, wordBreak: "break-all", userSelect: "all" }}>{link}</div>
+              : m.booking ? <div style={{ fontSize: 13, color: C.muted }}>Goes straight to your booking page. "Copy full post" ends with the 5-minute booking line and link.</div>
               : <div style={{ fontSize: 13, color: C.warn }}>Not built yet — "Copy full post" uses your booking link instead.</div>}
       </div>}
       <pre style={{ whiteSpace: "pre-wrap", fontFamily: F.body, fontSize: 14, lineHeight: 1.55, margin: 0, background: C.card, border: `1px solid ${C.line}`, borderRadius: 10, padding: 14 }}>{body}</pre>

@@ -24,7 +24,7 @@ export const MAGNETS = {
   "portfolio-snapshot": { name: "Free Portfolio Snapshot (no credit pull)", path: "/portfolio-snapshot", live: true },
   "fthb-class": { name: "First-Time Homebuyer Class", path: null, live: false },
   "fthb-dpa": { name: "Down Payment Help Check (then Skool: Homebuyers)", path: null, live: false },
-  "book-5": { name: "Book with me: 5 minutes to find out", path: null, live: false },
+  "book-5": { name: "Book with me: 5 minutes to find out", path: null, live: true, booking: true },
   "agent-strategy": { name: "Free Agent Deal Strategies (then Skool: Agents)", path: null, live: false },
 };
 
