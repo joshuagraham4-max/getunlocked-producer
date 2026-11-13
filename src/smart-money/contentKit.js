@@ -4,11 +4,22 @@ import { BRAND } from "./data.js";
 const BOOK = BRAND.booking;
 const SNAP = "https://getunlocked-producer.vercel.app/portfolio-snapshot?ref=PORT-01";
 const APPLY = "https://getunlocked-producer.vercel.app/equipment-apply";
-const WEB = "[webinar link]";
+// Webinar: Thursdays 1 PM ET on Google Meet. Sign-ups through a Google Form (Meet link in the form's confirmation message).
+// When the form exists, replace the placeholder below with its link: every video, email and post picks it up.
+const WEB = "[registration form link]";
+const WHEN = "Thursdays at 1 PM ET";
 const vid = (hook, pain, twist, solve, cta) =>
   `HOOK: ${hook}\n\nPAIN: ${pain}\n\nTWIST: ${twist}\n\nSOLVE:\n${solve.map((s) => "- " + s).join("\n")}\n\nCTA: ${cta}`;
 
 export const KIT = [
+  { id:"webinar-setup", title:"Webinar setup (do once)", note:"Thursdays 1 PM ET on Google Meet, sign-ups through a Google Form. Then send the form link to Claude to swap in everywhere.", items:[
+    { id:"s-meet", kind:"Setup", title:"Create the recurring Google Meet", steps:["Done"],
+      text:`Google Calendar → new event "Agent Prospecting Training (live)" → Thursdays, 1:00-1:45 PM ET → Repeat: Weekly on Thursday → Add Google Meet video conferencing → Save.\n\nCopy the Meet link. You'll paste it into the form's confirmation message.` },
+    { id:"s-form", kind:"Setup", title:"Create the Google Form", steps:["Built","Confirmation + alerts on"],
+      text:`Title: Free Agent Prospecting Training (Thursdays 1 PM ET)\nDescription: The 30-minute daily prospecting routine: who to call, what to say, and scripts that don't sound like a pitch. Live on Google Meet with Joshua Graham.\n\nQuestions (all required except brokerage):\n1. First name (short answer)\n2. Last name (short answer)\n3. Email (short answer, response validation: email)\n4. Mobile phone (short answer)\n5. Brokerage (short answer, optional)\n6. Do you have a team? (multiple choice: Yes, I lead a team / Yes, I'm on a team / No)\n7. Do you work with investors? (multiple choice: Yes / Some / Not yet)\n\nSettings → Presentation → Confirmation message:\n"You're in. We meet live Thursdays at 1 PM ET on Google Meet: [paste Meet link]. Add it to your calendar now. See you there! Joshua Graham, ${BRAND.phone}"\n\nResponses tab → three dots → Get email notifications for new responses: ON.\nResponses tab → Link to Sheets (keeps a running list).` },
+    { id:"s-link", kind:"Setup", title:"Send the form link to Claude", steps:["Sent"],
+      text:`Copy the form's link (Send → link icon → shorten URL) and paste it to Claude. It replaces [registration form link] in the course video caption, all 3 emails and the post.` },
+  ]},
   { id:"eqp-own", title:"Equipment: business owners", note:"Caption link: booking or application page. Hook as on-screen text.", items:[
     { id:"v-eqp-bankno", kind:"Video", title:"The bank said no", steps:["Recorded","Posted"],
       text: vid("Your bank said no on the equipment. Here's what most owners don't know.",
@@ -78,21 +89,21 @@ export const KIT = [
         "Let me run one training for your team this month. 5 minutes to set it up."),
       caption:`Hi [Name], I train agent teams on daily prospecting systems, plus the lending side that helps them win offers. Open to one free session for your team this month? ${BOOK}` },
   ]},
-  { id:"course", title:"Agent Prospecting Course → webinar", note:"Add the webinar date, time and link before sending. [webinar link] is a placeholder.", items:[
+  { id:"course", title:"Agent Prospecting Course → webinar", note:"Live on Google Meet, Thursdays at 1 PM ET. [registration form link] is a placeholder until the Google Form is made (see Webinar setup).", items:[
     { id:"v-c-video", kind:"Video", title:"Most agents quit in week two", steps:["Recorded","Posted"],
       text: vid("Most agents quit prospecting in week two. Here's why.",
         "You call 20 people, nobody picks up, it feels awkward, and you stop. Then the pipeline dries up 90 days later.",
         "The fix isn't more willpower. It's a short list, the right reason to call and a daily target you can actually hit.",
         ["The free webinar covers who to call today and why.", "It includes scripts that don't sound like a pitch.", "And a 30-minute daily routine that builds a pipeline."],
-        "Free live training. Save your seat, link's below."), caption:`Free live training for agents: the 30-minute daily prospecting routine 👉 ${WEB}` },
+        "Free live training, " + WHEN + ". Save your seat, link's below."), caption:`Free live training for agents, ${WHEN}: the 30-minute daily prospecting routine 👉 ${WEB}` },
     { id:"e-c-1", kind:"Email 1", title:"Send right away", steps:["Sent"],
-      text:`Subject: Why prospecting stops working in week two\n\nMost agents don't fail at prospecting; they quit before it works. The calls feel awkward, nobody answers, and it's easy to stop.\n\nOn [date] I'm teaching the daily system I use: who to call, what to say and how to make it take 30 minutes a day. It's free, and you'll get the scripts.\n\nSave your seat: ${WEB}\n\nJoshua Graham\n${BRAND.phone}` },
+      text:`Subject: Why prospecting stops working in week two\n\nMost agents don't fail at prospecting; they quit before it works. The calls feel awkward, nobody answers, and it's easy to stop.\n\n${WHEN} I'm teaching the daily system I use, live on Google Meet: who to call, what to say and how to make it take 30 minutes a day. It's free, and you'll get the scripts.\n\nSave your seat: ${WEB}\n\nJoshua Graham\n${BRAND.phone}` },
     { id:"e-c-2", kind:"Email 2", title:"2 days later", steps:["Sent"],
       text:`Subject: The one reason to call that always works\n\nCold calls feel bad because there's no reason behind them. "Just checking in" is not a reason. A home value update, a rate change or a neighbor's sale is.\n\nOn the webinar I'll show you how to find a real reason for every call on your list.\n\n${WEB}\n\nJoshua Graham\n${BRAND.phone}` },
     { id:"e-c-3", kind:"Email 3", title:"Day before", steps:["Sent"],
-      text:`Subject: Tomorrow: your 30-minute prospecting routine\n\nQuick reminder: tomorrow at [time] I'm walking through the full daily routine, including the call list, the scripts and how to track it so you actually stick with it.\n\nBring your questions.\n\n${WEB}\n\nJoshua Graham\n${BRAND.phone}` },
+      text:`Subject: Tomorrow: your 30-minute prospecting routine\n\nQuick reminder: tomorrow at 1 PM ET I'm walking through the full daily routine, including the call list, the scripts and how to track it so you actually stick with it.\n\nBring your questions.\n\n${WEB}\n\nJoshua Graham\n${BRAND.phone}` },
     { id:"p-c-a", kind:"Post", title:"Prospecting stops in week two", steps:["Posted"],
-      text:`AGENTS · FREE TRAINING\nProspecting stops in week two. Here's the fix.\nA 30-minute daily routine with real reasons to call.\nFree live training. Scripts included.\n\nMost agents don't fail at prospecting. They quit before it works. I'm teaching the daily system I use, live and free. Save your seat 👉 ${WEB}` },
+      text:`AGENTS · FREE TRAINING\nProspecting stops in week two. Here's the fix.\nA 30-minute daily routine with real reasons to call.\nFree live training. Scripts included.\n\nMost agents don't fail at prospecting. They quit before it works. I'm teaching the daily system I use, live and free, ${WHEN}. Save your seat 👉 ${WEB}` },
     { id:"p-c-b", kind:"Post", title:"Your buyer's budget might be too small", steps:["Posted"],
       text:`AGENTS · BUYER APPROVALS\nYour buyer's budget might be too small.\nRetail pricing can shrink approvals, and nobody notices.\nWholesale pricing. Same buyer, bigger budget.\n\nBefore your buyer loses another house by $20K, let me run a second look on their approval. 5 minutes 👉 ${BOOK}` },
     { id:"p-c-c", kind:"Post", title:"Your team needs a system", steps:["Posted"],
