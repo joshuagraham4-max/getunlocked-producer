@@ -24,7 +24,12 @@ const TOOLS = [
   { name:"Equity Unlock Estimator", url:`${ORIGIN}/equity-unlock`, note:"Homeowners: equity after selling, debt payoff, and down payment toward the next home (BBYS-01). Saves the lead to Contacts." },
   { name:"Free Portfolio Snapshot", url:`${ORIGIN}/portfolio-snapshot`, note:"Investors send the spreadsheet they already keep: no credit pull, no application (PORT-01). Saves to Contacts with the snapshot ready on the contact." },
   { name:"Florida UCC search (equipment leads)", url:"https://www.floridaucc.com/", note:"Florida Secured Transaction Registry: search by debtor (business) name or secured party (a lender like an equipment finance company) to see who financed equipment and when. Filings 3-4 years old = replacement/upgrade candidates. Other states: each Secretary of State runs its own UCC search." },
+  { name:"Equipment financing application", url:`${ORIGIN}/equipment-apply`, note:"Business owners: quick equipment application, no SSN. Saves to Contacts as an equipment application lead." },
+  { name:"Equipment application checklist (PDF)", url:`${ORIGIN}/equipment/Graham_Financial_Equipment_Checklist.pdf`, note:"What to send for app-only (under $75K) and larger deals." },
   { name:"Book a call with Joshua", url:BOOKING, note:"Google booking page." },
+  { name:"Apply (mortgage)", url:"https://approvedbyjoshua.com", note:"Mortgage application." },
+  { name:"PropStream", url:"https://app.propstream.com/", note:"Investor and property data." },
+  { name:"Sunbiz entity search (FL)", url:"https://search.sunbiz.org/Inquiry/CorporationSearch/ByName", note:"Look up the people behind a Florida LLC." },
 ];
 const COMING = ["Income Qualifier", "DPA estimator", "Medical Pro Buying-Power Check"];
 const IMAGES = [ { name:"Plum suit", src:"/groups/JG-SaveDeals-plum.png" }, { name:"Plaid suit", src:"/groups/JG-SaveDeals-plaid.png" } ];
@@ -32,9 +37,9 @@ import { SIGN_BLOCK } from "./askClaude.js";
 const fill = (t) => t.replaceAll("{CALC}", CALC).replaceAll("{BOOK}", BOOKING).replaceAll("{SIGN}", SIGN_BLOCK);
 const copy = (t) => navigator.clipboard?.writeText(t);
 
-export default function GroupsTab({ userId, onContact }) {
+export default function GroupsTab({ userId, onContact, mode = "marketing" }) {
   const [posts, setPosts] = useState([]); const [groups, setGroups] = useState([]); const [log, setLog] = useState([]);
-  const [view, setView] = useState("today");
+  const [view, setView] = useState(mode === "links" ? "tools" : "today");
   const [edit, setEdit] = useState(null); const [newG, setNewG] = useState({ name:"", url:"", members:"", rules:"", promo_day:"" });
   const [pick, setPick] = useState({}); const [msg, setMsg] = useState("");
   const [showJob, setShowJob] = useState(false); const [sent, setSent] = useState(false);
@@ -82,9 +87,9 @@ export default function GroupsTab({ userId, onContact }) {
 
   return (
     <div>
-      <div style={{display:"flex", gap:8, marginBottom:14, flexWrap:"wrap"}}>
-        <Tab k="profile" l="Profile posts"/><Tab k="today" l={`Group posts ${postedToday}/${active.length}`}/><Tab k="groups" l={`Groups ${joined.length}/${groups.length}`}/><Tab k="outreach" l="Agent outreach"/><Tab k="flyers" l="Flyers"/><Tab k="tools" l="Tools & links"/><Tab k="bank" l="Post bank"/>
-      </div>
+      {mode !== "links" && <div style={{display:"flex", gap:8, marginBottom:14, flexWrap:"wrap"}}>
+        <Tab k="profile" l="Profile posts"/><Tab k="today" l={`Group posts ${postedToday}/${active.length}`}/><Tab k="groups" l={`Groups ${joined.length}/${groups.length}`}/><Tab k="flyers" l="Flyers"/><Tab k="bank" l="Post bank"/>
+      </div>}
       {msg && <div style={{fontFamily:F.mono, fontSize:12, color:C.red, marginBottom:10}}>{msg}</div>}
 
       {view === "profile" && <ErrorBoundary label="Profile posts"><ProfilePosts userId={userId}/></ErrorBoundary>}

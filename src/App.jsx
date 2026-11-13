@@ -5,6 +5,7 @@ import ContactsTab from "./contacts/ContactsTab.jsx";
 import RadarTab from "./radar/RadarTab.jsx";
 import CallsTab from "./calls/CallsTab.jsx";
 import GroupsTab from "./groups/GroupsTab.jsx";
+import AgentOutreach from "./groups/AgentOutreach.jsx";
 import EquipmentTab from "./equipment/EquipmentTab.jsx";
 import ErrorBoundary from "./ErrorBoundary.jsx";
 import GamePlan from "./today/GamePlan.jsx";
@@ -489,6 +490,7 @@ export default function App() {
   const [dayMode, setDayMode] = useState(() => { try { return localStorage.getItem("gupDayMode:"+gpDay()) || "prospect"; } catch { return "prospect"; } });
   const setDayModeSaved = (k) => { setDayMode(k); try { localStorage.setItem("gupDayMode:"+gpDay(), k); } catch {} };
   // Stripped-down nav: Calls, Contacts, Radar. Everything else is hidden behind "More" (nothing deleted).
+  const [lastSub, setLastSub] = useState({ cash:"calls", marketing:"groups", tools:"links" });
   const [showMore, setShowMore] = useState(() => { try { return localStorage.getItem("gupShowMore") === "1"; } catch { return false; } });
   const toggleMore = () => setShowMore((v) => { try { localStorage.setItem("gupShowMore", v ? "0" : "1"); } catch {} return !v; });
   const [profile, setProfile] = useState({name:"",partnerName:"",partnerPhone:"",avgCommission:4000,baselineClosings:2});
@@ -733,7 +735,19 @@ export default function App() {
     }
   }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const navTabs = [["today","Today"],["calls","Calls"],["contacts","Contacts"],["radar","Radar"],["groups","Groups"]].concat(isAdmin?[["equipment","Equipment"]]:[]).concat(showMore ? [["scripts","Scripts"],["ioi","IOI"],["team","Team"]].concat(isAdmin?[["posts","Posts"]]:[]) : []).concat([["__more", showMore ? "Less" : "More"]]);
+  // Navigation by kind of work: Today, Cash (talking to people), Marketing (putting content out), Tools.
+  // Each section has sub-tabs; `tab` is still the sub-tab id, so every existing setTab("contacts") etc. keeps working.
+  const SUBS = {
+    cash:[["calls","Calls"],["contacts","Contacts"],["radar","Radar"],["partners","Partners"]].concat(isAdmin?[["equipment","Equipment"]]:[]).concat([["scripts","Call scripts"]]),
+    marketing:[["groups","Posts & groups"]].concat(isAdmin?[["posts","Smart Money"]]:[]).concat([["ioi","IOI posts"]]),
+    tools:[["links","Links"]].concat(isAdmin?[["matrix","Lender matrix"]]:[]).concat([["team","Settings"]]),
+  };
+  const sectionOf = (t) => Object.keys(SUBS).find((k) => SUBS[k].some(([id]) => id === t)) || "today";
+  const section = sectionOf(tab);
+  const navTabs = [["today","Today"],["cash","Cash"],["marketing","Marketing"],["tools","Tools"]];
+  const goSection = (id) => { if (id === "today") { setTab("today"); } else { const last = lastSub[id]; setTab(SUBS[id].some(([x]) => x === last) ? last : SUBS[id][0][0]); } setReturnTab(null); setRebuildOk(false); };
+  const pageTitle = (Object.values(SUBS).flat().find(([id]) => id === tab)?.[1] || (tab === "history" ? "History" : "Today")).toUpperCase();
+  useEffect(() => { const sec = sectionOf(tab); if (sec !== "today") setLastSub((p) => (p[sec] === tab ? p : { ...p, [sec]:tab })); }, [tab]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (tab==="team" && isAdmin) loadTeamData(); }, [tab, isAdmin]);
 
   const tomTimer = useRef(null);
@@ -1198,10 +1212,17 @@ export default function App() {
           </div>
           <nav style={{padding:"16px 0",flex:1}}>
             {navTabs.map(([id,lbl])=>(
-              <button key={id} onClick={()=>{ if(id==="__more"){toggleMore();return;} setTab(id);setReturnTab(null);setRebuildOk(false);}}
-                style={{display:"block",width:"100%",padding:"11px 20px",border:"none",textAlign:"left",background:tab===id?C.green:"transparent",color:tab===id?"#fff":"#888",fontFamily:F.cond,fontSize:14,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer",transition:"all 0.15s",borderLeft:tab===id?"3px solid #fff":"3px solid transparent"}}>
+              <div key={id}>
+              <button onClick={()=>goSection(id)}
+                style={{display:"block",width:"100%",padding:"11px 20px",border:"none",textAlign:"left",background:section===id?C.green:"transparent",color:section===id?"#fff":"#888",fontFamily:F.cond,fontSize:14,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer",transition:"all 0.15s",borderLeft:section===id?"3px solid #fff":"3px solid transparent"}}>
                 {lbl}
               </button>
+              {section===id && SUBS[id] && SUBS[id].map(([sid,sl])=>(
+                <button key={sid} onClick={()=>{setTab(sid);setReturnTab(null);setRebuildOk(false);}}
+                  style={{display:"block",width:"100%",padding:"7px 20px 7px 34px",border:"none",textAlign:"left",background:"transparent",color:tab===sid?"#fff":"#888",fontFamily:F.cond,fontSize:13,fontWeight:tab===sid?800:600,letterSpacing:"0.04em",textTransform:"uppercase",cursor:"pointer"}}>
+                  {tab===sid?"› ":""}{sl}
+                </button>))}
+              </div>
             ))}
           </nav>
           <div style={{padding:"16px 20px",borderTop:"1px solid #333"}}>
@@ -1219,7 +1240,7 @@ export default function App() {
         <div style={{fontFamily:F.cond,fontSize:10,fontWeight:600,letterSpacing:"0.2em",textTransform:"uppercase",color:C.light,marginBottom:3}}>Get Unlocked Producer</div>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end"}}>
           <div style={{fontFamily:F.cond,fontSize:22,fontWeight:800,color:C.ink,lineHeight:1}}>
-            {profile.name?.toUpperCase()} <span style={{color:C.green}}>— {tab==="today"?"TODAY":tab==="calls"?"CALLS":tab==="radar"?"RADAR":tab==="contacts"?"CONTACTS":tab==="scripts"?"SCRIPTS":tab==="ioi"?"IOI":tab==="history"?"HISTORY":tab==="posts"?"SMART MONEY POSTS":tab==="groups"?"GROUPS":tab==="equipment"?"EQUIPMENT":"TEAM"}</span>
+            {profile.name?.toUpperCase()} <span style={{color:C.green}}>— {pageTitle}</span>
           </div>
           <div style={{textAlign:"right"}}>
             <div style={{fontFamily:F.mono,fontSize:10,color:C.mid}}>{dateStr}</div>
@@ -1233,7 +1254,7 @@ export default function App() {
       {isWide && (
         <div style={{marginBottom:28}}>
           <div style={{fontFamily:F.cond,fontSize:32,fontWeight:900,color:C.ink,lineHeight:1}}>
-            {tab==="today"?"TODAY":tab==="calls"?"CALLS":tab==="radar"?"RADAR":tab==="contacts"?"CONTACTS":tab==="scripts"?"SCRIPTS":tab==="ioi"?"IOI POSTS":tab==="history"?"HISTORY":tab==="posts"?"SMART MONEY POSTS":tab==="groups"?"GROUPS":tab==="equipment"?"EQUIPMENT":"TEAM"}
+            {pageTitle}
           </div>
           <div style={{fontFamily:F.mono,fontSize:10,color:C.light,marginTop:4}}>{dateStr}</div>
         </div>
@@ -1243,7 +1264,14 @@ export default function App() {
       {!isWide && (
       <div style={{display:"grid",gridTemplateColumns:`repeat(${isAdmin?4:4},1fr)`,gap:3,marginBottom:12,background:C.card,border:`1px solid ${C.rule}`,borderRadius:8,padding:4}}>
         {navTabs.map(([id,lbl])=>(
-          <button key={id} onClick={()=>{ if(id==="__more"){toggleMore();return;} setTab(id);setReturnTab(null);setRebuildOk(false);}} style={{padding:"8px 2px",borderRadius:6,border:"none",background:tab===id?C.green:"transparent",color:tab===id?"#fff":C.mid,fontFamily:F.cond,fontSize:11,fontWeight:700,letterSpacing:"0.03em",textTransform:"uppercase",cursor:"pointer",transition:"all 0.15s"}}>{lbl}</button>
+          <button key={id} onClick={()=>goSection(id)} style={{padding:"8px 2px",borderRadius:6,border:"none",background:section===id?C.green:"transparent",color:section===id?"#fff":C.mid,fontFamily:F.cond,fontSize:12,fontWeight:700,letterSpacing:"0.03em",textTransform:"uppercase",cursor:"pointer",transition:"all 0.15s"}}>{lbl}</button>
+        ))}
+      </div>
+      )}
+      {!isWide && SUBS[section] && (
+      <div style={{display:"flex",gap:6,overflowX:"auto",marginBottom:14,paddingBottom:2}}>
+        {SUBS[section].map(([sid,sl])=>(
+          <button key={sid} onClick={()=>{setTab(sid);setReturnTab(null);setRebuildOk(false);}} style={{flex:"0 0 auto",padding:"7px 12px",borderRadius:16,border:`1px solid ${tab===sid?C.green:C.rule}`,background:tab===sid?C.green+"18":C.card,color:tab===sid?C.green:C.mid,fontFamily:F.cond,fontSize:12,fontWeight:700,letterSpacing:"0.03em",textTransform:"uppercase",cursor:"pointer",whiteSpace:"nowrap"}}>{sl}</button>
         ))}
       </div>
       )}
@@ -1592,6 +1620,14 @@ export default function App() {
       {(tab==="calls" || callsSeen) && <div style={{display:tab==="calls"?"block":"none"}}><ErrorBoundary label="Calls"><CallsTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onOpen={(c)=>{setOpenContactId(c.id);setReturnTab("calls");setTab("contacts");}} onGoRadar={()=>setTab("radar")}/></ErrorBoundary></div>}
       {(tab==="radar" || radarSeen) && <div style={{display:tab==="radar"?"block":"none"}}><ErrorBoundary label="Radar"><RadarTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onOpen={(c)=>{setOpenContactId(c.id);setReturnTab("radar");setTab("contacts");}} onGoCalls={()=>setTab("calls")}/></ErrorBoundary></div>}
       {tab==="groups" && <ErrorBoundary label="Groups"><GroupsTab userId={user?.id} onContact={(c) => setContacts((p) => p.some((x) => x.id === c.id) ? p.map((x) => (x.id === c.id ? c : x)) : [...p, c])}/></ErrorBoundary>}
+      {tab==="partners" && <ErrorBoundary label="Partners"><AgentOutreach userId={user?.id} onContact={(c) => setContacts((p) => p.some((x) => x.id === c.id) ? p.map((x) => (x.id === c.id ? c : x)) : [...p, c])}/></ErrorBoundary>}
+      {tab==="links" && <ErrorBoundary label="Links"><GroupsTab userId={user?.id} mode="links"/></ErrorBoundary>}
+      {tab==="matrix" && isAdmin && (
+        <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:10,padding:18}}>
+          <div style={{fontFamily:F.cond,fontWeight:800,fontSize:20,color:C.ink}}>Lender matrix</div>
+          <div style={{fontFamily:F.body,fontSize:15,color:C.mid,marginTop:6,lineHeight:1.5}}>Coming next. One place to match a scenario to a lender: DSCR (incl. STR and 5-8 units), closed-end seconds, bank statement, no-ratio, bridge / fix-and-flip, hard money and wholesale. Joshua is gathering the lender data.</div>
+        </div>
+      )}
       {tab==="equipment" && isAdmin && <ErrorBoundary label="Equipment"><EquipmentTab userId={user?.id}/></ErrorBoundary>}
       {tab==="scripts" && <ErrorBoundary label="Scripts"><ScriptsTab/></ErrorBoundary>}
       {tab==="ioi" && <ErrorBoundary label="IOI"><IOITab/></ErrorBoundary>}
