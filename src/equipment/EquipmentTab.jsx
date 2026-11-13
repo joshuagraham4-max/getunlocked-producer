@@ -150,6 +150,8 @@ export default function EquipmentTab({ userId }) {
           {niches.map((n) => <button key={n} style={niche===n?btnG:btn} onClick={() => setNiche(n)}>{n}</button>)}
           <button style={btn} onClick={() => setOpen(open==="scripts"?"":"scripts")}>{open==="scripts"?"Hide scripts":"Scripts"}</button>
           {!missing && <button style={btn} onClick={() => setAdd(add ? null : { name:"", niche:"", address:"", phone:"", contact_name:"", email:"", notes:"" })}>{add ? "Cancel" : "Add dealer"}</button>}
+          <a href="/equipment-apply" target="_blank" rel="noreferrer" style={btn}>Application page</a>
+          <button style={btn} onClick={() => copy(window.location.origin + "/equipment-apply")}>Copy application link</button>
           <button style={btn} onClick={() => setOpen(open==="check"?"":"check")}>{open==="check"?"Hide checklist":"Checklist"}</button>
           <a href="https://www.floridaucc.com/" target="_blank" rel="noreferrer" style={btn}>Florida UCC search</a>
         </div>

@@ -12,6 +12,7 @@ export default defineConfig({
         review: resolve(__dirname, 'review.html'),
         'equity-unlock': resolve(__dirname, 'equity-unlock.html'),
         'portfolio-snapshot': resolve(__dirname, 'portfolio-snapshot.html'),
+        'equipment-apply': resolve(__dirname, 'equipment-apply.html'),
       },
     },
   },
