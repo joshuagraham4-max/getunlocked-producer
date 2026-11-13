@@ -6,7 +6,7 @@ import { scriptsFor } from "../radar/engine.js";
 import { personFirst, sunbizUrl, isEntity } from "../radar/investorPlaybook.js";
 import Playbook from "../calls/Playbook.jsx";
 import { PsDetail } from "../investors/InvestorImport.jsx";
-import { leadStory, listingOf } from "../investors/psDetail.js";
+import { leadStory, listingOf , refiSignals } from "../investors/psDetail.js";
 
 const C = { card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc", green:"#1e6e4a" };
 const F = { mono:"'DM Mono',monospace", cond:"'Barlow Condensed',sans-serif", body:"'Barlow',sans-serif" };
@@ -112,6 +112,7 @@ export function LeadStory({ c, lead, contacts, onOpen, compact }) {
       <ul style={{margin:"2px 0 8px", paddingLeft:18, fontSize:14, lineHeight:1.5, color:C.ink}}>{st.facts.map((f, i) => <li key={i}>{f}</li>)}</ul>
       <div style={{fontSize:14, lineHeight:1.5, marginBottom:6}}><b style={{color:C.green}}>Why this lead:</b> {st.why}</div>
       {st.watch.length > 0 && <div style={{fontSize:14, lineHeight:1.5, marginBottom:6}}><b style={{color:"#b05e0d"}}>Watch:</b> {st.watch.join(" ")}</div>}
+      {refiSignals(d).map((x) => <div key={x.key} style={{fontSize:14, lineHeight:1.5, marginBottom:6}}><b style={{color:"#1f5f8b"}}>{x.title}:</b> {x.line}</div>)}
       {a?.name && (
         <div style={{borderTop:`1px solid ${C.rule}`, marginTop:8, paddingTop:8, display:"flex", gap:8, flexWrap:"wrap", alignItems:"center"}}>
           <span style={{fontFamily:F.cond, fontWeight:800, fontSize:15, color: leasing ? "#5b3fa6" : C.ink}}>{leasing ? "LEASING AGENT" : "LISTING AGENT"}:</span>

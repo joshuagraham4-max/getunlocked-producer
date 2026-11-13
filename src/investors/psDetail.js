@@ -145,3 +145,42 @@ export function detailScore(ps) {
   if (isRentalListing(d)) s += 10;   // renting units out: holding long term
   return s;
 }
+
+// Refi signals (DSCR builds): prepay likely ending, BRRRR refi window, Florida insurance squeeze.
+// PropStream doesn't record prepay terms, so prepay dates are estimates from the loan date (3- and 5-year are the common DSCR terms).
+const addMonths = (d, n) => { const x = new Date(d + "T12:00:00"); x.setMonth(x.getMonth() + n); return psDate(x.getTime()); };
+const monthsSince = (d) => { const a = new Date(d + "T12:00:00"), b = new Date(); return (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth()); };
+export function refiSignals(detail) {
+  const d = detail || {}; const out = [];
+  const loans = openLoans(d), cur = loans[0], sale = psDate(d.lastSaleDate);
+  // 1. Prepay ending: a long-term loan 30-40 months old (3-yr prepay) or 54-64 months old (5-yr prepay).
+  if (cur?.recorded && !short(cur)) {
+    const m = monthsSince(cur.recorded);
+    for (const yrs of [3, 5]) {
+      const end = yrs * 12;
+      if (m >= end - 6 && m <= end + 4) {
+        const date = addMonths(cur.recorded, end), past = m >= end;
+        out.push({ key:"prepay", date, title: past ? `Prepay likely ended (${yrs}-yr)` : `Prepay likely ends ${mo(date)} (${yrs}-yr)`,
+          line: `Loan from ${cur.lender || "their lender"} recorded ${mo(cur.recorded)}${pct(cur.rate)}. If it carries a ${yrs}-year prepay, it ${past ? "is likely over now" : `likely ends ${mo(date)}`}: refinance or pull cash out without the penalty.` });
+        break;
+      }
+    }
+  }
+  // 2. BRRRR refi window: bought in the last 18 months with cash (no loan since) or a short-term loan. Most DSCR lenders use the appraised value after 6 months of ownership.
+  if (sale && monthsSince(sale) <= 18 && !isSaleListed(d)) {
+    const since = loanHistory(d).filter((l) => l.recorded >= sale);
+    const cash = !since.length && !(num(d.openLienAmount) > 0), bridge = cur && short(cur);
+    if (cash || bridge) {
+      const date = addMonths(sale, 6), open = date <= psDate(Date.now());
+      out.push({ key:"brrrr", date, title: open ? "BRRRR refi window open" : `BRRRR refi window opens ${mo(date)}`,
+        line: `Bought ${mo(sale)}${d.lastSaleAmount ? ` for ${$k(num(d.lastSaleAmount))}` : ""} ${cash ? "with no loan recorded (likely cash)" : `on a short-term loan from ${cur.lender || "a private lender"}`}. ${open ? "Six months of ownership is in: a DSCR refi can use today's appraised value." : `At six months of ownership (${day(date)}) a DSCR refi can use the appraised value.`}${cash ? " Cash buyers can get their money back out." : ""}` });
+    }
+  }
+  // 3. Florida insurance squeeze: older Florida rentals (built before the 2002 Florida Building Code) are seeing the sharpest premium jumps.
+  const st = d.address?.stateCode;
+  if (st === "FL" && num(d.yearBuilt) && num(d.yearBuilt) < 2002) {
+    out.push({ key:"insurance", date:null, title:"Florida insurance squeeze",
+      line: `Built ${d.yearBuilt} in Florida: insurance has likely jumped since they bought. Ask if the rent still covers the payment. A refinance into a lower payment or longer term can put cash flow back.` });
+  }
+  return out;
+}

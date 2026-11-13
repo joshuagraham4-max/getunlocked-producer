@@ -10,6 +10,7 @@ import Playbook from "./Playbook.jsx";
 import { personFirst, sunbizUrl, isEntity } from "../radar/investorPlaybook.js";
 import { LeadStory, useLead } from "../contacts/InvestorPanel.jsx";
 import AgentResearch from "../contacts/AgentResearch.jsx";
+import RefiCalendar from "./RefiCalendar.jsx";
 
 const C = { bg:"#f5f0e8", card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc", green:"#1e6e4a", amber:"#b05e0d", amberBg:"#fdf0e0", greenBg:"#e6f2ea" };
 const F = { mono:"'DM Mono',monospace", cond:"'Barlow Condensed',sans-serif", body:"'Barlow',sans-serif" };
@@ -326,6 +327,7 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
           <button key={k} onClick={() => { setSeg(k); setSelId(null); }} style={{...(seg === k ? btnG : btn), padding:"9px 18px", fontSize:15}}>{l}</button>
         ))}
       </div>
+      {seg === "investors" && <RefiCalendar contacts={contacts} onOpen={onOpen}/>}
       {seg === "emails" ? <EmailDesk userId={userId} contacts={contacts} setContacts={setContacts} callIds={(all || []).map((x) => x.id)} wide={wide} onOpen={onOpen}/> : (
       <div style={{display:"grid", gridTemplateColumns: wide ? "400px 1fr" : "1fr", gap:18}}>
         {wide ? <>{List}{Focus}</> : <>{Focus}{List}</>}
