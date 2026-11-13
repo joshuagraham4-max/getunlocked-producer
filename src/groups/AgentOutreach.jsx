@@ -21,7 +21,7 @@ const EMPTY = { full_name:"", area:"", state:"FL", brokerage:"", profile_url:"",
 
 export default function AgentOutreach({ userId, onContact }) {
   const [rows, setRows] = useState([]); const [view, setView] = useState("today"); const [chan, setChan] = useState("all");
-  const [drafts, setDrafts] = useState({}); const [news, setNews] = useState({}); const [add, setAdd] = useState(null); const [msg, setMsg] = useState("");
+  const [drafts, setDrafts] = useState({}); const [news, setNews] = useState({}); const [add, setAdd] = useState(null); const [msg, setMsg] = useState(""); const [q, setQ] = useState("");
   const t = localDay();
   const load = useCallback(async () => {
     const { data, error } = await supabase.from("agent_outreach").select("*").order("created_at");
@@ -110,6 +110,30 @@ export default function AgentOutreach({ userId, onContact }) {
         <button onClick={() => setAdd(add ? null : { ...EMPTY })} style={btn}>{add ? "Cancel" : "Add agent"}</button>
       </div>
       {msg && <div style={{fontFamily:F.mono, fontSize:12, color:C.red, marginBottom:10}}>{msg}</div>}
+      <input placeholder="Quick find: name, brokerage or area (when someone calls or messages back)" value={q} onChange={(e) => setQ(e.target.value)} style={{...inp, marginBottom:12, fontSize:15}}/>
+      {q.trim().length >= 2 && (() => {
+        const words = q.toLowerCase().trim().split(/\s+/);
+        const hits = rows.filter((r) => { const hay = [r.full_name, r.brokerage, r.area, r.state, r.hook].filter(Boolean).join(" ").toLowerCase(); return words.every((w) => hay.includes(w)); }).slice(0, 12);
+        return <div style={{display:"grid", gap:8, marginBottom:16}}>
+          {!hits.length && <div style={{...card, padding:12, color:C.mid}}>No partner matches "{q}". Check Contacts, or add them with Add agent.</div>}
+          {hits.map((r) => (
+            <div key={r.id} style={{...card, padding:12, borderColor:C.green}}>
+              <div style={{display:"flex", justifyContent:"space-between", gap:8, flexWrap:"wrap"}}>
+                <div style={{fontFamily:F.cond, fontWeight:800, fontSize:18}}>{r.full_name}</div>
+                <div style={{fontFamily:F.mono, fontSize:11, color:C.mid, textTransform:"uppercase"}}>{r.status}{r.step ? ` · message ${r.step} of 3` : ""}{r.sent_at ? ` · last sent ${localDay(new Date(r.sent_at))}` : ""}</div>
+              </div>
+              <Meta r={r}/>
+              {prefLabel(r) && <div style={{fontFamily:F.cond, fontWeight:800, fontSize:15, color:C.green, marginTop:4}}>{prefLabel(r)}</div>}
+              {r.hook && <div style={{fontSize:13, color:C.mid, marginTop:4}}>Hook: {r.hook}</div>}
+              {r.last_message && <div style={{fontSize:13, color:C.mid, marginTop:6, whiteSpace:"pre-wrap"}}>Last sent: {r.last_message.slice(0, 220)}{r.last_message.length > 220 ? "..." : ""}</div>}
+              <div style={{display:"flex", gap:8, marginTop:8, flexWrap:"wrap"}}>
+                <Profile r={r}/>
+                {r.status !== "replied" && <button onClick={() => { gotReply(r); setQ(""); setView("replied"); }} style={btnG}>They replied</button>}
+                {r.status === "replied" && <button onClick={() => { setQ(""); setView("replied"); }} style={btn}>Open in Replied</button>}
+              </div>
+            </div>))}
+        </div>;
+      })()}
 
       {add && (
         <div style={{...card, padding:14, marginBottom:14, display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))", gap:10}}>

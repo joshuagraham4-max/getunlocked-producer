@@ -114,6 +114,10 @@ export default function GamePlan({ userId, avgCommission, onGoCalls }) {
   const DEFAULT_VAL = { dm:10, appt:200 };   // agent DMs $10 each, agent appointments set $200 each
   const val = (k) => (v[k] ?? DEFAULT_VAL[k] ?? 0);
   const earned = earnedParts.reduce((s, [k, n]) => s + n * val(k), 0);
+  // Saved with each day so week / month / year can be broken down by activity: { dial:{ n, usd }, ... }
+  const parts = Object.fromEntries(earnedParts.map(([k, n]) => [k, { n, usd:n * val(k) }]));
+  const partsRef = useRef(parts); partsRef.current = parts;
+  const [showBreak, setShowBreak] = useState(false);
 
   const evaluate = useCallback((rec, a0) => {
     const a = withAdj(a0, rec); const crit = [];
@@ -151,12 +155,29 @@ export default function GamePlan({ userId, avgCommission, onGoCalls }) {
     return t;
   }, [history, earned, KEY]);
 
+  // ---------- earned breakdown by activity: today, week, month, year. Days saved before Nov 13, 2026 only have a total ("earlier days"). ----------
+  const breakdown = useMemo(() => {
+    const now = new Date(KEY + "T12:00:00"), mon = new Date(now); mon.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+    const wk = ymd(mon), mo = KEY.slice(0, 7), yr = KEY.slice(0, 4);
+    const P = ["today", "wtd", "mtd", "ytd"], rows = {}, other = { wtd:0, mtd:0, ytd:0 };
+    for (const [k, n, l] of earnedParts) rows[k] = { label:l, rate:val(k), ...Object.fromEntries(P.map((p) => [p, { n:0, usd:0 }])) };
+    const add = (p, k, x) => { if (!rows[k]) return; rows[k][p].n += x.n || 0; rows[k][p].usd += x.usd || 0; };
+    const days = { ...history, [KEY]:{ parts } };
+    for (const [d, rec] of Object.entries(days)) {
+      if (d > KEY || !d.startsWith(yr)) continue;
+      const inP = (p) => p === "today" ? d === KEY : p === "wtd" ? d >= wk : p === "mtd" ? d.startsWith(mo) : true;
+      if (rec?.parts) { for (const [k, x] of Object.entries(rec.parts)) P.forEach((p) => inP(p) && add(p, k, x)); }
+      else { const e = Number(rec?.earned) || 0; ["wtd", "mtd", "ytd"].forEach((p) => { if (inP(p)) other[p] += e; }); }
+    }
+    return { rows:Object.entries(rows), other };
+  }, [history, KEY, earnedParts, parts]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // ---------- save ----------
   const persist = useCallback((next) => {
     if (!loaded.current) return;
     clearTimeout(saveT.current);
     saveT.current = setTimeout(() => {
-      const data = { ...next, perfect:evaluate(next, auto).perfect, earned };
+      const data = { ...next, perfect:evaluate(next, auto).perfect, earned, parts:partsRef.current };
       supabase.from("game_plan_days").upsert({ user_id:userId, day:KEY, data, updated_at:new Date().toISOString() }).then();
     }, 500);
   }, [userId, KEY, evaluate, auto, earned]);
@@ -227,8 +248,8 @@ export default function GamePlan({ userId, avgCommission, onGoCalls }) {
         <div>
           <div style={{...card, padding:"16px 18px"}}>
             <div style={{display:"grid", gridTemplateColumns:"1.3fr 1fr", gap:14}}>
-              <div style={{background:C.greenBg, border:`1px solid ${C.greenBd}`, borderRadius:10, padding:"14px 16px"}}>
-                <div style={{...lbl, color:C.green}}>Earned today</div>
+              <div onClick={() => setShowBreak((x) => !x)} title="Tap for the breakdown by activity" style={{background:C.greenBg, border:`1px solid ${C.greenBd}`, borderRadius:10, padding:"14px 16px", cursor:"pointer"}}>
+                <div style={{...lbl, color:C.green, display:"flex", justifyContent:"space-between"}}><span>Earned today</span><span>{showBreak ? "Hide breakdown" : "Breakdown"}</span></div>
                 <div style={{fontFamily:F.cond, fontWeight:800, fontSize:54, color:C.green, lineHeight:1}}>${earned.toLocaleString()}</div>
                 <div style={{fontFamily:F.mono, fontSize:10, color:C.mid, marginTop:4}}>{earnedParts.filter(([, n]) => n).map(([k, n, l]) => `${n} ${l} x $${val(k).toLocaleString()}`).join(" · ") || "Every call counts. Start the scoreboard."}</div>
                 <div style={{display:"grid", gridTemplateColumns:"repeat(3, 1fr)", gap:8, marginTop:10, borderTop:`1px solid ${C.greenBd}`, paddingTop:8}}>
@@ -243,6 +264,29 @@ export default function GamePlan({ userId, avgCommission, onGoCalls }) {
                 <div style={{fontFamily:F.mono, fontSize:11, color: ev.perfect ? C.green : C.mid}}>{ev.perfect ? "Perfect day" : `${ev.met} of ${ev.crit.length} today`}</div>
                 <div style={{height:6, borderRadius:3, background:C.rule, overflow:"hidden", marginTop:6}}><div style={{height:"100%", width:`${ev.met / ev.crit.length * 100}%`, background:C.green}}/></div>
               </div>
+            {showBreak && (
+              <div style={{gridColumn:"1/-1", marginTop:4, borderTop:`1px solid ${C.rule}`, paddingTop:12, overflowX:"auto"}}>
+                <table style={{width:"100%", borderCollapse:"collapse", fontFamily:F.body, fontSize:14}}>
+                  <thead><tr style={{textAlign:"right", color:C.mid, fontFamily:F.mono, fontSize:10, textTransform:"uppercase", letterSpacing:"0.08em"}}>
+                    <th style={{textAlign:"left", padding:"4px 6px"}}>Activity</th><th style={{padding:"4px 6px"}}>Each</th><th style={{padding:"4px 6px"}}>Today</th><th style={{padding:"4px 6px"}}>This week</th><th style={{padding:"4px 6px"}}>This month</th><th style={{padding:"4px 6px"}}>This year</th></tr></thead>
+                  <tbody>
+                    {breakdown.rows.map(([k, r]) => (
+                      <tr key={k} style={{borderTop:`1px solid ${C.rule}`, textAlign:"right"}}>
+                        <td style={{textAlign:"left", padding:"6px", fontWeight:600, textTransform:"capitalize"}}>{r.label}</td>
+                        <td style={{padding:"6px", color:C.mid}}>${r.rate.toLocaleString()}</td>
+                        {["today", "wtd", "mtd", "ytd"].map((p) => <td key={p} style={{padding:"6px"}}><b>{r[p].n}</b> <span style={{color:C.green}}>${Math.round(r[p].usd).toLocaleString()}</span></td>)}
+                      </tr>))}
+                    {(breakdown.other.ytd > 0) && <tr style={{borderTop:`1px solid ${C.rule}`, textAlign:"right", color:C.mid}}>
+                      <td style={{textAlign:"left", padding:"6px"}}>Earlier days (total only)</td><td/><td style={{padding:"6px"}}>-</td>
+                      {["wtd", "mtd", "ytd"].map((p) => <td key={p} style={{padding:"6px"}}>${Math.round(breakdown.other[p]).toLocaleString()}</td>)}</tr>}
+                    <tr style={{borderTop:`2px solid ${C.ink}`, textAlign:"right", fontWeight:800}}>
+                      <td style={{textAlign:"left", padding:"6px"}}>Total</td><td/>
+                      <td style={{padding:"6px", color:C.green}}>${earned.toLocaleString()}</td>
+                      {[["wtd", totals.wtd], ["mtd", totals.mtd], ["ytd", totals.ytd]].map(([p, v]) => <td key={p} style={{padding:"6px", color:C.green}}>${Math.round(v).toLocaleString()}</td>)}</tr>
+                  </tbody>
+                </table>
+                <div style={{fontFamily:F.mono, fontSize:10, color:C.light, marginTop:6}}>Counts include your manual + / - adjustments. Days before Nov 13 were saved as a total only, so they show under "Earlier days."</div>
+              </div>)}
             </div>
             <div style={{display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))", gap:10, marginTop:14}}>
               <Count label="Dials" n={tot.dials} goal={callTarget} autoTag adj="dials"/>
