@@ -24,8 +24,8 @@ export default function RefiCalendar({ contacts, onOpen }) {
       const c = byId.get(l.contact_id); if (!c || c.do_not_contact) continue;
       for (const s of refiSignals(l.ps_detail?.detail)) out.push({ ...s, c, addr:[l.property_address, l.property_city].filter(Boolean).join(", ") });
     }
-    // Open now first (date passed or no date), then soonest upcoming.
-    return out.sort((a, b) => ((a.date && a.date > t) - (b.date && b.date > t)) || String(a.date || "").localeCompare(String(b.date || "")));
+        const rank = (r) => (r.key === "insurance" ? 2 : r.date && r.date > t ? 1 : 0);   // open windows first, then upcoming, insurance last
+    return out.sort((a, b) => (rank(a) - rank(b)) || String(a.date || "").localeCompare(String(b.date || "")));
   }, [leads, contacts]);
   if (!leads || !rows.length) return null;
   const n = (k) => rows.filter((r) => k === "all" || r.key === k).length;
