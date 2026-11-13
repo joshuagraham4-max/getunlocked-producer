@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { supabase } from "../supabase.js";
 import { BRAND, CARDS, PAIN_POINTS, MAGNETS, FOOTERS, CHANNELS, planFor, magnetLink, MESSAGES, CONTENT_RULES, FUNNEL } from "./data.js";
+import ContentKit from "./ContentKit.jsx";
 
 // Self-contained module: drop <SmartMoney /> into the Producer app later.
 const C = {
@@ -287,7 +288,7 @@ function Messages() {
 }
 
 const panel = { background: C.card, border: `1px solid ${C.line}`, borderRadius: 14, padding: 18 };
-const TABS = [["today", "Today"], ["flyers", "Flyers"], ["pain", "By Pain Point"], ["library", "Flyer + Copy"], ["messages", "Messages"]];
+const TABS = [["today", "Today"], ["flyers", "Flyers"], ["pain", "By Pain Point"], ["library", "Flyer + Copy"], ["kit", "Videos + Scripts"], ["messages", "Messages"]];
 
 export default function SmartMoney({ userId = null, embedded = false }) {
   useFonts();
@@ -313,6 +314,7 @@ export default function SmartMoney({ userId = null, embedded = false }) {
         {tab === "flyers" && <Flyers open={open} />}
         {tab === "pain" && <PainPoints open={open} />}
         {tab === "library" && <Library selected={sel} setSelected={setSel} />}
+        {tab === "kit" && <ContentKit userId={userId} />}
         {tab === "messages" && <Messages />}
       </main>
     </div>
