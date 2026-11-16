@@ -66,6 +66,16 @@ CARDS = {
         ledger_px=31,
         cta="A few minutes on how I protect your clients.", panel_bottom=TAGLINE, foot=FOOT_AGENT,
         photo=dict(file="joshua-park-smile.jpg", h=640, size=800, x=-494, y=-84)),
+    "BUY-03": dict(palette="scarlet", side="left", kicker="COLORADO RENTERS &nbsp;/&nbsp; BUYING A HOME",
+        h1=["Rent is a bill.", "A mortgage is"], h1_accent="a plan.", h1_px=92,
+        left=("THE LEASE", "A place you pay for and never own."),
+        right=("THE MORTGAGE", "A payment that builds your equity."),
+        cta="See what your move would really take.", panel_bottom=STAT_30_45, foot=FOOT_CONSUMER),
+    "AGT-04": dict(palette="peacock", side="left", kicker="REAL ESTATE AGENTS &nbsp;/&nbsp; REFERRAL PARTNERS",
+        h1=["Clients forget", "the rate."], h1_accent="Never the closing.", h1_px=88,
+        left=("THE RATE", "A number that fades within a month."),
+        right=("THE CLOSING", "The day they decide whether to refer you."),
+        cta="A few minutes on making that day easy.", panel_bottom=TAGLINE, foot=FOOT_AGENT),
 }
 
 def grain_url():
@@ -108,12 +118,11 @@ def page(ref, c):
                       f'<p style="margin-top:12px;font:500 italic 64px/1.0 B;color:{p["panel_text"]}">not a<br>sales<br>call.</p></div>'
                       f'<div style="position:absolute;right:0;bottom:104px;width:270px;padding:0 34px 0 36px;box-sizing:border-box">{bottom}</div>')
     gf = os.path.join(BRAND, "gf-logo-ink.png"); zp = os.path.join(BRAND, "zpm-logo-ink.png")
-    return f'''<!doctype html><html><head><meta charset="utf-8"><style>{ff}body{{margin:0}}p,h1{{margin:0}}*{{font-variant-numeric:lining-nums !important;font-feature-settings:"lnum" 1 !important}}</style></head><body>
+    html_out = f'''<!doctype html><html><head><meta charset="utf-8"><style>{ff}body{{margin:0}}p,h1{{margin:0}}*{{font-variant-numeric:lining-nums !important;font-feature-settings:"lnum" 1 !important}}</style></head><body>
 <div style="width:1080px;height:1080px;position:relative;overflow:hidden;font-family:M">
 <div style="position:absolute;inset:0;background:{p["bg"]}"></div>{grain(.16)}
 <div style="position:absolute;right:0;top:0;bottom:0;width:270px;background:{p["panel"]}"></div><div style="position:absolute;right:0;top:0;bottom:0;width:270px">{grain(.3)}</div>
 {panel_body}
-<p style="position:absolute;right:34px;bottom:62px;font:600 12px M;letter-spacing:.2em;color:{p["panel_mute"]}">REF {ref}</p>
 <div style="position:absolute;left:74px;top:74px;display:flex;align-items:center;gap:14px"><div style="width:12px;height:12px;background:{p["accent"]}"></div><p style="font:700 14px M;letter-spacing:.34em;color:{p["ink"]};white-space:nowrap">{c["kicker"]}</p></div>
 <h1 style="position:absolute;left:74px;top:132px;font:500 {c.get("h1_px",104)}px/0.97 B;color:{p["ink"]};letter-spacing:-0.02em">{h1}</h1>
 <div style="position:absolute;left:74px;width:690px;top:540px;border-top:2px solid {p["ink"]}"></div>
@@ -127,8 +136,11 @@ def page(ref, c):
 <p style="margin-top:12px;font:700 12.5px M;letter-spacing:.28em;color:{p["accent"]};white-space:nowrap">REGIONAL LOAN ORIGINATOR</p>
 <p style="margin-top:7px;font:600 12px M;letter-spacing:.14em;color:{p["ink"]};white-space:nowrap">NMLS #169809 &nbsp;&middot;&nbsp; LICENSED IN COLORADO</p></div>
 <div style="display:flex;align-items:center;gap:18px;padding-bottom:2px;flex:none"><img src="file://{gf}" style="height:56px;display:block;opacity:.9"><div style="width:1px;height:46px;background:{p["ink"]}33"></div><img src="file://{zp}" style="height:40px;display:block;opacity:.9"></div></div>
-<p style="position:absolute;left:74px;width:690px;bottom:56px;font:500 10.5px/1.5 M;color:{p["muted"]}">{c["foot"]}</p>
+<p style="position:absolute;left:74px;width:690px;bottom:56px;font:500 10.5px/1.5 M;color:{p["muted"]}">{c["foot"]}<span style="display:block;margin-top:5px;font:700 9px M;letter-spacing:.18em;color:#000">REF {ref}</span></p>
 </div></body></html>'''
+    if c.get("side") == "left":
+        html_out = html_out.replace("right:0;", "left:0;").replace("left:74px", "left:344px")
+    return html_out
 
 def render(ref, c, outdir):
     tmp = tempfile.mkdtemp()
