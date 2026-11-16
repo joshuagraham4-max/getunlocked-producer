@@ -110,6 +110,17 @@ CARDS = {
                  dict(label="OWNING A $300K HOME", px=76, big="$2,450", small="a month, about, and you build your own.")],
         panel_line="When it<br>has to go<br>right, I'm<br>your guy.", panel_px=42, rule_top=500,
         cta="Book a call. I&#39;ll run your real numbers.", photo=dict(file="joshua-park-smile.jpg", h=500, size=720, x=-440, y=-40), photo_line="When it has<br>to go right,<br>I&#39;m your guy.", cta_px=26, cta_note="NOT A SALES CALL", panel_bottom=QR, foot=FOOT_PAY2, foot_px=9),
+    "PAY-03": dict(palette="scarlet", kicker="COLORADO RENTERS &nbsp;/&nbsp; BUYING A HOME", kicker_sub="Contact me for smart money to finance real estate.",
+        h1=["Own it for less"], h1_accent="than you rent.", h1_px=92,
+        receipt=[("YOU RENT, SOLO", "Builds your landlord&#39;s equity", "$1,850", False),
+                 ("OWN A $400K HOME, ON YOUR OWN", "All in, about", "$3,250", False),
+                 ("TWO ROOMMATES AT $800 EACH", "Rooms in your home", "&minus;$1,600", False),
+                 ("YOUR PAYMENT", "And you build the equity", "$1,650", True)],
+        receipt_note="Cash to close? Seller credits plus assistance can bring it near $0.",
+        rule_top=330,
+        photo=dict(file="joshua-park-smile.jpg", h=500, size=720, x=-440, y=-40), photo_line="When it has<br>to go right,<br>I&#39;m your guy.",
+        cta="Book a call. I&#39;ll run your real numbers.", cta_px=26, cta_note="NOT A SALES CALL",
+        panel_bottom=QR, foot=FOOT_PAY, foot_px=9),
     "DWN-01": dict(palette="camel", kicker="COLORADO RENTERS &nbsp;/&nbsp; BUYING A HOME",
         h1=["Cash to close", "can be"], h1_accent="near $0.", h1_px=100,
         figures=[dict(label="SELLER CREDITS", px=76, big="3&ndash;6%", small="of the price can come back to you. $12,000 to $24,000 on a $400K home."),
@@ -198,7 +209,7 @@ def page(ref, c):
                       f'<p style="margin-top:26px;font:500 italic {c.get("panel_px",50)}px/1.08 B;color:{p["panel_text"]};white-space:nowrap">{c.get("panel_line","Think of<br>me when<br>it has to<br>go right.")}</p></div>'
                       f'<div style="position:absolute;right:0;bottom:104px;width:270px;padding:0 34px 0 36px;box-sizing:border-box">{bottom}</div>')
     gf = os.path.join(BRAND, "gf-logo-ink.png"); zp = os.path.join(BRAND, "zpm-logo-ink.png")
-    ledger_html = "" if (c.get("figures") or c.get("chart")) else f'''<div style="position:absolute;left:74px;width:690px;top:556px;display:grid;grid-template-columns:1fr 1fr">
+    ledger_html = "" if (c.get("figures") or c.get("chart") or c.get("receipt")) else f'''<div style="position:absolute;left:74px;width:690px;top:556px;display:grid;grid-template-columns:1fr 1fr">
 <div style="padding-right:26px;border-right:1px solid {p["ink"]}33"><p style="font:700 13px M;letter-spacing:.32em;color:{p["ink"]}">{c["left"][0]}</p><p style="margin-top:10px;font:500 {lpx}px/1.12 B;color:{p["ink"]}">{c["left"][1]}</p></div>
 <div style="padding-left:26px"><p style="font:700 13px M;letter-spacing:.32em;color:{p["accent"]}">{c["right"][0]}</p><p style="margin-top:10px;font:700 {lpx}px/1.12 B;color:{p["ink"]}">{c["right"][1]}</p></div></div>
 '''
@@ -211,6 +222,16 @@ def page(ref, c):
                         f'<p style="margin-top:6px;font:500 {fg.get("px",70)}px/1 B;color:{p["ink"]};letter-spacing:-0.02em;white-space:nowrap">{fg["big"]}</p>'
                         f'<p style="margin-top:8px;font:500 21px/1.25 B;color:{p["ink"]}">{fg["small"]}</p></div>')
         ledger_html = '<div style="position:absolute;left:74px;width:690px;top:' + str(c.get("rule_top",540)+16) + 'px;display:grid;grid-template-columns:1fr 1fr">' + "".join(cols) + '</div>'
+    if c.get("receipt"):
+        top0 = c.get("rule_top", 540) + 14; rows = []
+        for k, (lab, sub, amt, hot) in enumerate(c["receipt"]):
+            col = p["accent"] if hot else p["ink"]
+            bt = f'border-top:2px solid {p["ink"]};' if hot else (f'border-top:1px solid {p["ink"]}33;' if k else "")
+            rows.append(f'<div style="display:flex;justify-content:space-between;align-items:center;{bt}padding:{12 if hot else 9}px 0">'
+                        f'<div><p style="font:700 12px M;letter-spacing:.28em;color:{col}">{lab}</p><p style="margin-top:4px;font:500 19px/1.2 B;color:{p["ink"]}">{sub}</p></div>'
+                        f'<p style="font:{600 if hot else 500} {58 if hot else 44}px/1 B;color:{col};letter-spacing:-0.02em;white-space:nowrap">{amt}</p></div>')
+        note = f'<p style="margin-top:12px;font:500 italic 22px/1.3 B;color:{p["ink"]}">{c["receipt_note"]}</p>' if c.get("receipt_note") else ""
+        ledger_html = f'<div style="position:absolute;left:74px;width:690px;top:{top0}px">' + "".join(rows) + note + '</div>'
     if c.get("chart"):
         ledger_html = chart_html(p, c.get("rule_top", 540) + 18)
     html_out = f'''<!doctype html><html><head><meta charset="utf-8"><style>{ff}body{{margin:0}}p,h1{{margin:0}}*{{font-variant-numeric:lining-nums !important;font-feature-settings:"lnum" 1 !important}}</style></head><body>
@@ -219,6 +240,7 @@ def page(ref, c):
 <div style="position:absolute;right:0;top:0;bottom:0;width:270px;background:{p["panel"]}"></div><div style="position:absolute;right:0;top:0;bottom:0;width:270px">{grain(.3)}</div>
 {panel_body}
 <div style="position:absolute;left:74px;top:74px;display:flex;align-items:center;gap:14px"><div style="width:12px;height:12px;background:{p["accent"]}"></div><p style="font:700 14px M;letter-spacing:.34em;color:{p["ink"]};white-space:nowrap">{c["kicker"]}</p></div>
+{('<p style="position:absolute;left:100px;top:98px;font:500 italic 15px B;color:' + p["muted"] + ';white-space:nowrap">' + c["kicker_sub"] + '</p>') if c.get("kicker_sub") else ""}
 <h1 style="position:absolute;left:74px;top:132px;font:500 {c.get("h1_px",104)}px/0.97 B;color:{p["ink"]};letter-spacing:-0.02em">{h1}</h1>
 <div style="position:absolute;left:74px;width:690px;top:{c.get("rule_top",540)}px;border-top:2px solid {p["ink"]}"></div>
 {ledger_html}
