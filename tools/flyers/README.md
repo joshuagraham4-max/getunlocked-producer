@@ -17,3 +17,12 @@ Render:
 Palettes: G (green #12291C, tiles #1C3B29, gold accent #F2B84B), N (navy #0E1B2A, tiles #16283C, gold accent).
 Signature card: public/smart-money/signature.png (mortgage card, used for equipment too for now).
 Fit rule: if anything wraps, shorten words; never shrink the template. Check REF line visible.
+
+## Elite look (Nov 16, 2026): gen_elite.py
+"Smooth. Precise. Elite." template: bone ground, Bodoni headline, hairline ledger, name + credentials as type, ink logos, right quarter panel.
+- Run from repo root: `python3 tools/flyers/gen_elite.py [REF ...]` (writes public/smart-money/flyers/<REF>.png). Setup and fonts: see the docstring at the top of the script.
+- Palettes: scarlet (buyers/renters), peacock (agents/partners). Add more in PALETTES; copy a CARDS entry for a new flyer.
+- Cards so far: BUY-01 (approved base), BUY-02 (rent builds their equity), AGT-02 (agents). Not yet wired into src/smart-money/data.js.
+- Logos: public/brand/gf-logo-ink.png and zpm-logo-ink.png (single-color, for light grounds), gf-logo-silver.png (for dark grounds). Mockups in public/brand/originals/mockups/. Photos in public/brand/photos/.
+- Consumer ads: no payment amounts or down payment percentages (Reg Z trigger terms) unless fully disclosed. Keep the footer.
+- VA seals are parked in tools/flyers/assets/va-parked/ (not public). Do not use until ZPM compliance approves.
