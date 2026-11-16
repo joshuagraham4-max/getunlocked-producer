@@ -202,6 +202,14 @@ CARDS = {
         rpad=22, rule_top=330, cta="Book a call. It&#39;s how we start.", foot=FOOT_CONSUMER, foot_px=9.5),
 }
 
+# ---- Photo toggle: his face on about 1 in 4 Bond flyers. Add a ref to PHOTO_ON to put the photo on it.
+BOND_REFS = ["PAY-01","PAY-02","PAY-03","PAY-04","DWN-01","DWN-02","DWN-03","WLT-01","WLT-02","WLT-03","EQT-01","EQT-02","EQT-03","CRD-01"]
+PHOTO_ON = {"CRD-01", "PAY-01", "DWN-02", "EQT-02"}
+for _ref in BOND_REFS:
+    if _ref not in PHOTO_ON:
+        _c = CARDS[_ref]; _c.pop("photo", None); _c.pop("photo_line", None)
+        _c["panel_line"] = "When it<br>has to go<br>right,<br>I&#39;m your<br>guy."; _c["panel_px"] = 50
+
 def qr_svg(url, px, dark, light):
     import segno
     m = segno.make(url, error="m").matrix
