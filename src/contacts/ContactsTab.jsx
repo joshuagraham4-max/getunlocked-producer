@@ -4,6 +4,7 @@ import { supabase } from "../supabase.js";
 import HowTo from "../HowTo.jsx";
 import { GUIDES } from "../howto/guides.jsx";
 import InvestorPanel, { isInvestorLead, ListingAgentPanel, isListingAgent } from "./InvestorPanel.jsx";
+import ContactHistory from "../calls/ContactHistory.jsx";
 import InvestorImport from "../investors/InvestorImport.jsx";
 import AgentResearch, { emailMismatch } from "./AgentResearch.jsx";
 import SnapshotPanel, { isSnapshotLead } from "./SnapshotPanel.jsx";
@@ -267,6 +268,9 @@ function BucketEditor({ c, contacts, save }) {
 }
 
 function Detail({ c, contacts, setContacts, userId, profileName, back, backLabel, open, links, reloadLinks, createContact }) {
+  const [histBump, setHistBump] = useState(0);
+  // Every call / text / email tapped from this record is logged, so the history below is complete.
+  const logTap = async (channel, outcome) => { await supabase.from("contact_touches").insert({ user_id:userId, contact_id:c.id, channel, outcome }); setHistBump((n) => n + 1); };
   const save = async (fields) => {
     const { data, error } = await supabase.from("contacts").update(fields).eq("id", c.id).select().single();
     if (error) { alert("Save failed: " + error.message); return; }
@@ -305,9 +309,9 @@ function Detail({ c, contacts, setContacts, userId, profileName, back, backLabel
         <BucketEditor c={c} contacts={contacts} save={save}/>
         {contactable && c.phone && (
           <div style={{display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:6, marginTop:10}}>
-            <a href={`tel:${digits(c.phone)}`} style={{...primary, textAlign:"center", textDecoration:"none", padding:"10px"}}>Call</a>
-            <a href={`sms:${digits(c.phone)}?body=${encodeURIComponent(`Hi ${c.first_name || ""}, this is ${profileName || "Joshua"}. Just checking in.`)}`} style={{...primary, textAlign:"center", textDecoration:"none", padding:"10px"}}>Text</a>
-            {c.email ? <a href={`mailto:${c.email}?subject=Checking in`} style={{...primary, textAlign:"center", textDecoration:"none", padding:"10px"}}>Email</a> : <span/>}
+            <a href={`tel:${digits(c.phone)}`} onClick={() => logTap("call", "dialed")} style={{...primary, textAlign:"center", textDecoration:"none", padding:"10px"}}>Call</a>
+            <a href={`sms:${digits(c.phone)}?body=${encodeURIComponent(`Hi ${c.first_name || ""}, this is ${profileName || "Joshua"}. Just checking in.`)}`} onClick={() => logTap("text", "texted")} style={{...primary, textAlign:"center", textDecoration:"none", padding:"10px"}}>Text</a>
+            {c.email ? <a href={`mailto:${c.email}?subject=Checking in`} onClick={() => logTap("email", "emailed")} style={{...primary, textAlign:"center", textDecoration:"none", padding:"10px"}}>Email</a> : <span/>}
           </div>
         )}
         {!contactable && <div style={{fontFamily:F.mono, fontSize:10, color:C.light, marginTop:8}}>Rolodex: reference only, never queued or emailed.</div>}
@@ -350,6 +354,7 @@ function Detail({ c, contacts, setContacts, userId, profileName, back, backLabel
           <Field label="Last outcome" value={c.outcome} options={["", "talked", "voicemail", "no answer", "booked", "not interested", "wrong number"]} onSave={f("outcome")}/>
         </div>
         <Field label="Notes" value={c.contact_note} onSave={f("contact_note")}/>
+        <ContactHistory userId={userId} contactId={c.id} bump={histBump} startOpen />
         {contactable && <button onClick={() => save({ last_contacted:today() })} style={{...primary, width:"100%", padding:"11px", marginTop:10}}>Mark contacted today</button>}
       </div>
 
