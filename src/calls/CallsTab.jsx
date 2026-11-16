@@ -5,6 +5,7 @@ import { GUIDES } from "../howto/guides.jsx";
 import { today, addDays, digits, fullName, fmtMo, loadRadarData, peekRadarData, wrongNumberEmail, computeRadar, buildQueue, investorQueue, APPLY, isInvestor, bdayCallable, reasonFor, scriptsFor, logOutcome, undoOutcome, canUndo, segmentOf, REASON_COLOR, REASON_BG } from "../radar/engine.js";
 import { supabase } from "../supabase.js";
 import EmailDesk from "./EmailDesk.jsx";
+import ContactHistory from "./ContactHistory.jsx";
 import QuickUpdate from "./QuickUpdate.jsx";
 import Playbook from "./Playbook.jsx";
 import { personFirst, sunbizUrl, isEntity } from "../radar/investorPlaybook.js";
@@ -219,6 +220,8 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
           <span style={{fontFamily:F.mono, fontSize:12, fontWeight:700, color:col, background:bg, padding:"4px 10px", borderRadius:12}}>{txt}</span>
           <button onClick={logCard} style={{...btn, padding:"3px 10px", fontSize:12}}>+ Handwritten note</button>
         </div>); })()}
+      <ContactHistory userId={userId} contactId={sel.id} bump={depBump + calledToday.length} />
+      <div style={{height:10}}/>
       {pinned === sel.id && <div style={{fontFamily:F.mono, fontSize:11, color:C.amber, marginBottom:8}}>Not on today's call list. Opened from search.</div>}
       <div style={{display:"flex", justifyContent:"space-between", gap:16, flexWrap:"wrap"}}>
         <div>
@@ -249,7 +252,7 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
       </a> : (
         <div style={{margin:"16px 0 12px", padding:"12px 14px", borderRadius:9, background:C.amberBg, color:C.amber, fontFamily:F.mono, fontSize:12, display:"flex", gap:8, alignItems:"center", flexWrap:"wrap"}}>
           <span>No phone on file.</span>
-          {sel.email && <a href={`mailto:${sel.email}?subject=${encodeURIComponent(scripts.emailSubject)}&body=${encodeURIComponent(scripts.emailBody)}`} onClick={() => logOutcome(userId, sel, "emailed", "", undefined, "email").then((u) => u && setContacts((p) => p.map((x) => (x.id === u.id ? u : x))))} style={btnG}>Send email</a>}
+          {sel.email && <a href={`mailto:${sel.email}?subject=${encodeURIComponent(scripts.emailSubject)}&body=${encodeURIComponent(scripts.emailBody)}`} onClick={() => logOutcome(userId, sel, "emailed", "", undefined, "email").then((u) => { setDepBump((n) => n + 1); return u && setContacts((p) => p.map((x) => (x.id === u.id ? u : x))); })} style={btnG}>Send email</a>}
           <button onClick={() => onOpen(sel)} style={btn}>Add a phone number</button>
         </div>
       )}
@@ -261,7 +264,7 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
       </div>
       {isInvestor(sel) && (
         <div style={{display:"flex", gap:8, flexWrap:"wrap", alignItems:"center", marginBottom:12}}>
-          {sel.email && <a href={`mailto:${sel.email}?subject=${encodeURIComponent(scripts.emailSubject)}&body=${encodeURIComponent(scripts.emailBody)}`} onClick={() => logOutcome(userId, sel, "emailed", "", undefined, "email").then((u) => u && setContacts((p) => p.map((x) => (x.id === u.id ? u : x))))} style={btnG}>Send email</a>}
+          {sel.email && <a href={`mailto:${sel.email}?subject=${encodeURIComponent(scripts.emailSubject)}&body=${encodeURIComponent(scripts.emailBody)}`} onClick={() => logOutcome(userId, sel, "emailed", "", undefined, "email").then((u) => { setDepBump((n) => n + 1); return u && setContacts((p) => p.map((x) => (x.id === u.id ? u : x))); })} style={btnG}>Send email</a>}
           <button onClick={() => navigator.clipboard?.writeText(`Subject: ${scripts.emailSubject}\n\n${scripts.emailBody}`)} style={btn}>Copy email</button>
           {(sel.company || isEntity(sel.first_name)) && <a href={sunbizUrl(sel.company || sel.first_name)} target="_blank" rel="noreferrer" style={btn}>Look up owner (Sunbiz)</a>}
           {!personFirst(sel) && <span style={{fontFamily:F.mono, fontSize:11, color:C.amber}}>No owner name yet: add it in Open full contact</span>}

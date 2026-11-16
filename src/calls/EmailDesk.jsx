@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { supabase } from "../supabase.js";
 import { today, addDays, fullName, BOOKING, MY_PHONE, CTA, isInvestor } from "../radar/engine.js";
+import ContactHistory, { isEmailSent } from "./ContactHistory.jsx";
 import { PLAYBOOKS, investorFollowUps, personFirst } from "../radar/investorPlaybook.js";
 
 const C = { bg:"#f5f0e8", card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc", green:"#1e6e4a", amber:"#b05e0d", amberBg:"#fdf0e0", red:"#9e3020" };
@@ -132,26 +133,39 @@ export default function EmailDesk({ userId, contacts, setContacts, callIds, wide
         const m = {}; (data || []).forEach((r) => { m[r.contact_id] = r; }); setSentToday(m);
       });
   }, [userId]);
+  // Emails already sent per contact, from the same history (so sends made from the Calls tab count too).
+  const [counts, setCounts] = useState({});
+  useEffect(() => {
+    if (!userId) return; let live = true;
+    (async () => { const m = {}; for (let from = 0; from < 20000; from += 1000) {
+      const { data } = await supabase.from("contact_touches").select("contact_id, channel, outcome").eq("user_id", userId).eq("channel", "email").range(from, from + 999);
+      (data || []).forEach((r) => { if (isEmailSent(r)) m[r.contact_id] = (m[r.contact_id] || 0) + 1; });
+      if (!data || data.length < 1000) break; }
+      if (live) setCounts(m); })();
+    return () => { live = false; };
+  }, [userId]);
+  // Effective step: the larger of the saved step and the emails actually logged (99 = replied/stopped).
+  const es = (c) => ((c.email_step || 0) >= 99 ? 99 : Math.max(c.email_step || 0, Math.min(counts[c.id] || 0, 3)));
   const key = `gupEmails:${userId}:${t}:${tab}`;
   const eligible = (c) => !c.do_not_contact && !c.email_bad && c.email && /@/.test(c.email)
-    && ["past_client","agent","lead"].includes(c.contact_type || "past_client") && (c.email_step || 0) < 3 && !(callIds || []).includes(c.id);
-  const firstLeft = useMemo(() => contacts.filter((c) => eligible(c) && !(c.email_step || 0) && !sentToday[c.id]).length, [contacts, sentToday]); // eslint-disable-line react-hooks/exhaustive-deps
-  const followDue = useMemo(() => contacts.filter((c) => eligible(c) && (c.email_step || 0) > 0 && c.email_next && c.email_next <= t && !sentToday[c.id]).length, [contacts, sentToday]); // eslint-disable-line react-hooks/exhaustive-deps
+    && ["past_client","agent","lead"].includes(c.contact_type || "past_client") && es(c) < 3 && !(callIds || []).includes(c.id);
+  const firstLeft = useMemo(() => contacts.filter((c) => eligible(c) && !es(c) && !sentToday[c.id]).length, [contacts, sentToday, counts]); // eslint-disable-line react-hooks/exhaustive-deps
+  const followDue = useMemo(() => contacts.filter((c) => eligible(c) && es(c) > 0 && (!c.email_next || c.email_next <= t) && !sentToday[c.id]).length, [contacts, sentToday, counts]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const queue = useMemo(() => {
     let saved = null; try { saved = JSON.parse(localStorage.getItem(key) || "null"); } catch {}
     if (saved && saved.target === target) return saved.ids.filter((id) => byId[id]);
     const due = contacts.filter((c) => eligible(c) && c.last_contacted !== t
-      && (tab === "first" ? !(c.email_step || 0) : (c.email_step || 0) > 0 && c.email_next && c.email_next <= t));
+      && (tab === "first" ? !es(c) : es(c) > 0 && (!c.email_next || c.email_next <= t)));
     if (tab === "first") due.sort((a, b) => (priority(b) - priority(a)) || String(b.funded_date || "").localeCompare(String(a.funded_date || "")));
-    else due.sort((a, b) => String(a.email_next).localeCompare(String(b.email_next)) || (priority(b) - priority(a)));   // oldest due first
+    else due.sort((a, b) => String(a.email_next || "").localeCompare(String(b.email_next || "")) || (priority(b) - priority(a)));   // oldest due first
     const ids = due.slice(0, target).map((c) => c.id);
     try { localStorage.setItem(key, JSON.stringify({ target, ids })); } catch {}
     return ids;
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [target, key, nonce, contacts.length, tab]);
+  }, [target, key, nonce, contacts.length, tab, counts]);
 
-  const done = (id) => { const c = byId[id]; return !!c && (!!sentToday[id] || c.__emailedToday || c.email_bad || (c.email_next && c.email_next > t) || c.email_step >= 3); };
+  const done = (id) => { const c = byId[id]; return !!c && (!!sentToday[id] || c.__emailedToday || c.email_bad || (c.email_next && c.email_next > t) || es(c) >= 3); };
   useEffect(() => { if (!selId || !queue.includes(selId)) { const n = queue.find((id) => !done(id)); setSelId(n || queue[0] || null); } }, [queue]); // eslint-disable-line react-hooks/exhaustive-deps
   const sel = selId ? byId[selId] : null;
   useEffect(() => { if (sel) setDraft(emailFor(sel)); }, [selId]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -161,6 +175,7 @@ export default function EmailDesk({ userId, contacts, setContacts, callIds, wide
     const prev = { email_step:sel.email_step || 0, email_next:sel.email_next || null, follow_up_date:sel.follow_up_date || null, do_not_contact:!!sel.do_not_contact, outcome:sel.outcome || null };
     const { data:touch } = await supabase.from("contact_touches").insert({ user_id:userId, contact_id:sel.id, channel:"email", outcome:label, note }).select("id").single();
     setSentToday((m) => ({ ...m, [sel.id]: { outcome:label, note } }));
+    if (/sent$/.test(label)) setCounts((m) => ({ ...m, [sel.id]: (m[sel.id] || 0) + 1 }));
     const { data } = await supabase.from("contacts").update(fields).eq("id", sel.id).select().single();
     if (data) setContacts((p) => p.map((x) => (x.id === data.id ? { ...data, __emailedToday:true } : x)));
     try { const u = JSON.parse(localStorage.getItem(undoKey) || "{}"); u[sel.id] = { prev, touchId:touch?.id }; localStorage.setItem(undoKey, JSON.stringify(u)); } catch {}
@@ -173,13 +188,14 @@ export default function EmailDesk({ userId, contacts, setContacts, callIds, wide
     const { data } = await supabase.from("contacts").update(s.prev).eq("id", id).select().single();
     if (data) setContacts((p) => p.map((x) => (x.id === data.id ? data : x)));
     delete u[id]; try { localStorage.setItem(undoKey, JSON.stringify(u)); } catch {}
+    if (/sent$/.test(sentToday[id]?.outcome || "")) setCounts((m) => ({ ...m, [id]: Math.max((m[id] || 1) - 1, 0) }));
     setSentToday((m) => { const x = { ...m }; delete x[id]; return x; });
     setSelId(id);
   };
   const canUndo = (id) => { try { return !!JSON.parse(localStorage.getItem(undoKey) || "{}")[id]; } catch { return false; } };
 
-  const step = sel ? (sel.email_step || 0) + 1 : 1;
-  const markSent = () => { const ns = (sel.email_step || 0) + 1; save({ email_step:ns, email_next: ns < 3 ? addDays(GAP[ns]) : null }, `email ${ns} sent`, `${draft.subject}\n\n${draft.body}`); };
+  const step = sel ? Math.min(es(sel) + 1, 3) : 1;
+  const markSent = () => { const ns = Math.min(es(sel) + 1, 3); save({ email_step:ns, email_next: ns < 3 ? addDays(GAP[ns]) : null }, `email ${ns} sent`, `${draft.subject}\n\n${draft.body}`); };
   const bounced = () => save({ email_bad:true, email_step:0, email_next:null, follow_up_date:t, outcome:"email bounced",
     contact_note:[sel.contact_note, `${t} · email bounced: ${sel.email}`].filter(Boolean).join("\n") }, "bounced");
   const replied = () => save({ email_step:99, email_next:null, follow_up_date:t, outcome:"replied to email" }, "replied");
@@ -218,7 +234,7 @@ export default function EmailDesk({ userId, contacts, setContacts, callIds, wide
         <div key={id} onClick={() => setSelId(id)} style={{display:"flex", gap:12, padding:"10px 18px", borderBottom:`1px solid ${C.rule}`, cursor:"pointer", background:on ? "#fff" : "transparent", borderLeft:on ? `4px solid ${C.green}` : "4px solid transparent", opacity:d && !on ? 0.45 : 1}}>
           <div style={{fontFamily:F.mono, fontSize:11, color:C.light, width:18, paddingTop:3}}>{n + 1}</div>
           <div><div style={{fontFamily:F.cond, fontWeight:700, fontSize:17, textDecoration:d ? "line-through" : "none"}}>{fullName(c)}</div>
-            <div style={{fontFamily:F.mono, fontSize:10, color:C.mid}}>{label(c)} · EMAIL {Math.max(1, Math.min((c.email_step || 0) + (d ? 0 : 1), 3))} OF 3{c.email_bad ? " · BOUNCED" : ""}</div></div>
+            <div style={{fontFamily:F.mono, fontSize:10, color:C.mid}}>{label(c)} · EMAIL {Math.max(1, Math.min(es(c) + (d ? 0 : 1), 3))} OF 3 · {counts[c.id] || 0} SENT{c.email_bad ? " · BOUNCED" : ""}</div></div>
         </div>); })}
       {queue.length === 0 && <div style={{padding:18, fontFamily:F.mono, fontSize:12, color:C.light}}>{tab === "first" ? "Everyone has had email 1." : "No follow-ups due today."}</div>}
     </div>
@@ -231,6 +247,8 @@ export default function EmailDesk({ userId, contacts, setContacts, callIds, wide
         {onOpen && <button onClick={() => onOpen(sel)} style={{...btn, padding:"5px 12px", fontSize:13, whiteSpace:"nowrap"}}>Go to client</button>}
       </div>
       <div style={{fontFamily:F.mono, fontSize:12, color:C.mid, margin:"6px 0 14px"}}>{label(sel)}{sel.company ? ` · ${sel.company}` : ""} · {sel.email}</div>
+      <ContactHistory userId={userId} contactId={sel.id} bump={Object.keys(sentToday).length + (counts[sel.id] || 0)} startOpen />
+      <div style={{height:14}}/>
       {done(sel.id) ? (<>
         <div style={{display:"flex", gap:8, alignItems:"center", padding:"10px 12px", borderRadius:8, background:"#fff", border:`1px solid ${C.rule}`}}>
           <span style={{fontFamily:F.mono, fontSize:12}}>{sentToday[sel.id] ? "Today" : "Logged"}: <b>{sel.email_bad ? "email bounced, on today's call list to get a new email" : sel.outcome === "replied to email" ? "replied" : sel.outcome === "asked to stop" ? "asked to stop" : `email ${sel.email_step} sent`}</b>{sel.email_next ? ` · next email ${sel.email_next.slice(5)}` : ""}</span>
@@ -251,14 +269,14 @@ export default function EmailDesk({ userId, contacts, setContacts, callIds, wide
           <input value={draft.subject} onChange={(e) => setDraft((d) => ({ ...d, subject:e.target.value }))} style={{...inp, marginTop:6, fontWeight:600}}/>
           <textarea value={draft.body} onChange={(e) => setDraft((d) => ({ ...d, body:e.target.value }))} rows={14} style={{...inp, marginTop:8, lineHeight:1.5, resize:"vertical", fontFamily:F.body}}/>
           <div style={{display:"flex", gap:8, flexWrap:"wrap", marginTop:12}}>
-            <a href={`mailto:${sel.email}?subject=${encodeURIComponent(draft.subject)}&body=${encodeURIComponent(draft.body)}`} style={btnG}>Open in email</a>
+            <a href={`mailto:${sel.email}?subject=${encodeURIComponent(draft.subject)}&body=${encodeURIComponent(draft.body)}`} onClick={markSent} style={btnG}>Open in email</a>
             <button onClick={() => navigator.clipboard?.writeText(draft.body)} style={btn}>Copy text</button>
             <button onClick={markSent} style={btnG}>Mark sent</button>
             <button onClick={replied} style={{...btn, marginLeft:"auto"}}>They replied</button>
             <button onClick={bounced} style={btn}>Bounced</button>
             <button onClick={stop} style={btn}>Asked to stop</button>
           </div>
-          <div style={{fontFamily:F.mono, fontSize:11, color:C.light, marginTop:10}}>Mark sent schedules the next email ({step === 1 ? "in 4 days" : step === 2 ? "in 7 days" : "none, this is the last one"}). They replied: ends the emails and puts a follow-up call on today's call list. Bounced: takes them off emails and puts them on today's call list to get a new email; entering it restarts the sequence. Asked to stop: marks them do-not-contact.</div>
+          <div style={{fontFamily:F.mono, fontSize:11, color:C.light, marginTop:10}}>Open in email logs the send for you (use Mark sent if you copied the text instead; Undo reverses it). It schedules the next email ({step === 1 ? "in 4 days" : step === 2 ? "in 7 days" : "none, this is the last one"}). They replied: ends the emails and puts a follow-up call on today's call list. Bounced: takes them off emails and puts them on today's call list to get a new email; entering it restarts the sequence. Asked to stop: marks them do-not-contact.</div>
         </>
       )}
     </div>
