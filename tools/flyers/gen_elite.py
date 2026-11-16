@@ -200,25 +200,50 @@ CARDS = {
                  ("WHEN IT HAS TO GO RIGHT", "Save my number. You&#39;ll want it", "Call me", True)],
         receipt_note="Book a call whenever it&#39;s time. No pressure, no pitch.",
         rpad=22, rule_top=330, cta="Book a call. It&#39;s how we start.", foot=FOOT_CONSUMER, foot_px=9.5),
+    "CRD-02": dict(palette="peacock", kicker="HOMEOWNERS &nbsp;/&nbsp; KNOW YOUR NUMBERS", **COMMON,
+        h1=["Your real value,"], h1_accent="not an online guess.", h1_px=84,
+        receipt=[("ONLINE ESTIMATE, EXAMPLE", "A computer&#39;s guess. It hasn&#39;t seen inside", "$480,000", False),
+                 ("A REAL NUMBER, EXAMPLE", "Your upgrades and the recent sales near you", "$515,000", False),
+                 ("THE GAP IN YOUR EQUITY", "It can run higher or lower", "$35,000", True)],
+        receipt_note="Estimates can be off in either direction. Let&#39;s start with a real number.",
+        rpad=22, rule_top=330, cta="Book a call. I&#39;ll give you a game plan.", foot=FOOT_EQ, foot_px=9.5),
+    "AGT-04": dict(palette="burgundy", kicker="REAL ESTATE AGENTS &nbsp;/&nbsp; REFERRAL PARTNERS", **COMMON,
+        h1=["Clients who close"], h1_accent="without the drama.", h1_px=80,
+        receipt=[("BEFORE THE OFFER", "Numbers settled early, so nothing moves later", "Clear", False),
+                 ("DURING ESCROW", "Steady updates to you and your client", "Steady", False),
+                 ("AT THE TABLE", "A calm path to the keys", "Closed", True)],
+        receipt_note="The deals that slip usually slip late. I work to settle them early.",
+        rpad=22, rule_top=330, cta="Book a call. Let&#39;s protect your clients.", foot=FOOT_AGENT, foot_px=10),
+    "AGT-05": dict(palette="peacock", kicker="REAL ESTATE AGENTS &nbsp;/&nbsp; REFERRAL PARTNERS", **COMMON,
+        h1=["A closing your client"], h1_accent="thanks you for.", h1_px=76,
+        receipt=[("YOUR CLIENT SEES", "Their real numbers before they write offers", "Early", False),
+                 ("YOU GET", "Updates, so you aren&#39;t chasing anyone", "Steady", False),
+                 ("THE RESULT", "A client who sends their friends to you", "Referrals", True)],
+        receipt_note="Think of me when you want your closings to go amazingly well.",
+        rpad=22, rule_top=330, cta="Book a call. Let&#39;s make your next closing easy.", foot=FOOT_AGENT, foot_px=10),
 }
 
-# ---- Photo toggle. Every Bond flyer is rendered both ways: REF-photo.png (tie photo) and REF-text.png (text-only panel).
-# REF.png is the default one; GUP lets him switch per flyer. Add a ref to PHOTO_ON to make photo the default.
-BOND_REFS = ["PAY-01","PAY-02","PAY-03","PAY-04","DWN-01","DWN-02","DWN-03","WLT-01","WLT-02","WLT-03","EQT-01","EQT-02","EQT-03","CRD-01"]
-PHOTO_ON = {"CRD-01", "PAY-01", "DWN-02", "EQT-02"}
+# ---- Photo toggle. Every Bond flyer is rendered five ways: REF.png (the default), REF-tie, REF-plum, REF-check, REF-text.
+BOND_REFS = ["PAY-01","PAY-02","PAY-03","PAY-04","DWN-01","DWN-02","DWN-03","WLT-01","WLT-02","WLT-03","EQT-01","EQT-02","EQT-03","CRD-01","CRD-02","AGT-04","AGT-05"]
+PHOTO_DEFAULT = {"PAY-01": "tie", "CRD-01": "check", "DWN-02": "plum", "EQT-02": "tie", "AGT-05": "plum"}   # everything else defaults to text-only
+PHOTOS = {
+    "tie":   dict(file="joshua-park-smile.jpg", h=500, size=720, x=-440, y=-40),
+    "plum":  dict(file="joshua-plum-suit.jpg", h=500, size=1000, x=-116, y=0),
+    "check": dict(file="joshua-check-suit.jpg", h=500, size=880, x=-70, y=0),
+}
 TEXT_PANEL = "When it<br>has to go<br>right,<br>I&#39;m your<br>guy."
-def _variant(c, photo):
+def _variant(c, mode):
     c = dict(c)
-    if photo:
-        c["photo"] = dict(COMMON["photo"]); c["photo_line"] = COMMON["photo_line"]; c.pop("panel_line", None); c.pop("panel_px", None)
+    if mode in PHOTOS:
+        c["photo"] = dict(PHOTOS[mode]); c["photo_line"] = COMMON["photo_line"]; c.pop("panel_line", None); c.pop("panel_px", None)
     else:
         c.pop("photo", None); c.pop("photo_line", None); c["panel_line"] = TEXT_PANEL; c["panel_px"] = 50
     return c
 VARIANTS = {}
 for _ref in BOND_REFS:
-    VARIANTS[_ref + "-photo"] = _variant(CARDS[_ref], True)
-    VARIANTS[_ref + "-text"] = _variant(CARDS[_ref], False)
-    CARDS[_ref] = VARIANTS[_ref + ("-photo" if _ref in PHOTO_ON else "-text")]
+    for _m in ("tie", "plum", "check", "text"):
+        VARIANTS[_ref + "-" + _m] = _variant(CARDS[_ref], _m)
+    CARDS[_ref] = VARIANTS[_ref + "-" + PHOTO_DEFAULT.get(_ref, "text")]
 
 def qr_svg(url, px, dark, light):
     import segno
@@ -368,5 +393,5 @@ if __name__ == "__main__":
     for ref in (args or list(CARDS)):
         print(render(ref, CARDS[ref], out))
         if ref in BOND_REFS:
-            for v in ("photo", "text"):
+            for v in ("tie", "plum", "check", "text"):
                 print(render(ref, VARIANTS[ref + "-" + v], out, name=ref + "-" + v))

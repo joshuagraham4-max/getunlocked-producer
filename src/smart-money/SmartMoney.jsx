@@ -74,12 +74,12 @@ const audTag = (c) => c.audience === "intro" ? <Tag tone="neutral">Intro · post
 const licTag = (c) => (c.audience === "intro" || c.audience === "agent") ? null : c.bank === "equipment" ? <Tag tone="warn">Nationwide · not CA</Tag> : c.license === "none" ? <Tag tone="good">No license needed · FL OK</Tag> : <Tag tone="warn">License required · CO only</Tag>;
 
 // Bond flyers come in two versions (-photo and -text). Per-flyer choice is remembered on this device.
-const photoMode = (card) => { if (!isBond(card)) return null; return store.get("sm_photo_" + card.ref) || (card.photoDefault ? "photo" : "text"); };
+const photoMode = (card) => { if (!isBond(card)) return null; const v = store.get("sm_photo_" + card.ref); return v === "photo" ? "tie" : (v || card.photoDefault || "text"); };
 function useFlyerSrc(card) {
   const [, bump] = useState(0);
   React.useEffect(() => { const h = () => bump((n) => n + 1); window.addEventListener("sm-photo", h); return () => window.removeEventListener("sm-photo", h); }, []);
   const m = photoMode(card);
-  return card.flyer && m ? card.flyer.replace(/\.png$/, m === "photo" ? "-photo.png" : "-text.png") : card.flyer;
+  return card.flyer && m ? card.flyer.replace(/\.png$/, `-${m}.png`) : card.flyer;
 }
 function PhotoToggle({ card }) {
   useFlyerSrc(card);
@@ -89,8 +89,7 @@ function PhotoToggle({ card }) {
   return (
     <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
       <span style={{ fontSize: 12, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: "0.06em" }}>Flyer version</span>
-      <button onClick={() => set("photo")} style={m === "photo" ? btn(C.navy) : ghost}>With my photo</button>
-      <button onClick={() => set("text")} style={m === "text" ? btn(C.navy) : ghost}>No photo</button>
+      {[["tie", "Tie photo"], ["plum", "Plum suit"], ["check", "Checkered suit"], ["text", "No photo"]].map(([v, l]) => <button key={v} onClick={() => set(v)} style={m === v ? btn(C.navy) : ghost}>{l}</button>)}
     </div>
   );
 }
@@ -106,7 +105,7 @@ function Flyer({ card, size = "100%" }) {
   );
 }
 
-function useFlyerSrcPlain(card) { const m = photoMode(card); return card.flyer && m ? card.flyer.replace(/\.png$/, m === "photo" ? "-photo.png" : "-text.png") : card.flyer; }
+function useFlyerSrcPlain(card) { const m = photoMode(card); return card.flyer && m ? card.flyer.replace(/\.png$/, `-${m}.png`) : card.flyer; }
 function PostKit({ card, copyKind = "short" }) {
   useFlyerSrc(card);
   const link = magnetLink(card);
