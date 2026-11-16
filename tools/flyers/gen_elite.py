@@ -31,12 +31,16 @@ PALETTES = {
     # buyers / renters
     "scarlet": dict(bg="#EFEAE0", ink="#101820", accent="#A3141C", panel="#1E252C", panel_text="#EFEAE0", panel_mute="#B9BEC4", muted="#5A5F66"),
     # agents / partners
+    "burgundy": dict(bg="#EFEAE0", ink="#101820", accent="#7A1E2C", panel="#3E1019", panel_text="#EFEAE0", panel_mute="#CDB0B5", muted="#5A5F66"),
+    "camel": dict(bg="#EFEAE0", ink="#101820", accent="#9A7440", panel="#15181C", panel_text="#EFEAE0", panel_mute="#CDB892", muted="#5A5F66"),
     "peacock": dict(bg="#EFEAE0", ink="#101820", accent="#0C5A63", panel="#0A363D", panel_text="#EFEAE0", panel_mute="#9DC0C0", muted="#5A5F66"),
 }
 
+FOOT_NUMBERS_SUFFIX = " Example only: payment and move-in figures are illustrative and vary by scenario; disclosure text to be supplied by ZPM compliance."
 FOOT_CONSUMER = ("Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity. "
     "Licensed in Colorado. Down payment assistance and seller concessions depend on program eligibility, lender and seller agreement and are not available to all borrowers. "
     "First payment timing varies by closing date. Not a commitment to lend; subject to credit approval, underwriting guidelines and change without notice.")
+FOOT_NUMBERS = FOOT_CONSUMER + FOOT_NUMBERS_SUFFIX
 FOOT_AGENT = ("Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity. "
     "Licensed in Colorado. Not a commitment to lend; subject to credit approval, underwriting guidelines and change without notice.")
 
@@ -71,6 +75,18 @@ CARDS = {
         left=("THE LEASE", "A place you pay for and never own."),
         right=("THE MORTGAGE", "A payment that builds your equity."),
         cta="See what your move would really take.", panel_bottom=STAT_30_45, foot=FOOT_CONSUMER),
+    "NUM-01": dict(palette="burgundy", kicker="THINKING ABOUT BUYING IN COLORADO",
+        h1=["Look at"], h1_accent="these numbers.", h1_px=112,
+        figures=[dict(label="RENTING", px=76, big="$2,000", small="a month, plus two months and a deposit to move in."),
+                 dict(label="BUYING", px=76, big="$2K&ndash;$3K", small="a month, and help can mean little to nothing out of pocket.")],
+        panel_line="When it<br>has to go<br>right, I'm<br>your guy.", panel_px=42, rule_top=470,
+        cta="Save my number. You'll want it.", panel_bottom=STAT_30_45, foot=FOOT_NUMBERS),
+    "NUM-02": dict(palette="camel", kicker="THINKING ABOUT BUYING IN COLORADO",
+        h1=["Look at"], h1_accent="these numbers.", h1_px=112,
+        figures=[dict(label="RENTING", px=76, big="$2,000", small="a month, plus two months and a deposit to move in."),
+                 dict(label="BUYING", px=76, big="$2K&ndash;$3K", small="a month, and help can mean little to nothing out of pocket.")],
+        panel_line="When it<br>has to go<br>right, I'm<br>your guy.", panel_px=42, rule_top=470,
+        cta="Save my number. You'll want it.", panel_bottom=STAT_30_45, foot=FOOT_NUMBERS),
 }
 
 def grain_url():
@@ -108,9 +124,22 @@ def page(ref, c):
                       f'<p style="position:absolute;right:34px;bottom:104px;font:600 11px/1.6 M;letter-spacing:.26em;color:{p["panel_mute"]}">SMOOTH. PRECISE. ELITE.</p>')
     else:
         panel_body = (f'<div style="position:absolute;right:0;top:0;width:270px;padding:84px 34px 0 36px;box-sizing:border-box"><div style="width:44px;height:3px;background:{rule}"></div>'
-                      f'<p style="margin-top:26px;font:500 italic 50px/1.06 B;color:{p["panel_text"]}">Think of<br>me when<br>it has to<br>go right.</p></div>'
+                      f'<p style="margin-top:26px;font:500 italic {c.get("panel_px",50)}px/1.08 B;color:{p["panel_text"]};white-space:nowrap">{c.get("panel_line","Think of<br>me when<br>it has to<br>go right.")}</p></div>'
                       f'<div style="position:absolute;right:0;bottom:104px;width:270px;padding:0 34px 0 36px;box-sizing:border-box">{bottom}</div>')
     gf = os.path.join(BRAND, "gf-logo-ink.png"); zp = os.path.join(BRAND, "zpm-logo-ink.png")
+    ledger_html = "" if c.get("figures") else f'''<div style="position:absolute;left:74px;width:690px;top:556px;display:grid;grid-template-columns:1fr 1fr">
+<div style="padding-right:26px;border-right:1px solid {p["ink"]}33"><p style="font:700 13px M;letter-spacing:.32em;color:{p["ink"]}">{c["left"][0]}</p><p style="margin-top:10px;font:500 {lpx}px/1.12 B;color:{p["ink"]}">{c["left"][1]}</p></div>
+<div style="padding-left:26px"><p style="font:700 13px M;letter-spacing:.32em;color:{p["accent"]}">{c["right"][0]}</p><p style="margin-top:10px;font:700 {lpx}px/1.12 B;color:{p["ink"]}">{c["right"][1]}</p></div></div>
+'''
+    if c.get("figures"):
+        cols = []
+        for k, fg in enumerate(c["figures"]):
+            colr = p["accent"] if k else p["ink"]
+            pad = "padding-left:26px" if k else "padding-right:26px;border-right:1px solid " + p["ink"] + "33"
+            cols.append(f'<div style="{pad}"><p style="font:700 13px M;letter-spacing:.32em;color:{colr}">{fg["label"]}</p>'
+                        f'<p style="margin-top:6px;font:500 {fg.get("px",70)}px/1 B;color:{p["ink"]};letter-spacing:-0.02em;white-space:nowrap">{fg["big"]}</p>'
+                        f'<p style="margin-top:8px;font:500 21px/1.25 B;color:{p["ink"]}">{fg["small"]}</p></div>')
+        ledger_html = '<div style="position:absolute;left:74px;width:690px;top:' + str(c.get("rule_top",540)+16) + 'px;display:grid;grid-template-columns:1fr 1fr">' + "".join(cols) + '</div>'
     html_out = f'''<!doctype html><html><head><meta charset="utf-8"><style>{ff}body{{margin:0}}p,h1{{margin:0}}*{{font-variant-numeric:lining-nums !important;font-feature-settings:"lnum" 1 !important}}</style></head><body>
 <div style="width:1080px;height:1080px;position:relative;overflow:hidden;font-family:M">
 <div style="position:absolute;inset:0;background:{p["bg"]}"></div>{grain(.16)}
@@ -118,10 +147,8 @@ def page(ref, c):
 {panel_body}
 <div style="position:absolute;left:74px;top:74px;display:flex;align-items:center;gap:14px"><div style="width:12px;height:12px;background:{p["accent"]}"></div><p style="font:700 14px M;letter-spacing:.34em;color:{p["ink"]};white-space:nowrap">{c["kicker"]}</p></div>
 <h1 style="position:absolute;left:74px;top:132px;font:500 {c.get("h1_px",104)}px/0.97 B;color:{p["ink"]};letter-spacing:-0.02em">{h1}</h1>
-<div style="position:absolute;left:74px;width:690px;top:540px;border-top:2px solid {p["ink"]}"></div>
-<div style="position:absolute;left:74px;width:690px;top:556px;display:grid;grid-template-columns:1fr 1fr">
-<div style="padding-right:26px;border-right:1px solid {p["ink"]}33"><p style="font:700 13px M;letter-spacing:.32em;color:{p["ink"]}">{c["left"][0]}</p><p style="margin-top:10px;font:500 {lpx}px/1.12 B;color:{p["ink"]}">{c["left"][1]}</p></div>
-<div style="padding-left:26px"><p style="font:700 13px M;letter-spacing:.32em;color:{p["accent"]}">{c["right"][0]}</p><p style="margin-top:10px;font:700 {lpx}px/1.12 B;color:{p["ink"]}">{c["right"][1]}</p></div></div>
+<div style="position:absolute;left:74px;width:690px;top:{c.get("rule_top",540)}px;border-top:2px solid {p["ink"]}"></div>
+{ledger_html}
 <div style="position:absolute;left:74px;width:690px;top:726px;border-top:1px solid {p["ink"]}33"></div>
 <p style="position:absolute;left:74px;top:738px;font:500 italic 29px B;color:{p["ink"]};white-space:nowrap">{c["cta"]}</p>
 <div style="position:absolute;left:74px;width:690px;top:792px;display:flex;align-items:center;justify-content:space-between">
