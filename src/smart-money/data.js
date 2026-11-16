@@ -1041,7 +1041,7 @@ I'd rather show you your real numbers than guess. Think of me when you want your
     },
   },
   {
-    ref: "PAY-01", bank: "consumer", name: "Own It for Less Than You Rent (roommates)", lender: "N/A — call; route to payment, DPA and seller-credit scenarios",
+    ref: "PAY-01", campaign: "bond", lane: "pay", bank: "consumer", name: "Own It for Less Than You Rent (roommates)", lender: "N/A — call; route to payment, DPA and seller-credit scenarios",
     audience: "consumer", license: "required", flyer: "/smart-money/flyers/PAY-01.png", footer: "pay",
     cta: `Book a call and I'll run YOUR numbers, roommates and all. It's not a sales call. When it has to go right, I'm your guy. Save my info 👉 ${BRAND.booking}`,
     painPoints: ["priced-out", "renting"], magnet: "book-5", skool: "Homebuyers",
@@ -1071,7 +1071,7 @@ Book a call and I'll run YOUR numbers, roommates and all. It's not a sales call.
     },
   },
   {
-    ref: "PAY-02", bank: "consumer", name: "About $100 More a Week, and It's Yours (payment)", lender: "N/A — call; route to payment, DPA and seller-credit scenarios",
+    ref: "PAY-02", campaign: "bond", lane: "pay", bank: "consumer", name: "About $100 More a Week, and It's Yours (payment)", lender: "N/A — call; route to payment, DPA and seller-credit scenarios",
     audience: "consumer", license: "required", flyer: "/smart-money/flyers/PAY-02.png", footer: "pay2",
     cta: `Book a call and I'll run YOUR numbers next to your rent. It's not a sales call. When it has to go right, I'm your guy. Save my info 👉 ${BRAND.booking}`,
     painPoints: ["priced-out", "renting"], magnet: "book-5", skool: "Homebuyers",
@@ -1097,7 +1097,7 @@ Book a call and I'll run YOUR numbers next to your rent. It's not a sales call. 
     },
   },
   {
-    ref: "DWN-01", bank: "consumer", name: "Cash to Close Can Be Near $0 (renters)", lender: "N/A — call; route to payment, DPA and seller-credit scenarios",
+    ref: "DWN-01", campaign: "bond", lane: "cash", bank: "consumer", name: "Cash to Close Can Be Near $0 (renters)", lender: "N/A — call; route to payment, DPA and seller-credit scenarios",
     audience: "consumer", license: "required", flyer: "/smart-money/flyers/DWN-01.png", footer: "dpa",
     cta: `Book a call and I'll show you exactly how much you'd bring to closing. It's not a sales call. When it has to go right, I'm your guy. Save my info 👉 ${BRAND.booking}`,
     painPoints: ["no-down-payment", "renting"], magnet: "book-5", skool: "Homebuyers",
@@ -1124,7 +1124,7 @@ Book a call and I'll show you exactly how much you'd bring to closing. It's not 
     },
   },
   {
-    ref: "WLT-01", bank: "consumer", name: "Home Prices Rose in 45 of 50 Years (wealth building)", lender: "N/A — call; route to payment, DPA and seller-credit scenarios",
+    ref: "WLT-01", campaign: "bond", lane: "wealth", bank: "consumer", name: "Home Prices Rose in 45 of 50 Years (wealth building)", lender: "N/A — call; route to payment, DPA and seller-credit scenarios",
     audience: "consumer", license: "required", flyer: "/smart-money/flyers/WLT-01.png", footer: "wealth",
     cta: `Book a call and I'll show you what owning could mean for YOU. It's not a sales call. When it has to go right, I'm your guy. Save my info 👉 ${BRAND.booking}`,
     painPoints: ["renting"], magnet: "book-5", skool: "Homebuyers",
@@ -1152,7 +1152,7 @@ Book a call and I'll show you what owning could mean for YOU. It's not a sales c
     },
   },
   {
-    ref: "EQT-01", bank: "consumer", name: "Your Equity Is Dead Money (homeowners to investors)", lender: "RISE Business Purpose Closed-End Second DSCR or cash-out, per scenario; get the matrix before quoting",
+    ref: "EQT-01", campaign: "bond", lane: "equity", bank: "consumer", name: "Your Equity Is Dead Money (homeowners to investors)", lender: "RISE Business Purpose Closed-End Second DSCR or cash-out, per scenario; get the matrix before quoting",
     audience: "consumer", license: "required", flyer: "/smart-money/flyers/EQT-01.png", footer: "consumer",
     cta: `Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info 👉 ${BRAND.booking}`,
     painPoints: ["equity-trapped", "stuck"], magnet: "book-5", skool: "Homebuyers",
@@ -1199,8 +1199,8 @@ const dayIndex = (d) => Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.get
 export function planFor(date) {
   const di = dayIndex(date);
   const pools = {
-    investor: CARDS.filter((c) => c.audience === "investor"),
-    consumer: CARDS.filter((c) => c.audience === "consumer"),
+    investor: CARDS.filter((c) => c.audience === "investor" && c.campaign !== "bond"),
+    consumer: CARDS.filter((c) => c.audience === "consumer" && c.campaign !== "bond"),
   };
   // count investor/consumer slots used before this day (from a fixed epoch) to advance the rotation
   const epoch = dayIndex(new Date(2026, 9, 26)); // Mon Oct 26, 2026
@@ -1268,4 +1268,80 @@ export const FUNNEL = [
   { step: 3, name: "Join Skool + take a class", detail: "Invite shown only after the lead is captured." },
   { step: 4, name: "Free credit review", detail: "Bonus for joining and taking a class." },
   { step: 5, name: "Application", detail: "The credit review links straight into the full application." },
+];
+
+// =====================================================================================
+// THE BOND CAMPAIGN — its own section, its own rotation. Smooth. Precise. Elite.
+// Any card with campaign: "bond" lives here (consumer or agent) and nowhere in Smart Money.
+// Smart Money (investor, DSCR, equipment, older consumer and agent cards) is untouched.
+// =====================================================================================
+export const isBond = (c) => c.campaign === "bond";
+export const BOND_LANES = [
+  { id: "pay", label: "Payment: it's not out of reach" },
+  { id: "cash", label: "Cash to close: little to nothing out of pocket" },
+  { id: "wealth", label: "Rent vs. wealth building" },
+  { id: "equity", label: "Trapped equity into an investment property" },
+  { id: "cred", label: "Credibility: why me" },
+];
+export const BOND_CHANNELS = {
+  consumer: ["Facebook page", "Facebook groups: Direct-to-consumer (CO audiences)", "Instagram (cross-post)"],
+  agent: ["Facebook page", "Facebook groups: Real estate agents", "Instagram (cross-post)"],
+};
+
+// Rotation: two slots a day. Lanes are interleaved round-robin, the two cards in a day are never the same lane,
+// and a card goes to the back of the line after it posts. Deterministic from the epoch, so any day can be viewed.
+export function planBond(date) {
+  const cards = CARDS.filter(isBond);
+  const byLane = BOND_LANES.map((l) => cards.filter((c) => c.lane === l.id)).filter((a) => a.length);
+  const seq = [];
+  for (let i = 0; byLane.some((a) => i < a.length); i++) byLane.forEach((a) => { if (i < a.length) seq.push(a[i]); });
+  const epoch = dayIndex(new Date(2026, 10, 16)); // Mon Nov 16, 2026
+  const di = dayIndex(date);
+  const queue = seq.slice();
+  const pick = () => {
+    const am = queue.shift();
+    let k = queue.findIndex((c) => c.lane !== am.lane);
+    if (k < 0) k = 0;
+    const pm = queue.length ? queue.splice(k, 1)[0] : am;
+    return [am, pm];
+  };
+  let last = null;
+  const days = Math.max(0, di - epoch);
+  for (let i = 0; i <= days; i++) { const [am, pm] = pick(); last = [am, pm]; if (i < days) { queue.push(am); if (pm !== am) queue.push(pm); } }
+  const wd = date.getDay(); const weekend = wd === 0 || wd === 6;
+  const slots = last.map((card, i) => ({
+    slot: SLOTS[i], audience: card.audience, card, channels: BOND_CHANNELS[card.audience] || BOND_CHANNELS.consumer,
+    copy: weekend ? "long" : i === 0 ? "short" : "long", style: "Bond",
+  }));
+  return { slots, video: last[0] };
+}
+
+export const BOND_MESSAGES = [
+  { id: "B1", theme: "The close", text: "When it has to go right, I'm your guy. Save my info." },
+  { id: "B2", theme: "The ask", text: "Book a consultation call with me. It's not a sales call. I'll run your real numbers and you decide what happens next." },
+  { id: "B3", theme: "Payment", text: "You've been told owning is out of reach. Look at these numbers. With a roommate or two it can land close to what you pay in rent, and the payment builds your equity, not your landlord's.",
+    caution: "Payment amounts trigger Reg Z: the loan-example footer must travel with the post. Roommate income is illustrative, not guaranteed or always counted toward qualifying." },
+  { id: "B4", theme: "Cash to close", text: "Sellers are paying credits right now, often 3 to 6% of the price, and down payment assistance can cover more. In the right scenario your cash to close can be little to nothing.",
+    caution: "Say 'can' and 'in the right scenario'. Never promise zero." },
+  { id: "B5", theme: "Rent vs. wealth", text: "Nationally, home prices rose in 45 of the last 50 years. Rent builds your landlord's wealth. A mortgage builds yours.",
+    caution: "Appreciation isn't guaranteed and Denver has been flat to down lately. Keep it a years-long play and cite FHFA (All-Transactions HPI)." },
+  { id: "B6", theme: "Trapped equity", text: "Your equity is dead money until you put it to work. It can be the down payment on your next property, and you don't have to sell.",
+    caution: "Amount depends on value, credit and program. No rates or payments in the post." },
+  { id: "B7", theme: "The money guy", text: "Contact me for smart money to finance real estate.",
+    caution: "Use 'access to smart money'. Do NOT say 'I have the money': he is a broker with access to lenders, not a lender." },
+];
+export const BOND_RULES = [
+  "Smooth. Precise. Elite. One idea per flyer, the numbers as a receipt underneath, his photo, the QR code.",
+  "Every post ends the same way: book a consultation call, it's not a sales call, when it has to go right I'm your guy, save my info.",
+  "He is the money guy, not a real estate agent. Keep 'Contact me for smart money to finance real estate' on every flyer.",
+  "Title is Regional Loan Originator. No 'AVP'.",
+  "Payment amounts or a down payment: the loan-example footer goes with the post (Reg Z). Keep NMLS and Equal Housing.",
+  "Roommate income is illustrative. Appreciation is hedged. No testimonials without ZPM review.",
+  "Every flyer is a funnel to a booked call. If it doesn't give a reason to call, rewrite it.",
+];
+export const BOND_FUNNEL = [
+  { step: 1, name: "Post", detail: "Flyer + copy. The flyer carries the reason to call and a QR code to the booking page." },
+  { step: 2, name: "Book the call", detail: "Booking link in the post and on the flyer. No lead form, no class gate." },
+  { step: 3, name: "The consultation call", detail: "Not a sales call. Run their real numbers, then decide next steps together." },
+  { step: 4, name: "Save my info", detail: "Contact saved in GUP; the call list and radar take it from there." },
 ];

@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { supabase } from "../supabase.js";
-import { BRAND, CARDS, PAIN_POINTS, MAGNETS, FOOTERS, CHANNELS, planFor, magnetLink, MESSAGES, CONTENT_RULES, FUNNEL } from "./data.js";
+import { BRAND, CARDS, PAIN_POINTS, MAGNETS, FOOTERS, CHANNELS, planFor, magnetLink, MESSAGES, CONTENT_RULES, FUNNEL, planBond, isBond, BOND_LANES, BOND_MESSAGES, BOND_RULES, BOND_FUNNEL } from "./data.js";
 import ContentKit from "./ContentKit.jsx";
 
 // Self-contained module: drop <SmartMoney /> into the Producer app later.
@@ -122,10 +122,11 @@ function PostKit({ card, copyKind = "short" }) {
 }
 
 // ---------------- Views
-function Today({ userId }) {
+function Today({ userId, campaign }) {
+  const bond = campaign === "bond"; const pfx = bond ? "bond-" : "";
   const [offset, setOffset] = useState(0);
   const date = useMemo(() => { const d = new Date(); d.setDate(d.getDate() + offset); return d; }, [offset]);
-  const plan = planFor(date);
+  const plan = bond ? planBond(date) : planFor(date);
   const day = dateKey(date);
   const [done, setDone] = useState({});
   const [saveErr, setSaveErr] = useState(false);
@@ -140,7 +141,7 @@ function Today({ userId }) {
     const ok = await posts.save(userId, day, id, n[id], n); setSaveErr(!ok);
   };
   const v = plan.video.video;
-  const count = ["am", "pm", "video"].filter((k) => done[k]).length;
+  const count = ["am", "pm", "video"].filter((k) => done[pfx + k]).length;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
@@ -160,13 +161,13 @@ function Today({ userId }) {
             <span style={{ fontSize: 13, color: C.muted }}>{s.slot.mtn}</span>
             <Tag>{s.style}</Tag>
             <label style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8, fontWeight: 700, cursor: "pointer" }}>
-              <input type="checkbox" checked={!!done[s.slot.id]} onChange={() => toggle(s.slot.id)} style={{ width: 20, height: 20 }} /> Posted
+              <input type="checkbox" checked={!!done[pfx + s.slot.id]} onChange={() => toggle(pfx + s.slot.id)} style={{ width: 20, height: 20 }} /> Posted
             </label>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 260px), 1fr))", gap: 18, alignItems: "start" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <Flyer card={s.card} />
-              <div style={{ fontSize: 13, color: C.muted }}><b style={{ color: C.ink }}>Post to:</b> {CHANNELS[s.audience].join(" · ")}</div>
+              <div style={{ fontSize: 13, color: C.muted }}><b style={{ color: C.ink }}>Post to:</b> {(s.channels || CHANNELS[s.audience]).join(" · ")}</div>
             </div>
             <PostKit card={s.card} copyKind={s.copy} />
           </div>
@@ -178,7 +179,7 @@ function Today({ userId }) {
           <div style={{ fontFamily: F.display, fontWeight: 800, fontSize: 18 }}>Daily video</div>
           <Tag>Skool · {plan.video.skool}</Tag><Tag>REF {plan.video.ref}</Tag>
           <label style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8, fontWeight: 700, cursor: "pointer" }}>
-            <input type="checkbox" checked={!!done.video} onChange={() => toggle("video")} style={{ width: 20, height: 20 }} /> Filmed
+            <input type="checkbox" checked={!!done[pfx + "video"]} onChange={() => toggle(pfx + "video")} style={{ width: 20, height: 20 }} /> Filmed
           </label>
         </div>
         <div style={{ fontWeight: 800, fontSize: 17, marginBottom: 6 }}>{v.title}</div>
@@ -191,14 +192,14 @@ function Today({ userId }) {
   );
 }
 
-function Flyers({ open }) {
+function Flyers({ open, cards, bond }) {
   const [aud, setAud] = useState("all"); const [lic, setLic] = useState("all");
-  const list = CARDS.filter((c) => (aud === "all" || c.audience === aud) && (lic === "all" || c.license === lic));
+  const list = cards.filter((c) => (aud === "all" || c.audience === aud) && (lic === "all" || c.license === lic));
   const Pill = ({ v, cur, set, children }) => <button onClick={() => set(v)} style={cur === v ? btn(C.navy) : ghost}>{children}</button>;
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-        <Pill v="all" cur={aud} set={setAud}>All</Pill><Pill v="investor" cur={aud} set={setAud}>Investor</Pill><Pill v="consumer" cur={aud} set={setAud}>Consumer</Pill><Pill v="business" cur={aud} set={setAud}>Equipment: owners</Pill><Pill v="partner" cur={aud} set={setAud}>Equipment: partners</Pill>
+        <Pill v="all" cur={aud} set={setAud}>All</Pill>{bond ? <><Pill v="consumer" cur={aud} set={setAud}>Consumers</Pill><Pill v="agent" cur={aud} set={setAud}>Agents</Pill></> : <><Pill v="investor" cur={aud} set={setAud}>Investor</Pill><Pill v="consumer" cur={aud} set={setAud}>Consumer</Pill><Pill v="business" cur={aud} set={setAud}>Equipment: owners</Pill><Pill v="partner" cur={aud} set={setAud}>Equipment: partners</Pill></>}
         <span style={{ width: 12 }} />
         <Pill v="all" cur={lic} set={setLic}>Any license</Pill><Pill v="none" cur={lic} set={setLic}>No license (FL OK)</Pill><Pill v="required" cur={lic} set={setLic}>CO only</Pill>
       </div>
@@ -215,16 +216,16 @@ function Flyers({ open }) {
   );
 }
 
-function PainPoints({ open }) {
+function PainPoints({ open, cards, pains }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-      {PAIN_POINTS.map((p) => {
-        const cards = CARDS.filter((c) => c.painPoints.includes(p.id));
+      {pains.map((p) => {
+        const hits = cards.filter((c) => c.painPoints.includes(p.id));
         return (
           <section key={p.id} style={panel}>
             <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 10 }}>{p.label}</div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              {cards.map((c) => <button key={c.ref} onClick={() => open(c.ref)} style={ghost}>{c.ref} · {c.name}</button>)}
+              {hits.map((c) => <button key={c.ref} onClick={() => open(c.ref)} style={ghost}>{c.ref} · {c.name}</button>)}
             </div>
           </section>
         );
@@ -233,13 +234,13 @@ function PainPoints({ open }) {
   );
 }
 
-function Library({ selected, setSelected }) {
-  const card = CARDS.find((c) => c.ref === selected) || CARDS[0];
+function Library({ selected, setSelected, cards }) {
+  const card = cards.find((c) => c.ref === selected) || cards[0];
   const [kind, setKind] = useState("short");
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <select value={card.ref} onChange={(e) => setSelected(e.target.value)} style={{ font: "inherit", padding: 10, borderRadius: 8, border: `1px solid ${C.line}`, maxWidth: 520 }} aria-label="Choose a program">
-        {CARDS.map((c) => <option key={c.ref} value={c.ref}>{c.ref}{c.was ? ` (was ${c.was})` : ""} · {c.name}</option>)}
+        {cards.map((c) => <option key={c.ref} value={c.ref}>{c.ref}{c.was ? ` (was ${c.was})` : ""} · {c.name}</option>)}
       </select>
       <section style={panel}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 280px), 1fr))", gap: 20, alignItems: "start" }}>
@@ -267,13 +268,14 @@ function Library({ selected, setSelected }) {
   );
 }
 
-function Messages() {
+function Messages({ bond }) {
+  const msgs = bond ? BOND_MESSAGES : MESSAGES, rules = bond ? BOND_RULES : CONTENT_RULES, funnel = bond ? BOND_FUNNEL : FUNNEL;
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-      <p style={{ margin: 0, color: C.muted, fontSize: 14 }}>Core Smart Money messages. Use them as post hooks, captions or video openers.</p>
-      <section style={{ ...panel, background: C.bg }}><div style={{ fontWeight: 800, marginBottom: 6 }}>The funnel</div><ol style={{ margin: 0, paddingLeft: 18, lineHeight: 1.6 }}>{FUNNEL.map((f) => <li key={f.step}><b>{f.name}</b> — {f.detail}</li>)}</ol></section>
-      <section style={{ ...panel, background: C.bg }}><div style={{ fontWeight: 800, marginBottom: 6 }}>Content rules</div><ul style={{ margin: 0, paddingLeft: 18, lineHeight: 1.6 }}>{CONTENT_RULES.map((r) => <li key={r}>{r}</li>)}</ul></section>
-      {MESSAGES.map((m) => (
+      <p style={{ margin: 0, color: C.muted, fontSize: 14 }}>{bond ? "Core Bond Campaign messages" : "Core Smart Money messages"}. Use them as post hooks, captions or video openers.</p>
+      <section style={{ ...panel, background: C.bg }}><div style={{ fontWeight: 800, marginBottom: 6 }}>The funnel</div><ol style={{ margin: 0, paddingLeft: 18, lineHeight: 1.6 }}>{funnel.map((f) => <li key={f.step}><b>{f.name}</b> — {f.detail}</li>)}</ol></section>
+      <section style={{ ...panel, background: C.bg }}><div style={{ fontWeight: 800, marginBottom: 6 }}>Content rules</div><ul style={{ margin: 0, paddingLeft: 18, lineHeight: 1.6 }}>{rules.map((r) => <li key={r}>{r}</li>)}</ul></section>
+      {msgs.map((m) => (
         <section key={m.id} style={panel}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
             <Tag>{m.id}</Tag><span style={{ fontWeight: 800 }}>{m.theme}</span>
@@ -289,33 +291,37 @@ function Messages() {
 
 const panel = { background: C.card, border: `1px solid ${C.line}`, borderRadius: 14, padding: 18 };
 const TABS = [["today", "Today"], ["flyers", "Flyers"], ["pain", "By Pain Point"], ["library", "Flyer + Copy"], ["kit", "Videos + Scripts"], ["messages", "Messages"]];
+const BOND_TABS = [["today", "Daily Rotation"], ["flyers", "Flyers"], ["pain", "By Pain Point"], ["library", "Flyer + Copy"], ["kit", "Videos + Scripts"], ["messages", "Messages"]];
 
-export default function SmartMoney({ userId = null, embedded = false }) {
+export default function SmartMoney({ userId = null, embedded = false, campaign = "smart" }) {
   useFonts();
+  const bond = campaign === "bond";
+  const cards = useMemo(() => CARDS.filter((c) => (bond ? isBond(c) : !isBond(c))), [bond]);
+  const pains = useMemo(() => bond ? PAIN_POINTS.filter((p) => cards.some((c) => c.painPoints.includes(p.id))) : PAIN_POINTS, [bond, cards]);
   const [tab, setTab] = useState("today");
-  const [sel, setSel] = useState(CARDS[0].ref);
+  const [sel, setSel] = useState(cards[0].ref);
   const open = (ref) => { setSel(ref); setTab("library"); };
   return (
     <div style={{ fontFamily: F.body, color: C.ink, background: C.bg, minHeight: "100%", ...(embedded ? { borderRadius: 14, overflow: "hidden", border: `1px solid ${C.line}` } : {}) }}>
       <header style={{ background: C.navy, color: "#fff" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto", padding: "22px 16px 0" }}>
-          <div style={{ fontFamily: F.display, fontWeight: 700, fontSize: 12, letterSpacing: "0.16em", color: C.sky, textTransform: "uppercase" }}>Graham Financial · Smart Money Posting</div>
-          <div style={{ fontFamily: F.display, fontWeight: 800, fontSize: 24, marginTop: 6 }}>{BRAND.motto}</div>
+          <div style={{ fontFamily: F.display, fontWeight: 700, fontSize: 12, letterSpacing: "0.16em", color: C.sky, textTransform: "uppercase" }}>{bond ? "Graham Financial · The Bond Campaign" : "Graham Financial · Smart Money Posting"}</div>
+          <div style={{ fontFamily: F.display, fontWeight: 800, fontSize: 24, marginTop: 6 }}>{bond ? "When it has to go right, I'm your guy." : BRAND.motto}</div>
           <div style={{ fontSize: 13, color: "#B9C8D8", marginTop: 2 }}>{BRAND.tag}</div>
           <nav style={{ display: "flex", gap: 4, marginTop: 16, overflowX: "auto" }}>
-            {TABS.map(([id, label]) => (
+            {(bond ? BOND_TABS : TABS).map(([id, label]) => (
               <button key={id} onClick={() => setTab(id)} style={{ font: "inherit", fontFamily: F.display, fontWeight: 700, fontSize: 14, padding: "12px 14px", border: 0, cursor: "pointer", borderRadius: "10px 10px 0 0", background: tab === id ? C.bg : "transparent", color: tab === id ? C.ink : "#C9D6E3", whiteSpace: "nowrap" }}>{label}</button>
             ))}
           </nav>
         </div>
       </header>
       <main style={{ maxWidth: 1100, margin: "0 auto", padding: "20px 16px 48px" }}>
-        {tab === "today" && <Today userId={userId} />}
-        {tab === "flyers" && <Flyers open={open} />}
-        {tab === "pain" && <PainPoints open={open} />}
-        {tab === "library" && <Library selected={sel} setSelected={setSel} />}
-        {tab === "kit" && <ContentKit userId={userId} />}
-        {tab === "messages" && <Messages />}
+        {tab === "today" && <Today userId={userId} campaign={campaign} />}
+        {tab === "flyers" && <Flyers open={open} cards={cards} bond={bond} />}
+        {tab === "pain" && <PainPoints open={open} cards={cards} pains={pains} />}
+        {tab === "library" && <Library selected={sel} setSelected={setSel} cards={cards} />}
+        {tab === "kit" && <ContentKit userId={userId} {...(bond ? { only: ["bond"] } : { exclude: ["bond"] })} />}
+        {tab === "messages" && <Messages bond={bond} />}
       </main>
     </div>
   );

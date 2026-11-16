@@ -14,7 +14,8 @@ function Copy({ text, label }) {
   return <button style={btn} onClick={() => { navigator.clipboard?.writeText(text); setOk(true); setTimeout(() => setOk(false), 1200); }}>{ok ? "Copied" : label}</button>;
 }
 
-export default function ContentKit({ userId }) {
+export default function ContentKit({ userId, only, exclude = [] }) {
+  const kit = KIT.filter((s) => (!only || only.includes(s.id)) && !exclude.includes(s.id));
   const [done, setDone] = useState(() => store.get("sm_kit") || {});
   const [open, setOpen] = useState({}); const [err, setErr] = useState("");
   useEffect(() => { if (!userId) return;
@@ -28,7 +29,7 @@ export default function ContentKit({ userId }) {
     setErr(error ? "Saved on this device only; the database didn't accept it." : "");
   };
   const keys = (it) => it.steps.map((s, i) => `kit:${it.id}:${i}`);
-  const all = KIT.flatMap((s) => s.items.flatMap(keys)); const nDone = all.filter((k) => done[k]).length;
+  const all = kit.flatMap((s) => s.items.flatMap(keys)); const nDone = all.filter((k) => done[k]).length;
 
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
@@ -38,7 +39,7 @@ export default function ContentKit({ userId }) {
         <div style={{ fontFamily:F.display, fontWeight:800, fontSize:18, color: nDone === all.length ? C.good : C.ink }}>{nDone} / {all.length} done</div>
         {err && <div style={{ width:"100%", fontSize:13, color:"#B05E0D" }}>{err}</div>}
       </div>
-      {KIT.map((sec) => {
+      {kit.map((sec) => {
         const sk = sec.items.flatMap(keys), sd = sk.filter((k) => done[k]).length;
         return (
           <section key={sec.id} style={{ background:C.card, border:`1px solid ${C.line}`, borderRadius:14, padding:16 }}>

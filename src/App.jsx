@@ -739,7 +739,7 @@ export default function App() {
   // Each section has sub-tabs; `tab` is still the sub-tab id, so every existing setTab("contacts") etc. keeps working.
   const SUBS = {
     cash:[["calls","Calls"],["contacts","Contacts"],["radar","Radar"],["partners","Partners"]].concat(isAdmin?[["equipment","Equipment"]]:[]).concat([["scripts","Call scripts"]]),
-    marketing:[["groups","Posts & groups"]].concat(isAdmin?[["posts","Smart Money"]]:[]).concat([["ioi","IOI posts"]]),
+    marketing:[["groups","Posts & groups"]].concat(isAdmin?[["bond","The Bond Campaign"]]:[]).concat(isAdmin?[["posts","Smart Money"]]:[]).concat([["ioi","IOI posts"]]),
     tools:[["links","Links"]].concat(isAdmin?[["matrix","Lender matrix"]]:[]).concat([["team","Settings"]]),
   };
   const sectionOf = (t) => Object.keys(SUBS).find((k) => SUBS[k].some(([id]) => id === t)) || "today";
@@ -1631,6 +1631,13 @@ export default function App() {
       {tab==="equipment" && isAdmin && <ErrorBoundary label="Equipment"><EquipmentTab userId={user?.id}/></ErrorBoundary>}
       {tab==="scripts" && <ErrorBoundary label="Scripts"><ScriptsTab/></ErrorBoundary>}
       {tab==="ioi" && <ErrorBoundary label="IOI"><IOITab/></ErrorBoundary>}
+      {tab==="bond" && isAdmin && (
+        <PostsBoundary>
+          <Suspense fallback={<div style={{fontFamily:F.mono,fontSize:11,color:C.light}}>Loading campaign…</div>}>
+            <ErrorBoundary label="The Bond Campaign"><SmartMoney userId={user?.id} embedded campaign="bond" /></ErrorBoundary>
+          </Suspense>
+        </PostsBoundary>
+      )}
       {tab==="posts" && isAdmin && (
         <PostsBoundary>
           <Suspense fallback={<div style={{fontFamily:F.mono,fontSize:11,color:C.light}}>Loading posts…</div>}>

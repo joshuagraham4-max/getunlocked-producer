@@ -95,6 +95,8 @@ export const KIT = [
         ["Down payment assistance and seller credits can cut what you bring to the table, in many cases to very little.", "Your first mortgage payment is typically 30 to 45 days after closing.", "It won't fit everyone, so see your real number instead of guessing."],
         "Think of me when you want your move to go amazingly well. You'll know where you stand."),
       caption:`Two months of rent plus a deposit, or often far less to buy? Think of me when you want your move to go amazingly well 👉 ${BOOK}` },
+  ]},
+  { id:"bond", title:"The Bond Campaign: videos", note:"Colorado consumers and homeowners. Close every video the same way. Payment amounts only with the loan-example footer in the post (Reg Z). Keep the hedges: often, can, depends.", items:[
     { id:"v-r-payment", kind:"Video", title:"It's not out of reach (payment + roommates)", steps:["Recorded","Posted"],
       text: vid("Look at these numbers.",
         "You've been told owning is out of reach, so you keep paying someone else's mortgage.",
