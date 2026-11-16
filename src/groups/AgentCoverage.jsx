@@ -38,7 +38,7 @@ export function placeAgent(r) {
 }
 
 export default function AgentCoverage({ rows, onContact }) {
-  const [info, setInfo] = useState({}); const [st, setSt] = useState("CO"); const [showEmpty, setShowEmpty] = useState(true);
+  const [info, setInfo] = useState({}); const [st, setSt] = useState("ALL"); const [showEmpty, setShowEmpty] = useState(true);
   const replied = useMemo(() => rows.filter((r) => r.status === "replied")
     .sort((a, b) => RATING_ORDER[agentRating(a).grade] - RATING_ORDER[agentRating(b).grade] || (a.full_name || "").localeCompare(b.full_name || "")), [rows]);
   const ids = useMemo(() => replied.map((r) => r.contact_id).filter(Boolean).join(","), [replied]);
@@ -56,9 +56,10 @@ export default function AgentCoverage({ rows, onContact }) {
     const email = c.email || c.email_2 || (pv.includes("@") ? pv : "");
     return { phone, email };
   };
-  const cols = (st === "CO" ? REGIONS.filter((g) => g.st === "CO") : REGIONS.filter((g) => g.st === "FL")).concat([OTHER]);
-  const mine = replied.filter((r) => { const d = digits(r.state || ""); const s = String(r.state || "").toUpperCase(); return st === "CO" ? (s === "CO" || s === "" || s === "COLORADO") : (s === "FL" || s === "FLORIDA"); });
-  // Agents with no state still show under CO; the Other column catches areas the word list does not know.
+  // Placement goes by the area words only (the state field is ignored, since it defaults to FL for new rows).
+  // The Other column catches areas the word list does not know.
+  const cols = (st === "ALL" ? REGIONS : REGIONS.filter((g) => g.st === st)).concat([OTHER]);
+  const mine = replied;
   const byCol = {}; cols.forEach((g) => { byCol[g.k] = []; });
   mine.forEach((r) => { const keys = placeAgent(r).filter((k) => byCol[k]); (keys.length ? keys : ["other"]).forEach((k) => byCol[k].push(r)); });
   const shown = cols.filter((g) => showEmpty || byCol[g.k].length);
@@ -68,7 +69,7 @@ export default function AgentCoverage({ rows, onContact }) {
   return (
     <div>
       <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap", marginBottom:10 }}>
-        <Btn k="CO" l="Colorado"/><Btn k="FL" l="Florida"/>
+        <Btn k="ALL" l="All areas"/><Btn k="CO" l="Colorado"/><Btn k="FL" l="Florida"/>
         <label style={{ fontFamily:F.mono, fontSize:11, color:C.mid, display:"flex", gap:6, alignItems:"center", marginLeft:8 }}>
           <input type="checkbox" checked={showEmpty} onChange={(e) => setShowEmpty(e.target.checked)}/> show empty areas (the gaps)
         </label>
