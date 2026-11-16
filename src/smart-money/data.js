@@ -84,11 +84,23 @@ export const FOOTERS = {
     "Graham Financial | Commercial equipment financing for business purposes only. Financing provided by participating lenders, subject to credit approval and lender terms. No upfront fees. Not available in California.",
   sba:
     "Graham Financial | SBA and business-purpose lending through participating lenders. Subject to SBA eligibility, credit approval and lender terms. No upfront fees.",
+  bonddpa:
+    "Down payment assistance and seller concessions subject to program guidelines, eligibility and availability; homebuyer education required. Programs and availability vary and not every buyer or home qualifies. Credits depend on the seller and the loan program. Prices vary by area and home type. Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity. Licensed in Colorado. Not a commitment to lend; subject to credit approval.",
+  bondequity:
+    "How much equity you can use depends on value, lien position, credit and the program. Investment property financing is for business purposes only and is not available in every state. Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity. Licensed in Colorado. Not a commitment to lend; subject to credit approval, underwriting guidelines and change without notice.",
+  bondvalue:
+    "Online and automated value estimates can differ from an appraisal and can be off in either direction. Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity. Licensed in Colorado. Not a commitment to lend; subject to credit approval, underwriting guidelines and change without notice.",
   intro:
     "Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity.",
   medical:
     "Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity. Licensed in Colorado. Primary residence only, for eligible medical professionals. Maximum loan amount and terms vary by credit score and loan-to-value. Not a commitment to lend; subject to credit approval, underwriting guidelines and change without notice.",
 };
+
+// Bond footers built from the shared ones, so the small print carries the caveats the posts no longer repeat.
+FOOTERS.bondpaydpa = FOOTERS.pay + " Programs and availability vary and not every buyer or home qualifies.";
+FOOTERS.bondwealth = FOOTERS.wealth + " Appreciation is not guaranteed.";
+FOOTERS.bondpay2own = FOOTERS.pay2 + " Homeowners also pay taxes, insurance and upkeep.";
+FOOTERS.bondpay2rent = FOOTERS.pay2 + " Rent growth of 5% a year is an assumption, not a prediction. Taxes and insurance can change.";
 
 // audience: "investor" | "consumer"   license: "none" (business purpose) | "required" (CO only)
 export const CARDS = [
@@ -1061,7 +1073,7 @@ Book a call and I'll run YOUR numbers, roommates and all. It's not a sales call.
 - Owning on your own: about $3,250 a month all in.
 - Owning with two roommates at $800 each: near $1,650 a month, and you build the equity.
 
-It will not fit everyone, and roommate income is not guaranteed or always counted toward qualifying. That's why I'd rather walk through YOUR numbers than guess.
+I'd rather walk through YOUR numbers than guess.
 
 Book a call and I'll run YOUR numbers, roommates and all. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
     video: {
@@ -1087,7 +1099,7 @@ Wondering if you have a roommate who could move in and close that gap? Let's loo
 Book a call and I'll run YOUR numbers next to your rent. It's not a sales call.`,
     long: `Here is the honest math on a $300,000 home with 3% down: a payment near $2,450 a month, all in. If you're paying about $2,000 to rent, that's roughly $100 more a week, and you own the home instead of funding your landlord's.
 
-Prices vary by area and home type, and your numbers may be different, which is exactly why I'd rather show you yours.
+I'd rather show you yours.
 
 Book a call and I'll run YOUR numbers next to your rent. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
     video: {
@@ -1099,7 +1111,7 @@ Book a call and I'll run YOUR numbers next to your rent. It's not a sales call. 
   },
   {
     ref: "DWN-01", campaign: "bond", lane: "cash", bank: "consumer", name: "Cash to Close Can Be Near $0 (renters)", lender: "N/A — call; route to payment, DPA and seller-credit scenarios",
-    audience: "consumer", license: "required", flyer: "/smart-money/flyers/DWN-01.png", footer: "dpa",
+    audience: "consumer", license: "required", flyer: "/smart-money/flyers/DWN-01.png", footer: "bonddpa",
     cta: `Book a call and I'll show you exactly how much you'd bring to closing. It's not a sales call. When it has to go right, I'm your guy. Save my info 👉 ${BRAND.booking}`,
     painPoints: ["no-down-payment", "renting"], magnet: "book-5", skool: "Homebuyers",
     highlights: ["Seller credits of 3 to 6 percent can come back to you at closing", "Down payment assistance can cover the rest for those who qualify", "Cash to close can be near $0 in the right scenario"],
@@ -1126,7 +1138,7 @@ Book a call and I'll show you exactly how much you'd bring to closing. It's not 
   },
   {
     ref: "WLT-01", campaign: "bond", lane: "wealth", bank: "consumer", name: "Home Prices Rose in 45 of 50 Years (wealth building)", lender: "N/A — call; route to payment, DPA and seller-credit scenarios",
-    audience: "consumer", license: "required", flyer: "/smart-money/flyers/WLT-01.png", footer: "wealth",
+    audience: "consumer", license: "required", flyer: "/smart-money/flyers/WLT-01.png", footer: "bondwealth",
     cta: `Book a call and I'll show you what owning could mean for YOU. It's not a sales call. When it has to go right, I'm your guy. Save my info 👉 ${BRAND.booking}`,
     painPoints: ["renting"], magnet: "book-5", skool: "Homebuyers",
     highlights: ["U.S. home prices rose in 45 of the last 50 years", "The only down years were 2007 to 2011", "Rent builds your landlord's wealth; a home can build yours"],
@@ -1135,14 +1147,14 @@ Book a call and I'll show you exactly how much you'd bring to closing. It's not 
 
 A $400K home growing 3% a year can add about $12,000 in equity. That's yours, not your landlord's.
 
-Prices can fall and local markets vary, so let's look at your numbers.
+Let's look at your numbers.
 
 Book a call and I'll show you what owning could mean for YOU. It's not a sales call.`,
     long: `Nationally, home prices rose in 45 of the last 50 years (FHFA, not adjusted for inflation). The only down years were 2007 through 2011, and prices were back above the old peak about a decade after it.
 
 Here is why that matters. A $400,000 home that grows 3% in a year adds about $12,000 in equity. When you rent, any growth like that belongs to your landlord, not you.
 
-Appreciation is never guaranteed, local markets vary and Denver has been flat to down lately. It's about owning something over years, not a quick win.
+It's about owning something over years, not a quick win.
 
 Book a call and I'll show you what owning could mean for YOU. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
     video: {
@@ -1154,7 +1166,7 @@ Book a call and I'll show you what owning could mean for YOU. It's not a sales c
   },
   {
     ref: "EQT-01", campaign: "bond", lane: "equity", bank: "consumer", name: "Your Equity Is Dead Money (homeowners to investors)", lender: "RISE Business Purpose Closed-End Second DSCR or cash-out, per scenario; get the matrix before quoting",
-    audience: "consumer", license: "required", flyer: "/smart-money/flyers/EQT-01.png", footer: "consumer",
+    audience: "consumer", license: "required", flyer: "/smart-money/flyers/EQT-01.png", footer: "bondequity",
     cta: `Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info 👉 ${BRAND.booking}`,
     painPoints: ["equity-trapped", "stuck"], magnet: "book-5", skool: "Homebuyers",
     highlights: ["Equity in your home is money sitting idle", "It can be the down payment on a rental, without selling", "A call, not a sales call"],
@@ -1166,7 +1178,7 @@ If your home is worth $600K and you owe $300K, that's $300K sitting there earnin
 Book a call and I'll show you what your equity can do. It's not a sales call.`,
     long: `Equity in your home is the most expensive idle money you own. Here is an example: a $600,000 home with $300,000 owed leaves $300,000 sitting there, earning nothing.
 
-For homeowners and investors, that equity can become the down payment on a rental, without selling the home you love. How much you can use depends on the value, your credit and the program, and investment property financing is for business purposes and isn't available in every state.
+For homeowners and investors, that equity can become the down payment on a rental, without selling the home you love.
 
 Book a consultation call with me and I'll run your real numbers. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
     video: {
@@ -1194,12 +1206,12 @@ Book a consultation call with me and I'll run your real numbers. It's not a sale
   },
   {
     ref: "DWN-02", campaign: "bond", photoDefault: "plum", lane: "cash", bank: "consumer", name: "Who Pays Your Closing Costs? The Seller Can. (renters)", lender: "N/A — call; route to the matching payment, DPA, seller-credit or equity scenario",
-    audience: "consumer", license: "required", flyer: "/smart-money/flyers/DWN-02.png", footer: "dpa",
+    audience: "consumer", license: "required", flyer: "/smart-money/flyers/DWN-02.png", footer: "bonddpa",
     cta: `Book a call and I'll show you who can pay what. It's not a sales call. When it has to go right, I'm your guy. Save my info. 👉 ${BRAND.booking}`,
     painPoints: ["no-down-payment", "renting"], magnet: "book-5", skool: "Homebuyers",
     highlights: ["A seller credit of 3 percent on a $400K home is $12,000", "Typical lender and title costs in our example are about $7,000", "A call, not a sales call"],
     notes: "No payment amounts, rates or down payment percent on the flyer, so FOOT_NUMBERS (illustrative) applies. $7,000 is the lender ($5,000) plus title ($2,000) assumption used in the Reg Z example; prepaids and escrows are extra and can also be covered by credits depending on program. Credit limits depend on the loan program and the seller. Plaid photo.",
-    short: `Who pays your closing costs? The seller can.\n\nOn a $400K home, lender and title costs can run about $7,000. A 3% seller credit on that same home is $12,000. In the right scenario your costs at the table can be near $0.\n\nIt depends on the seller and the loan program, so not every deal qualifies. Book a call and I'll show you who can pay what. It's not a sales call.`,
+    short: `Who pays your closing costs? The seller can.\n\nOn a $400K home, lender and title costs can run about $7,000. A 3% seller credit on that same home is $12,000. In the right scenario your costs at the table can be near $0.\n\nBook a call and I'll show you who can pay what. It's not a sales call.`,
     long: `Most renters stop at the closing costs. Here's why they shouldn't.\n\nOn a $400,000 home:\n\n- Closing costs, lender and title, in our example: about $7,000.\n- A 3% credit from the seller: $12,000.\n- Your costs at the table, in the right scenario: near $0.\n\nSellers are paying credits right now and price cuts are common in Colorado. Credits depend on the seller and the loan program, and not every deal qualifies, so let's look at yours.\n\nBook a call and I'll show you who can pay what. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
     video: {
       title: "Who pays your closing costs?",
@@ -1210,29 +1222,29 @@ Book a consultation call with me and I'll run your real numbers. It's not a sale
   },
   {
     ref: "WLT-02", campaign: "bond", lane: "wealth", bank: "consumer", name: "$600 a Year or $18,000? (wealth building)", lender: "N/A — call; route to the matching payment, DPA, seller-credit or equity scenario",
-    audience: "consumer", license: "required", flyer: "/smart-money/flyers/WLT-02.png", footer: "wealth",
+    audience: "consumer", license: "required", flyer: "/smart-money/flyers/WLT-02.png", footer: "bondwealth",
     cta: `Book a call and let's see what it could mean for you. It's not a sales call. When it has to go right, I'm your guy. Save my info. 👉 ${BRAND.booking}`,
     painPoints: ["renting"], magnet: "book-5", skool: "Homebuyers",
     highlights: ["$10,000 at 6% earns about $600 a year", "A $600,000 home growing 3% grows about $18,000 in a year", "A call, not a sales call"],
     notes: "Illustration only. Appreciation isn't guaranteed and Denver is flat to down. The 30x is the dollar difference between 6% on $10K and 3% on $600K; the footer states both rates are assumptions. Do not attach a down payment, rate or payment to this post (Reg Z).",
-    short: `$600 a year or $18,000?\n\n$10,000 in savings earning 6% makes about $600 a year. A $600,000 home growing just 3% grows about $18,000 in a year. Same idea, bigger base: the home works on its whole value.\n\nAppreciation isn't guaranteed and prices can fall, so it's a years-long play. Book a call and let's see what it could mean for you. It's not a sales call.`,
-    long: `Say you have $10,000 in savings earning 6% a year. That's about $600.\n\nNow take a $600,000 home growing 3% in a year. That's about $18,000. Same idea, a much bigger base, because the home works on its whole value and not only on what you put in.\n\nAppreciation isn't guaranteed, prices can fall, and Denver has been flat lately. This is a years-long play, not a promise. Nationally, home prices rose in 45 of the last 50 years.\n\nBook a call and let's see what it could mean for you. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
+    short: `$600 a year or $18,000?\n\n$10,000 in savings earning 6% makes about $600 a year. A $600,000 home growing just 3% grows about $18,000 in a year. Same idea, bigger base: the home works on its whole value.\n\nIt's a years-long play, not a quick win. Book a call and let's see what it could mean for you. It's not a sales call.`,
+    long: `Say you have $10,000 in savings earning 6% a year. That's about $600.\n\nNow take a $600,000 home growing 3% in a year. That's about $18,000. Same idea, a much bigger base, because the home works on its whole value and not only on what you put in.\n\nThis is a years-long play, not a quick win. Nationally, home prices rose in 45 of the last 50 years.\n\nBook a call and let's see what it could mean for you. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
     video: {
       title: "$600 a year or $18,000?",
       hook: "Look at these numbers.",
-      points: ["$10,000 at 6% earns about $600 a year", "A $600,000 home growing 3% is about $18,000 in a year", "Appreciation isn't guaranteed, so it's a years-long play"],
+      points: ["$10,000 at 6% earns about $600 a year", "A $600,000 home growing 3% is about $18,000 in a year", "A years-long play, not a quick win"],
       cta: "Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info.",
     },
   },
   {
     ref: "EQT-02", campaign: "bond", photoDefault: "tie", lane: "equity", bank: "consumer", name: "One More Door Starts at Home (homeowners to investors)", lender: "N/A — call; route to the matching payment, DPA, seller-credit or equity scenario",
-    audience: "consumer", license: "required", flyer: "/smart-money/flyers/EQT-02.png", footer: "consumer",
+    audience: "consumer", license: "required", flyer: "/smart-money/flyers/EQT-02.png", footer: "bondequity",
     cta: `Book a call and let's see what your equity can open. It's not a sales call. When it has to go right, I'm your guy. Save my info. 👉 ${BRAND.booking}`,
     painPoints: ["equity-trapped", "stuck"], magnet: "book-5", skool: "Homebuyers",
     highlights: ["Lenders often allow borrowing up to a percent of your home value, minus what you owe", "On a $600K home with $300K owed, up to about $180,000 in the example", "A call, not a sales call"],
     notes: "Homeowners, past clients and investors. 80% is an example, not a promise: available equity depends on value, lien position, credit and program. Investment property financing is business purpose and not available in all states. No rate, payment or down payment percent, so no Reg Z block. Plaid photo.",
-    short: `One more door starts at home.\n\nIf your home is worth $600K and you owe $300K, 80% of its value minus what you owe is up to $180,000 of equity you may be able to use. It could be the down payment on a rental, and you don't have to sell.\n\nHow much depends on your value, credit and the program. Book a call and let's see what your equity can open. It's not a sales call.`,
-    long: `Most homeowners are sitting on more equity than they think.\n\nOn a home worth $600,000 with $300,000 owed:\n\n- 80% of the value: $480,000.\n- Minus what you owe: $300,000.\n- Equity you may be able to use, up to: $180,000.\n\nThat could be the down payment on a rental property, and you don't have to sell your home. The amount depends on your value, lien position, credit and the program, and investment property financing isn't available in every state.\n\nBook a call and let's see what your equity can open. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
+    short: `One more door starts at home.\n\nIf your home is worth $600K and you owe $300K, 80% of its value minus what you owe is up to $180,000 of equity you may be able to use. It could be the down payment on a rental, and you don't have to sell.\n\nBook a call and let's see what your equity can open. It's not a sales call.`,
+    long: `Most homeowners are sitting on more equity than they think.\n\nOn a home worth $600,000 with $300,000 owed:\n\n- 80% of the value: $480,000.\n- Minus what you owe: $300,000.\n- Equity you may be able to use, up to: $180,000.\n\nThat could be the down payment on a rental property, and you don't have to sell your home.\n\nBook a call and let's see what your equity can open. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
     video: {
       title: "One more door starts at home.",
       hook: "Your equity can be your next down payment.",
@@ -1242,7 +1254,7 @@ Book a consultation call with me and I'll run your real numbers. It's not a sale
   },
   {
     ref: "PAY-04", campaign: "bond", lane: "pay", bank: "consumer", name: "Rent Goes Up. Your Loan Doesn't. (payment)", lender: "N/A — call; route to the matching payment, DPA, seller-credit or equity scenario",
-    audience: "consumer", license: "required", flyer: "/smart-money/flyers/PAY-04.png", footer: "pay2",
+    audience: "consumer", license: "required", flyer: "/smart-money/flyers/PAY-04.png", footer: "bondpay2rent",
     cta: `Book a call and I'll run YOUR numbers. It's not a sales call. When it has to go right, I'm your guy. Save my info. 👉 ${BRAND.booking}`,
     painPoints: ["priced-out", "renting"], magnet: "book-5", skool: "Homebuyers",
     highlights: ["Rent after 5 yearly raises of 5% goes from $2,000 to about $2,553", "Principal and interest on a fixed loan is the same every year", "A call, not a sales call"],
@@ -1258,13 +1270,13 @@ Book a consultation call with me and I'll run your real numbers. It's not a sale
   },
   {
     ref: "DWN-03", campaign: "bond", lane: "cash", bank: "consumer", name: "You Don't Need $80,000 Down (first-time buyers)", lender: "N/A — call; route to the matching payment, DPA, seller-credit or equity scenario",
-    audience: "consumer", license: "required", flyer: "/smart-money/flyers/DWN-03.png", footer: "pay",
+    audience: "consumer", license: "required", flyer: "/smart-money/flyers/DWN-03.png", footer: "bondpaydpa",
     cta: `Book a call and I'll show you what you'd bring. It's not a sales call. When it has to go right, I'm your guy. Save my info. 👉 ${BRAND.booking}`,
     painPoints: ["no-down-payment", "renting"], magnet: "book-5", skool: "Homebuyers",
     highlights: ["20% down on a $400K home is $80,000, and most buyers don't need that", "3% down on that home is $12,000", "Assistance can cover much of the rest for buyers who qualify"],
     notes: "Down payment percent and amount: the pay footer ($400K, 3% down, loan example, APR) MUST travel with every post. Assistance depends on program, eligibility and availability; never promise $0.",
     short: `You don't need $80,000 down.\n\nOn a $400K home, 20% down is $80,000. That's what most people think it takes. 3% down on that same home is $12,000, and with down payment assistance, for buyers who qualify, help can cover much of the rest.\n\nNot every buyer or home qualifies. Book a call and I'll show you what you'd bring. It's not a sales call.`,
-    long: `Most renters assume they need 20% down. On a $400,000 home that's $80,000, and it keeps people renting for years.\n\n- 20% down on a $400K home: $80,000.\n- 3% down on the same home: $12,000. Low down payment loans exist.\n- With assistance, if you qualify: help can cover much of the rest, and in the right scenario you may bring very little.\n\nPrograms and availability vary and not every buyer or home qualifies, so let's look at yours.\n\nBook a call and I'll show you what you'd bring. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
+    long: `Most renters assume they need 20% down. On a $400,000 home that's $80,000, and it keeps people renting for years.\n\n- 20% down on a $400K home: $80,000.\n- 3% down on the same home: $12,000. Low down payment loans exist.\n- With assistance, if you qualify: help can cover much of the rest, and in the right scenario you may bring very little.\n\nBook a call and I'll show you what you'd bring. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
     video: {
       title: "You don't need $80,000 down.",
       hook: "You've been told you need 20% down.",
@@ -1274,7 +1286,7 @@ Book a consultation call with me and I'll run your real numbers. It's not a sale
   },
   {
     ref: "WLT-03", campaign: "bond", lane: "wealth", bank: "consumer", name: "Rent Builds Their Equity (wealth building)", lender: "N/A — call; route to the matching payment, DPA, seller-credit or equity scenario",
-    audience: "consumer", license: "required", flyer: "/smart-money/flyers/WLT-03.png", footer: "pay2",
+    audience: "consumer", license: "required", flyer: "/smart-money/flyers/WLT-03.png", footer: "bondpay2own",
     cta: `Book a call and I'll run both sides with YOUR numbers. It's not a sales call. When it has to go right, I'm your guy. Save my info. 👉 ${BRAND.booking}`,
     painPoints: ["renting"], magnet: "book-5", skool: "Homebuyers",
     highlights: ["5 years of rent at $2,000 is $120,000 and builds your landlord's equity", "On a $300K home, the loan balance drops about $16,700 in 5 years", "A call, not a sales call"],
@@ -1290,17 +1302,17 @@ Book a consultation call with me and I'll run your real numbers. It's not a sale
   },
   {
     ref: "EQT-03", campaign: "bond", lane: "equity", bank: "consumer", name: "Keep Your Low Rate. Use Your Equity. (past clients)", lender: "N/A — call; route to the matching payment, DPA, seller-credit or equity scenario",
-    audience: "consumer", license: "required", flyer: "/smart-money/flyers/EQT-03.png", footer: "consumer",
+    audience: "consumer", license: "required", flyer: "/smart-money/flyers/EQT-03.png", footer: "bondequity",
     cta: `Book a call and let's see what your equity can open. It's not a sales call. When it has to go right, I'm your guy. Save my info. 👉 ${BRAND.booking}`,
     painPoints: ["low-rate-locked", "equity-trapped"], magnet: "book-5", skool: "Homebuyers",
     highlights: ["Your first mortgage stays untouched", "A separate loan can tap the equity, depending on value, credit and program", "A call, not a sales call"],
     notes: "Past clients and homeowners with a low first-mortgage rate. No rate, payment or down payment percent on the flyer. 'Often no refinance needed' is hedged: it applies to a separate second-lien product. Business-purpose investment financing is not available in all states. Get the RISE matrix before quoting.",
-    short: `Keep your low rate. Use your equity.\n\nIf you locked in a low rate, you probably don't want to give it up. You may not have to. On a $600K home with $300K owed, there's $300K of equity, and a separate loan against it can often leave your first mortgage untouched.\n\nHow much depends on your value, credit and the program. Book a call and let's see what your equity can open. It's not a sales call.`,
-    long: `A lot of homeowners are sitting on a low rate they don't want to lose, and equity they aren't using.\n\n- Your first mortgage: the low rate you already have, untouched.\n- Your equity, in our example: a $600,000 home with $300,000 owed leaves $300,000.\n- What you can do: tap some of it with a separate loan, often with no refinance of your first mortgage.\n\nThe amount depends on your value, credit and the program, and investment property financing isn't available in every state.\n\nBook a call. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
+    short: `Keep your low rate. Use your equity.\n\nIf you locked in a low rate, you probably don't want to give it up. You may not have to. On a $600K home with $300K owed, there's $300K of equity, and a separate loan against it can often leave your first mortgage untouched.\n\nBook a call and let's see what your equity can open. It's not a sales call.`,
+    long: `A lot of homeowners are sitting on a low rate they don't want to lose, and equity they aren't using.\n\n- Your first mortgage: the low rate you already have, untouched.\n- Your equity, in our example: a $600,000 home with $300,000 owed leaves $300,000.\n- What you can do: tap some of it with a separate loan, often with no refinance of your first mortgage.\n\nBook a call. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
     video: {
       title: "Keep your low rate. Use your equity.",
       hook: "You don't have to give up your low rate.",
-      points: ["Your first mortgage stays exactly as it is", "A separate loan against your equity", "It depends on your value, credit and the program"],
+      points: ["Your first mortgage stays exactly as it is", "A separate loan against your equity", "Your equity can open the door to your next property"],
       cta: "Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info.",
     },
   },
@@ -1322,7 +1334,7 @@ Book a consultation call with me and I'll run your real numbers. It's not a sale
   },
   {
     ref: "CRD-02", campaign: "bond", lane: "cred", bank: "consumer", name: "Your Real Value, Not an Online Guess (homeowners)", lender: "N/A — call; route to the matching scenario",
-    audience: "consumer", license: "required", flyer: "/smart-money/flyers/CRD-02.png", footer: "consumer",
+    audience: "consumer", license: "required", flyer: "/smart-money/flyers/CRD-02.png", footer: "bondvalue",
     cta: `Book a call and I'll give you a game plan for your finances. It's not a sales call. When it has to go right, I'm your guy. Save my info. 👉 ${BRAND.booking}`,
     painPoints: ["equity-trapped", "trust"], magnet: "book-5", skool: "Homebuyers",
     highlights: ["An online estimate is a computer guess; a real number counts your upgrades and recent sales", "Estimates can run higher or lower than reality", "A call with a game plan for your finances"],
