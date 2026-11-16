@@ -131,7 +131,7 @@ def page(ref, c):
 <p style="margin-top:12px;font:700 12.5px M;letter-spacing:.28em;color:{p["accent"]};white-space:nowrap">REGIONAL LOAN ORIGINATOR</p>
 <p style="margin-top:7px;font:600 12px M;letter-spacing:.14em;color:{p["ink"]};white-space:nowrap">NMLS #169809 &nbsp;&middot;&nbsp; LICENSED IN COLORADO</p></div>
 <div style="display:flex;align-items:center;gap:18px;padding-bottom:2px;flex:none"><img src="file://{gf}" style="height:56px;display:block;opacity:.9"><div style="width:1px;height:46px;background:{p["ink"]}33"></div><img src="file://{zp}" style="height:40px;display:block;opacity:.9"></div></div>
-<p style="position:absolute;left:74px;top:896px;font:700 20px M;letter-spacing:.05em;color:{p["ink"]};white-space:nowrap">720-468-6872 <span style="color:{p["accent"]}">&nbsp;&nbsp;|&nbsp;&nbsp;</span> jgraham@grahamfinancial.us</p>
+<div style="position:absolute;left:74px;top:894px;display:flex;align-items:baseline;gap:18px;white-space:nowrap"><p style="font:600 30px/1 B;color:{p["ink"]};letter-spacing:.01em">720-468-6872</p><div style="width:2px;height:22px;background:{p["accent"]};align-self:center"></div><p style="font:500 28px/1 B;color:{p["ink"]}">jgraham@grahamfinancial.us</p></div>
 <p style="position:absolute;left:74px;width:690px;bottom:46px;font:500 10.5px/1.5 M;color:{p["muted"]}">{c["foot"]}<span style="display:block;margin-top:5px;font:700 9px M;letter-spacing:.18em;color:#000">REF {ref}</span></p>
 </div></body></html>'''
     if c.get("side") == "left":
