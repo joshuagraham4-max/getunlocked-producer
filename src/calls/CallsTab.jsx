@@ -50,6 +50,7 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
   const [follow, setFollow] = useState(null);      // after voicemail / no answer: show text + email follow-up
   const [say, setSay] = useState("");
   const [nonce, setNonce] = useState(0);
+  const [monthSkips, setMonthSkips] = useState(() => new Set());   // skipped for the month; synced via smart_money_posts (slot callskip:<id>, day = date it returns)
   const [seg, setSeg] = useState("customers");
   const [, tick] = useState(0);
   useEffect(() => { const i = setInterval(() => tick((n) => n + 1), 60000); return () => clearInterval(i); }, []);
@@ -63,6 +64,8 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
     const seen = new Set(); setCalledToday((t || []).filter((x) => !seen.has(x.contact_id) && seen.add(x.contact_id)));
   }, [userId]);
   useEffect(() => { loadCalled(); }, [loadCalled]);
+  useEffect(() => { if (!userId) return; supabase.from("smart_money_posts").select("slot").eq("user_id", userId).like("slot", "callskip:%").gte("day", today())
+    .then(({ data: r, error }) => { if (!error && r) setMonthSkips(new Set(r.map((x) => x.slot.slice(9)))); }); }, [userId]);
   const radar = useMemo(() => data ? computeRadar(contacts, data.loans, data.rates, data.settings) : null, [contacts, data]);
   const byId = useMemo(() => Object.fromEntries(contacts.map((c) => [c.id, c])), [contacts]);
 
@@ -71,19 +74,25 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
   const queue = useMemo(() => {
     if (!radar) return null;
     let saved = null; try { saved = JSON.parse(localStorage.getItem(qKey) || "null"); } catch {}
-    if (saved && saved.target === target && Array.isArray(saved.items)) return saved.items.filter((x) => byId[x.id] && (!x.bday || byId[x.id].last_contacted === today() || bdayCallable(byId[x.id]))).map((x) => ({ ...x, group: x.group || segmentOf(byId[x.id]) }));
-    const items = buildQueue(contacts, radar, target);
+    if (saved && saved.target === target && Array.isArray(saved.items)) return saved.items.filter((x) => byId[x.id] && !monthSkips.has(x.id) && (!x.bday || byId[x.id].last_contacted === today() || bdayCallable(byId[x.id]))).map((x) => ({ ...x, group: x.group || segmentOf(byId[x.id]) }));
+    let shown = {}; const shownKey = `gupShown:${userId}`; try { shown = JSON.parse(localStorage.getItem(shownKey) || "{}"); } catch {}
+    const items = buildQueue(contacts, radar, target, { shown, exclude: monthSkips });
+    try { const t = today(); const nx = {}; for (const [id, e] of Object.entries(shown)) if (e.d >= addDays(-60)) nx[id] = e;
+      for (const x of items) { const e = shown[x.id], c = byId[x.id]; nx[x.id] = e && e.d === t ? e : { n: e && (!c?.last_contacted || c.last_contacted < e.d) ? e.n + 1 : 1, d: t }; }
+      localStorage.setItem(shownKey, JSON.stringify(nx)); } catch {}
     try { localStorage.setItem(qKey, JSON.stringify({ target, items })); } catch {}
     return items;
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [radar, target, qKey, nonce]);
+  }, [radar, target, qKey, nonce, monthSkips]);
   const skipped = useMemo(() => { try { return JSON.parse(localStorage.getItem(skipKey) || "[]"); } catch { return []; } }, [skipKey, nonce]);
 
   // Investors are live (not cached): new imports and follow-ups show up right away.
   const invQ = useMemo(() => investorQueue(contacts), [contacts]);
   const all = useMemo(() => queue ? [...queue.filter((x) => !isInvestor(byId[x.id])), ...invQ] : null, [queue, invQ, byId]);
   const segQ = useMemo(() => all ? all.filter((x) => x.group === seg) : null, [all, seg]);
-  const isDone = useCallback((id) => byId[id]?.last_contacted === today() || skipped.includes(id), [byId, skipped]);
+  const reach = useMemo(() => { const cut = addDays(-21); const pool = contacts.filter((c) => !c.do_not_contact && c.phone && c.outcome !== "wrong number" && ["past_client","lead","agent"].includes(c.contact_type || "past_client") && !isInvestor(c));
+    return { total: pool.length, done: pool.filter((c) => c.last_contacted && c.last_contacted >= cut).length }; }, [contacts]);
+  const isDone = useCallback((id) => byId[id]?.last_contacted === today() || skipped.includes(id) || monthSkips.has(id), [byId, skipped, monthSkips]);
   const segDone = (g) => all ? all.filter((x) => x.group === g && byId[x.id]?.last_contacted === today()).length : 0;
   const segN = (g) => all ? all.filter((x) => x.group === g).length : 0;
   const made = all ? all.filter((x) => byId[x.id]?.last_contacted === today()).length : 0;
@@ -142,6 +151,10 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
     setDepBump((n) => n + 1);
   };
   const skip = () => { try { localStorage.setItem(skipKey, JSON.stringify([...skipped, selId])); } catch {} setNonce((n) => n + 1); next(); };
+  const skipMonth = async () => {
+    const id = selId; setMonthSkips((m) => new Set([...m, id])); next();
+    try { await supabase.from("smart_money_posts").upsert({ user_id:userId, day:addDays(30), slot:`callskip:${id}`, done:true, updated_at:new Date().toISOString() }); } catch {}
+  };
   const rebuild = () => { try { localStorage.removeItem(qKey); } catch {} setSelId(null); setNonce((n) => n + 1); };
   const changeTarget = (t) => { setTarget(t); try { localStorage.setItem(`gupTarget:${userId}`, String(t)); localStorage.removeItem(qKey); } catch {} setSelId(null); };
 
@@ -163,6 +176,7 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
         <div style={{display:"flex", gap:8, alignItems:"center", marginTop:12}}>
           <span style={{fontFamily:F.mono, fontSize:11, color:C.mid}}>Daily target</span>
           <select value={target} onChange={(e) => changeTarget(Number(e.target.value))} style={{...inp, padding:"4px 6px"}}>{TARGETS.map((t) => <option key={t} value={t}>{t}</option>)}</select>
+          <span style={{fontFamily:F.mono, fontSize:11, color:C.mid}}>Reached {reach.done} of {reach.total} in 21 days</span>
           <button onClick={rebuild} style={{...btn, padding:"4px 10px", fontSize:12, marginLeft:"auto"}}>Rebuild list</button>
         </div>
         {ratesStale && (
@@ -291,6 +305,7 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
           <div style={{display:"flex", gap:8, flexWrap:"wrap"}}>
             {OUTCOMES.map(([k, l, d]) => <button key={k} onClick={() => record(k, d)} style={k === "booked" ? btnG : btn}>{k === "voicemail" ? "Voicemail + follow-up" : l}</button>)}
             <button onClick={skip} style={{...btn, marginLeft:"auto"}}>Skip for today</button>
+            <button onClick={skipMonth} style={btn}>Skip for a month</button>
           </div>
           <div style={{display:"flex", gap:8, marginTop:10, flexWrap:"wrap"}}>
             <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Note (optional)" style={{...inp, flex:"1 1 220px"}}/>

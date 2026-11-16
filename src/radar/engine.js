@@ -176,12 +176,14 @@ export const priorityScore = (c, reason) => {
   const tier = ["followup","newlead"].includes(reason.key) ? 5000 : (ty === "past_client" && c.book === "mine") ? 2000 : 0;
   return tier + reason.score + (reason.also?.length || 0) * 15;
 };
-export function buildQueue(contacts, radar, target = 20) {
+// opts.shown: {id:{n,d}} days a person was listed without being reached (cool-off). opts.exclude: Set of ids skipped for the month.
+export function buildQueue(contacts, radar, target = 20, opts = {}) {
   const t = today(); const nAgents = Math.round(target * 0.4), nClients = target - nAgents;
   const pool = { clients:[], agents:[] }; const bdays = [];
   for (const c of contacts) {
     const ty = c.contact_type || "past_client";
     if (c.do_not_contact) continue;
+    if (opts.exclude && opts.exclude.has(c.id)) continue;               // skipped for the month
     if (!["past_client","lead","agent","referral_partner"].includes(ty)) continue;
     if (isInvestor(c)) continue;                                      // investors have their own tab (investorQueue)
     // Birthdays: always on the list, on top of the target, even if called recently or no phone.
@@ -197,14 +199,21 @@ export function buildQueue(contacts, radar, target = 20) {
     const reason = reasonFor(c, radar.info[c.id], t); if (!reason) continue;
     // Priority tiers: commitments (follow-ups due / new leads) > Joshua's own closings > past LO files.
     const tier = ["followup","newlead"].includes(reason.key) ? 5000 : (ty === "past_client" && c.book === "mine") ? 2000 : 0;
-    const s = tier + reason.score + (reason.also.length * 15) + Math.random();
-    (ty === "agent" ? pool.agents : pool.clients).push({ id:c.id, reason, group:segmentOf(c), s });
+    // Cool-off: listed on earlier days and never reached lowers the score, so the same people stop camping on top. Due follow-ups and new leads are exempt.
+    const sh = opts.shown && opts.shown[c.id];
+    const pen = sh && tier < 5000 && (!c.last_contacted || c.last_contacted < sh.d) ? Math.min(sh.n, 6) * 400 : 0;
+    const s = tier + reason.score + (reason.also.length * 15) + Math.random() - pen;
+    (ty === "agent" ? pool.agents : pool.clients).push({ id:c.id, reason, group:segmentOf(c), s, age:daysSince(c.last_contacted) });
   }
-  pool.clients.sort((a, b) => b.s - a.s); pool.agents.sort((a, b) => b.s - a.s);
-  const picked = [...pool.clients.slice(0, nClients), ...pool.agents.slice(0, nAgents)];
-  if (picked.length < target) picked.push(...pool.clients.slice(nClients, nClients + target - picked.length));
-  picked.push(...bdays);
-  picked.sort((a, b) => b.s - a.s);
+  // Reach: about a third of each pool goes to whoever has been quiet longest (or never called), whatever their score, interleaved 2 scored : 1 quiet so they get worked.
+  const mix = (pool, n) => { const r = Math.round(n * 0.33); const by = pool.slice().sort((a, b) => b.s - a.s); const scored = by.slice(0, Math.max(0, n - r)); const stale = by.slice(scored.length).sort((a, b) => b.age - a.age).slice(0, r); return { scored, stale }; };
+  const mc = mix(pool.clients, nClients), ma = mix(pool.agents, nAgents);
+  const scoredL = [...mc.scored, ...ma.scored].sort((a, b) => b.s - a.s), staleL = [...mc.stale, ...ma.stale].sort((a, b) => b.age - a.age);
+  const picked = []; let i = 0, j = 0;
+  while (i < scoredL.length || j < staleL.length) { for (let k = 0; k < 2 && i < scoredL.length; k++) picked.push(scoredL[i++]); if (j < staleL.length) picked.push(staleL[j++]); }
+  if (picked.length < target) { const used = new Set(picked.map((x) => x.id)); picked.push(...[...pool.clients, ...pool.agents].filter((x) => !used.has(x.id)).sort((a, b) => b.s - a.s).slice(0, target - picked.length)); }
+  bdays.sort((a, b) => b.s - a.s);
+  picked.unshift(...bdays);
   return picked.map(({ id, reason, group, bday }) => ({ id, reason, group, bday: !!bday }));
 }
 
