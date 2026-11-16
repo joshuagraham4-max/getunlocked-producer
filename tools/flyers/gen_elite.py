@@ -221,11 +221,18 @@ CARDS = {
                  ("THE RESULT", "A client who sends their friends to you", "Referrals", True)],
         receipt_note="Think of me when you want your closings to go amazingly well.",
         rpad=22, rule_top=330, cta="Book a call. Let&#39;s make your next closing easy.", foot=FOOT_AGENT, foot_px=10),
+    "TRU-01": dict(palette="camel", kicker="HOMEBUYERS &nbsp;/&nbsp; HOMEOWNERS", **COMMON,
+        h1=["Ask me anything."], h1_accent="Straight answers.", h1_px=84,
+        receipt=[("YOU ASK", "Anything, big or small, any time", "Anything", False),
+                 ("I ANSWER", "Straight, even when it isn&#39;t what you hoped", "Straight", False),
+                 ("YOU DECIDE", "No pressure. No surprises.", "Yours", True)],
+        receipt_note="25 years of home loans. I&#39;d rather earn your trust than your signature.",
+        rpad=22, rule_top=330, cta="Save my info. Ask me anything.", foot=FOOT_AGENT, foot_px=10),
 }
 
 # ---- Photo toggle. Every Bond flyer is rendered five ways: REF.png (the default), REF-tie, REF-plum, REF-check, REF-text.
-BOND_REFS = ["PAY-01","PAY-02","PAY-03","PAY-04","DWN-01","DWN-02","DWN-03","WLT-01","WLT-02","WLT-03","EQT-01","EQT-02","EQT-03","CRD-01","CRD-02","AGT-04","AGT-05"]
-PHOTO_DEFAULT = {"PAY-01": "tie", "CRD-01": "check", "DWN-02": "plum", "EQT-02": "tie", "AGT-05": "plum"}   # everything else defaults to text-only
+BOND_REFS = ["PAY-01","PAY-02","PAY-03","PAY-04","DWN-01","DWN-02","DWN-03","WLT-01","WLT-02","WLT-03","EQT-01","EQT-02","EQT-03","CRD-01","CRD-02","AGT-04","AGT-05","TRU-01"]
+PHOTO_DEFAULT = {"PAY-01": "tie", "CRD-01": "check", "DWN-02": "plum", "EQT-02": "tie", "AGT-05": "plum", "TRU-01": "tie"}   # everything else defaults to text-only
 PHOTOS = {
     "tie":   dict(file="joshua-park-smile.jpg", h=500, size=720, x=-440, y=-40),
     "plum":  dict(file="joshua-plum-suit.jpg", h=500, size=1000, x=-116, y=0),

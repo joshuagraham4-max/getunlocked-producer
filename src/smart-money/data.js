@@ -1368,6 +1368,22 @@ Book a consultation call with me and I'll run your real numbers. It's not a sale
       cta: "Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info.",
     },
   },
+  {
+    ref: "TRU-01", campaign: "bond", photoDefault: "tie", lane: "trust", bank: "trust", name: "Trust: Ask Me Anything (receipt)", lender: "N/A — save my info; route by what they ask",
+    audience: "consumer", license: "CO", flyer: "/smart-money/flyers/TRU-01.png", footer: "intro",
+    cta: `Save my info and ask me anything. It's not a sales call. When it has to go right, I'm your guy. 👉 ${BRAND.booking}`,
+    painPoints: ["trust"], magnet: "book-5", skool: "Buyers",
+    highlights: ["Ask anything, big or small", "A straight answer, even when it isn't what you hoped", "No pressure, no surprises. You decide"],
+    notes: "First Trust-lane card. Words, not numbers. Soft call to action: save my info, ask me anything. Tie photo by default.",
+    short: `Got a question about buying, refinancing or your equity? Ask me.\n\nYou'll get a straight answer, even when it isn't the one you hoped for. No pressure, no surprises, and you decide what happens next.\n\nSave my info and ask me anything. It's not a sales call.`,
+    long: `I've been doing home loans for 25 years, and here's how I work:\n\n- Ask me anything, big or small, any time.\n- You get a straight answer, even when it isn't the one you hoped for.\n- No pressure. No surprises. You decide.\n\nI'd rather earn your trust than your signature.\n\nSave my info and ask me anything. It's not a sales call. When it has to go right, I'm your guy.`,
+    video: {
+      title: "Ask me anything",
+      hook: "Got a mortgage question you've been afraid to ask? Ask me.",
+      points: ["25 years, since 2001: I've seen every kind of deal", "How I work: no pressure, no surprises, a straight answer", "If I can't help, I'll tell you"],
+      cta: "Save my info and ask me anything. It's not a sales call. When it has to go right, I'm your guy.",
+    },
+  },
 ];
 
 // ---- Schedule: 7 days × 2 slots (8:30 AM / 12:30 PM ET). 8 investor / 6 consumer per week.
@@ -1476,6 +1492,7 @@ export const BOND_LANES = [
   { id: "equity", label: "Trapped equity into an investment property" },
   { id: "cred", label: "Credibility: why me" },
   { id: "agent", label: "Agents: referral partners" },
+  { id: "trust", label: "Trust: who I am and how I work" },
 ];
 export const BOND_CHANNELS = {
   consumer: ["Facebook page", "Facebook groups: Direct-to-consumer (CO audiences)", "Instagram (cross-post)"],
