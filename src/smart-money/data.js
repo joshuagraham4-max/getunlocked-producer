@@ -1359,6 +1359,22 @@ I'd rather show you your real numbers than guess. Think of me when you want your
     },
   },
   {
+    ref: "SMART-01", campaign: "bond", kind: "trust", lane: "trust", bank: "consumer", name: "SMART buyer class: Become a SMART buyer with SMART money (receipt)", lender: "N/A — save my info; send the class, then run their real number",
+    audience: "consumer", license: "required", flyer: "/smart-money/flyers/SMART-01.png", footer: "consumer",
+    cta: `Save my info and I'll send you the free class. It's not a sales call. When it has to go right, I'm your guy. 👉 ${BRAND.booking}`,
+    painPoints: [], magnet: "book-5", skool: "Buyers",
+    highlights: ["A free class, about 15 minutes", "How to shop lenders, and what to ask them", "Your numbers, run on your real info"],
+    notes: "The pre-sell. Class is built from the interview questions 1 to 6 Joshua records. Do not post until the class is recorded and the save-my-info page can send it.",
+    short: `Want to become a SMART buyer with SMART money?\n\nHere's a free class, about 15 minutes, built from the questions first-time buyers ask me. How to shop lenders, what to ask, and what lenders look at.\n\nI'm a wholesale broker, so I shop several lenders for you and you get access to the best rates, not just one bank's.\n\nSave my info and I'll send you the class. It's not a sales call. When it has to go right, I'm your guy.`,
+    long: `Most buyers learn how this works after they've already signed. Here's a way to learn it first.\n\nI built a free class, about 15 minutes, from the questions first-time buyers ask me most:\n\n- How to shop lenders, and what to ask them.\n- What lenders look at.\n- What your real numbers could be.\n\nHere's how I'm different. I'm a wholesale broker, so I shop several lenders for you and you get access to the best rates, not just one bank's.\n\nSave my info and I'll send you the class. It's not a sales call. When it has to go right, I'm your guy.`,
+    video: {
+      title: "Become a SMART buyer with SMART money",
+      hook: "Want to become a SMART buyer with SMART money?",
+      points: ["A free class, about 15 minutes", "How to shop lenders, and what to ask", "Your numbers, run on your real info"],
+      cta: "Save my info and I'll send you the class. It's not a sales call. When it has to go right, I'm your guy.",
+    },
+  },
+  {
     ref: "WHY-01", campaign: "bond", kind: "trust", lane: "cred", bank: "credibility", name: "Why me: $65 billion left on the table (receipt)", lender: "N/A — save my info; I run their real number",
     audience: "consumer", license: "CO", flyer: "/smart-money/flyers/WHY-01.png", footer: "bondwhy",
     cta: `Save my info and I'll show you your number. It's not a sales call. When it has to go right, I'm your guy. 👉 ${BRAND.booking}`,

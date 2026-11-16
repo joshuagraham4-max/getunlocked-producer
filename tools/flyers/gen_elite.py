@@ -243,6 +243,13 @@ CARDS = {
                  ("THE FIX", "A wholesale broker shops several lenders for you", "Me", True)],
         receipt_note="Get a quote from anyone. Then get mine.",
         rpad=10, rule_top=330, cta="Save my info. I&#39;ll show you your number.", foot=FOOT_WHY, foot_px=9),
+    "SMART-01": dict(palette="peacock", kicker="FIRST-TIME BUYERS &nbsp;/&nbsp; SMART MONEY", **COMMON,
+        h1=["Become a SMART buyer"], h1_accent="with SMART money.", h1_px=58,
+        receipt=[("THE CLASS", "Free, short and built from real buyer questions", "15 min", False),
+                 ("WHAT YOU LEARN", "How to shop lenders, and what to ask them", "The edge", False),
+                 ("YOUR NEXT STEP", "Your numbers, run on your real info", "Your plan", True)],
+        receipt_note="I&#39;m a wholesale broker. I shop several lenders for you.",
+        rpad=22, rule_top=330, cta="Save my info. I&#39;ll send you the class.", foot=FOOT_CONSUMER, foot_px=9.5),
     "INVB-01": dict(palette="camel", kicker="REAL ESTATE INVESTORS &nbsp;/&nbsp; PORTFOLIO REVIEW", **COMMON,
         h1=["Is your portfolio financed"], h1_accent="as well as it was bought?", h1_px=60,
         receipt=[("YOUR LOANS TODAY", "Placed one at a time, with whoever was there", "Scattered", False),
@@ -253,7 +260,7 @@ CARDS = {
 }
 
 # ---- Photo toggle. Every Bond flyer is rendered five ways: REF.png (the default), REF-tie, REF-plum, REF-check, REF-text.
-BOND_REFS = ["PAY-01","PAY-02","PAY-03","PAY-04","DWN-01","DWN-02","DWN-03","WLT-01","WLT-02","WLT-03","EQT-01","EQT-02","EQT-03","CRD-01","CRD-02","AGT-04","AGT-05","AGT-06","INVB-01","WHY-01"]
+BOND_REFS = ["PAY-01","PAY-02","PAY-03","PAY-04","DWN-01","DWN-02","DWN-03","WLT-01","WLT-02","WLT-03","EQT-01","EQT-02","EQT-03","CRD-01","CRD-02","AGT-04","AGT-05","AGT-06","INVB-01","SMART-01","WHY-01"]
 PHOTO_DEFAULT = {"PAY-01": "tie", "CRD-01": "check", "DWN-02": "plum", "EQT-02": "tie", "AGT-05": "plum"}   # everything else defaults to text-only
 PHOTOS = {
     "tie":   dict(file="joshua-park-smile.jpg", h=500, size=720, x=-440, y=-40),

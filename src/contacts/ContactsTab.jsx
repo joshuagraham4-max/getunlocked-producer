@@ -5,6 +5,7 @@ import HowTo from "../HowTo.jsx";
 import { GUIDES } from "../howto/guides.jsx";
 import InvestorPanel, { isInvestorLead, ListingAgentPanel, isListingAgent } from "./InvestorPanel.jsx";
 import ContactHistory from "../calls/ContactHistory.jsx";
+import AgentMatch from "./AgentMatch.jsx";
 import InvestorImport from "../investors/InvestorImport.jsx";
 import AgentResearch, { emailMismatch } from "./AgentResearch.jsx";
 import SnapshotPanel, { isSnapshotLead } from "./SnapshotPanel.jsx";
@@ -344,6 +345,7 @@ function Detail({ c, contacts, setContacts, userId, profileName, back, backLabel
       {isInvestorLead(c) && <InvestorPanel c={c} profileName={profileName} contacts={contacts} onOpen={open}/>}
       {isListingAgent(c) && <ListingAgentPanel c={c} contacts={contacts} links={links}/>}
       {["past_client","lead"].includes(typeOf(c)) && <Loans contact={c} userId={userId}/>}
+      {typeOf(c) === "lead" && <AgentMatch contact={c} contacts={contacts} userId={userId} onLogged={() => setHistBump((n) => n + 1)}/>}
       <Linked contact={c} contacts={contacts} userId={userId} open={open} links={links} reloadLinks={reloadLinks} onCreate={createContact}/>
 
       <div style={box}>
