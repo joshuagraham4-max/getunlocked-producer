@@ -912,6 +912,104 @@ Let me help you add some deals. Find out my strategies for free, then join the c
       cta: "Grab my deal strategies free — link in the post.",
     },
   },
+  {
+    ref: "BUY-01", bank: "consumer", name: "Move-In Cost: Two Months and a Deposit (renters)", lender: "N/A — consultation; route to DPA / seller-credit scenarios",
+    audience: "consumer", license: "required", flyer: "/smart-money/flyers/BUY-01.png", footer: "consumer",
+    cta: `A few minutes with me. A consultation, not a sales call. It's free to find out 👉 ${BRAND.booking}`,
+    painPoints: ["renting", "priced-out"], magnet: "book-5", skool: "Homebuyers",
+    highlights: ["Renting: two months plus a deposit at move-in", "Buying: often far less up front with help and seller credits", "First mortgage payment is usually 30 to 45 days out"],
+    notes: "Elite look. No payment amounts, rates or down-payment % in public copy (Reg Z). Keep 'often' / 'can' hedges. Verify the 2-months-plus-deposit framing matches what Colorado renters are quoted. Compliance (ZPM) to review before heavy use.",
+    short: `Moving in as a renter usually means two months of rent plus a deposit, all at once.
+
+Buying can look very different. With the right help and seller credits, the move-in cost is often far less, and your first mortgage payment is typically 30 to 45 days out.
+
+Most renters never find out what their real number would be.
+
+A few minutes with me and you'll know. It's a consultation, not a sales call.`,
+    long: `Here's what moving in costs a renter: two months of rent plus a deposit, up front. For a lot of Colorado renters, that's a big check for a place that builds someone else's equity.
+
+Buying can be a different picture. Depending on your situation, down payment assistance and seller credits can cut what you bring to the table to very little, and your first mortgage payment typically isn't due for 30 to 45 days.
+
+It won't fit everyone, which is why I'd rather show you your real number than guess. Take a few minutes with me. It's a consultation, not a sales call, and you'll walk away knowing where you stand.`,
+    video: {
+      title: "Compare your real move-in number",
+      hook: "Two months of rent plus a deposit. That's what moving in costs a renter.",
+      points: ["What a rental move-in actually costs", "How help and seller credits can shrink the buyer's number", "Why the first payment lands 30 to 45 days out"],
+      cta: "Take a few minutes with me to see your real number. A consultation, not a sales call. Link in the post.",
+    },
+  },
+  {
+    ref: "BUY-02", bank: "consumer", name: "Rent Builds Their Equity (renters)", lender: "N/A — consultation; route to DPA / seller-credit scenarios",
+    audience: "consumer", license: "required", flyer: "/smart-money/flyers/BUY-02.png", footer: "consumer",
+    cta: `A few minutes with me. A consultation, not a sales call. It's free to find out 👉 ${BRAND.booking}`,
+    painPoints: ["renting", "priced-out"], magnet: "book-5", skool: "Homebuyers",
+    highlights: ["Rent payments build the landlord's equity", "Buying often needs far less up front than a rental move-in", "First payment 30 to 45 days out"],
+    notes: "Elite look. Same Reg Z cautions as BUY-01. Pair with BUY-01 on alternating days, not back to back.",
+    short: `Every month you rent, you build your landlord's equity.
+
+And you pay two months plus a deposit just to get in the door.
+
+Buying often takes far less up front, and the first payment is usually 30 to 45 days away.
+
+A few minutes with me, no pressure. It's a consultation, not a sales call.`,
+    long: `Renting asks for two months plus a deposit up front, then a payment every month that builds your landlord's equity instead of yours.
+
+Buying can ask for a lot less up front, and the first payment typically comes 30 to 45 days after closing. What it looks like for you depends on your situation, and that's what a few minutes with me is for.
+
+It's a consultation, not a sales call. You'll know where you stand either way.`,
+    video: {
+      title: "Whose equity are you building?",
+      hook: "Your rent payment is building someone's equity. Just not yours.",
+      points: ["Why renting asks for so much up front", "How buying can ask for far less", "What a few minutes with me covers"],
+      cta: "Book a few minutes with me. A consultation, not a sales call. Link in the post.",
+    },
+  },
+  {
+    ref: "AGT-02", bank: "agents", name: "Agents: Clients Who Close Without the Drama", lender: "N/A",
+    audience: "agent", license: "none", flyer: "/smart-money/flyers/AGT-02.png", footer: "intro",
+    cta: `A few minutes with me on protecting your clients. A consultation, not a sales call 👉 ${BRAND.booking}`,
+    painPoints: [], magnet: "book-5", skool: "Agents",
+    highlights: ["Late surprises and a buyer who goes quiet", "Clear numbers, steady updates, a calm closing", "Consultation, not a sales call"],
+    notes: "Elite look, peacock palette. Agent footer is the intro footer; ask ZPM whether RESPA language is wanted for agent-facing ads. Goal: agents refer because clients reach the table smoothly.",
+    short: `Agents: the deals that slip usually slip late. A surprise in the numbers, a missing document, a buyer who goes quiet.
+
+I work to settle the numbers early and keep everyone updated, so your clients close calmly and thank you for it.
+
+A few minutes with me. A consultation, not a sales call.`,
+    long: `Most deals don't fall apart at the offer. They fall apart late, on a surprise, a missing document or a buyer who stops answering.
+
+My job is to take that off your plate: numbers settled early, steady updates to you and your client, and a calm closing. The kind of closing your client remembers when they refer their friends to you.
+
+If you want to see how I'd protect your clients, take a few minutes with me. It's a consultation, not a sales call.`,
+    video: {
+      title: "Why deals slip, and how I keep your clients calm",
+      hook: "Your deal won't die at the offer. It dies at the surprise.",
+      points: ["Where deals really slip: late numbers and silence", "What settling it early looks like", "What the consultation covers"],
+      cta: "Take a few minutes with me. A consultation, not a sales call. Link in the post.",
+    },
+  },
+  {
+    ref: "AGT-03", bank: "agents", name: "Agents: A Closing Your Client Thanks You For (photo)", lender: "N/A",
+    audience: "agent", license: "none", flyer: "/smart-money/flyers/AGT-03.png", footer: "intro",
+    cta: `A few minutes with me on protecting your clients. A consultation, not a sales call 👉 ${BRAND.booking}`,
+    painPoints: [], magnet: "book-5", skool: "Agents",
+    highlights: ["Surprises, missing documents, a slipping date vs. numbers settled early", "Steady updates to the keys", "Consultation, not a sales call"],
+    notes: "Photo variant: roughly 1 in 4 flyers carries Joshua's photo (grayscale panel).",
+    short: `A closing your client thanks you for.
+
+That's the goal. Numbers settled early, steady updates, and no surprises on the way to the keys.
+
+A few minutes with me and you'll see how I protect your clients. A consultation, not a sales call.`,
+    long: `The usual closing: surprises, missing documents, a date that slips. The alternative: numbers settled early and steady updates all the way to the keys.
+
+I'm Joshua Graham, and I'd like to show you how I protect your clients so they close calmly and send their friends your way. A few minutes, a consultation, not a sales call.`,
+    video: {
+      title: "A closing your client thanks you for",
+      hook: "What if your client thanked you for the closing?",
+      points: ["The usual closing vs. the calm one", "How early numbers and steady updates change it", "What a few minutes with me covers"],
+      cta: "Take a few minutes with me. A consultation, not a sales call. Link in the post.",
+    },
+  },
 ];
 
 // ---- Schedule: 7 days × 2 slots (8:30 AM / 12:30 PM ET). 8 investor / 6 consumer per week.

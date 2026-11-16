@@ -59,6 +59,13 @@ CARDS = {
         left=("WHERE DEALS SLIP", "Late surprises and a buyer who goes quiet."),
         right=("WHAT CHANGES", "Clear numbers, steady updates, a calm closing."),
         cta="Let's talk about protecting your clients.", panel_bottom=TAGLINE, foot=FOOT_AGENT),
+    "AGT-03": dict(palette="peacock", kicker="REAL ESTATE AGENTS &nbsp;/&nbsp; REFERRAL PARTNERS",
+        h1=["A closing your", "client thanks"], h1_accent="you for.", h1_px=98,
+        left=("THE USUAL", "Surprises, missing documents, a date that slips."),
+        right=("THE ALTERNATIVE", "Numbers settled early. Steady updates to the keys."),
+        ledger_px=31,
+        cta="A few minutes on how I protect your clients.", panel_bottom=TAGLINE, foot=FOOT_AGENT,
+        photo=dict(file="joshua-park-smile.jpg", h=640, size=800, x=-494, y=-84)),
 }
 
 def grain_url():
@@ -85,18 +92,30 @@ def page(ref, c):
         words = "".join(f'<p style="font:500 italic 50px/1.12 B;color:{p["panel_text"]}">{w}</p>' for w in pb["words"])
         bottom = (f'<div style="width:44px;height:1px;background:{p["panel_mute"]};margin-bottom:20px"></div>{words}'
                   f'<p style="margin-top:18px;font:600 12px/1.6 M;letter-spacing:.26em;color:{p["panel_mute"]}">{pb["label"]}</p>')
+    rule = p["accent"] if c["palette"] == "scarlet" else p["panel_mute"]
+    ph = c.get("photo")
+    if ph:
+        img = os.path.join(BRAND, "photos", ph["file"])
+        panel_body = (f'<div style="position:absolute;right:0;top:0;width:270px;height:{ph["h"]}px;background-image:url(file://{img});background-size:auto {ph["size"]}px;background-position:{ph["x"]}px {ph["y"]}px;filter:grayscale(1) contrast(1.08) brightness(.96)"></div>'
+                      f'<div style="position:absolute;right:0;top:{ph["h"]-150}px;width:270px;height:150px;background:linear-gradient(to bottom,rgba(0,0,0,0),{p["panel"]})"></div>'
+                      f'<div style="position:absolute;right:0;top:{ph["h"]+12}px;width:270px;padding:0 34px 0 36px;box-sizing:border-box"><div style="width:44px;height:3px;background:{rule}"></div>'
+                      f'<p style="margin-top:22px;font:600 12px M;letter-spacing:.3em;color:{p["panel_mute"]}">A CONSULTATION,</p>'
+                      f'<p style="margin-top:10px;font:500 italic 54px/1.0 B;color:{p["panel_text"]}">not a<br>sales<br>call.</p></div>'
+                      f'<p style="position:absolute;right:34px;bottom:104px;font:600 11px/1.6 M;letter-spacing:.26em;color:{p["panel_mute"]}">SMOOTH. PRECISE. ELITE.</p>')
+    else:
+        panel_body = (f'<div style="position:absolute;right:0;top:0;width:270px;padding:84px 34px 0 36px;box-sizing:border-box"><div style="width:44px;height:3px;background:{rule}"></div>'
+                      f'<p style="margin-top:26px;font:600 12px M;letter-spacing:.3em;color:{p["panel_mute"]}">A CONSULTATION,</p>'
+                      f'<p style="margin-top:12px;font:500 italic 64px/1.0 B;color:{p["panel_text"]}">not a<br>sales<br>call.</p></div>'
+                      f'<div style="position:absolute;right:0;bottom:104px;width:270px;padding:0 34px 0 36px;box-sizing:border-box">{bottom}</div>')
     gf = os.path.join(BRAND, "gf-logo-ink.png"); zp = os.path.join(BRAND, "zpm-logo-ink.png")
     return f'''<!doctype html><html><head><meta charset="utf-8"><style>{ff}body{{margin:0}}p,h1{{margin:0}}*{{font-variant-numeric:lining-nums !important;font-feature-settings:"lnum" 1 !important}}</style></head><body>
 <div style="width:1080px;height:1080px;position:relative;overflow:hidden;font-family:M">
 <div style="position:absolute;inset:0;background:{p["bg"]}"></div>{grain(.16)}
 <div style="position:absolute;right:0;top:0;bottom:0;width:270px;background:{p["panel"]}"></div><div style="position:absolute;right:0;top:0;bottom:0;width:270px">{grain(.3)}</div>
-<div style="position:absolute;right:0;top:0;width:270px;padding:84px 34px 0 36px;box-sizing:border-box"><div style="width:44px;height:3px;background:{p["accent"] if c["palette"]=="scarlet" else p["panel_mute"]}"></div>
-<p style="margin-top:26px;font:600 12px M;letter-spacing:.3em;color:{p["panel_mute"]}">A CONSULTATION,</p>
-<p style="margin-top:12px;font:500 italic 64px/1.0 B;color:{p["panel_text"]}">not a<br>sales<br>call.</p></div>
-<div style="position:absolute;right:0;bottom:104px;width:270px;padding:0 34px 0 36px;box-sizing:border-box">{bottom}</div>
+{panel_body}
 <p style="position:absolute;right:34px;bottom:62px;font:600 12px M;letter-spacing:.2em;color:{p["panel_mute"]}">REF {ref}</p>
 <div style="position:absolute;left:74px;top:74px;display:flex;align-items:center;gap:14px"><div style="width:12px;height:12px;background:{p["accent"]}"></div><p style="font:700 14px M;letter-spacing:.34em;color:{p["ink"]};white-space:nowrap">{c["kicker"]}</p></div>
-<h1 style="position:absolute;left:74px;top:132px;font:500 104px/0.97 B;color:{p["ink"]};letter-spacing:-0.02em">{h1}</h1>
+<h1 style="position:absolute;left:74px;top:132px;font:500 {c.get("h1_px",104)}px/0.97 B;color:{p["ink"]};letter-spacing:-0.02em">{h1}</h1>
 <div style="position:absolute;left:74px;width:690px;top:540px;border-top:2px solid {p["ink"]}"></div>
 <div style="position:absolute;left:74px;width:690px;top:556px;display:grid;grid-template-columns:1fr 1fr">
 <div style="padding-right:26px;border-right:1px solid {p["ink"]}33"><p style="font:700 13px M;letter-spacing:.32em;color:{p["ink"]}">{c["left"][0]}</p><p style="margin-top:10px;font:500 {lpx}px/1.12 B;color:{p["ink"]}">{c["left"][1]}</p></div>
