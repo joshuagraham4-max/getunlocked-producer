@@ -52,11 +52,15 @@ FOOT_WEALTH = ("Joshua Graham NMLS #169809 | Graham Financial, powered by Zero P
     "Source: FHFA All-Transactions House Price Index, fourth quarter to fourth quarter, 1976 to 2025, not adjusted for inflation. National figures; local markets vary and prices can fall. "
     "Past performance does not guarantee future results. Not a commitment to lend; subject to credit approval, underwriting guidelines and change without notice.")
 FOOT_PAY2 = FOOT_CONSUMER + (" Example: $300,000 purchase price, 3% down ($9,000), loan amount $291,000, 30-year fixed rate 7.125%, APR 7.370% (assumes $5,000 lender costs and $2,000 title costs). "
-    "Principal and interest $1,961 per month; estimated taxes, homeowners insurance and mortgage insurance add about $490, for a total near $2,450. Rent is illustrative. Rates and APR are examples, not an offer, and change daily.")
+    "Principal and interest $1,961 per month; estimated taxes, homeowners insurance and mortgage insurance add about $490, for a total near $2,450. Roommate income is illustrative, is not guaranteed and may not count toward qualifying. Rent is illustrative. Rates and APR are examples, not an offer, and change daily.")
 QR = dict(kind="qr", label="SCAN TO BOOK<br>A CALL WITH ME")
 CTA_BOOK = "Book a call with me. It's not a sales call."
 STAT_30_45 = dict(kind="stat", top="30", bottom="45", label="DAYS TO YOUR<br>FIRST PAYMENT")
 TAGLINE = dict(kind="tagline", words=["Smooth.", "Precise.", "Elite."], label="GRAHAM FINANCIAL")
+
+SMART = "Contact me for smart money to finance real estate."
+COMMON = dict(photo=dict(file="joshua-park-smile.jpg", h=500, size=720, x=-440, y=-40), photo_line="When it has<br>to go right,<br>I&#39;m your guy.",
+              cta_px=26, cta_note="NOT A SALES CALL", panel_bottom=QR, kicker_sub=SMART)
 
 CARDS = {
     "BUY-01": dict(palette="scarlet", kicker="COLORADO RENTERS &nbsp;/&nbsp; BUYING A HOME",
@@ -98,39 +102,32 @@ CARDS = {
                  dict(label="BUYING", px=76, big="$2K&ndash;$3K", small="a month, and help can mean little to nothing out of pocket.")],
         panel_line="When it<br>has to go<br>right, I'm<br>your guy.", panel_px=42, rule_top=470,
         cta="Save my number. You'll want it.", panel_bottom=STAT_30_45, foot=FOOT_NUMBERS),
-    "PAY-01": dict(palette="scarlet", kicker="COLORADO RENTERS &nbsp;/&nbsp; BUYING A HOME",
-        h1=["It's not"], h1_accent="out of reach.", h1_px=112,
-        figures=[dict(label="RENTING SOLO", px=76, big="$1,850", small="a month, about. Your landlord builds the equity."),
-                 dict(label="OWNING, 2 ROOMMATES", px=76, big="$1,650", small="a month at $800 each. $3,250 on your own.")],
-        panel_line="When it<br>has to go<br>right, I'm<br>your guy.", panel_px=42, rule_top=470,
-        cta="Book a call. I&#39;ll run your real numbers.", photo=dict(file="joshua-park-smile.jpg", h=500, size=720, x=-440, y=-40), photo_line="When it has<br>to go right,<br>I&#39;m your guy.", cta_px=26, cta_note="NOT A SALES CALL", panel_bottom=QR, foot=FOOT_PAY, foot_px=9),
-    "PAY-02": dict(palette="burgundy", kicker="COLORADO RENTERS &nbsp;/&nbsp; BUYING A HOME",
-        h1=["About $100", "more a week."], h1_accent="And it's yours.", h1_px=100,
-        figures=[dict(label="RENTING", px=76, big="$2,000", small="a month, about. Your landlord builds the equity."),
-                 dict(label="OWNING A $300K HOME", px=76, big="$2,450", small="a month, about, and you build your own.")],
-        panel_line="When it<br>has to go<br>right, I'm<br>your guy.", panel_px=42, rule_top=500,
-        cta="Book a call. I&#39;ll run your real numbers.", photo=dict(file="joshua-park-smile.jpg", h=500, size=720, x=-440, y=-40), photo_line="When it has<br>to go right,<br>I&#39;m your guy.", cta_px=26, cta_note="NOT A SALES CALL", panel_bottom=QR, foot=FOOT_PAY2, foot_px=9),
-    "PAY-03": dict(palette="scarlet", kicker="COLORADO RENTERS &nbsp;/&nbsp; BUYING A HOME", kicker_sub="Contact me for smart money to finance real estate.",
+    "PAY-01": dict(palette="scarlet", kicker="COLORADO RENTERS &nbsp;/&nbsp; BUYING A HOME", **COMMON,
         h1=["Own it for less"], h1_accent="than you rent.", h1_px=92,
         receipt=[("YOU RENT, SOLO", "Builds your landlord&#39;s equity", "$1,850", False),
                  ("OWN A $400K HOME, ON YOUR OWN", "All in, about", "$3,250", False),
                  ("TWO ROOMMATES AT $800 EACH", "Rooms in your home", "&minus;$1,600", False),
                  ("YOUR PAYMENT", "And you build the equity", "$1,650", True)],
         receipt_note="Cash to close? Seller credits plus assistance can bring it near $0.",
-        rule_top=330,
-        photo=dict(file="joshua-park-smile.jpg", h=500, size=720, x=-440, y=-40), photo_line="When it has<br>to go right,<br>I&#39;m your guy.",
-        cta="Book a call. I&#39;ll run your real numbers.", cta_px=26, cta_note="NOT A SALES CALL",
-        panel_bottom=QR, foot=FOOT_PAY, foot_px=9),
-    "DWN-01": dict(palette="camel", kicker="COLORADO RENTERS &nbsp;/&nbsp; BUYING A HOME",
-        h1=["Cash to close", "can be"], h1_accent="near $0.", h1_px=100,
-        figures=[dict(label="SELLER CREDITS", px=76, big="3&ndash;6%", small="of the price can come back to you. $12,000 to $24,000 on a $400K home."),
-                 dict(label="WITH ASSISTANCE", px=76, big="Near $0", small="out of pocket can be possible when credits and help line up.")],
-        panel_line="When it<br>has to go<br>right, I'm<br>your guy.", panel_px=42, rule_top=500,
-        cta="Book a call. I&#39;ll show you your cash to close.", photo=dict(file="joshua-park-smile.jpg", h=500, size=720, x=-440, y=-40), photo_line="When it has<br>to go right,<br>I&#39;m your guy.", cta_px=26, cta_note="NOT A SALES CALL", panel_bottom=QR, foot=FOOT_CONSUMER),
-    "WLT-01": dict(palette="peacock", kicker="U.S. HOME PRICES &nbsp;/&nbsp; BUILDING WEALTH", chart=True,
-        h1=["Home prices", "rose in"], h1_accent="45 of 50 years.", h1_px=96,
-        panel_line="When it<br>has to go<br>right, I'm<br>your guy.", panel_px=42, rule_top=450,
-        cta="Book a call. See what it could mean for you.", photo=dict(file="joshua-park-smile.jpg", h=500, size=720, x=-440, y=-40), photo_line="When it has<br>to go right,<br>I&#39;m your guy.", cta_px=26, cta_note="NOT A SALES CALL", panel_bottom=QR, foot=FOOT_WEALTH, foot_px=9.5),
+        rule_top=330, cta="Book a call. I&#39;ll run your real numbers.", foot=FOOT_PAY, foot_px=9),
+    "PAY-02": dict(palette="burgundy", kicker="COLORADO RENTERS &nbsp;/&nbsp; BUYING A HOME", **COMMON,
+        h1=["About $100"], h1_accent="more a week.", h1_px=92,
+        receipt=[("YOU RENT TODAY", "Builds your landlord&#39;s equity", "$2,000", False),
+                 ("OWN A $300K HOME", "All in, about", "$2,450", False),
+                 ("THE DIFFERENCE", "About $100 a week, and the equity is yours", "$450", True)],
+        receipt_note="Rent one room for $500 and you&#39;re below what you pay now.",
+        rpad=22, rule_top=330, cta="Book a call. I&#39;ll run your real numbers.", foot=FOOT_PAY2, foot_px=9),
+    "DWN-01": dict(palette="camel", kicker="COLORADO RENTERS &nbsp;/&nbsp; BUYING A HOME", **COMMON,
+        h1=["Cash to close"], h1_accent="can be near $0.", h1_px=92,
+        receipt=[("SELLER CREDITS", "3&ndash;6% of the price comes back to you", "$12K&ndash;$24K", False),
+                 ("DOWN PAYMENT HELP", "Assistance for buyers who qualify", "Available", False),
+                 ("YOUR CASH TO CLOSE", "In the right scenario", "Near $0", True)],
+        receipt_note="Shown on a $400K home. Not every buyer or home qualifies.",
+        rpad=22, rule_top=330, cta="Book a call. I&#39;ll show you your cash to close.", foot=FOOT_CONSUMER),
+    "WLT-01": dict(palette="peacock", kicker="U.S. HOME PRICES &nbsp;/&nbsp; BUILDING WEALTH", **COMMON,
+        chart=True, chart_h=270, h1=["Home prices rose in"], h1_accent="45 of 50 years.", h1_px=76,
+        chart_note="A $400K home growing 3% a year can add about $12,000 in equity. Yours, not your landlord&#39;s.",
+        rule_top=330, cta="Book a call. See what it could mean for you.", foot=FOOT_WEALTH, foot_px=9.5),
 }
 
 def qr_svg(url, px, dark, light):
@@ -227,13 +224,15 @@ def page(ref, c):
         for k, (lab, sub, amt, hot) in enumerate(c["receipt"]):
             col = p["accent"] if hot else p["ink"]
             bt = f'border-top:2px solid {p["ink"]};' if hot else (f'border-top:1px solid {p["ink"]}33;' if k else "")
-            rows.append(f'<div style="display:flex;justify-content:space-between;align-items:center;{bt}padding:{12 if hot else 9}px 0">'
+            rows.append(f'<div style="display:flex;justify-content:space-between;align-items:center;{bt}padding:{c.get('rpad',9)+3 if hot else c.get('rpad',9)}px 0">'
                         f'<div><p style="font:700 12px M;letter-spacing:.28em;color:{col}">{lab}</p><p style="margin-top:4px;font:500 19px/1.2 B;color:{p["ink"]}">{sub}</p></div>'
                         f'<p style="font:{600 if hot else 500} {58 if hot else 44}px/1 B;color:{col};letter-spacing:-0.02em;white-space:nowrap">{amt}</p></div>')
         note = f'<p style="margin-top:12px;font:500 italic 22px/1.3 B;color:{p["ink"]}">{c["receipt_note"]}</p>' if c.get("receipt_note") else ""
         ledger_html = f'<div style="position:absolute;left:74px;width:690px;top:{top0}px">' + "".join(rows) + note + '</div>'
     if c.get("chart"):
-        ledger_html = chart_html(p, c.get("rule_top", 540) + 18)
+        ledger_html = chart_html(p, c.get("rule_top", 540) + 18, height=c.get("chart_h", 250))
+        if c.get("chart_note"):
+            ledger_html += f'<p style="position:absolute;left:74px;width:690px;top:{c.get("rule_top",540)+18+c.get("chart_h",250)+8}px;font:500 italic 22px/1.3 B;color:{p["ink"]}">{c["chart_note"]}</p>'
     html_out = f'''<!doctype html><html><head><meta charset="utf-8"><style>{ff}body{{margin:0}}p,h1{{margin:0}}*{{font-variant-numeric:lining-nums !important;font-feature-settings:"lnum" 1 !important}}</style></head><body>
 <div style="width:1080px;height:1080px;position:relative;overflow:hidden;font-family:M">
 <div style="position:absolute;inset:0;background:{p["bg"]}"></div>{grain(.16)}

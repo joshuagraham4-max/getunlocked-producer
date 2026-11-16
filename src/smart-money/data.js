@@ -72,7 +72,7 @@ export const FOOTERS = {
   pay:
     "Example: $400,000 purchase price, 3% down ($12,000), loan amount $388,000, 30-year fixed rate 7.125%, APR 7.308% (assumes $5,000 lender costs and $2,000 title costs). Principal and interest $2,614 per month; estimated taxes, homeowners insurance and mortgage insurance add about $640, for a total near $3,250. Roommate income is illustrative, is not guaranteed and may not count toward qualifying. Rent is an approximate Colorado one-bedroom average. Rates and APR are examples, not an offer, and change daily. Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity. Licensed in Colorado. Not a commitment to lend; subject to credit approval, underwriting guidelines and change without notice.",
   pay2:
-    "Example: $300,000 purchase price, 3% down ($9,000), loan amount $291,000, 30-year fixed rate 7.125%, APR 7.370% (assumes $5,000 lender costs and $2,000 title costs). Principal and interest $1,961 per month; estimated taxes, homeowners insurance and mortgage insurance add about $490, for a total near $2,450. Rent is illustrative. Rates and APR are examples, not an offer, and change daily. Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity. Licensed in Colorado. Not a commitment to lend; subject to credit approval, underwriting guidelines and change without notice.",
+    "Example: $300,000 purchase price, 3% down ($9,000), loan amount $291,000, 30-year fixed rate 7.125%, APR 7.370% (assumes $5,000 lender costs and $2,000 title costs). Principal and interest $1,961 per month; estimated taxes, homeowners insurance and mortgage insurance add about $490, for a total near $2,450. Roommate income is illustrative, is not guaranteed and may not count toward qualifying. Rent is illustrative. Rates and APR are examples, not an offer, and change daily. Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity. Licensed in Colorado. Not a commitment to lend; subject to credit approval, underwriting guidelines and change without notice.",
   wealth:
     "Source: FHFA All-Transactions House Price Index, fourth quarter to fourth quarter, 1976 to 2025, not adjusted for inflation. National figures; local markets vary and prices can fall. Examples are illustrations, not predictions, and past performance does not guarantee future results. Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity. Licensed in Colorado.",
   market:
@@ -1041,7 +1041,7 @@ I'd rather show you your real numbers than guess. Think of me when you want your
     },
   },
   {
-    ref: "PAY-01", bank: "consumer", name: "It's Not Out of Reach (payment, roommates)", lender: "N/A — call; route to payment, DPA and seller-credit scenarios",
+    ref: "PAY-01", bank: "consumer", name: "Own It for Less Than You Rent (roommates)", lender: "N/A — call; route to payment, DPA and seller-credit scenarios",
     audience: "consumer", license: "required", flyer: "/smart-money/flyers/PAY-01.png", footer: "pay",
     cta: `Book a call and I'll run YOUR numbers, roommates and all. It's not a sales call. When it has to go right, I'm your guy. Save my info 👉 ${BRAND.booking}`,
     painPoints: ["priced-out", "renting"], magnet: "book-5", skool: "Homebuyers",
