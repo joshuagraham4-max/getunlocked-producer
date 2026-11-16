@@ -99,6 +99,7 @@ export const FOOTERS = {
 // Bond footers built from the shared ones, so the small print carries the caveats the posts no longer repeat.
 FOOTERS.bondpaydpa = FOOTERS.pay + " Programs and availability vary and not every buyer or home qualifies.";
 FOOTERS.bondwealth = FOOTERS.wealth + " Appreciation is not guaranteed.";
+FOOTERS.bondwhy = "Source: Bankrate research, July 2026, based on 2025 mortgage data: about $65 billion a year in mortgage overpayments nationwide; about $3,300 is the national average per borrower per year. Your own savings will vary. Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity. Licensed in Colorado. Not a commitment to lend; subject to credit approval, underwriting guidelines and change without notice.";
 FOOTERS.bondpay2own = FOOTERS.pay2 + " Homeowners also pay taxes, insurance and upkeep.";
 FOOTERS.bondpay2rent = FOOTERS.pay2 + " Rent growth of 5% a year is an assumption, not a prediction. Taxes and insurance can change.";
 
@@ -1054,86 +1055,51 @@ I'd rather show you your real numbers than guess. Think of me when you want your
     },
   },
   {
-    ref: "PAY-01", campaign: "bond", photoDefault: "tie", lane: "pay", bank: "consumer", name: "Own It for Less Than You Rent (roommates)", lender: "N/A — call; route to payment, DPA and seller-credit scenarios",
+    ref: "PAY-01", campaign: "bond", photoDefault: "tie", lane: "pay", bank: "consumer", name: "Payment: Rent went up again (receipt)", lender: "N/A — call; route to payment, DPA and seller-credit scenarios",
     audience: "consumer", license: "required", flyer: "/smart-money/flyers/PAY-01.png", footer: "pay",
-    cta: `Book a call and I'll run YOUR numbers, roommates and all. It's not a sales call. When it has to go right, I'm your guy. Save my info 👉 ${BRAND.booking}`,
+    cta: `Save my info and I'll run your real number. It's not a sales call. When it has to go right, I'm your guy. 👉 ${BRAND.booking}`,
     painPoints: ["priced-out", "renting"], magnet: "book-5", skool: "Homebuyers",
-    highlights: ["Owning with roommates can land near what you pay in rent", "Your payment builds your equity, not your landlord's", "A call, not a sales call"],
-    notes: "Payment-bearing (Reg Z): the pay footer MUST travel with every post. $400K example: P&I $2,614, total near $3,250, APR 7.308%. Confirm ZPM is fine with the roommate framing (roommate income may not count toward qualifying). Refresh rent and rate quarterly.",
-    short: `Paying about $1,850 a month to rent on your own?
-
-Buying a $400K home can cost about $3,250 a month on your own. Bring in two roommates at $800 each and it can land near $1,650, and the payment builds YOUR equity, not your landlord's.
-
-It's not out of reach. It's just math nobody showed you.
-
-Book a call and I'll run YOUR numbers, roommates and all. It's not a sales call.`,
-    long: `Most renters assume owning is out of reach. Here is the math on a $400,000 home with 3% down:
-
-- Renting a one-bedroom on your own: about $1,850 a month, and your landlord builds the equity.
-- Owning on your own: about $3,250 a month all in.
-- Owning with two roommates at $800 each: near $1,650 a month, and you build the equity.
-
-I'd rather walk through YOUR numbers than guess.
-
-Book a call and I'll run YOUR numbers, roommates and all. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
+    highlights: ["Rent went up again: what would owning cost?", "A $400K home, all in, with two roommates: about $1,650", "Wholesale broker: I shop several lenders for you"],
+    notes: "Curiosity-first rebuild. Hook is the renter's own thought. Wholesale line on every buyer piece. Roommate example is illustrative; the small print covers it.",
+    short: `Rent went up again. What would owning cost you?\n\nOn a $400K home, all in, it's about $3,250 a month. Rent out two rooms at $800 each and your payment lands near $1,650, and the equity is yours instead of your landlord's.\n\nI'm a wholesale broker, so I shop several lenders for you and you get access to the best rates, not just one bank's.\n\nCurious what yours would be? Save my info and I'll run it. It's not a sales call. When it has to go right, I'm your guy.`,
+    long: `Rent went up again, didn't it?\n\nHere's a question most renters never ask: what would it cost to own instead?\n\n- Rent today, on your own: $1,850.\n- A $400K home, all in: about $3,250.\n- Two roommates at $800 each: minus $1,600.\n- Your payment: about $1,650, and you build the equity.\n\nHere's how I'm different. I'm a wholesale broker, so I shop several lenders for you and you get access to the best rates, not just one bank's. Homebuyers leave about $65 billion a year on the table, roughly $3,300 each (Bankrate research, 2026), mostly because they take the first quote they get.\n\nCurious what yours would be? Save my info and I'll run your real numbers. It's not a sales call. When it has to go right, I'm your guy.`,
     video: {
-      title: "It's not out of reach",
-      hook: "Look at these numbers.",
-      points: ["Rent solo vs. owning with roommates", "Why the payment builds your equity", "How I help"],
-      cta: "Book a call and I'll run YOUR numbers, roommates and all. It's not a sales call. When it has to go right, I'm your guy. Save my info.",
+      title: "Rent went up again",
+      hook: "Rent went up again. What would owning cost?",
+      points: ["The real monthly payment on a $400K home", "What two roommates do to that payment", "Why I'm different: wholesale, several lenders"],
+      cta: "Save my info and I'll run your real number. It's not a sales call. When it has to go right, I'm your guy.",
     },
   },
   {
-    ref: "PAY-02", campaign: "bond", lane: "pay", bank: "consumer", name: "About $100 More a Week, and It's Yours (payment)", lender: "N/A — call; route to payment, DPA and seller-credit scenarios",
+    ref: "PAY-02", campaign: "bond", lane: "pay", bank: "consumer", name: "Payment: How much more is owning (receipt)", lender: "N/A — call; route to payment, DPA and seller-credit scenarios",
     audience: "consumer", license: "required", flyer: "/smart-money/flyers/PAY-02.png", footer: "pay2",
-    cta: `Book a call and I'll run YOUR numbers next to your rent. It's not a sales call. When it has to go right, I'm your guy. Save my info 👉 ${BRAND.booking}`,
+    cta: `Save my info and I'll show you your number. It's not a sales call. When it has to go right, I'm your guy. 👉 ${BRAND.booking}`,
     painPoints: ["priced-out", "renting"], magnet: "book-5", skool: "Homebuyers",
-    highlights: ["About $100 more a week than renting, on a $300K home", "You own it and build your own equity", "A call, not a sales call"],
-    notes: "Payment-bearing (Reg Z): the pay2 footer MUST travel with every post. $300K example: P&I $1,961, total near $2,450, APR 7.370%. Gap vs $2,000 rent is about $450 a month, roughly $104 a week. Fits condo/townhome price points (attached median is about $395K statewide, so many buyers will see higher numbers: say so on the call). Refresh rent and rate quarterly.",
-    short: `Paying about $2,000 a month to rent?
-
-On a $300K home, the payment can be about $2,450 a month. That's roughly $100 more a week, and you own it and build your own equity instead of your landlord's.
-
-Wondering if you have a roommate who could move in and close that gap? Let's look at it.
-
-Book a call and I'll run YOUR numbers next to your rent. It's not a sales call.`,
-    long: `Here is the honest math on a $300,000 home with 3% down: a payment near $2,450 a month, all in. If you're paying about $2,000 to rent, that's roughly $100 more a week, and you own the home instead of funding your landlord's.
-
-I'd rather show you yours.
-
-Book a call and I'll run YOUR numbers next to your rent. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
+    highlights: ["About $100 more a week than renting, and the equity is yours", "Rent one room for $500 and you're below what you pay now", "Wholesale broker: several lenders, best rates"],
+    notes: "Curiosity-first rebuild of the $100-a-week card.",
+    short: `How much more is owning than renting, really?\n\nOn a $300K home the all-in payment is about $2,450. If you pay $2,000 in rent today, that's about $100 more a week, and the equity is yours.\n\nI'm a wholesale broker, so I shop several lenders for you and you get access to the best rates, not just one bank's.\n\nCurious what it'd be for you? Save my info. It's not a sales call. When it has to go right, I'm your guy.`,
+    long: `Most renters assume owning costs a fortune more. Here's the real comparison:\n\n- Rent today: $2,000.\n- A $300K home, all in: about $2,450.\n- The difference: about $100 a week, and the equity is yours.\n\nRent one room for $500 and you're below what you pay now.\n\nHere's how I'm different. I'm a wholesale broker, so I shop several lenders for you and you get access to the best rates, not just one bank's. Homebuyers leave about $65 billion a year on the table, roughly $3,300 each (Bankrate research, 2026), mostly because they take the first quote they get.\n\nWant your real number? Save my info. It's not a sales call. When it has to go right, I'm your guy.`,
     video: {
-      title: "About $100 more a week",
-      hook: "Look at these numbers.",
-      points: ["Rent vs. owning, side by side", "Where the extra $100 a week goes", "How I help"],
-      cta: "Book a call and I'll run YOUR numbers next to your rent. It's not a sales call. When it has to go right, I'm your guy. Save my info.",
+      title: "How much more is owning",
+      hook: "How much more is owning than renting, really?",
+      points: ["The real gap between your rent and a payment", "What one roommate does to it", "Why I shop several lenders for you"],
+      cta: "Save my info and I'll show you your number. It's not a sales call. When it has to go right, I'm your guy.",
     },
   },
   {
-    ref: "DWN-01", campaign: "bond", lane: "cash", bank: "consumer", name: "Cash to Close Can Be Near $0 (renters)", lender: "N/A — call; route to payment, DPA and seller-credit scenarios",
-    audience: "consumer", license: "required", flyer: "/smart-money/flyers/DWN-01.png", footer: "bonddpa",
-    cta: `Book a call and I'll show you exactly how much you'd bring to closing. It's not a sales call. When it has to go right, I'm your guy. Save my info 👉 ${BRAND.booking}`,
+    ref: "DWN-01", campaign: "bond", lane: "cash", bank: "consumer", name: "Down payment: 3% down and I get you 5% (receipt)", lender: "N/A — call; route to payment, DPA and seller-credit scenarios",
+    audience: "consumer", license: "required", flyer: "/smart-money/flyers/DWN-01.png", footer: "bondpaydpa",
+    cta: `Save my info and I'll run your cash to close. It's not a sales call. When it has to go right, I'm your guy. 👉 ${BRAND.booking}`,
     painPoints: ["no-down-payment", "renting"], magnet: "book-5", skool: "Homebuyers",
-    highlights: ["Seller credits of 3 to 6 percent can come back to you at closing", "Down payment assistance can cover the rest for those who qualify", "Cash to close can be near $0 in the right scenario"],
-    notes: "No payment amounts or down-payment percent on the flyer. Near $0 is hedged. Conventional seller credits cap at 3 percent with low down payment, FHA at 6 percent, so near $0 usually needs credits AND assistance. Your recent deals ran 3 to 6 percent credits.",
-    short: `How much cash do you need to buy? Less than most renters think.
-
-Sellers are cutting prices, and credits of 3 to 6% of the price can come back to you at closing. On a $400K home that's $12,000 to $24,000. Add down payment assistance and cash to close can be near $0 in the right scenario.
-
-Book a call and I'll show you exactly how much you'd bring to closing. It's not a sales call.`,
-    long: `The biggest block for most renters isn't the payment, it's the cash. Two things can change that:
-
-1. Seller credits. With price cuts common on Colorado listings right now, credits of 3 to 6% of the price are common on my deals. On a $400,000 home that is $12,000 to $24,000 back to you at closing.
-2. Down payment assistance, for buyers who qualify.
-
-Together, they can bring cash to close to near $0 in the right scenario. Not every buyer or home qualifies, so let's look at yours.
-
-Book a call and I'll show you exactly how much you'd bring to closing. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
+    highlights: ["3% down on a $400K home is $12,000", "Assistance of 3.5% to 5%, plus seller credits of 3% to 6%", "Wholesale broker: I shop the lenders and the programs"],
+    notes: "Joshua's words: what if they only needed 3% down and I could get them 5%. Assistance 3.5% and 5% programs per Joshua. Seller concessions 3 to 6% on almost every deal this year per Joshua.",
+    short: `What if you only needed 3% down, and I could get you 5% toward it?\n\nOn a $400K home, 3% down is $12,000. Down payment assistance of 3.5% to 5% is $14,000 to $20,000. Add the seller credits I see on almost every deal, 3% to 6% of the price, and your cash to close can drop close to nothing.\n\nI'm a wholesale broker, so I shop several lenders for you and you get access to the best rates, not just one bank's.\n\nCurious what yours looks like? Save my info. It's not a sales call. When it has to go right, I'm your guy.`,
+    long: `Most renters think they need $80,000 down. Here's what I actually see:\n\n- 3% down on a $400K home: $12,000.\n- Down payment assistance of 3.5% to 5%: $14,000 to $20,000.\n- Seller credits of 3% to 6% of the price, on almost every deal I closed this year: $12,000 to $24,000.\n- Your cash to close: it can drop close to nothing.\n\nHere's how I'm different. I'm a wholesale broker, so I shop several lenders for you and you get access to the best rates, not just one bank's. Homebuyers leave about $65 billion a year on the table, roughly $3,300 each (Bankrate research, 2026), mostly because they take the first quote they get.\n\nCurious what yours looks like? Save my info. It's not a sales call. When it has to go right, I'm your guy.`,
     video: {
-      title: "Cash to close can be near $0",
-      hook: "You don't need as much cash as you think.",
-      points: ["Why sellers are paying credits right now", "How assistance covers the rest", "How I help"],
-      cta: "Book a call and I'll show you exactly how much you'd bring to closing. It's not a sales call. When it has to go right, I'm your guy. Save my info.",
+      title: "3% down and I get you 5%",
+      hook: "What if you only needed 3% down, and I could get you 5%?",
+      points: ["What 3% down really is, in dollars", "How assistance and seller credits stack on top", "Why I shop several lenders and programs for you"],
+      cta: "Save my info and I'll run your cash to close. It's not a sales call. When it has to go right, I'm your guy.",
     },
   },
   {
@@ -1165,59 +1131,51 @@ Book a call and I'll show you what owning could mean for YOU. It's not a sales c
     },
   },
   {
-    ref: "EQT-01", campaign: "bond", lane: "equity", bank: "consumer", name: "Your Equity Is Dead Money (homeowners to investors)", lender: "RISE Business Purpose Closed-End Second DSCR or cash-out, per scenario; get the matrix before quoting",
+    ref: "EQT-01", campaign: "bond", lane: "equity", bank: "consumer", name: "Equity: Is your equity doing anything (receipt)", lender: "RISE Business Purpose Closed-End Second DSCR or cash-out, per scenario; get the matrix before quoting",
     audience: "consumer", license: "required", flyer: "/smart-money/flyers/EQT-01.png", footer: "bondequity",
-    cta: `Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info 👉 ${BRAND.booking}`,
+    cta: `Save my info and I'll show you what your equity could do. It's not a sales call. When it has to go right, I'm your guy. 👉 ${BRAND.booking}`,
     painPoints: ["equity-trapped", "stuck"], magnet: "book-5", skool: "Homebuyers",
-    highlights: ["Equity in your home is money sitting idle", "It can be the down payment on a rental, without selling", "A call, not a sales call"],
-    notes: "Homeowners, past clients and investors. No rate, payment or down-payment percent on the flyer, so no Reg Z block. Example values ($600K home, $300K owed) are illustrative and labeled. Investment property financing is business purpose and not available in every state: keep the flyer footer on every post.",
-    short: `Your equity is dead money.
-
-If your home is worth $600K and you owe $300K, that's $300K sitting there earning nothing. It can be the down payment on your next property, and you don't have to sell.
-
-Book a call and I'll show you what your equity can do. It's not a sales call.`,
-    long: `Equity in your home is the most expensive idle money you own. Here is an example: a $600,000 home with $300,000 owed leaves $300,000 sitting there, earning nothing.
-
-For homeowners and investors, that equity can become the down payment on a rental, without selling the home you love.
-
-Book a consultation call with me and I'll run your real numbers. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
+    highlights: ["Equity just sitting there earns nothing", "It can be the down payment on a rental, with no sale", "Wholesale broker: several lenders, best rates"],
+    notes: "Curiosity-first rebuild of Your equity is dead money.",
+    short: `Is your equity doing anything right now?\n\nSay your home is worth $600K and you owe $300K. That's $300K sitting there, earning nothing. It could be the down payment on a rental, and you don't have to sell.\n\nI'm a wholesale broker, so I shop several lenders for you and you get access to the best rates, not just one bank's.\n\nCurious what yours could do? Save my info. It's not a sales call. When it has to go right, I'm your guy.`,
+    long: `Quick question for homeowners: is your equity doing anything right now?\n\n- Your home is worth, say: $600,000.\n- You owe: $300,000.\n- Equity you have: $300,000, sitting there earning nothing.\n\nPut it to work as the down payment on a rental, and you never have to sell the home you love.\n\nHere's how I'm different. I'm a wholesale broker, so I shop several lenders for you and you get access to the best rates, not just one bank's.\n\nCurious what yours could do? Save my info. It's not a sales call. When it has to go right, I'm your guy.`,
     video: {
-      title: "Your equity is dead money",
-      hook: "Look at these numbers.",
-      points: ["Value minus what you owe equals the equity you already have", "That equity can be the down payment on a rental", "How I help"],
-      cta: "Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info.",
+      title: "Is your equity doing anything",
+      hook: "Is your equity doing anything right now?",
+      points: ["What your equity is really worth to you", "How it becomes the down payment on a rental", "Why I shop several lenders for you"],
+      cta: "Save my info and I'll show you what your equity could do. It's not a sales call. When it has to go right, I'm your guy.",
     },
   },
   {
-    ref: "PAY-03", campaign: "bond", lane: "pay", bank: "consumer", name: "Rent Is a Bill. A Mortgage Is a Plan. (receipt)", lender: "N/A — call; route to the matching payment, DPA, seller-credit or equity scenario",
+    ref: "PAY-03", campaign: "bond", lane: "pay", bank: "consumer", name: "Payment: What if it never went up (receipt)", lender: "N/A — call; route to the matching payment, DPA, seller-credit or equity scenario",
     audience: "consumer", license: "required", flyer: "/smart-money/flyers/PAY-03.png", footer: "pay2",
-    cta: `Book a call and I'll run YOUR numbers. It's not a sales call. When it has to go right, I'm your guy. Save my info. 👉 ${BRAND.booking}`,
+    cta: `Save my info and I'll run your numbers. It's not a sales call. When it has to go right, I'm your guy. 👉 ${BRAND.booking}`,
     painPoints: ["priced-out", "renting"], magnet: "book-5", skool: "Homebuyers",
-    highlights: ["Rent can rise every year; principal and interest on a fixed loan does not", "In 5 years the loan balance drops about $16,700 before any appreciation", "A call, not a sales call"],
-    notes: "Payment-bearing (Reg Z): the pay2 footer MUST travel with every post. $300K example: P&I $1,961, total near $2,450, APR 7.370%. Loan balance after 60 payments on $291,000 at 7.125% is about $274,286, so about $16,714 paid down (rounded to $16,700). Send to ZPM compliance with the other payment flyers.",
-    short: `Rent is a bill. A mortgage is a plan.\n\nRent today: about $2,000, and every raise is up to your landlord. Principal and interest on a $300K home with a fixed loan: about $1,961, the same for all 30 years. And in the first 5 years your loan balance drops by about $16,700 before any appreciation.\n\nBook a call and I'll run YOUR numbers. It's not a sales call.`,
-    long: `A rent payment is a bill. It builds your landlord's equity, and the raises are up to them.\n\nHere is the same idea on a $300,000 home with 3% down:\n\n- Rent today: about $2,000 a month.\n- Principal and interest on a fixed 30-year loan: about $1,961 a month, and it doesn't change.\n- In the first 5 years, your loan balance drops by about $16,700. That part is yours, before any appreciation.\n\nTaxes and insurance can change, and this won't fit everyone. That's why I'd rather walk through YOUR numbers than guess.\n\nBook a call and I'll run YOUR numbers. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
+    highlights: ["Principal and interest stays the same for 30 years", "Your loan balance drops about $16,700 in 5 years", "Wholesale broker: I shop several lenders"],
+    notes: "Curiosity-first rebuild of Rent is a bill.",
+    short: `What if your payment never went up?\n\nRent goes up when your landlord says so. On a $300K home, principal and interest stays about $1,961 for all 30 years, and after 5 years your loan balance is down about $16,700. That part is yours.\n\nI'm a wholesale broker, so I shop several lenders for you and you get access to the best rates, not just one bank's.\n\nWant your numbers? Save my info. It's not a sales call. When it has to go right, I'm your guy.`,
+    long: `Quick question: when did your rent last go up, and did you get a say?\n\nA fixed loan works differently:\n\n- Rent today: $2,000, and it builds their equity.\n- Principal and interest on a $300K home: about $1,961, the same for all 30 years.\n- Your loan balance after 5 years: down about $16,700. That's yours.\n\nHere's how I'm different. I'm a wholesale broker, so I shop several lenders for you and you get access to the best rates, not just one bank's. Homebuyers leave about $65 billion a year on the table, roughly $3,300 each (Bankrate research, 2026), mostly because they take the first quote they get.\n\nCurious what yours would be? Save my info. It's not a sales call. When it has to go right, I'm your guy.`,
     video: {
-      title: "Rent is a bill. A mortgage is a plan.",
-      hook: "Look at these numbers.",
-      points: ["Rent builds your landlord's equity and the raises are up to them", "A fixed loan's principal and interest stays the same for 30 years", "About $16,700 of loan paid down in 5 years, before any appreciation"],
-      cta: "Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info.",
+      title: "What if it never went up",
+      hook: "What if your payment never went up?",
+      points: ["Why your payment can stay flat while rent climbs", "What 5 years of payments does to your balance", "Why I shop several lenders for you"],
+      cta: "Save my info and I'll run your numbers. It's not a sales call. When it has to go right, I'm your guy.",
     },
   },
   {
-    ref: "DWN-02", campaign: "bond", photoDefault: "plum", lane: "cash", bank: "consumer", name: "Who Pays Your Closing Costs? The Seller Can. (renters)", lender: "N/A — call; route to the matching payment, DPA, seller-credit or equity scenario",
+    ref: "DWN-02", campaign: "bond", photoDefault: "plum", lane: "cash", bank: "consumer", name: "Down payment: Why sellers pay closing costs (receipt)", lender: "N/A — call; route to the matching payment, DPA, seller-credit or equity scenario",
     audience: "consumer", license: "required", flyer: "/smart-money/flyers/DWN-02.png", footer: "bonddpa",
-    cta: `Book a call and I'll show you who can pay what. It's not a sales call. When it has to go right, I'm your guy. Save my info. 👉 ${BRAND.booking}`,
+    cta: `Save my info and I'll show you who can pay what. It's not a sales call. When it has to go right, I'm your guy. 👉 ${BRAND.booking}`,
     painPoints: ["no-down-payment", "renting"], magnet: "book-5", skool: "Homebuyers",
-    highlights: ["A seller credit of 3 percent on a $400K home is $12,000", "Typical lender and title costs in our example are about $7,000", "A call, not a sales call"],
-    notes: "No payment amounts, rates or down payment percent on the flyer, so FOOT_NUMBERS (illustrative) applies. $7,000 is the lender ($5,000) plus title ($2,000) assumption used in the Reg Z example; prepaids and escrows are extra and can also be covered by credits depending on program. Credit limits depend on the loan program and the seller. Plaid photo.",
-    short: `Who pays your closing costs? The seller can.\n\nOn a $400K home, lender and title costs can run about $7,000. A 3% seller credit on that same home is $12,000. In the right scenario your costs at the table can be near $0.\n\nBook a call and I'll show you who can pay what. It's not a sales call.`,
-    long: `Most renters stop at the closing costs. Here's why they shouldn't.\n\nOn a $400,000 home:\n\n- Closing costs, lender and title, in our example: about $7,000.\n- A 3% credit from the seller: $12,000.\n- Your costs at the table, in the right scenario: near $0.\n\nSellers are paying credits right now and price cuts are common in Colorado. Credits depend on the seller and the loan program, and not every deal qualifies, so let's look at yours.\n\nBook a call and I'll show you who can pay what. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
+    highlights: ["The seller can pay your closing costs", "Almost every deal I closed this year had 3% to 6% in concessions", "Wholesale broker: several lenders, best rates"],
+    notes: "Curiosity-first rebuild of Who pays your closing costs.",
+    short: `Why do sellers keep paying buyers' closing costs?\n\nOn a $400K home, lender and title costs run about $7,000. A 3% seller credit on that same home is $12,000. Almost every deal I closed this year had seller concessions of 3% to 6%.\n\nI'm a wholesale broker, so I shop several lenders for you and you get access to the best rates, not just one bank's.\n\nCurious who could pay what on your purchase? Save my info. It's not a sales call. When it has to go right, I'm your guy.`,
+    long: `Here's something most buyers don't know: the seller can pay your closing costs.\n\n- Closing costs on a $400K home, about: $7,000.\n- A 3% seller credit on that home: $12,000.\n- Almost every deal I closed this year: seller concessions of 3% to 6%.\n\nSo why do sellers do it? Because it gets the deal done, and I know how to ask for it.\n\nHere's how I'm different. I'm a wholesale broker, so I shop several lenders for you and you get access to the best rates, not just one bank's. Homebuyers leave about $65 billion a year on the table, roughly $3,300 each (Bankrate research, 2026), mostly because they take the first quote they get.\n\nCurious who could pay what for you? Save my info. It's not a sales call. When it has to go right, I'm your guy.`,
     video: {
-      title: "Who pays your closing costs?",
-      hook: "You don't have to write that check alone.",
-      points: ["Closing costs on a $400K home can be around $7,000", "A 3% seller credit is $12,000 on the same home", "In the right scenario your costs at the table can be near $0"],
-      cta: "Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info.",
+      title: "Why sellers pay closing costs",
+      hook: "Why do sellers keep paying buyers' closing costs?",
+      points: ["Why sellers pay closing costs", "What 3% to 6% means on a $400K home", "Why I shop several lenders for you"],
+      cta: "Save my info and I'll show you who can pay what. It's not a sales call. When it has to go right, I'm your guy.",
     },
   },
   {
@@ -1237,19 +1195,19 @@ Book a consultation call with me and I'll run your real numbers. It's not a sale
     },
   },
   {
-    ref: "EQT-02", campaign: "bond", photoDefault: "tie", lane: "equity", bank: "consumer", name: "One More Door Starts at Home (homeowners to investors)", lender: "N/A — call; route to the matching payment, DPA, seller-credit or equity scenario",
+    ref: "EQT-02", campaign: "bond", photoDefault: "tie", lane: "equity", bank: "consumer", name: "Equity: What would you do with $180,000 (receipt)", lender: "N/A — call; route to the matching payment, DPA, seller-credit or equity scenario",
     audience: "consumer", license: "required", flyer: "/smart-money/flyers/EQT-02.png", footer: "bondequity",
-    cta: `Book a call and let's see what your equity can open. It's not a sales call. When it has to go right, I'm your guy. Save my info. 👉 ${BRAND.booking}`,
+    cta: `Save my info and I'll run your equity. It's not a sales call. When it has to go right, I'm your guy. 👉 ${BRAND.booking}`,
     painPoints: ["equity-trapped", "stuck"], magnet: "book-5", skool: "Homebuyers",
-    highlights: ["Lenders often allow borrowing up to a percent of your home value, minus what you owe", "On a $600K home with $300K owed, up to about $180,000 in the example", "A call, not a sales call"],
-    notes: "Homeowners, past clients and investors. 80% is an example, not a promise: available equity depends on value, lien position, credit and program. Investment property financing is business purpose and not available in all states. No rate, payment or down payment percent, so no Reg Z block. Plaid photo.",
-    short: `One more door starts at home.\n\nIf your home is worth $600K and you owe $300K, 80% of its value minus what you owe is up to $180,000 of equity you may be able to use. It could be the down payment on a rental, and you don't have to sell.\n\nBook a call and let's see what your equity can open. It's not a sales call.`,
-    long: `Most homeowners are sitting on more equity than they think.\n\nOn a home worth $600,000 with $300,000 owed:\n\n- 80% of the value: $480,000.\n- Minus what you owe: $300,000.\n- Equity you may be able to use, up to: $180,000.\n\nThat could be the down payment on a rental property, and you don't have to sell your home.\n\nBook a call and let's see what your equity can open. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
+    highlights: ["Up to $180,000 of usable equity on a $600K home with $300K owed", "The down payment on a rental, with no sale", "Wholesale broker: several lenders, best rates"],
+    notes: "Curiosity-first rebuild of One more door starts at home.",
+    short: `What would you do with $180,000 of equity?\n\nOn a $600K home with $300K owed: 80% of the value is $480K, minus what you owe is up to $180,000 of equity you may be able to use. It could be the down payment on a rental, and you don't have to sell.\n\nI'm a wholesale broker, so I shop several lenders for you and you get access to the best rates, not just one bank's.\n\nCurious what yours is? Save my info. It's not a sales call. When it has to go right, I'm your guy.`,
+    long: `What would you do with $180,000?\n\nIf your home is worth $600,000 and you owe $300,000:\n\n- 80% of the value: $480,000.\n- Minus what you owe: $300,000.\n- Equity you may be able to use, up to: $180,000.\n\nThat could be the down payment on a rental property, with no sale of your home.\n\nHere's how I'm different. I'm a wholesale broker, so I shop several lenders for you and you get access to the best rates, not just one bank's.\n\nCurious what yours is? Save my info. It's not a sales call. When it has to go right, I'm your guy.`,
     video: {
-      title: "One more door starts at home.",
-      hook: "Your equity can be your next down payment.",
-      points: ["Value, times 80%, minus what you owe", "On a $600K home with $300K owed, up to about $180,000", "It can fund a rental and you don't have to sell"],
-      cta: "Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info.",
+      title: "What would you do with $180,000",
+      hook: "What would you do with $180,000 of equity?",
+      points: ["How the 80% math works on your home", "What that equity could buy", "Why I shop several lenders for you"],
+      cta: "Save my info and I'll run your equity. It's not a sales call. When it has to go right, I'm your guy.",
     },
   },
   {
@@ -1269,19 +1227,19 @@ Book a consultation call with me and I'll run your real numbers. It's not a sale
     },
   },
   {
-    ref: "DWN-03", campaign: "bond", lane: "cash", bank: "consumer", name: "You Don't Need $80,000 Down (first-time buyers)", lender: "N/A — call; route to the matching payment, DPA, seller-credit or equity scenario",
+    ref: "DWN-03", campaign: "bond", lane: "cash", bank: "consumer", name: "Down payment: Did anyone tell you help exists (receipt)", lender: "N/A — call; route to the matching payment, DPA, seller-credit or equity scenario",
     audience: "consumer", license: "required", flyer: "/smart-money/flyers/DWN-03.png", footer: "bondpaydpa",
-    cta: `Book a call and I'll show you what you'd bring. It's not a sales call. When it has to go right, I'm your guy. Save my info. 👉 ${BRAND.booking}`,
+    cta: `Save my info and I'll show you what you'd bring. It's not a sales call. When it has to go right, I'm your guy. 👉 ${BRAND.booking}`,
     painPoints: ["no-down-payment", "renting"], magnet: "book-5", skool: "Homebuyers",
-    highlights: ["20% down on a $400K home is $80,000, and most buyers don't need that", "3% down on that home is $12,000", "Assistance can cover much of the rest for buyers who qualify"],
-    notes: "Down payment percent and amount: the pay footer ($400K, 3% down, loan example, APR) MUST travel with every post. Assistance depends on program, eligibility and availability; never promise $0.",
-    short: `You don't need $80,000 down.\n\nOn a $400K home, 20% down is $80,000. That's what most people think it takes. 3% down on that same home is $12,000, and with down payment assistance, for buyers who qualify, help can cover much of the rest.\n\nNot every buyer or home qualifies. Book a call and I'll show you what you'd bring. It's not a sales call.`,
-    long: `Most renters assume they need 20% down. On a $400,000 home that's $80,000, and it keeps people renting for years.\n\n- 20% down on a $400K home: $80,000.\n- 3% down on the same home: $12,000. Low down payment loans exist.\n- With assistance, if you qualify: help can cover much of the rest, and in the right scenario you may bring very little.\n\nBook a call and I'll show you what you'd bring. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
+    highlights: ["Most people assume $80,000 down", "3% down is $12,000, with assistance of 3.5% to 5% toward it", "Wholesale broker: I shop the lenders and programs"],
+    notes: "Curiosity-first rebuild of You don't need $80,000.",
+    short: `Did anyone tell you down payment help exists?\n\nMost renters assume 20% down, $80,000 on a $400K home. 3% down is $12,000, and assistance of 3.5% to 5% is $14,000 to $20,000 toward it.\n\nI'm a wholesale broker, so I shop several lenders for you and you get access to the best rates, not just one bank's.\n\nCurious what you'd really bring? Save my info. It's not a sales call. When it has to go right, I'm your guy.`,
+    long: `Quick question: has anyone ever walked you through down payment help?\n\n- 20% down, what most people assume, on a $400K home: $80,000.\n- 3% down on that same home: $12,000.\n- Assistance toward it, 3.5% to 5% of the price: $14,000 to $20,000.\n\nHere's how I'm different. I'm a wholesale broker, so I shop several lenders for you and you get access to the best rates, not just one bank's. Homebuyers leave about $65 billion a year on the table, roughly $3,300 each (Bankrate research, 2026), mostly because they take the first quote they get.\n\nWant to see what you'd really bring? Save my info. It's not a sales call. When it has to go right, I'm your guy.`,
     video: {
-      title: "You don't need $80,000 down.",
-      hook: "You've been told you need 20% down.",
-      points: ["20% down on a $400K home is $80,000", "3% down on that home is $12,000", "Assistance can cover much of the rest if you qualify"],
-      cta: "Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info.",
+      title: "Did anyone tell you help exists",
+      hook: "Did anyone tell you down payment help exists?",
+      points: ["Why 20% down is a myth for most buyers", "The assistance programs I can reach", "Why I shop several lenders for you"],
+      cta: "Save my info and I'll show you what you'd bring. It's not a sales call. When it has to go right, I'm your guy.",
     },
   },
   {
@@ -1301,19 +1259,19 @@ Book a consultation call with me and I'll run your real numbers. It's not a sale
     },
   },
   {
-    ref: "EQT-03", campaign: "bond", lane: "equity", bank: "consumer", name: "Keep Your Low Rate. Use Your Equity. (past clients)", lender: "N/A — call; route to the matching payment, DPA, seller-credit or equity scenario",
+    ref: "EQT-03", campaign: "bond", lane: "equity", bank: "consumer", name: "Equity: What if you didn't have to give up your rate (receipt)", lender: "N/A — call; route to the matching payment, DPA, seller-credit or equity scenario",
     audience: "consumer", license: "required", flyer: "/smart-money/flyers/EQT-03.png", footer: "bondequity",
-    cta: `Book a call and let's see what your equity can open. It's not a sales call. When it has to go right, I'm your guy. Save my info. 👉 ${BRAND.booking}`,
+    cta: `Save my info and I'll show you your options. It's not a sales call. When it has to go right, I'm your guy. 👉 ${BRAND.booking}`,
     painPoints: ["low-rate-locked", "equity-trapped"], magnet: "book-5", skool: "Homebuyers",
-    highlights: ["Your first mortgage stays untouched", "A separate loan can tap the equity, depending on value, credit and program", "A call, not a sales call"],
-    notes: "Past clients and homeowners with a low first-mortgage rate. No rate, payment or down payment percent on the flyer. 'Often no refinance needed' is hedged: it applies to a separate second-lien product. Business-purpose investment financing is not available in all states. Get the RISE matrix before quoting.",
-    short: `Keep your low rate. Use your equity.\n\nIf you locked in a low rate, you probably don't want to give it up. You may not have to. On a $600K home with $300K owed, there's $300K of equity, and a separate loan against it can often leave your first mortgage untouched.\n\nBook a call and let's see what your equity can open. It's not a sales call.`,
-    long: `A lot of homeowners are sitting on a low rate they don't want to lose, and equity they aren't using.\n\n- Your first mortgage: the low rate you already have, untouched.\n- Your equity, in our example: a $600,000 home with $300,000 owed leaves $300,000.\n- What you can do: tap some of it with a separate loan, often with no refinance of your first mortgage.\n\nBook a call. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
+    highlights: ["Keep your low rate on your first mortgage", "A separate loan against your equity", "Wholesale broker: several lenders, best rates"],
+    notes: "Curiosity-first rebuild of Keep your low rate.",
+    short: `What if you didn't have to give up your low rate?\n\nIf you locked in a low rate, you probably don't want to lose it. On a $600K home with $300K owed, there's $300K of equity, and a separate loan against it can often leave your first mortgage untouched.\n\nI'm a wholesale broker, so I shop several lenders for you and you get access to the best rates, not just one bank's.\n\nCurious what yours could do? Save my info. It's not a sales call. When it has to go right, I'm your guy.`,
+    long: `You've got a low rate you love and equity you aren't using. Does it have to be one or the other?\n\n- Your first mortgage: the low rate you already have, untouched.\n- Your equity, in our example: a $600K home with $300K owed leaves $300K.\n- What you can do: a separate loan against your equity, often with no refinance of your first mortgage.\n\nHere's how I'm different. I'm a wholesale broker, so I shop several lenders for you and you get access to the best rates, not just one bank's.\n\nCurious what yours could do? Save my info. It's not a sales call. When it has to go right, I'm your guy.`,
     video: {
-      title: "Keep your low rate. Use your equity.",
-      hook: "You don't have to give up your low rate.",
-      points: ["Your first mortgage stays exactly as it is", "A separate loan against your equity", "Your equity can open the door to your next property"],
-      cta: "Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info.",
+      title: "What if you didn't have to give up your rate",
+      hook: "What if you didn't have to give up your low rate?",
+      points: ["Why you may not have to give up your rate", "How a separate loan against equity works", "Why I shop several lenders for you"],
+      cta: "Save my info and I'll show you your options. It's not a sales call. When it has to go right, I'm your guy.",
     },
   },
   {
@@ -1378,6 +1336,22 @@ Book a consultation call with me and I'll run your real numbers. It's not a sale
       hook: "Your next referral starts at the closing table.",
       points: ["Early numbers for your client", "Steady updates so you aren't chasing", "A client who refers their friends"],
       cta: "Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info.",
+    },
+  },
+  {
+    ref: "WHY-01", campaign: "bond", lane: "cred", bank: "credibility", name: "Why me: $65 billion left on the table (receipt)", lender: "N/A — save my info; I run their real number",
+    audience: "consumer", license: "CO", flyer: "/smart-money/flyers/WHY-01.png", footer: "bondwhy",
+    cta: `Save my info and I'll show you your number. It's not a sales call. When it has to go right, I'm your guy. 👉 ${BRAND.booking}`,
+    painPoints: [], magnet: "book-5", skool: "Buyers",
+    highlights: ["Buyers leave about $65 billion a year on the table", "Your share is about $3,300 a year", "Wholesale broker: I shop several lenders for you"],
+    notes: "The big stat per Joshua: $65 billion a year, about $3,300 per borrower (Bankrate research, July 2026). Source is in the small print. Get a quote from anyone, then get mine.",
+    short: `Homebuyers leave about $65 billion a year on the table. Your share is about $3,300 a year.\n\nWhy? Most buyers take one lender's quote. I'm a wholesale broker. I shop several lenders for you, so you get access to the best rates.\n\nGet a quote from anyone. Then get mine. Save my info and I'll show you your number. It's not a sales call.`,
+    long: `Here's a number that should bother you: about $65 billion a year. That's what homebuyers overpay on their mortgages, nationwide (Bankrate research, 2026). Your share is about $3,300 a year.\n\nThe cause is simple. Most buyers take one lender's quote, and that's the end of the shopping.\n\nHere's how I'm different. I'm a wholesale broker. I shop several lenders for you, so you get access to the best rates, not just one bank's.\n\nGet a quote from anyone. Then get mine. Save my info and I'll show you your number. It's not a sales call. When it has to go right, I'm your guy.`,
+    video: {
+      title: "$65 billion left on the table",
+      hook: "Homebuyers leave $65 billion a year on the table. Your share is about $3,300.",
+      points: ["Most buyers take one lender's quote", "I'm a wholesale broker: I shop several lenders for you", "Get a quote from anyone, then get mine"],
+      cta: "Save my info and I'll show you your number. It's not a sales call. When it has to go right, I'm your guy.",
     },
   },
   {
