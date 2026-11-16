@@ -64,7 +64,7 @@ CARDS = {
         left=("THE USUAL", "Surprises, missing documents, a date that slips."),
         right=("THE ALTERNATIVE", "Numbers settled early. Steady updates to the keys."),
         ledger_px=31,
-        cta="A few minutes on how I protect your clients.", panel_bottom=TAGLINE, foot=FOOT_AGENT,
+        cta="Let's make your next closing the easy one.", panel_bottom=TAGLINE, foot=FOOT_AGENT,
         photo=dict(file="joshua-park-smile.jpg", h=640, size=800, x=-494, y=-84)),
     "BUY-03": dict(palette="scarlet", side="left", kicker="COLORADO RENTERS &nbsp;/&nbsp; BUYING A HOME",
         h1=["Rent is a bill.", "A mortgage is"], h1_accent="a plan.", h1_px=92,
@@ -104,13 +104,11 @@ def page(ref, c):
         panel_body = (f'<div style="position:absolute;right:0;top:0;width:270px;height:{ph["h"]}px;background-image:url(file://{img});background-size:auto {ph["size"]}px;background-position:{ph["x"]}px {ph["y"]}px;filter:grayscale(1) contrast(1.08) brightness(.96)"></div>'
                       f'<div style="position:absolute;right:0;top:{ph["h"]-150}px;width:270px;height:150px;background:linear-gradient(to bottom,rgba(0,0,0,0),{p["panel"]})"></div>'
                       f'<div style="position:absolute;right:0;top:{ph["h"]+12}px;width:270px;padding:0 34px 0 36px;box-sizing:border-box"><div style="width:44px;height:3px;background:{rule}"></div>'
-                      f'<p style="margin-top:22px;font:600 12px M;letter-spacing:.3em;color:{p["panel_mute"]}">A CONSULTATION,</p>'
-                      f'<p style="margin-top:10px;font:500 italic 54px/1.0 B;color:{p["panel_text"]}">not a<br>sales<br>call.</p></div>'
+                      f'<p style="margin-top:22px;font:500 italic 35px/1.1 B;color:{p["panel_text"]};white-space:nowrap">Think of me<br>when it has<br>to go right.</p></div>'
                       f'<p style="position:absolute;right:34px;bottom:104px;font:600 11px/1.6 M;letter-spacing:.26em;color:{p["panel_mute"]}">SMOOTH. PRECISE. ELITE.</p>')
     else:
         panel_body = (f'<div style="position:absolute;right:0;top:0;width:270px;padding:84px 34px 0 36px;box-sizing:border-box"><div style="width:44px;height:3px;background:{rule}"></div>'
-                      f'<p style="margin-top:26px;font:600 12px M;letter-spacing:.3em;color:{p["panel_mute"]}">A CONSULTATION,</p>'
-                      f'<p style="margin-top:12px;font:500 italic 64px/1.0 B;color:{p["panel_text"]}">not a<br>sales<br>call.</p></div>'
+                      f'<p style="margin-top:26px;font:500 italic 50px/1.06 B;color:{p["panel_text"]}">Think of<br>me when<br>it has to<br>go right.</p></div>'
                       f'<div style="position:absolute;right:0;bottom:104px;width:270px;padding:0 34px 0 36px;box-sizing:border-box">{bottom}</div>')
     gf = os.path.join(BRAND, "gf-logo-ink.png"); zp = os.path.join(BRAND, "zpm-logo-ink.png")
     html_out = f'''<!doctype html><html><head><meta charset="utf-8"><style>{ff}body{{margin:0}}p,h1{{margin:0}}*{{font-variant-numeric:lining-nums !important;font-feature-settings:"lnum" 1 !important}}</style></head><body>
@@ -126,13 +124,14 @@ def page(ref, c):
 <div style="padding-left:26px"><p style="font:700 13px M;letter-spacing:.32em;color:{p["accent"]}">{c["right"][0]}</p><p style="margin-top:10px;font:700 {lpx}px/1.12 B;color:{p["ink"]}">{c["right"][1]}</p></div></div>
 <div style="position:absolute;left:74px;width:690px;top:726px;border-top:1px solid {p["ink"]}33"></div>
 <p style="position:absolute;left:74px;top:738px;font:500 italic 29px B;color:{p["ink"]};white-space:nowrap">{c["cta"]}</p>
-<div style="position:absolute;left:74px;width:690px;top:790px;display:flex;align-items:flex-end;justify-content:space-between">
-<div><p style="font:600 46px/1 B;color:{p["ink"]};letter-spacing:-0.01em;white-space:nowrap">Joshua Graham</p>
-<p style="margin-top:12px;font:700 12.5px M;letter-spacing:.28em;color:{p["accent"]};white-space:nowrap">REGIONAL LOAN ORIGINATOR</p>
-<p style="margin-top:7px;font:600 12px M;letter-spacing:.14em;color:{p["ink"]};white-space:nowrap">NMLS #169809 &nbsp;&middot;&nbsp; LICENSED IN COLORADO</p></div>
-<div style="display:flex;align-items:center;gap:18px;padding-bottom:2px;flex:none"><img src="file://{gf}" style="height:56px;display:block;opacity:.9"><div style="width:1px;height:46px;background:{p["ink"]}33"></div><img src="file://{zp}" style="height:40px;display:block;opacity:.9"></div></div>
-<div style="position:absolute;left:74px;top:894px;display:flex;align-items:baseline;gap:18px;white-space:nowrap"><p style="font:600 30px/1 B;color:{p["ink"]};letter-spacing:.01em">720-468-6872</p><div style="width:2px;height:22px;background:{p["accent"]};align-self:center"></div><p style="font:500 28px/1 B;color:{p["ink"]}">jgraham@grahamfinancial.us</p></div>
-<p style="position:absolute;left:74px;width:690px;bottom:46px;font:500 10.5px/1.5 M;color:{p["muted"]}">{c["foot"]}<span style="display:block;margin-top:5px;font:700 9px M;letter-spacing:.18em;color:#000">REF {ref}</span></p>
+<div style="position:absolute;left:74px;width:690px;top:792px;display:flex;align-items:center;justify-content:space-between">
+<div><p style="font:600 34px/1 B;color:{p["ink"]};letter-spacing:-0.01em;white-space:nowrap">Joshua Graham</p>
+<p style="margin-top:10px;font:700 11px M;letter-spacing:.2em;color:{p["accent"]};white-space:nowrap">REGIONAL LOAN ORIGINATOR</p>
+<p style="margin-top:5px;font:600 10.5px M;letter-spacing:.12em;color:{p["ink"]};white-space:nowrap">NMLS #169809 &nbsp;&middot;&nbsp; LICENSED IN COLORADO</p></div>
+<div style="display:flex;align-items:center;gap:16px;flex:none"><img src="file://{gf}" style="height:52px;display:block;opacity:.9"><div style="width:1px;height:42px;background:{p["ink"]}33"></div><img src="file://{zp}" style="height:36px;display:block;opacity:.9"></div></div>
+<div style="position:absolute;left:74px;width:690px;top:886px;border-top:1px solid {p["ink"]}33"></div>
+<div style="position:absolute;left:74px;width:690px;top:898px;display:flex;align-items:baseline;gap:14px;white-space:nowrap"><p style="font:600 24px/1 B;color:{p["ink"]}">720-468-6872</p><span style="color:{p["accent"]};font:500 18px/1 B">&nbsp;/&nbsp;</span><p style="font:500 24px/1 B;color:{p["ink"]}">jgraham@grahamfinancial.us</p></div>
+<p style="position:absolute;left:74px;width:690px;bottom:40px;font:500 10px/1.5 M;color:{p["muted"]}">{c["foot"]}<span style="display:block;margin-top:5px;font:700 9px M;letter-spacing:.18em;color:#000">REF {ref}</span></p>
 </div></body></html>'''
     if c.get("side") == "left":
         html_out = html_out.replace("right:0;", "left:0;").replace("left:74px", "left:344px")
