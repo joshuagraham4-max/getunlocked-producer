@@ -123,6 +123,13 @@ export const KIT = [
         ["$10,000 at 6% earns about $600 a year.", "A $600,000 home appreciating 3% grows about $18,000 in a year. Same math, bigger base.", "Appreciation isn't guaranteed and Denver has been flat lately, so it's a years-long play."],
         "Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info."),
       caption:`U.S. home prices rose in 45 of the last 50 years. Let's talk about what that could mean for you. Not a sales call. 👉 ${BOOK}` },
+    { id:"v-r-equity", kind:"Video", title:"Your equity is dead money (homeowners and investors)", steps:["Recorded","Posted"],
+      text: vid("Look at these numbers.",
+        "Your home is worth more than you owe, and that equity just sits there earning nothing.",
+        "That equity doesn't have to sit. It can be the down payment on your next property, and you don't have to sell.",
+        ["Value minus what you owe is the equity you already have.", "It can fund a rental, one door at a time.", "How much depends on your value, credit and the program, so let's run yours."],
+        "Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info."),
+      caption:`Your equity is dead money until you put it to work. Book a call, it's not a sales call 👉 ${BOOK}` },
   ]},
   { id:"teams", title:"Team leaders: I train your team", note:"Send to team leads and brokers.", items:[
     { id:"v-t-train", kind:"Video", title:"Your team has a prospecting problem", steps:["Recorded","Sent to 5 team leads"],

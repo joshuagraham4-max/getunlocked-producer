@@ -1151,6 +1151,30 @@ Book a call and I'll show you what owning could mean for YOU. It's not a sales c
       cta: "Book a call and I'll show you what owning could mean for YOU. It's not a sales call. When it has to go right, I'm your guy. Save my info.",
     },
   },
+  {
+    ref: "EQT-01", bank: "consumer", name: "Your Equity Is Dead Money (homeowners to investors)", lender: "RISE Business Purpose Closed-End Second DSCR or cash-out, per scenario; get the matrix before quoting",
+    audience: "consumer", license: "required", flyer: "/smart-money/flyers/EQT-01.png", footer: "consumer",
+    cta: `Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info 👉 ${BRAND.booking}`,
+    painPoints: ["equity-trapped", "stuck"], magnet: "book-5", skool: "Homebuyers",
+    highlights: ["Equity in your home is money sitting idle", "It can be the down payment on a rental, without selling", "A call, not a sales call"],
+    notes: "Homeowners, past clients and investors. No rate, payment or down-payment percent on the flyer, so no Reg Z block. Example values ($600K home, $300K owed) are illustrative and labeled. Investment property financing is business purpose and not available in every state: keep the flyer footer on every post.",
+    short: `Your equity is dead money.
+
+If your home is worth $600K and you owe $300K, that's $300K sitting there earning nothing. It can be the down payment on your next property, and you don't have to sell.
+
+Book a call and I'll show you what your equity can do. It's not a sales call.`,
+    long: `Equity in your home is the most expensive idle money you own. Here is an example: a $600,000 home with $300,000 owed leaves $300,000 sitting there, earning nothing.
+
+For homeowners and investors, that equity can become the down payment on a rental, without selling the home you love. How much you can use depends on the value, your credit and the program, and investment property financing is for business purposes and isn't available in every state.
+
+I'm a call away to run your real numbers. It's not a sales call. Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
+    video: {
+      title: "Your equity is dead money",
+      hook: "Look at these numbers.",
+      points: ["Value minus what you owe equals the equity you already have", "That equity can be the down payment on a rental", "How I help"],
+      cta: "Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info.",
+    },
+  },
 ];
 
 // ---- Schedule: 7 days × 2 slots (8:30 AM / 12:30 PM ET). 8 investor / 6 consumer per week.

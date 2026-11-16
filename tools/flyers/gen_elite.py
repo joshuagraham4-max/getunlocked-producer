@@ -53,6 +53,8 @@ FOOT_WEALTH = ("Joshua Graham NMLS #169809 | Graham Financial, powered by Zero P
     "Past performance does not guarantee future results. Not a commitment to lend; subject to credit approval, underwriting guidelines and change without notice.")
 FOOT_PAY2 = FOOT_CONSUMER + (" Example: $300,000 purchase price, 3% down ($9,000), loan amount $291,000, 30-year fixed rate 7.125%, APR 7.370% (assumes $5,000 lender costs and $2,000 title costs). "
     "Principal and interest $1,961 per month; estimated taxes, homeowners insurance and mortgage insurance add about $490, for a total near $2,450. Roommate income is illustrative, is not guaranteed and may not count toward qualifying. Rent is illustrative. Rates and APR are examples, not an offer, and change daily.")
+FOOT_EQ = FOOT_CONSUMER.split(" Down payment assistance")[0] + (" Example only: home value, balance and equity are illustrative. Equity available depends on value, lien position, credit and program guidelines. "
+    "Investment property financing is for business purposes only and is not available in all states. Not a commitment to lend; subject to credit approval, underwriting guidelines and change without notice.")
 QR = dict(kind="qr", label="SCAN TO BOOK<br>A CALL WITH ME")
 CTA_BOOK = "Book a call with me. It's not a sales call."
 STAT_30_45 = dict(kind="stat", top="30", bottom="45", label="DAYS TO YOUR<br>FIRST PAYMENT")
@@ -124,6 +126,13 @@ CARDS = {
                  ("YOUR CASH TO CLOSE", "In the right scenario", "Near $0", True)],
         receipt_note="Shown on a $400K home. Not every buyer or home qualifies.",
         rpad=22, rule_top=330, cta="Book a call. I&#39;ll show you your cash to close.", foot=FOOT_CONSUMER),
+    "EQT-01": dict(palette="burgundy", kicker="HOMEOWNERS &nbsp;/&nbsp; INVESTING IN REAL ESTATE", **COMMON,
+        h1=["Your equity is"], h1_accent="dead money.", h1_px=92,
+        receipt=[("YOUR HOME IS WORTH", "An example, today", "$600,000", False),
+                 ("YOU OWE", "On your mortgage", "$300,000", False),
+                 ("EQUITY YOU HAVE", "Sitting there, earning nothing", "$300,000", True)],
+        receipt_note="Put it to work as the down payment on a rental. No need to sell.",
+        rpad=22, rule_top=330, cta="Book a call. See what your equity can do.", foot=FOOT_EQ, foot_px=9.5),
     "WLT-01": dict(palette="peacock", kicker="U.S. HOME PRICES &nbsp;/&nbsp; BUILDING WEALTH", **COMMON,
         chart=True, chart_h=270, h1=["Home prices rose in"], h1_accent="45 of 50 years.", h1_px=76,
         chart_note="A $400K home growing 3% a year can add about $12,000 in equity. Yours, not your landlord&#39;s.",
