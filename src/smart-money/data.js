@@ -1103,31 +1103,19 @@ I'd rather show you your real numbers than guess. Think of me when you want your
     },
   },
   {
-    ref: "WLT-01", campaign: "bond", lane: "wealth", bank: "consumer", name: "Home Prices Rose in 45 of 50 Years (wealth building)", lender: "N/A — call; route to payment, DPA and seller-credit scenarios",
+    ref: "WLT-01", campaign: "bond", lane: "wealth", bank: "consumer", name: "Wealth: Who gets the $12,000 your home earns (receipt)", lender: "N/A — save my info; I run their real number",
     audience: "consumer", license: "required", flyer: "/smart-money/flyers/WLT-01.png", footer: "bondwealth",
-    cta: `Book a call and I'll show you what owning could mean for YOU. It's not a sales call. When it has to go right, I'm your guy. Save my info 👉 ${BRAND.booking}`,
-    painPoints: ["renting"], magnet: "book-5", skool: "Homebuyers",
-    highlights: ["U.S. home prices rose in 45 of the last 50 years", "The only down years were 2007 to 2011", "Rent builds your landlord's wealth; a home can build yours"],
-    notes: "FHFA All-Transactions HPI, Q4 to Q4, 1976 to 2025, nominal. Always say U.S. or nationally; Denver is flat to down lately and prices CAN fall. Never write will appreciate. Data in tools/flyers/data/hpi_annual.json. This is the chart for every wealth-building post.",
-    short: `U.S. home prices rose in 45 of the last 50 years. The only down stretch was 2007 to 2011.
-
-A $400K home growing 3% a year can add about $12,000 in equity. That's yours, not your landlord's.
-
-Let's look at your numbers.
-
-Book a call and I'll show you what owning could mean for YOU. It's not a sales call.`,
-    long: `Nationally, home prices rose in 45 of the last 50 years (FHFA, not adjusted for inflation). The only down years were 2007 through 2011, and prices were back above the old peak about a decade after it.
-
-Here is why that matters. A $400,000 home that grows 3% in a year adds about $12,000 in equity. When you rent, any growth like that belongs to your landlord, not you.
-
-It's about owning something over years, not a quick win.
-
-Book a call and I'll show you what owning could mean for YOU. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
+    cta: `Save my info and I'll show you your number. It's not a sales call. When it has to go right, I'm your guy. 👉 ${BRAND.booking}`,
+    painPoints: [], magnet: "book-5", skool: "Buyers",
+    highlights: ["A $400K home growing 3% adds about $12,000 a year", "The owner keeps it, a renter doesn't", "Wholesale broker: several lenders, best rates"],
+    notes: "Replaces the 45-of-50-years chart card. 3% growth is an illustrative assumption, stated in the small print.",
+    short: `Who gets the $12,000 your home earns?\n\nA $400K home growing 3% a year adds about $12,000 in value. If you own it, that's yours. If you rent, it's your landlord's.\n\nI'm a wholesale broker, so I shop several lenders for you and you get access to the best rates, not just one bank's.\n\nCurious what owning could mean for you? Save my info. It's not a sales call. When it has to go right, I'm your guy.`,
+    long: `Here's a question most renters never ask: who keeps the growth?\n\n- A $400K home, as an example.\n- Growing 3% a year: about $12,000 in a year.\n- Who keeps it: the owner. A renter keeps none of it.\n\nHere's how I'm different. I'm a wholesale broker, so I shop several lenders for you and you get access to the best rates, not just one bank's. Homebuyers leave about $65 billion a year on the table, roughly $3,300 each (Bankrate research, 2026), mostly because they take the first quote they get.\n\nCurious what owning could mean for you? Save my info. It's not a sales call. When it has to go right, I'm your guy.`,
     video: {
-      title: "Home prices rose in 45 of 50 years",
-      hook: "Look at these numbers.",
-      points: ["The 50-year chart: 45 up years, only 2007 to 2011 down", "A $400K home growing 3% a year can add about $12,000 in equity", "How I help"],
-      cta: "Book a call and I'll show you what owning could mean for YOU. It's not a sales call. When it has to go right, I'm your guy. Save my info.",
+      title: "Who gets the $12,000 your home earns",
+      hook: "Who gets the $12,000 your home earns?",
+      points: ["A $400K home growing 3% adds about $12,000 a year", "The owner keeps it, a renter doesn't", "Wholesale broker: several lenders, best rates"],
+      cta: "Save my info and I'll show you your number. It's not a sales call. When it has to go right, I'm your guy.",
     },
   },
   {
@@ -1179,19 +1167,19 @@ Book a call and I'll show you what owning could mean for YOU. It's not a sales c
     },
   },
   {
-    ref: "WLT-02", campaign: "bond", lane: "wealth", bank: "consumer", name: "$600 a Year or $18,000? (wealth building)", lender: "N/A — call; route to the matching payment, DPA, seller-credit or equity scenario",
+    ref: "WLT-02", campaign: "bond", lane: "wealth", bank: "consumer", name: "Wealth: Where does $10,000 work harder (receipt)", lender: "N/A — save my info; I run their real number",
     audience: "consumer", license: "required", flyer: "/smart-money/flyers/WLT-02.png", footer: "bondwealth",
-    cta: `Book a call and let's see what it could mean for you. It's not a sales call. When it has to go right, I'm your guy. Save my info. 👉 ${BRAND.booking}`,
-    painPoints: ["renting"], magnet: "book-5", skool: "Homebuyers",
-    highlights: ["$10,000 at 6% earns about $600 a year", "A $600,000 home growing 3% grows about $18,000 in a year", "A call, not a sales call"],
-    notes: "Illustration only. Appreciation isn't guaranteed and Denver is flat to down. The 30x is the dollar difference between 6% on $10K and 3% on $600K; the footer states both rates are assumptions. Do not attach a down payment, rate or payment to this post (Reg Z).",
-    short: `$600 a year or $18,000?\n\n$10,000 in savings earning 6% makes about $600 a year. A $600,000 home growing just 3% grows about $18,000 in a year. Same idea, bigger base: the home works on its whole value.\n\nIt's a years-long play, not a quick win. Book a call and let's see what it could mean for you. It's not a sales call.`,
-    long: `Say you have $10,000 in savings earning 6% a year. That's about $600.\n\nNow take a $600,000 home growing 3% in a year. That's about $18,000. Same idea, a much bigger base, because the home works on its whole value and not only on what you put in.\n\nThis is a years-long play, not a quick win. Nationally, home prices rose in 45 of the last 50 years.\n\nBook a call and let's see what it could mean for you. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
+    cta: `Save my info and I'll show you your number. It's not a sales call. When it has to go right, I'm your guy. 👉 ${BRAND.booking}`,
+    painPoints: [], magnet: "book-5", skool: "Buyers",
+    highlights: ["$10,000 at 6% earns about $600", "A $600K home growing 3% adds about $18,000", "Wholesale broker: several lenders, best rates"],
+    notes: "Curiosity-first rebuild of $600 a year or $18,000. Assumptions in the small print.",
+    short: `Where does $10,000 work harder?\n\nIn savings at 6%, it earns about $600 a year. A $600K home growing 3% adds about $18,000. Same idea, bigger base.\n\nI'm a wholesale broker, so I shop several lenders for you and you get access to the best rates, not just one bank's.\n\nCurious what yours could do? Save my info. It's not a sales call. When it has to go right, I'm your guy.`,
+    long: `Quick question: where does your money work harder?\n\n- $10,000 in savings at 6%: about $600 a year.\n- A $600,000 home growing 3%: about $18,000 a year.\n- Same idea, bigger base: 30 times the growth.\n\nHere's how I'm different. I'm a wholesale broker, so I shop several lenders for you and you get access to the best rates, not just one bank's.\n\nCurious what yours could do? Save my info. It's not a sales call. When it has to go right, I'm your guy.`,
     video: {
-      title: "$600 a year or $18,000?",
-      hook: "Look at these numbers.",
-      points: ["$10,000 at 6% earns about $600 a year", "A $600,000 home growing 3% is about $18,000 in a year", "A years-long play, not a quick win"],
-      cta: "Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info.",
+      title: "Where does $10,000 work harder",
+      hook: "Where does $10,000 work harder?",
+      points: ["$10,000 at 6% earns about $600", "A $600K home growing 3% adds about $18,000", "Wholesale broker: several lenders, best rates"],
+      cta: "Save my info and I'll show you your number. It's not a sales call. When it has to go right, I'm your guy.",
     },
   },
   {
@@ -1211,19 +1199,19 @@ Book a call and I'll show you what owning could mean for YOU. It's not a sales c
     },
   },
   {
-    ref: "PAY-04", campaign: "bond", lane: "pay", bank: "consumer", name: "Rent Goes Up. Your Loan Doesn't. (payment)", lender: "N/A — call; route to the matching payment, DPA, seller-credit or equity scenario",
+    ref: "PAY-04", campaign: "bond", lane: "pay", bank: "consumer", name: "Payment: Where will your rent be in five years (receipt)", lender: "N/A — save my info; I run their real number",
     audience: "consumer", license: "required", flyer: "/smart-money/flyers/PAY-04.png", footer: "bondpay2rent",
-    cta: `Book a call and I'll run YOUR numbers. It's not a sales call. When it has to go right, I'm your guy. Save my info. 👉 ${BRAND.booking}`,
-    painPoints: ["priced-out", "renting"], magnet: "book-5", skool: "Homebuyers",
-    highlights: ["Rent after 5 yearly raises of 5% goes from $2,000 to about $2,553", "Principal and interest on a fixed loan is the same every year", "A call, not a sales call"],
-    notes: "Payment-bearing (Reg Z): the pay2 footer MUST travel with every post. 5% raises are an assumption and the flyer footer says so (2000 x 1.05^5 = 2,552.56). Taxes and insurance can change; do not say the total payment is fixed.",
-    short: `Rent goes up. Your loan doesn't.\n\nRent today: about $2,000 a month. After 5 yearly raises of 5% it's about $2,553. Principal and interest on a $300K home with a fixed loan: about $1,961, the same every year.\n\nThe 5% is an example, and taxes and insurance can change. Book a call and I'll run YOUR numbers. It's not a sales call.`,
-    long: `Rent is a number someone else sets, and it tends to go up.\n\nHere's an illustration, assuming raises of 5% a year:\n\n- Rent today: $2,000 a month.\n- After 5 yearly raises: about $2,553 a month for the same place.\n- Principal and interest on a fixed 30-year loan on a $300,000 home: about $1,961 a month, the same every year.\n\nThe 5% is an assumption, not a prediction. Taxes and insurance can change, and owning won't fit everyone, so let's look at your real numbers.\n\nBook a call and I'll run YOUR numbers. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
+    cta: `Save my info and I'll show you your number. It's not a sales call. When it has to go right, I'm your guy. 👉 ${BRAND.booking}`,
+    painPoints: [], magnet: "book-5", skool: "Buyers",
+    highlights: ["Rent at 5% raises: $2,000 becomes about $2,553", "A fixed loan's principal and interest stays about $1,961", "Wholesale broker: several lenders, best rates"],
+    notes: "Curiosity-first rebuild of Rent goes up, your loan doesn't. 5% raises are an assumption.",
+    short: `Where will your rent be in five years?\n\nAt 5% raises a year, $2,000 becomes about $2,553. On a $300K home with a fixed loan, principal and interest stays about $1,961 every year.\n\nI'm a wholesale broker, so I shop several lenders for you and you get access to the best rates, not just one bank's.\n\nCurious what yours would be? Save my info. It's not a sales call. When it has to go right, I'm your guy.`,
+    long: `Quick question: what will your rent be in five years?\n\n- Rent today: $2,000, and it builds your landlord's equity.\n- After 5 yearly raises of 5%: about $2,553.\n- A fixed loan on a $300K home, principal and interest: about $1,961, every year.\n\nHere's how I'm different. I'm a wholesale broker, so I shop several lenders for you and you get access to the best rates, not just one bank's. Homebuyers leave about $65 billion a year on the table, roughly $3,300 each (Bankrate research, 2026), mostly because they take the first quote they get.\n\nCurious what yours would be? Save my info. It's not a sales call. When it has to go right, I'm your guy.`,
     video: {
-      title: "Rent goes up. Your loan doesn't.",
-      hook: "Look at these numbers.",
-      points: ["Rent $2,000 today, about $2,553 after 5 raises of 5% (assumption)", "Principal and interest on a fixed loan stays the same", "Taxes and insurance can change, so run your real numbers"],
-      cta: "Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info.",
+      title: "Where will your rent be in five years",
+      hook: "Where will your rent be in five years?",
+      points: ["Rent at 5% raises: $2,000 becomes about $2,553", "A fixed loan's principal and interest stays about $1,961", "Wholesale broker: several lenders, best rates"],
+      cta: "Save my info and I'll show you your number. It's not a sales call. When it has to go right, I'm your guy.",
     },
   },
   {
@@ -1243,19 +1231,19 @@ Book a call and I'll show you what owning could mean for YOU. It's not a sales c
     },
   },
   {
-    ref: "WLT-03", campaign: "bond", lane: "wealth", bank: "consumer", name: "Rent Builds Their Equity (wealth building)", lender: "N/A — call; route to the matching payment, DPA, seller-credit or equity scenario",
+    ref: "WLT-03", campaign: "bond", lane: "wealth", bank: "consumer", name: "Wealth: Where does your rent actually go (receipt)", lender: "N/A — save my info; I run their real number",
     audience: "consumer", license: "required", flyer: "/smart-money/flyers/WLT-03.png", footer: "bondpay2own",
-    cta: `Book a call and I'll run both sides with YOUR numbers. It's not a sales call. When it has to go right, I'm your guy. Save my info. 👉 ${BRAND.booking}`,
-    painPoints: ["renting"], magnet: "book-5", skool: "Homebuyers",
-    highlights: ["5 years of rent at $2,000 is $120,000 and builds your landlord's equity", "On a $300K home, the loan balance drops about $16,700 in 5 years", "A call, not a sales call"],
-    notes: "Payment-bearing (Reg Z): pay2 footer MUST travel with every post. Not an apples-to-apples cost comparison; the flyer note says owners also pay taxes, insurance and upkeep. Keep that note when quoting. Plaid photo.",
-    short: `Rent builds their equity.\n\n5 years of rent at $2,000 is $120,000, and you've built $0 of equity with it. On a $300K home, the loan balance drops about $16,700 in the first 5 years, before any appreciation.\n\nOwners also pay taxes, insurance and upkeep, so let's run both sides. Book a call and I'll run YOUR numbers. It's not a sales call.`,
-    long: `A rent check builds your landlord's equity, not yours.\n\n- 5 years of rent at $2,000 a month, no raises assumed: $120,000.\n- Equity you built with it: $0.\n- As an owner of a $300,000 home with a fixed loan, your loan balance drops about $16,700 in the same 5 years, before any appreciation.\n\nOwners also pay taxes, insurance and upkeep, and owning won't fit everyone. That's why I'd rather walk through both sides with YOUR numbers.\n\nBook a call. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
+    cta: `Save my info and I'll show you your number. It's not a sales call. When it has to go right, I'm your guy. 👉 ${BRAND.booking}`,
+    painPoints: [], magnet: "book-5", skool: "Buyers",
+    highlights: ["5 years of rent at $2,000 is $120,000", "Equity built with it: $0", "A $300K loan drops about $16,700 in 5 years"],
+    notes: "Curiosity-first rebuild of Rent builds their equity. No shaming: it's a question, not a verdict.",
+    short: `Where does your rent actually go?\n\nFive years of rent at $2,000 is $120,000, and the equity you built with it is $0. On a $300K home, five years of payments pays your loan down about $16,700. That part is yours.\n\nI'm a wholesale broker, so I shop several lenders for you and you get access to the best rates, not just one bank's.\n\nCurious what yours would be? Save my info. It's not a sales call. When it has to go right, I'm your guy.`,
+    long: `Here's a question worth five minutes: where does your rent actually go?\n\n- 5 years of rent at $2,000: $120,000.\n- Equity you built with it: $0.\n- An owner's loan balance after 5 years on a $300K home: down about $16,700. That's yours.\n\nHere's how I'm different. I'm a wholesale broker, so I shop several lenders for you and you get access to the best rates, not just one bank's. Homebuyers leave about $65 billion a year on the table, roughly $3,300 each (Bankrate research, 2026), mostly because they take the first quote they get.\n\nCurious what yours would be? Save my info. It's not a sales call. When it has to go right, I'm your guy.`,
     video: {
-      title: "Rent builds their equity.",
-      hook: "Look at these numbers.",
-      points: ["5 years of rent at $2,000 is $120,000", "Equity you built with it is $0", "As an owner, about $16,700 of loan paid down in 5 years"],
-      cta: "Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info.",
+      title: "Where does your rent actually go",
+      hook: "Where does your rent actually go?",
+      points: ["5 years of rent at $2,000 is $120,000", "Equity built with it: $0", "A $300K loan drops about $16,700 in 5 years"],
+      cta: "Save my info and I'll show you your number. It's not a sales call. When it has to go right, I'm your guy.",
     },
   },
   {
@@ -1275,39 +1263,39 @@ Book a call and I'll show you what owning could mean for YOU. It's not a sales c
     },
   },
   {
-    ref: "CRD-01", campaign: "bond", photoDefault: "check", lane: "cred", bank: "consumer", name: "25 Years. One Call Away. (credibility)", lender: "N/A — call; route to the matching payment, DPA, seller-credit or equity scenario",
-    audience: "consumer", license: "required", flyer: "/smart-money/flyers/CRD-01.png", footer: "consumer",
-    cta: `Book a call whenever it's time. It's not a sales call. When it has to go right, I'm your guy. Save my info. 👉 ${BRAND.booking}`,
-    painPoints: ["trust"], magnet: "book-5", skool: "Homebuyers",
-    highlights: ["25 years in mortgage", "Licensed in Colorado, NMLS #169809", "Save my number: when it has to go right, I'm your guy"],
-    notes: "Credibility flyer: only facts he can back up (25 years, Colorado license, NMLS). Confirm the 25-year figure against his LinkedIn (profile says 20+). No testimonials; those need ZPM review. Plaid photo.",
-    short: `25 years in mortgage. One call away.\n\nI've been doing this through every rate cycle, and I'm licensed in Colorado. When it has to go right, I'm your guy. Save my number. You'll want it.\n\nBook a call whenever it's time. It's not a sales call.`,
-    long: `I've been in mortgage for 25 years, through every rate cycle there is. I'm licensed in Colorado, NMLS #169809, and when it's time to buy, sell or invest, I'd like to be the person you call first.\n\nNo pressure, no pitch. Just a consultation call where I run your real numbers and you decide what happens next.\n\nBook a call. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
+    ref: "CRD-01", campaign: "bond", photoDefault: "check", kind: "trust", lane: "cred", bank: "consumer", name: "Trust: Who do you call when it has to go right (receipt)", lender: "N/A — save my info; I run their real number",
+    audience: "consumer", license: "required", flyer: "/smart-money/flyers/CRD-01.png", footer: "intro",
+    cta: `Save my info and I'll be your number. It's not a sales call. When it has to go right, I'm your guy. 👉 ${BRAND.booking}`,
+    painPoints: [], magnet: "book-5", skool: "Buyers",
+    highlights: ["25 years through every rate cycle", "Wholesale broker: I shop several lenders", "Get a quote from anyone, then get mine"],
+    notes: "Trust card with Joshua's face (check suit). Pepsi challenge line.",
+    short: `Who do you call when it has to go right?\n\nI've done mortgages for 25 years, through every rate cycle. I'm a wholesale broker, so I shop several lenders for you and you get access to the best rates.\n\nGet a quote from anyone. Then get mine. Save my info. It's not a sales call. When it has to go right, I'm your guy.`,
+    long: `When it's time to buy, sell or invest, who do you call?\n\nI've been in mortgage for 25 years, through every rate cycle. Here's how I'm different:\n\n- I'm a wholesale broker. I shop several lenders for you and you get access to the best rates, not just one bank's.\n- Homebuyers leave about $65 billion a year on the table, roughly $3,300 each (Bankrate research, 2026), mostly because they take the first quote they get.\n- Get a quote from anyone. Then get mine.\n\nSave my info and I'll be the number you have when it counts. It's not a sales call. When it has to go right, I'm your guy.`,
     video: {
-      title: "25 years. One call away.",
-      hook: "Look at these numbers.",
-      points: ["25 years in mortgage, through every rate cycle", "Licensed in Colorado, NMLS #169809", "Save my number. You'll want it"],
-      cta: "Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info.",
+      title: "Who do you call when it has to go right",
+      hook: "Who do you call when it has to go right?",
+      points: ["25 years through every rate cycle", "Wholesale broker: I shop several lenders", "Get a quote from anyone, then get mine"],
+      cta: "Save my info and I'll be your number. It's not a sales call. When it has to go right, I'm your guy.",
     },
   },
   {
-    ref: "CRD-02", campaign: "bond", lane: "cred", bank: "consumer", name: "Your Real Value, Not an Online Guess (homeowners)", lender: "N/A — call; route to the matching scenario",
+    ref: "CRD-02", campaign: "bond", kind: "trust", lane: "cred", bank: "consumer", name: "Trust: What is your home really worth (receipt)", lender: "N/A — save my info; I run their real number",
     audience: "consumer", license: "required", flyer: "/smart-money/flyers/CRD-02.png", footer: "bondvalue",
-    cta: `Book a call and I'll give you a game plan for your finances. It's not a sales call. When it has to go right, I'm your guy. Save my info. 👉 ${BRAND.booking}`,
-    painPoints: ["equity-trapped", "trust"], magnet: "book-5", skool: "Homebuyers",
-    highlights: ["An online estimate is a computer guess; a real number counts your upgrades and recent sales", "Estimates can run higher or lower than reality", "A call with a game plan for your finances"],
-    notes: "Homeowners and past clients. Example values ($480,000 online estimate, $515,000 real number, $35,000 gap) are illustrative and labeled. COMPLIANCE FLAG: the flyer implies a better number than an online estimate: a lender does not set value. The real number comes from a market analysis by an agent partner or a lender-ordered appraisal on a real loan. Have ZPM confirm the wording. No rate, payment or down payment percent, so no Reg Z block.",
-    short: `Your real value, not an online guess.\n\nAn online estimate is a computer's guess. It hasn't seen inside your home, your upgrades or the recent sales near you, and it can run higher or lower than the real number. In our example, $480,000 online vs. $515,000 with a real look is a $35,000 gap in your equity.\n\nBook a call and I'll give you a game plan for your finances, starting with a real number. It's not a sales call.`,
-    long: `Most homeowners are working from a number a website guessed.\n\nAn online estimate hasn't seen inside your home. It doesn't know your upgrades or the sales that just closed near you, and it can be off in either direction. In our example:\n\n- Online estimate: $480,000.\n- A real number, with your upgrades and recent nearby sales: $515,000.\n- The gap in your equity: $35,000.\n\nThat's an example, and yours could go either way. Your equity is the starting point for almost every smart move, whether that's a refinance, a rental or just knowing where you stand.\n\nBook a call and I'll give you a game plan for your finances, starting with a real number. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
+    cta: `Save my info and I'll find your real number. It's not a sales call. When it has to go right, I'm your guy. 👉 ${BRAND.booking}`,
+    painPoints: [], magnet: "book-5", skool: "Buyers",
+    highlights: ["An online estimate is a computer's guess", "A real number counts your upgrades and local sales", "Wholesale broker: several lenders, best rates"],
+    notes: "Curiosity-first rebuild of Your real value.",
+    short: `What is your home really worth?\n\nAn online estimate is a computer's guess. A real number counts your upgrades and the recent sales near you. In our example the gap is $35,000 of equity.\n\nI'm a wholesale broker, so I shop several lenders for you and you get access to the best rates, not just one bank's.\n\nCurious what yours is? Save my info. It's not a sales call. When it has to go right, I'm your guy.`,
+    long: `An online estimate says $480,000. A real number, with your upgrades and the recent sales near you, says $515,000. That's a $35,000 gap in your equity, in our example, and it can run higher or lower.\n\nWhy does it matter? Because your equity is your next down payment.\n\nHere's how I'm different. I'm a wholesale broker, so I shop several lenders for you and you get access to the best rates, not just one bank's.\n\nCurious what yours is? Save my info. It's not a sales call. When it has to go right, I'm your guy.`,
     video: {
-      title: "Your real value, not an online guess.",
-      hook: "Look at these numbers.",
-      points: ["An online estimate has never seen inside your home", "A real number counts your upgrades and recent nearby sales", "Your equity is the starting point for your game plan"],
-      cta: "Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info.",
+      title: "What is your home really worth",
+      hook: "What is your home really worth?",
+      points: ["An online estimate is a computer's guess", "A real number counts your upgrades and local sales", "Wholesale broker: several lenders, best rates"],
+      cta: "Save my info and I'll find your real number. It's not a sales call. When it has to go right, I'm your guy.",
     },
   },
   {
-    ref: "AGT-04", campaign: "bond", lane: "agent", bank: "agents", name: "Agents: What if your lender brought you deals (receipt)", lender: "N/A — call; route to the matching scenario",
+    ref: "AGT-04", campaign: "bond", kind: "trust", lane: "agent", bank: "agents", name: "Agents: What if your lender brought you deals (receipt)", lender: "N/A — call; route to the matching scenario",
     audience: "agent", license: "none", flyer: "/smart-money/flyers/AGT-04.png", footer: "intro",
     cta: `Save my info and I'll train your team too. It's not a sales call. When it has to go right, I'm your guy. 👉 ${BRAND.booking}`,
     painPoints: [], magnet: "book-5", skool: "Agents",
@@ -1323,7 +1311,7 @@ Book a call and I'll show you what owning could mean for YOU. It's not a sales c
     },
   },
   {
-    ref: "AGT-05", campaign: "bond", photoDefault: "plum", lane: "agent", bank: "agents", name: "Agents: Are your buyers getting the most they qualify for (receipt)", lender: "N/A — call; route to the matching scenario",
+    ref: "AGT-05", campaign: "bond", kind: "trust", photoDefault: "plum", lane: "agent", bank: "agents", name: "Agents: Are your buyers getting the most they qualify for (receipt)", lender: "N/A — call; route to the matching scenario",
     audience: "agent", license: "none", flyer: "/smart-money/flyers/AGT-05.png", footer: "intro",
     cta: `Save my info and I'll train your team too. It's not a sales call. When it has to go right, I'm your guy. 👉 ${BRAND.booking}`,
     painPoints: [], magnet: "book-5", skool: "Agents",
@@ -1355,7 +1343,23 @@ Book a call and I'll show you what owning could mean for YOU. It's not a sales c
     },
   },
   {
-    ref: "WHY-01", campaign: "bond", lane: "cred", bank: "credibility", name: "Why me: $65 billion left on the table (receipt)", lender: "N/A — save my info; I run their real number",
+    ref: "INVB-01", campaign: "bond", kind: "trust", lane: "wealth", bank: "investor", name: "Investors: Is your portfolio financed as well as it was bought (receipt)", lender: "N/A — save my info; I run their real number",
+    audience: "investor", license: "none", flyer: "/smart-money/flyers/INVB-01.png", footer: "business",
+    cta: `Save my info and I'll review your portfolio. It's not a sales call. When it has to go right, I'm your guy. 👉 ${BRAND.booking}`,
+    painPoints: [], magnet: "book-5", skool: "Investors",
+    highlights: ["Every loan, rate and maturity on one page", "Several lenders for every property you hold", "A SMART Money investor review"],
+    notes: "Investor side of the lead plan: portfolio review per Joshua. No numbers claimed. Business-purpose, so license none.",
+    short: `Is your portfolio financed as well as it was bought?\n\nMost investors place loans one at a time, with whoever was there. A portfolio review puts every loan, rate and maturity on one page.\n\nI'm a wholesale broker, so I shop several lenders for you and you get access to the best rates, not just one bank's.\n\nCurious what yours looks like? Save my info and I'll review your portfolio. It's not a sales call. When it has to go right, I'm your guy.`,
+    long: `Quick question for investors: when did you last look at all of your loans on one page?\n\n- Your loans today: placed one at a time, with whoever was there.\n- A portfolio review: every loan, rate and maturity on one page.\n- The edge: several lenders, for every property you hold.\n\nHere's how I'm different. I'm a wholesale broker, so I shop several lenders for you and you get access to the best rates, not just one bank's.\n\nSave my info and I'll review your portfolio. It's not a sales call. When it has to go right, I'm your guy.`,
+    video: {
+      title: "Is your portfolio financed as well as it was bought",
+      hook: "Is your portfolio financed as well as it was bought?",
+      points: ["Every loan, rate and maturity on one page", "Several lenders for every property you hold", "A SMART Money investor review"],
+      cta: "Save my info and I'll review your portfolio. It's not a sales call. When it has to go right, I'm your guy.",
+    },
+  },
+  {
+    ref: "WHY-01", campaign: "bond", kind: "trust", lane: "cred", bank: "credibility", name: "Why me: $65 billion left on the table (receipt)", lender: "N/A — save my info; I run their real number",
     audience: "consumer", license: "CO", flyer: "/smart-money/flyers/WHY-01.png", footer: "bondwhy",
     cta: `Save my info and I'll show you your number. It's not a sales call. When it has to go right, I'm your guy. 👉 ${BRAND.booking}`,
     painPoints: [], magnet: "book-5", skool: "Buyers",
@@ -1368,22 +1372,6 @@ Book a call and I'll show you what owning could mean for YOU. It's not a sales c
       hook: "Homebuyers leave $65 billion a year on the table. Your share is about $3,300.",
       points: ["Most buyers take one lender's quote", "I'm a wholesale broker: I shop several lenders for you", "Get a quote from anyone, then get mine"],
       cta: "Save my info and I'll show you your number. It's not a sales call. When it has to go right, I'm your guy.",
-    },
-  },
-  {
-    ref: "TRU-01", campaign: "bond", photoDefault: "tie", lane: "trust", bank: "trust", name: "Trust: Ask Me Anything (receipt)", lender: "N/A — save my info; route by what they ask",
-    audience: "consumer", license: "CO", flyer: "/smart-money/flyers/TRU-01.png", footer: "intro",
-    cta: `Save my info and ask me anything. It's not a sales call. When it has to go right, I'm your guy. 👉 ${BRAND.booking}`,
-    painPoints: ["trust"], magnet: "book-5", skool: "Buyers",
-    highlights: ["Ask anything, big or small", "A straight answer, even when it isn't what you hoped", "No pressure, no surprises. You decide"],
-    notes: "First Trust-lane card. Words, not numbers. Soft call to action: save my info, ask me anything. Tie photo by default.",
-    short: `Got a question about buying, refinancing or your equity? Ask me.\n\nYou'll get a straight answer, even when it isn't the one you hoped for. No pressure, no surprises, and you decide what happens next.\n\nSave my info and ask me anything. It's not a sales call.`,
-    long: `I've been doing home loans for 25 years, and here's how I work:\n\n- Ask me anything, big or small, any time.\n- You get a straight answer, even when it isn't the one you hoped for.\n- No pressure. No surprises. You decide.\n\nI'd rather earn your trust than your signature.\n\nSave my info and ask me anything. It's not a sales call. When it has to go right, I'm your guy.`,
-    video: {
-      title: "Ask me anything",
-      hook: "Got a mortgage question you've been afraid to ask? Ask me.",
-      points: ["25 years, since 2001: I've seen every kind of deal", "How I work: no pressure, no surprises, a straight answer", "If I can't help, I'll tell you"],
-      cta: "Save my info and ask me anything. It's not a sales call. When it has to go right, I'm your guy.",
     },
   },
 ];
@@ -1499,6 +1487,7 @@ export const BOND_LANES = [
 export const BOND_CHANNELS = {
   consumer: ["Facebook page", "Facebook groups: Direct-to-consumer (CO audiences)", "Instagram (cross-post)"],
   agent: ["Facebook page", "Facebook groups: Real estate agents", "Instagram (cross-post)"],
+  investor: ["Facebook page", "Facebook groups: Real estate investors", "Instagram (cross-post)"],
 };
 
 // Rotation: two slots a day. Lanes are interleaved round-robin, the two cards in a day are never the same lane,
@@ -1506,21 +1495,18 @@ export const BOND_CHANNELS = {
 export function planBond(date) {
   const cards = CARDS.filter(isBond);
   const byLane = BOND_LANES.map((l) => cards.filter((c) => c.lane === l.id)).filter((a) => a.length);
-  const seq = [];
-  for (let i = 0; byLane.some((a) => i < a.length); i++) byLane.forEach((a) => { if (i < a.length) seq.push(a[i]); });
+  const rr = (filter) => { const lanes = byLane.map((a) => a.filter(filter)).filter((a) => a.length); const out = []; for (let i = 0; lanes.some((a) => i < a.length); i++) lanes.forEach((a) => { if (i < a.length) out.push(a[i]); }); return out; };
+  const T = rr((c) => c.kind === "trust"), N = rr((c) => c.kind !== "trust"); // trust and curiosity cards lead: three of every four slots
   const epoch = dayIndex(new Date(2026, 10, 16)); // Mon Nov 16, 2026
-  const di = dayIndex(date);
-  const queue = seq.slice();
-  const pick = () => {
-    const am = queue.shift();
-    let k = queue.findIndex((c) => c.lane !== am.lane);
-    if (k < 0) k = 0;
-    const pm = queue.length ? queue.splice(k, 1)[0] : am;
-    return [am, pm];
+  const di = Math.max(0, dayIndex(date) - epoch);
+  const at = (g, skip) => { // slot number g: three trust, then one numbers card, repeating; skip nudges past a same-lane clash
+    const q = Math.floor(g / 4), r = g % 4;
+    return r < 3 ? T[(q * 3 + r + skip) % T.length] : N[(q + skip) % N.length];
   };
-  let last = null;
-  const days = Math.max(0, di - epoch);
-  for (let i = 0; i <= days; i++) { const [am, pm] = pick(); last = [am, pm]; if (i < days) { queue.push(am); if (pm !== am) queue.push(pm); } }
+  const am = at(di * 2, 0);
+  let pm = at(di * 2 + 1, 0);
+  for (let s = 1; pm.lane === am.lane && s < 6; s++) pm = at(di * 2 + 1, s);
+  const last = [am, pm];
   const wd = date.getDay(); const weekend = wd === 0 || wd === 6;
   const slots = last.map((card, i) => ({
     slot: SLOTS[i], audience: card.audience, card, channels: BOND_CHANNELS[card.audience] || BOND_CHANNELS.consumer,
