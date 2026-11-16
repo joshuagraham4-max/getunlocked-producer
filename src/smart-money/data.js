@@ -1034,28 +1034,6 @@ I'd rather show you your real numbers than guess. A few minutes with me. A consu
       cta: "Take a few minutes with me. A consultation, not a sales call. Link in the post.",
     },
   },
-  {
-    ref: "AGT-04", bank: "agents", name: "Agents: Clients Forget the Rate, Never the Closing", lender: "N/A",
-    audience: "agent", license: "none", flyer: "/smart-money/flyers/AGT-04.png", footer: "intro",
-    cta: `A few minutes with me on making closing day easy. A consultation, not a sales call 👉 ${BRAND.booking}`,
-    painPoints: [], magnet: "book-5", skool: "Agents",
-    highlights: ["The rate fades within a month", "The closing decides whether they refer you", "Consultation, not a sales call"],
-    notes: "Elite look, panel on the left, peacock palette.",
-    short: `Clients forget the rate. They never forget the closing.
-
-The rate is a number that fades within a month. The closing is the day they decide whether to refer you.
-
-A few minutes with me on making that day easy. A consultation, not a sales call.`,
-    long: `Your client won't remember their rate a month from now. They will remember how the closing felt, and that's the day they decide whether to refer you.
-
-My job is to make that day easy: numbers settled early, steady updates, no surprises. If you'd like to see how, take a few minutes with me. A consultation, not a sales call.`,
-    video: {
-      title: "Clients forget the rate. Never the closing.",
-      hook: "Your client won't remember their rate. They'll remember the closing.",
-      points: ["Why the rate fades and the closing sticks", "What an easy closing day takes", "What the consultation covers"],
-      cta: "Take a few minutes with me. A consultation, not a sales call. Link in the post.",
-    },
-  },
 ];
 
 // ---- Schedule: 7 days × 2 slots (8:30 AM / 12:30 PM ET). 8 investor / 6 consumer per week.

@@ -71,11 +71,6 @@ CARDS = {
         left=("THE LEASE", "A place you pay for and never own."),
         right=("THE MORTGAGE", "A payment that builds your equity."),
         cta="See what your move would really take.", panel_bottom=STAT_30_45, foot=FOOT_CONSUMER),
-    "AGT-04": dict(palette="peacock", side="left", kicker="REAL ESTATE AGENTS &nbsp;/&nbsp; REFERRAL PARTNERS",
-        h1=["Clients forget", "the rate."], h1_accent="Never the closing.", h1_px=88,
-        left=("THE RATE", "A number that fades within a month."),
-        right=("THE CLOSING", "The day they decide whether to refer you."),
-        cta="A few minutes on making that day easy.", panel_bottom=TAGLINE, foot=FOOT_AGENT),
 }
 
 def grain_url():
@@ -130,13 +125,14 @@ def page(ref, c):
 <div style="padding-right:26px;border-right:1px solid {p["ink"]}33"><p style="font:700 13px M;letter-spacing:.32em;color:{p["ink"]}">{c["left"][0]}</p><p style="margin-top:10px;font:500 {lpx}px/1.12 B;color:{p["ink"]}">{c["left"][1]}</p></div>
 <div style="padding-left:26px"><p style="font:700 13px M;letter-spacing:.32em;color:{p["accent"]}">{c["right"][0]}</p><p style="margin-top:10px;font:700 {lpx}px/1.12 B;color:{p["ink"]}">{c["right"][1]}</p></div></div>
 <div style="position:absolute;left:74px;width:690px;top:726px;border-top:1px solid {p["ink"]}33"></div>
-<p style="position:absolute;left:74px;top:746px;font:500 italic 29px B;color:{p["ink"]};white-space:nowrap">{c["cta"]}</p>
-<div style="position:absolute;left:74px;width:690px;top:804px;display:flex;align-items:flex-end;justify-content:space-between">
+<p style="position:absolute;left:74px;top:738px;font:500 italic 29px B;color:{p["ink"]};white-space:nowrap">{c["cta"]}</p>
+<div style="position:absolute;left:74px;width:690px;top:790px;display:flex;align-items:flex-end;justify-content:space-between">
 <div><p style="font:600 46px/1 B;color:{p["ink"]};letter-spacing:-0.01em;white-space:nowrap">Joshua Graham</p>
 <p style="margin-top:12px;font:700 12.5px M;letter-spacing:.28em;color:{p["accent"]};white-space:nowrap">REGIONAL LOAN ORIGINATOR</p>
 <p style="margin-top:7px;font:600 12px M;letter-spacing:.14em;color:{p["ink"]};white-space:nowrap">NMLS #169809 &nbsp;&middot;&nbsp; LICENSED IN COLORADO</p></div>
 <div style="display:flex;align-items:center;gap:18px;padding-bottom:2px;flex:none"><img src="file://{gf}" style="height:56px;display:block;opacity:.9"><div style="width:1px;height:46px;background:{p["ink"]}33"></div><img src="file://{zp}" style="height:40px;display:block;opacity:.9"></div></div>
-<p style="position:absolute;left:74px;width:690px;bottom:56px;font:500 10.5px/1.5 M;color:{p["muted"]}">{c["foot"]}<span style="display:block;margin-top:5px;font:700 9px M;letter-spacing:.18em;color:#000">REF {ref}</span></p>
+<p style="position:absolute;left:74px;top:896px;font:700 20px M;letter-spacing:.05em;color:{p["ink"]};white-space:nowrap">720-468-6872 <span style="color:{p["accent"]}">&nbsp;&nbsp;|&nbsp;&nbsp;</span> jgraham@grahamfinancial.us</p>
+<p style="position:absolute;left:74px;width:690px;bottom:46px;font:500 10.5px/1.5 M;color:{p["muted"]}">{c["foot"]}<span style="display:block;margin-top:5px;font:700 9px M;letter-spacing:.18em;color:#000">REF {ref}</span></p>
 </div></body></html>'''
     if c.get("side") == "left":
         html_out = html_out.replace("right:0;", "left:0;").replace("left:74px", "left:344px")
