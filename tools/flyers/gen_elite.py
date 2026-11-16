@@ -210,19 +210,26 @@ CARDS = {
         receipt_note="Estimates can be off in either direction. Let&#39;s start with a real number.",
         rpad=22, rule_top=330, cta="Book a call. I&#39;ll give you a game plan.", foot=FOOT_EQ, foot_px=9.5),
     "AGT-04": dict(palette="burgundy", kicker="REAL ESTATE AGENTS &nbsp;/&nbsp; REFERRAL PARTNERS", **COMMON,
-        h1=["Clients who close"], h1_accent="without the drama.", h1_px=80,
-        receipt=[("BEFORE THE OFFER", "Numbers settled early, so nothing moves later", "Clear", False),
-                 ("DURING ESCROW", "Steady updates to you and your client", "Steady", False),
-                 ("AT THE TABLE", "A calm path to the keys", "Closed", True)],
-        receipt_note="The deals that slip usually slip late. I work to settle them early.",
-        rpad=22, rule_top=330, cta="Book a call. Let&#39;s protect your clients.", foot=FOOT_AGENT, foot_px=10),
+        h1=["What if your lender"], h1_accent="brought you deals?", h1_px=76,
+        receipt=[("YOUR LENDER TODAY", "Waits for you to send the buyer", "Waiting", False),
+                 ("A PARTNER WHO BUILDS", "Brings buyers, with the numbers already done", "Buyers", False),
+                 ("YOUR TEAM", "I train your agents on lending, like I trained LOs", "Trained", True)],
+        receipt_note="I&#39;m a wholesale broker. I shop several lenders for your buyers.",
+        rpad=22, rule_top=330, cta="Save my info. I&#39;ll train your team too.", foot=FOOT_AGENT, foot_px=10),
     "AGT-05": dict(palette="peacock", kicker="REAL ESTATE AGENTS &nbsp;/&nbsp; REFERRAL PARTNERS", **COMMON,
-        h1=["A closing your client"], h1_accent="thanks you for.", h1_px=76,
-        receipt=[("YOUR CLIENT SEES", "Their real numbers before they write offers", "Early", False),
-                 ("YOU GET", "Updates, so you aren&#39;t chasing anyone", "Steady", False),
-                 ("THE RESULT", "A client who sends their friends to you", "Referrals", True)],
-        receipt_note="Think of me when you want your closings to go amazingly well.",
-        rpad=22, rule_top=330, cta="Book a call. Let&#39;s make your next closing easy.", foot=FOOT_AGENT, foot_px=10),
+        h1=["Are your buyers getting"], h1_accent="the most they qualify for?", h1_px=62,
+        receipt=[("MOST LENDERS", "One bank, one set of guidelines, one rate sheet", "1", False),
+                 ("A WHOLESALE BROKER", "Several lenders, the best fit for each buyer", "Several", False),
+                 ("THE RESULT", "More buyer, a lower rate and a deal that closes", "More", True)],
+        receipt_note="I&#39;m a wholesale broker. I shop several lenders for your buyers.",
+        rpad=22, rule_top=330, cta="Save my info. I&#39;ll train your team too.", foot=FOOT_AGENT, foot_px=10),
+    "AGT-06": dict(palette="scarlet", kicker="REAL ESTATE AGENTS &nbsp;/&nbsp; REFERRAL PARTNERS", **COMMON,
+        h1=["Your buyer loves the house."], h1_accent="The payment doesn&#39;t reach.", h1_px=52,
+        receipt=[("THE PAYMENT YOUR BUYER CAN HOLD", "Example, all in", "$3,000", False),
+                 ("A HALF-POINT LOWER RATE", "What a wholesale broker can often find", "&minus;0.5%", False),
+                 ("THE HOUSE THEY CAN NOW REACH", "More purchase price, same payment", "+$20K&ndash;25K", True)],
+        receipt_note="I&#39;m a wholesale broker. I shop several lenders for your buyers.",
+        rpad=22, rule_top=330, cta="Save my info. I&#39;ll train your team too.", foot=FOOT_AGENT + " Example only: a $3,000 payment, a half-point lower rate and the added purchase price are illustrative and vary by scenario.", foot_px=9.5),
     "WHY-01": dict(palette="scarlet", kicker="HOMEBUYERS &nbsp;/&nbsp; EVERYWHERE", **COMMON,
         h1=["Buyers leave $65 billion"], h1_accent="a year on the table.", h1_px=58,
         receipt=[("THE NATIONAL TOTAL", "Overpaid on mortgages, every year", "$65 billion", False),
@@ -241,7 +248,7 @@ CARDS = {
 }
 
 # ---- Photo toggle. Every Bond flyer is rendered five ways: REF.png (the default), REF-tie, REF-plum, REF-check, REF-text.
-BOND_REFS = ["PAY-01","PAY-02","PAY-03","PAY-04","DWN-01","DWN-02","DWN-03","WLT-01","WLT-02","WLT-03","EQT-01","EQT-02","EQT-03","CRD-01","CRD-02","AGT-04","AGT-05","TRU-01","WHY-01"]
+BOND_REFS = ["PAY-01","PAY-02","PAY-03","PAY-04","DWN-01","DWN-02","DWN-03","WLT-01","WLT-02","WLT-03","EQT-01","EQT-02","EQT-03","CRD-01","CRD-02","AGT-04","AGT-05","AGT-06","TRU-01","WHY-01"]
 PHOTO_DEFAULT = {"PAY-01": "tie", "CRD-01": "check", "DWN-02": "plum", "EQT-02": "tie", "AGT-05": "plum", "TRU-01": "tie"}   # everything else defaults to text-only
 PHOTOS = {
     "tie":   dict(file="joshua-park-smile.jpg", h=500, size=720, x=-440, y=-40),
