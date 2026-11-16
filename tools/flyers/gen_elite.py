@@ -103,23 +103,23 @@ CARDS = {
         figures=[dict(label="RENTING SOLO", px=76, big="$1,850", small="a month, about. Your landlord builds the equity."),
                  dict(label="OWNING, 2 ROOMMATES", px=76, big="$1,650", small="a month at $800 each. $3,250 on your own.")],
         panel_line="When it<br>has to go<br>right, I'm<br>your guy.", panel_px=42, rule_top=470,
-        cta=CTA_BOOK, panel_bottom=QR, foot=FOOT_PAY, foot_px=9),
+        cta="Book a call. I&#39;ll run your real numbers.", photo=dict(file="joshua-park-smile.jpg", h=500, size=720, x=-440, y=-40), photo_line="When it has<br>to go right,<br>I&#39;m your guy.", cta_px=26, cta_note="NOT A SALES CALL", panel_bottom=QR, foot=FOOT_PAY, foot_px=9),
     "PAY-02": dict(palette="burgundy", kicker="COLORADO RENTERS &nbsp;/&nbsp; BUYING A HOME",
         h1=["About $100", "more a week."], h1_accent="And it's yours.", h1_px=100,
         figures=[dict(label="RENTING", px=76, big="$2,000", small="a month, about. Your landlord builds the equity."),
                  dict(label="OWNING A $300K HOME", px=76, big="$2,450", small="a month, about, and you build your own.")],
         panel_line="When it<br>has to go<br>right, I'm<br>your guy.", panel_px=42, rule_top=500,
-        cta=CTA_BOOK, panel_bottom=QR, foot=FOOT_PAY2, foot_px=9),
+        cta="Book a call. I&#39;ll run your real numbers.", photo=dict(file="joshua-park-smile.jpg", h=500, size=720, x=-440, y=-40), photo_line="When it has<br>to go right,<br>I&#39;m your guy.", cta_px=26, cta_note="NOT A SALES CALL", panel_bottom=QR, foot=FOOT_PAY2, foot_px=9),
     "DWN-01": dict(palette="camel", kicker="COLORADO RENTERS &nbsp;/&nbsp; BUYING A HOME",
         h1=["Cash to close", "can be"], h1_accent="near $0.", h1_px=100,
         figures=[dict(label="SELLER CREDITS", px=76, big="3&ndash;6%", small="of the price can come back to you. $12,000 to $24,000 on a $400K home."),
                  dict(label="WITH ASSISTANCE", px=76, big="Near $0", small="out of pocket can be possible when credits and help line up.")],
         panel_line="When it<br>has to go<br>right, I'm<br>your guy.", panel_px=42, rule_top=500,
-        cta=CTA_BOOK, panel_bottom=QR, foot=FOOT_CONSUMER),
+        cta="Book a call. I&#39;ll show you your cash to close.", photo=dict(file="joshua-park-smile.jpg", h=500, size=720, x=-440, y=-40), photo_line="When it has<br>to go right,<br>I&#39;m your guy.", cta_px=26, cta_note="NOT A SALES CALL", panel_bottom=QR, foot=FOOT_CONSUMER),
     "WLT-01": dict(palette="peacock", kicker="U.S. HOME PRICES &nbsp;/&nbsp; BUILDING WEALTH", chart=True,
         h1=["Home prices", "rose in"], h1_accent="45 of 50 years.", h1_px=96,
         panel_line="When it<br>has to go<br>right, I'm<br>your guy.", panel_px=42, rule_top=450,
-        cta=CTA_BOOK, panel_bottom=QR, foot=FOOT_WEALTH, foot_px=9.5),
+        cta="Book a call. See what it could mean for you.", photo=dict(file="joshua-park-smile.jpg", h=500, size=720, x=-440, y=-40), photo_line="When it has<br>to go right,<br>I&#39;m your guy.", cta_px=26, cta_note="NOT A SALES CALL", panel_bottom=QR, foot=FOOT_WEALTH, foot_px=9.5),
 }
 
 def qr_svg(url, px, dark, light):
@@ -184,11 +184,15 @@ def page(ref, c):
     ph = c.get("photo")
     if ph:
         img = os.path.join(BRAND, "photos", ph["file"])
+        pline = c.get("photo_line", "Think of me<br>when it has<br>to go right.")
         panel_body = (f'<div style="position:absolute;right:0;top:0;width:270px;height:{ph["h"]}px;background-image:url(file://{img});background-size:auto {ph["size"]}px;background-position:{ph["x"]}px {ph["y"]}px;filter:grayscale(1) contrast(1.08) brightness(.96)"></div>'
                       f'<div style="position:absolute;right:0;top:{ph["h"]-150}px;width:270px;height:150px;background:linear-gradient(to bottom,rgba(0,0,0,0),{p["panel"]})"></div>'
                       f'<div style="position:absolute;right:0;top:{ph["h"]+12}px;width:270px;padding:0 34px 0 36px;box-sizing:border-box"><div style="width:44px;height:3px;background:{rule}"></div>'
-                      f'<p style="margin-top:22px;font:500 italic 35px/1.1 B;color:{p["panel_text"]};white-space:nowrap">Think of me<br>when it has<br>to go right.</p></div>'
-                      f'<p style="position:absolute;right:34px;bottom:104px;font:600 11px/1.6 M;letter-spacing:.26em;color:{p["panel_mute"]}">SMOOTH. PRECISE. ELITE.</p>')
+                      f'<p style="margin-top:22px;font:500 italic 35px/1.1 B;color:{p["panel_text"]};white-space:nowrap">{pline}</p></div>')
+        if pb["kind"] == "qr":
+            panel_body += f'<div style="position:absolute;right:0;bottom:104px;width:270px;padding:0 34px 0 36px;box-sizing:border-box">{bottom}</div>'
+        else:
+            panel_body += f'<p style="position:absolute;right:34px;bottom:104px;font:600 11px/1.6 M;letter-spacing:.26em;color:{p["panel_mute"]}">SMOOTH. PRECISE. ELITE.</p>'
     else:
         panel_body = (f'<div style="position:absolute;right:0;top:0;width:270px;padding:84px 34px 0 36px;box-sizing:border-box"><div style="width:44px;height:3px;background:{rule}"></div>'
                       f'<p style="margin-top:26px;font:500 italic {c.get("panel_px",50)}px/1.08 B;color:{p["panel_text"]};white-space:nowrap">{c.get("panel_line","Think of<br>me when<br>it has to<br>go right.")}</p></div>'
@@ -219,7 +223,8 @@ def page(ref, c):
 <div style="position:absolute;left:74px;width:690px;top:{c.get("rule_top",540)}px;border-top:2px solid {p["ink"]}"></div>
 {ledger_html}
 <div style="position:absolute;left:74px;width:690px;top:726px;border-top:1px solid {p["ink"]}33"></div>
-<p style="position:absolute;left:74px;top:738px;font:500 italic 29px B;color:{p["ink"]};white-space:nowrap">{c["cta"]}</p>
+<p style="position:absolute;left:74px;top:738px;font:500 italic {c.get("cta_px",29)}px B;color:{p["ink"]};white-space:nowrap">{c["cta"]}</p>
+{('<p style="position:absolute;left:74px;width:690px;top:748px;text-align:right;font:700 10.5px M;letter-spacing:.2em;color:' + p["accent"] + '">' + c["cta_note"] + '</p>') if c.get("cta_note") else ""}
 <div style="position:absolute;left:74px;width:690px;top:792px;display:flex;align-items:center;justify-content:space-between">
 <div><p style="font:600 34px/1 B;color:{p["ink"]};letter-spacing:-0.01em;white-space:nowrap">Joshua Graham</p>
 <p style="margin-top:10px;font:700 11px M;letter-spacing:.2em;color:{p["accent"]};white-space:nowrap">REGIONAL LOAN ORIGINATOR</p>
