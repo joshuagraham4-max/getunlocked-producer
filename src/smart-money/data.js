@@ -10,7 +10,7 @@ export const BRAND = {
   site: "approvedbyjoshua.com",
   booking: "https://calendar.app.google/nz1sdrnBGK1D4LXh7",
   apply: "https://approvedbyjoshua.com",
-  bookingCta: "Book your 15 min with me. NOT a sales call. It's free to find out 👉 https://calendar.app.google/nz1sdrnBGK1D4LXh7",
+  bookingCta: "Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info 👉 https://calendar.app.google/nz1sdrnBGK1D4LXh7",
 };
 
 // Where every post sends people. `path` = landing page in this app; null = not built yet.
@@ -69,6 +69,12 @@ export const FOOTERS = {
     "Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity. Business-purpose loans on non-owner-occupied investment property only. Not available in AZ, CA, ID, MI, MN, NV, NJ, ND, OR, SD, UT, VT, VA. Rates subject to change; actual rate depends on credit, LTV and property type. Not a commitment to lend; subject to credit approval, underwriting guidelines and change without notice.",
   consumer:
     "Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity. Licensed in Colorado. Not a commitment to lend; subject to credit approval, underwriting guidelines and change without notice.",
+  pay:
+    "Example: $400,000 purchase price, 3% down ($12,000), loan amount $388,000, 30-year fixed rate 7.125%, APR 7.308% (assumes $5,000 lender costs and $2,000 title costs). Principal and interest $2,614 per month; estimated taxes, homeowners insurance and mortgage insurance add about $640, for a total near $3,250. Roommate income is illustrative, is not guaranteed and may not count toward qualifying. Rent is an approximate Colorado one-bedroom average. Rates and APR are examples, not an offer, and change daily. Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity. Licensed in Colorado. Not a commitment to lend; subject to credit approval, underwriting guidelines and change without notice.",
+  pay2:
+    "Example: $300,000 purchase price, 3% down ($9,000), loan amount $291,000, 30-year fixed rate 7.125%, APR 7.370% (assumes $5,000 lender costs and $2,000 title costs). Principal and interest $1,961 per month; estimated taxes, homeowners insurance and mortgage insurance add about $490, for a total near $2,450. Rent is illustrative. Rates and APR are examples, not an offer, and change daily. Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity. Licensed in Colorado. Not a commitment to lend; subject to credit approval, underwriting guidelines and change without notice.",
+  wealth:
+    "Source: FHFA All-Transactions House Price Index, fourth quarter to fourth quarter, 1976 to 2025, not adjusted for inflation. National figures; local markets vary and prices can fall. Examples are illustrations, not predictions, and past performance does not guarantee future results. Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity. Licensed in Colorado.",
   market:
     "Illustration based on an estimated home value and market rent for one Denver-area home; not an offer of credit, a rate quote or a prediction of home values. Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity. Licensed in Colorado.",
   dpa:
@@ -1032,6 +1038,117 @@ I'd rather show you your real numbers than guess. Think of me when you want your
       hook: "Rent is a bill. A mortgage is a plan.",
       points: ["What a lease actually buys you", "How a mortgage payment builds your equity", "How I help"],
       cta: "Think of me when you want your closings to go amazingly well. Link in the post.",
+    },
+  },
+  {
+    ref: "PAY-01", bank: "consumer", name: "It's Not Out of Reach (payment, roommates)", lender: "N/A — call; route to payment, DPA and seller-credit scenarios",
+    audience: "consumer", license: "required", flyer: "/smart-money/flyers/PAY-01.png", footer: "pay",
+    cta: `Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info 👉 ${BRAND.booking}`,
+    painPoints: ["priced-out", "renting"], magnet: "book-5", skool: "Homebuyers",
+    highlights: ["Owning with roommates can land near what you pay in rent", "Your payment builds your equity, not your landlord's", "A call, not a sales call"],
+    notes: "Payment-bearing (Reg Z): the pay footer MUST travel with every post. $400K example: P&I $2,614, total near $3,250, APR 7.308%. Confirm ZPM is fine with the roommate framing (roommate income may not count toward qualifying). Refresh rent and rate quarterly.",
+    short: `Paying about $1,850 a month to rent on your own?
+
+Buying a $400K home can cost about $3,250 a month on your own. Bring in two roommates at $800 each and it can land near $1,650, and the payment builds YOUR equity, not your landlord's.
+
+It's not out of reach. It's just math nobody showed you.
+
+Book a consultation call with me. It's not a sales call.`,
+    long: `Most renters assume owning is out of reach. Here is the math on a $400,000 home with 3% down:
+
+- Renting a one-bedroom on your own: about $1,850 a month, and your landlord builds the equity.
+- Owning on your own: about $3,250 a month all in.
+- Owning with two roommates at $800 each: near $1,650 a month, and you build the equity.
+
+It will not fit everyone, and roommate income is not guaranteed or always counted toward qualifying. That's why I'd rather walk through YOUR numbers than guess.
+
+Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
+    video: {
+      title: "It's not out of reach",
+      hook: "Look at these numbers.",
+      points: ["Rent solo vs. owning with roommates", "Why the payment builds your equity", "How I help"],
+      cta: "Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info.",
+    },
+  },
+  {
+    ref: "PAY-02", bank: "consumer", name: "About $100 More a Week, and It's Yours (payment)", lender: "N/A — call; route to payment, DPA and seller-credit scenarios",
+    audience: "consumer", license: "required", flyer: "/smart-money/flyers/PAY-02.png", footer: "pay2",
+    cta: `Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info 👉 ${BRAND.booking}`,
+    painPoints: ["priced-out", "renting"], magnet: "book-5", skool: "Homebuyers",
+    highlights: ["About $100 more a week than renting, on a $300K home", "You own it and build your own equity", "A call, not a sales call"],
+    notes: "Payment-bearing (Reg Z): the pay2 footer MUST travel with every post. $300K example: P&I $1,961, total near $2,450, APR 7.370%. Gap vs $2,000 rent is about $450 a month, roughly $104 a week. Fits condo/townhome price points (attached median is about $395K statewide, so many buyers will see higher numbers: say so on the call). Refresh rent and rate quarterly.",
+    short: `Paying about $2,000 a month to rent?
+
+On a $300K home, the payment can be about $2,450 a month. That's roughly $100 more a week, and you own it and build your own equity instead of your landlord's.
+
+Wondering if you have a roommate who could move in and close that gap? Let's look at it.
+
+Book a consultation call with me. It's not a sales call.`,
+    long: `Here is the honest math on a $300,000 home with 3% down: a payment near $2,450 a month, all in. If you're paying about $2,000 to rent, that's roughly $100 more a week, and you own the home instead of funding your landlord's.
+
+Prices vary by area and home type, and your numbers may be different, which is exactly why I'd rather show you yours.
+
+Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
+    video: {
+      title: "About $100 more a week",
+      hook: "Look at these numbers.",
+      points: ["Rent vs. owning, side by side", "Where the extra $100 a week goes", "How I help"],
+      cta: "Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info.",
+    },
+  },
+  {
+    ref: "DWN-01", bank: "consumer", name: "Cash to Close Can Be Near $0 (renters)", lender: "N/A — call; route to payment, DPA and seller-credit scenarios",
+    audience: "consumer", license: "required", flyer: "/smart-money/flyers/DWN-01.png", footer: "dpa",
+    cta: `Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info 👉 ${BRAND.booking}`,
+    painPoints: ["no-down-payment", "renting"], magnet: "book-5", skool: "Homebuyers",
+    highlights: ["Seller credits of 3 to 6 percent can come back to you at closing", "Down payment assistance can cover the rest for those who qualify", "Cash to close can be near $0 in the right scenario"],
+    notes: "No payment amounts or down-payment percent on the flyer. Near $0 is hedged. Conventional seller credits cap at 3 percent with low down payment, FHA at 6 percent, so near $0 usually needs credits AND assistance. Your recent deals ran 3 to 6 percent credits.",
+    short: `How much cash do you need to buy? Less than most renters think.
+
+Sellers are cutting prices, and credits of 3 to 6% of the price can come back to you at closing. On a $400K home that's $12,000 to $24,000. Add down payment assistance and cash to close can be near $0 in the right scenario.
+
+Book a consultation call with me. It's not a sales call.`,
+    long: `The biggest block for most renters isn't the payment, it's the cash. Two things can change that:
+
+1. Seller credits. With more than half of Colorado listings taking price cuts, credits of 3 to 6% of the price are common on my deals. On a $400,000 home that is $12,000 to $24,000 back to you at closing.
+2. Down payment assistance, for buyers who qualify.
+
+Together, they can bring cash to close to near $0 in the right scenario. Not every buyer or home qualifies, so let's look at yours.
+
+Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
+    video: {
+      title: "Cash to close can be near $0",
+      hook: "You don't need as much cash as you think.",
+      points: ["Why sellers are paying credits right now", "How assistance covers the rest", "How I help"],
+      cta: "Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info.",
+    },
+  },
+  {
+    ref: "WLT-01", bank: "consumer", name: "Home Prices Rose in 45 of 50 Years (wealth building)", lender: "N/A — call; route to payment, DPA and seller-credit scenarios",
+    audience: "consumer", license: "required", flyer: "/smart-money/flyers/WLT-01.png", footer: "wealth",
+    cta: `Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info 👉 ${BRAND.booking}`,
+    painPoints: ["renting"], magnet: "book-5", skool: "Homebuyers",
+    highlights: ["U.S. home prices rose in 45 of the last 50 years", "The only down years were 2007 to 2011", "Rent builds your landlord's wealth; a home can build yours"],
+    notes: "FHFA All-Transactions HPI, Q4 to Q4, 1976 to 2025, nominal. Always say U.S. or nationally; Denver is flat to down lately and prices CAN fall. Never write will appreciate. Data in tools/flyers/data/hpi_annual.json. This is the chart for every wealth-building post.",
+    short: `U.S. home prices rose in 45 of the last 50 years. The only down stretch was 2007 to 2011.
+
+6% on $10,000 is about $600 a year. 3% on a $600,000 home is about $18,000. Same math, a much bigger base, and it's yours instead of your landlord's.
+
+Prices can fall and local markets vary, so let's look at your numbers.
+
+Book a consultation call with me. It's not a sales call.`,
+    long: `Nationally, home prices rose in 45 of the last 50 years (FHFA, not adjusted for inflation). The only down years were 2007 through 2011, and prices were back above the old peak about a decade after it.
+
+Here is why that matters. $10,000 invested at 6% earns about $600 a year. A $600,000 home that appreciates 3% grows about $18,000 in a year. Same percentages, a very different base, and when you rent, that growth belongs to your landlord.
+
+Appreciation is never guaranteed, local markets vary and Denver has been flat to down lately. It's about owning something over years, not a quick win.
+
+Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
+    video: {
+      title: "Home prices rose in 45 of 50 years",
+      hook: "Look at these numbers.",
+      points: ["The 50-year chart: 45 up years, only 2007 to 2011 down", "$600 on $10K vs. about $18K on a $600K home", "How I help"],
+      cta: "Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info.",
     },
   },
 ];

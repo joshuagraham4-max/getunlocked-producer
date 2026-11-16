@@ -3,6 +3,7 @@
 // Claude fills the batch (name, area, a hook from their posts). Replies come to you and go on today's call list.
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../supabase.js";
+import AgentCoverage from "./AgentCoverage.jsx";
 import { STEPS, TAKEOVER, CHANNELS, REPLY_FRAMEWORK, messageFor, linkedInNote, replySuggestions, agentRating, RATING_ORDER, WEEKLY_TOUCH, warmupReady, PREF_CHANNELS, prefLabel } from "./outreachScripts.js";
 
 const C = { card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc", green:"#1e6e4a", greenBg:"#e8f4ee", amber:"#b05e0d", amberBg:"#fdf0e0", red:"#9e3020" };
@@ -105,7 +106,7 @@ export default function AgentOutreach({ userId, onContact }) {
       </div>
       <div style={{display:"flex", gap:8, flexWrap:"wrap", marginBottom:12}}>
         <Tab k="today" l={`To message ${due.length}`}/><Tab k="warming" l={`Warming up ${warming.length}`}/><Tab k="requested" l={`Requests out ${requested.length}`}/><Tab k="replied" l={`Replied ${replied.length}`}/>
-        <Tab k="later" l={`Waiting ${later.length}`}/><Tab k="closed" l={`Done ${closed.length}`}/><Tab k="scripts" l="Scripts"/>
+        <Tab k="later" l={`Waiting ${later.length}`}/><Tab k="closed" l={`Done ${closed.length}`}/><Tab k="coverage" l="Coverage"/><Tab k="scripts" l="Scripts"/>
         <select value={chan} onChange={(e) => setChan(e.target.value)} style={{...inp, width:"auto"}}><option value="all">All channels</option>{CHANNELS.map((c) => <option key={c.k} value={c.k}>{c.l}</option>)}</select>
         <button onClick={() => setAdd(add ? null : { ...EMPTY })} style={btn}>{add ? "Cancel" : "Add agent"}</button>
       </div>
@@ -178,6 +179,7 @@ export default function AgentOutreach({ userId, onContact }) {
         {warming.length === 0 && <div style={{...card, padding:14, color:C.mid}}>Nobody warming up. Comment on a few agents' listings and they'll show here after the next Monday or Thursday run.</div>}
       </div>}
 
+      {view === "coverage" && <AgentCoverage rows={rows} onContact={onContact}/>}
       {view === "replied" && <div style={{display:"grid", gap:10}}>
         <div style={{fontFamily:F.mono, fontSize:12, color:C.mid}}>These are yours now. Pick up the conversation in Messenger. They're tagged "outreach: replied" in Contacts. Best-rated first: A is 24+ sales or $10M+ in the last 12 months, B is 10+ or $4M+, C is less.</div>
         {replied.map((r) => (
