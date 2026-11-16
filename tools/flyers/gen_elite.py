@@ -34,6 +34,10 @@ PALETTES = {
     "burgundy": dict(bg="#EFEAE0", ink="#101820", accent="#7A1E2C", panel="#3E1019", panel_text="#EFEAE0", panel_mute="#CDB0B5", muted="#5A5F66"),
     # Bond sample: light blue ground, navy ink and panel, red accent
     "navyred": dict(bg="#E4EDF5", ink="#0E1B2A", accent="#C8102E", panel="#0E1B2A", panel_text="#E4EDF5", panel_mute="#9DB4CC", muted="#4A5B70"),
+    # Bond family: navy, maroon and teal themes, light grounds, red type on every one
+    "sky":    dict(bg="#E4EDF5", ink="#0E1B2A", accent="#C8102E", panel="#0E1B2A", panel_text="#E4EDF5", panel_mute="#9DB4CC", muted="#4A5B70"),
+    "maroon": dict(bg="#F1ECE6", ink="#1A1216", accent="#C8102E", panel="#4A111C", panel_text="#F6ECE9", panel_mute="#D9B3B9", muted="#5E5358"),
+    "teal":   dict(bg="#E3EEF0", ink="#0B1C21", accent="#C8102E", panel="#0A3A42", panel_text="#E9F3F4", panel_mute="#9CC3C7", muted="#41585D"),
     "camel": dict(bg="#EFEAE0", ink="#101820", accent="#9A7440", panel="#15181C", panel_text="#EFEAE0", panel_mute="#CDB892", muted="#5A5F66"),
     "peacock": dict(bg="#EFEAE0", ink="#101820", accent="#0C5A63", panel="#0A363D", panel_text="#EFEAE0", panel_mute="#9DC0C0", muted="#5A5F66"),
 }
@@ -275,8 +279,11 @@ def _variant(c, mode):
     else:
         c.pop("photo", None); c.pop("photo_line", None); c["panel_line"] = TEXT_PANEL; c["panel_px"] = 50
     return c
+BOND_PAL = {r: ("sky", "maroon", "teal")[i % 3] for i, r in enumerate(BOND_REFS)}
+BOND_PAL.update({"CRD-01": "sky", "WHY-01": "sky", "SMART-01": "teal"})
 VARIANTS = {}
 for _ref in BOND_REFS:
+    CARDS[_ref]["palette"] = BOND_PAL[_ref]
     for _m in ("tie", "plum", "check", "text"):
         VARIANTS[_ref + "-" + _m] = _variant(CARDS[_ref], _m)
     CARDS[_ref] = VARIANTS[_ref + "-" + PHOTO_DEFAULT.get(_ref, "text")]
