@@ -202,13 +202,23 @@ CARDS = {
         rpad=22, rule_top=330, cta="Book a call. It&#39;s how we start.", foot=FOOT_CONSUMER, foot_px=9.5),
 }
 
-# ---- Photo toggle: his face on about 1 in 4 Bond flyers. Add a ref to PHOTO_ON to put the photo on it.
+# ---- Photo toggle. Every Bond flyer is rendered both ways: REF-photo.png (tie photo) and REF-text.png (text-only panel).
+# REF.png is the default one; GUP lets him switch per flyer. Add a ref to PHOTO_ON to make photo the default.
 BOND_REFS = ["PAY-01","PAY-02","PAY-03","PAY-04","DWN-01","DWN-02","DWN-03","WLT-01","WLT-02","WLT-03","EQT-01","EQT-02","EQT-03","CRD-01"]
 PHOTO_ON = {"CRD-01", "PAY-01", "DWN-02", "EQT-02"}
+TEXT_PANEL = "When it<br>has to go<br>right,<br>I&#39;m your<br>guy."
+def _variant(c, photo):
+    c = dict(c)
+    if photo:
+        c["photo"] = dict(COMMON["photo"]); c["photo_line"] = COMMON["photo_line"]; c.pop("panel_line", None); c.pop("panel_px", None)
+    else:
+        c.pop("photo", None); c.pop("photo_line", None); c["panel_line"] = TEXT_PANEL; c["panel_px"] = 50
+    return c
+VARIANTS = {}
 for _ref in BOND_REFS:
-    if _ref not in PHOTO_ON:
-        _c = CARDS[_ref]; _c.pop("photo", None); _c.pop("photo_line", None)
-        _c["panel_line"] = "When it<br>has to go<br>right,<br>I&#39;m your<br>guy."; _c["panel_px"] = 50
+    VARIANTS[_ref + "-photo"] = _variant(CARDS[_ref], True)
+    VARIANTS[_ref + "-text"] = _variant(CARDS[_ref], False)
+    CARDS[_ref] = VARIANTS[_ref + ("-photo" if _ref in PHOTO_ON else "-text")]
 
 def qr_svg(url, px, dark, light):
     import segno
@@ -339,11 +349,11 @@ def page(ref, c):
         html_out = html_out.replace("right:0;", "left:0;").replace("left:74px", "left:344px")
     return html_out
 
-def render(ref, c, outdir):
+def render(ref, c, outdir, name=None):
     tmp = tempfile.mkdtemp()
     html = os.path.join(tmp, ref + ".html")
     open(html, "w").write(page(ref, c))
-    png = os.path.join(outdir, ref + ".png")
+    png = os.path.join(outdir, (name or ref) + ".png")
     os.makedirs(outdir, exist_ok=True)
     subprocess.run(["google-chrome", "--headless=new", "--no-sandbox", "--disable-gpu", "--hide-scrollbars", "--allow-file-access-from-files",
                     "--window-size=1080,1080", "--virtual-time-budget=3000", f"--screenshot={png}", "file://" + html],
@@ -357,3 +367,6 @@ if __name__ == "__main__":
         i = args.index("--out"); out = args[i + 1]; args = args[:i] + args[i + 2:]
     for ref in (args or list(CARDS)):
         print(render(ref, CARDS[ref], out))
+        if ref in BOND_REFS:
+            for v in ("photo", "text"):
+                print(render(ref, VARIANTS[ref + "-" + v], out, name=ref + "-" + v))

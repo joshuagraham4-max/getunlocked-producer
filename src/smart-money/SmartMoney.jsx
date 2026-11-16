@@ -73,8 +73,30 @@ function Tag({ children, tone = "neutral" }) {
 const audTag = (c) => c.audience === "intro" ? <Tag tone="neutral">Intro · post once per group</Tag> : c.audience === "agent" ? <Tag tone="neutral">Real estate agents</Tag> : c.audience === "business" ? <Tag tone="neutral">Business owners · equipment</Tag> : c.audience === "partner" ? <Tag tone="neutral">Referral partners · equipment</Tag> : <Tag tone={c.audience}>{c.audience === "investor" ? "Investor" : "Consumer"}</Tag>;
 const licTag = (c) => (c.audience === "intro" || c.audience === "agent") ? null : c.bank === "equipment" ? <Tag tone="warn">Nationwide · not CA</Tag> : c.license === "none" ? <Tag tone="good">No license needed · FL OK</Tag> : <Tag tone="warn">License required · CO only</Tag>;
 
+// Bond flyers come in two versions (-photo and -text). Per-flyer choice is remembered on this device.
+const photoMode = (card) => { if (!isBond(card)) return null; return store.get("sm_photo_" + card.ref) || (card.photoDefault ? "photo" : "text"); };
+function useFlyerSrc(card) {
+  const [, bump] = useState(0);
+  React.useEffect(() => { const h = () => bump((n) => n + 1); window.addEventListener("sm-photo", h); return () => window.removeEventListener("sm-photo", h); }, []);
+  const m = photoMode(card);
+  return card.flyer && m ? card.flyer.replace(/\.png$/, m === "photo" ? "-photo.png" : "-text.png") : card.flyer;
+}
+function PhotoToggle({ card }) {
+  useFlyerSrc(card);
+  if (!isBond(card)) return null;
+  const m = photoMode(card);
+  const set = (v) => { store.set("sm_photo_" + card.ref, v); window.dispatchEvent(new Event("sm-photo")); };
+  return (
+    <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+      <span style={{ fontSize: 12, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: "0.06em" }}>Flyer version</span>
+      <button onClick={() => set("photo")} style={m === "photo" ? btn(C.navy) : ghost}>With my photo</button>
+      <button onClick={() => set("text")} style={m === "text" ? btn(C.navy) : ghost}>No photo</button>
+    </div>
+  );
+}
 function Flyer({ card, size = "100%" }) {
-  if (card.flyer) return <img src={card.flyer} alt={`${card.ref} flyer`} style={{ width: size, maxWidth: "100%", aspectRatio: "1/1", objectFit: "cover", borderRadius: 10, display: "block", border: `1px solid ${C.line}` }} />;
+  const src = useFlyerSrc(card);
+  if (card.flyer) return <img src={src} alt={`${card.ref} flyer`} style={{ width: size, maxWidth: "100%", aspectRatio: "1/1", objectFit: "cover", borderRadius: 10, display: "block", border: `1px solid ${C.line}` }} />;
   return (
     <div style={{ width: size, maxWidth: "100%", aspectRatio: "1/1", borderRadius: 10, background: C.navy, color: "#fff", display: "flex", flexDirection: "column", justifyContent: "center", gap: 8, padding: 20, boxSizing: "border-box" }}>
       <div style={{ fontFamily: F.display, fontWeight: 800, fontSize: 18 }}>{card.ref}</div>
@@ -84,7 +106,9 @@ function Flyer({ card, size = "100%" }) {
   );
 }
 
+function useFlyerSrcPlain(card) { const m = photoMode(card); return card.flyer && m ? card.flyer.replace(/\.png$/, m === "photo" ? "-photo.png" : "-text.png") : card.flyer; }
 function PostKit({ card, copyKind = "short" }) {
+  useFlyerSrc(card);
   const link = magnetLink(card);
   const m = MAGNETS[card.magnet];
   const body = card[copyKind];
@@ -94,6 +118,7 @@ function PostKit({ card, copyKind = "short" }) {
   const withBooking = `${body}${link ? `\n\n${link}` : ""}\n\n${cta}\n\n${footer}`;
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12, minWidth: 0 }}>
+      <PhotoToggle card={card} />
       <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>{audTag(card)}{licTag(card)}<Tag>REF {card.ref}</Tag>{card.was && <Tag>was {card.was}</Tag>}</div>
       {card.hooks && <div style={{ background: C.bg, border: `1px solid ${C.line}`, borderRadius: 10, padding: 14 }}>
         <div style={{ fontSize: 12, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>Color-block test hooks</div>
@@ -115,7 +140,7 @@ function PostKit({ card, copyKind = "short" }) {
         <CopyBtn text={withBooking} label="Copy post + booking link" />
         <CopyBtn text={BRAND.bookingCta} label="Copy booking CTA" />
         <CopyBtn text={footer} label="Copy footer" />
-        {card.flyer && <a href={card.flyer} download={`${card.ref}.png`} style={{ ...ghost, textDecoration: "none", display: "inline-flex", alignItems: "center" }}>Download flyer</a>}
+        {card.flyer && <a href={useFlyerSrcPlain(card)} download={`${card.ref}.png`} style={{ ...ghost, textDecoration: "none", display: "inline-flex", alignItems: "center" }}>Download flyer</a>}
       </div>
     </div>
   );

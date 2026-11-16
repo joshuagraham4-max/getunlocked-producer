@@ -1042,7 +1042,7 @@ I'd rather show you your real numbers than guess. Think of me when you want your
     },
   },
   {
-    ref: "PAY-01", campaign: "bond", lane: "pay", bank: "consumer", name: "Own It for Less Than You Rent (roommates)", lender: "N/A — call; route to payment, DPA and seller-credit scenarios",
+    ref: "PAY-01", campaign: "bond", photoDefault: true, lane: "pay", bank: "consumer", name: "Own It for Less Than You Rent (roommates)", lender: "N/A — call; route to payment, DPA and seller-credit scenarios",
     audience: "consumer", license: "required", flyer: "/smart-money/flyers/PAY-01.png", footer: "pay",
     cta: `Book a call and I'll run YOUR numbers, roommates and all. It's not a sales call. When it has to go right, I'm your guy. Save my info 👉 ${BRAND.booking}`,
     painPoints: ["priced-out", "renting"], magnet: "book-5", skool: "Homebuyers",
@@ -1111,7 +1111,7 @@ Sellers are cutting prices, and credits of 3 to 6% of the price can come back to
 Book a call and I'll show you exactly how much you'd bring to closing. It's not a sales call.`,
     long: `The biggest block for most renters isn't the payment, it's the cash. Two things can change that:
 
-1. Seller credits. With more than half of Colorado listings taking price cuts, credits of 3 to 6% of the price are common on my deals. On a $400,000 home that is $12,000 to $24,000 back to you at closing.
+1. Seller credits. With price cuts common on Colorado listings right now, credits of 3 to 6% of the price are common on my deals. On a $400,000 home that is $12,000 to $24,000 back to you at closing.
 2. Down payment assistance, for buyers who qualify.
 
 Together, they can bring cash to close to near $0 in the right scenario. Not every buyer or home qualifies, so let's look at yours.
@@ -1133,14 +1133,14 @@ Book a call and I'll show you exactly how much you'd bring to closing. It's not 
     notes: "FHFA All-Transactions HPI, Q4 to Q4, 1976 to 2025, nominal. Always say U.S. or nationally; Denver is flat to down lately and prices CAN fall. Never write will appreciate. Data in tools/flyers/data/hpi_annual.json. This is the chart for every wealth-building post.",
     short: `U.S. home prices rose in 45 of the last 50 years. The only down stretch was 2007 to 2011.
 
-6% on $10,000 is about $600 a year. 3% on a $600,000 home is about $18,000. Same math, a much bigger base, and it's yours instead of your landlord's.
+A $400K home growing 3% a year can add about $12,000 in equity. That's yours, not your landlord's.
 
 Prices can fall and local markets vary, so let's look at your numbers.
 
 Book a call and I'll show you what owning could mean for YOU. It's not a sales call.`,
     long: `Nationally, home prices rose in 45 of the last 50 years (FHFA, not adjusted for inflation). The only down years were 2007 through 2011, and prices were back above the old peak about a decade after it.
 
-Here is why that matters. $10,000 invested at 6% earns about $600 a year. A $600,000 home that appreciates 3% grows about $18,000 in a year. Same percentages, a very different base, and when you rent, that growth belongs to your landlord.
+Here is why that matters. A $400,000 home that grows 3% in a year adds about $12,000 in equity. When you rent, any growth like that belongs to your landlord, not you.
 
 Appreciation is never guaranteed, local markets vary and Denver has been flat to down lately. It's about owning something over years, not a quick win.
 
@@ -1148,7 +1148,7 @@ Book a call and I'll show you what owning could mean for YOU. It's not a sales c
     video: {
       title: "Home prices rose in 45 of 50 years",
       hook: "Look at these numbers.",
-      points: ["The 50-year chart: 45 up years, only 2007 to 2011 down", "$600 on $10K vs. about $18K on a $600K home", "How I help"],
+      points: ["The 50-year chart: 45 up years, only 2007 to 2011 down", "A $400K home growing 3% a year can add about $12,000 in equity", "How I help"],
       cta: "Book a call and I'll show you what owning could mean for YOU. It's not a sales call. When it has to go right, I'm your guy. Save my info.",
     },
   },
@@ -1168,7 +1168,7 @@ Book a call and I'll show you what your equity can do. It's not a sales call.`,
 
 For homeowners and investors, that equity can become the down payment on a rental, without selling the home you love. How much you can use depends on the value, your credit and the program, and investment property financing is for business purposes and isn't available in every state.
 
-I'm a call away to run your real numbers. It's not a sales call. Book a consultation call with me. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
+Book a consultation call with me and I'll run your real numbers. It's not a sales call. When it has to go right, I'm your guy. Save my info.`,
     video: {
       title: "Your equity is dead money",
       hook: "Look at these numbers.",
@@ -1193,7 +1193,7 @@ I'm a call away to run your real numbers. It's not a sales call. Book a consulta
     },
   },
   {
-    ref: "DWN-02", campaign: "bond", lane: "cash", bank: "consumer", name: "Who Pays Your Closing Costs? The Seller Can. (renters)", lender: "N/A — call; route to the matching payment, DPA, seller-credit or equity scenario",
+    ref: "DWN-02", campaign: "bond", photoDefault: true, lane: "cash", bank: "consumer", name: "Who Pays Your Closing Costs? The Seller Can. (renters)", lender: "N/A — call; route to the matching payment, DPA, seller-credit or equity scenario",
     audience: "consumer", license: "required", flyer: "/smart-money/flyers/DWN-02.png", footer: "dpa",
     cta: `Book a call and I'll show you who can pay what. It's not a sales call. When it has to go right, I'm your guy. Save my info. 👉 ${BRAND.booking}`,
     painPoints: ["no-down-payment", "renting"], magnet: "book-5", skool: "Homebuyers",
@@ -1225,7 +1225,7 @@ I'm a call away to run your real numbers. It's not a sales call. Book a consulta
     },
   },
   {
-    ref: "EQT-02", campaign: "bond", lane: "equity", bank: "consumer", name: "One More Door Starts at Home (homeowners to investors)", lender: "N/A — call; route to the matching payment, DPA, seller-credit or equity scenario",
+    ref: "EQT-02", campaign: "bond", photoDefault: true, lane: "equity", bank: "consumer", name: "One More Door Starts at Home (homeowners to investors)", lender: "N/A — call; route to the matching payment, DPA, seller-credit or equity scenario",
     audience: "consumer", license: "required", flyer: "/smart-money/flyers/EQT-02.png", footer: "consumer",
     cta: `Book a call and let's see what your equity can open. It's not a sales call. When it has to go right, I'm your guy. Save my info. 👉 ${BRAND.booking}`,
     painPoints: ["equity-trapped", "stuck"], magnet: "book-5", skool: "Homebuyers",
@@ -1305,7 +1305,7 @@ I'm a call away to run your real numbers. It's not a sales call. Book a consulta
     },
   },
   {
-    ref: "CRD-01", campaign: "bond", lane: "cred", bank: "consumer", name: "25 Years. One Call Away. (credibility)", lender: "N/A — call; route to the matching payment, DPA, seller-credit or equity scenario",
+    ref: "CRD-01", campaign: "bond", photoDefault: true, lane: "cred", bank: "consumer", name: "25 Years. One Call Away. (credibility)", lender: "N/A — call; route to the matching payment, DPA, seller-credit or equity scenario",
     audience: "consumer", license: "required", flyer: "/smart-money/flyers/CRD-01.png", footer: "consumer",
     cta: `Book a call whenever it's time. It's not a sales call. When it has to go right, I'm your guy. Save my info. 👉 ${BRAND.booking}`,
     painPoints: ["trust"], magnet: "book-5", skool: "Homebuyers",
