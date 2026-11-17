@@ -1,0 +1,50 @@
+[
+  {
+    "id": "PAY-01",
+    "ref": "T-PAY01",
+    "hook": "Rent went up again. What would owning cost?",
+    "theme": "navy",
+    "audience": "buyers",
+    "link": "https://getunlocked-producer.vercel.app/save?ref=T-PAY01"
+  },
+  {
+    "id": "DWN-01",
+    "ref": "T-DWN01",
+    "hook": "What if you only needed 3% down, and I could get you 5%?",
+    "theme": "maroon",
+    "audience": "buyers",
+    "link": "https://getunlocked-producer.vercel.app/save?ref=T-DWN01"
+  },
+  {
+    "id": "WLT-01",
+    "ref": "T-WLT01",
+    "hook": "Who gets the $12,000 your home earns?",
+    "theme": "teal",
+    "audience": "buyers",
+    "link": "https://getunlocked-producer.vercel.app/save?ref=T-WLT01"
+  },
+  {
+    "id": "WHY-01",
+    "ref": "T-WHY01",
+    "hook": "Buyers leave $65 billion a year on the table.",
+    "theme": "navy",
+    "audience": "buyers",
+    "link": "https://getunlocked-producer.vercel.app/save?ref=T-WHY01"
+  },
+  {
+    "id": "CRD-01",
+    "ref": "T-CRD01",
+    "hook": "Who do you call when it has to go right?",
+    "theme": "maroon",
+    "audience": "all",
+    "link": "https://getunlocked-producer.vercel.app/save?ref=T-CRD01"
+  },
+  {
+    "id": "AGT-06",
+    "ref": "T-AGT06",
+    "hook": "Your buyer loves the house. The payment doesn't reach.",
+    "theme": "teal",
+    "audience": "agents",
+    "link": "https://getunlocked-producer.vercel.app/save?ref=T-AGT06"
+  }
+]
