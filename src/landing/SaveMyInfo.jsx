@@ -140,7 +140,7 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
   const [err, setErr] = useState(""); const [busy, setBusy] = useState(false); const [done, setDone] = useState(false);
   const top = React.useRef(null);
   const base = WHO.find((w) => w.id === who);
-  const flow = base && agent && who === "buyer" ? { ...base, qs:[{ id:"hasagent", short:"Has agent", q:"Are you already working with an agent?", sub:"Totally fine either way. You're free to shop for an agent and a lender.", opts:["No, I don't have one", "Not sure yet", "Yes, I'm working with an agent"] }, ...base.qs] } : base; const vid = embedFor(SAVE_VIDEO);
+  const flow = base && agent && who === "buyer" ? { ...base, qs:[{ id:"hasagent", short:"Has agent", q:"Are you already working with an agent?", opts:["No, I don't have one", "Not sure yet", "Yes, I'm working with an agent"] }, ...base.qs] } : base; const vid = embedFor(SAVE_VIDEO);
   const go = (n) => { setStep(n); setErr(""); setTimeout(() => { try { top.current && top.current.scrollIntoView({ behavior:"smooth", block:"start" }); } catch {} }, 30); };
   const pick = (w) => { setWho(w); setA({}); go(0); };
   const answer = (q, v) => { setA({ ...a, [q.id]:v }); go(step + 1); };
