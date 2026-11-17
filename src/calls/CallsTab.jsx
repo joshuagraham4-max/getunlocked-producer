@@ -5,7 +5,7 @@ import { GUIDES } from "../howto/guides.jsx";
 import { today, addDays, digits, fullName, fmtMo, loadRadarData, peekRadarData, wrongNumberEmail, computeRadar, buildQueue, investorQueue, APPLY, isInvestor, bdayCallable, reasonFor, scriptsFor, logOutcome, undoOutcome, canUndo, segmentOf, REASON_COLOR, REASON_BG } from "../radar/engine.js";
 import { supabase } from "../supabase.js";
 import EmailDesk from "./EmailDesk.jsx";
-import ContactHistory from "./ContactHistory.jsx";
+import ContactHistory, { LogNote } from "./ContactHistory.jsx";
 import QuickUpdate from "./QuickUpdate.jsx";
 import Playbook from "./Playbook.jsx";
 import { personFirst, sunbizUrl, isEntity } from "../radar/investorPlaybook.js";
@@ -141,7 +141,7 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
     setDepBump((n) => n + 1);
   };
   // Deposits: every contact attempt (calls, voicemails, texts, emails, handwritten notes) before asking for business.
-  const [deposits, setDeposits] = useState(null); const [depBump, setDepBump] = useState(0);
+  const [deposits, setDeposits] = useState(null); const [depBump, setDepBump] = useState(0); const [noteBump, setNoteBump] = useState(0);
   useEffect(() => { if (!sel?.id) return; let live = true;
     supabase.from("contact_touches").select("id", { count:"exact", head:true }).eq("contact_id", sel.id).neq("channel", "update")
       .then(({ count }) => { if (live) setDeposits({ id:sel.id, n:count || 0 }); });
@@ -220,7 +220,8 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
           <span style={{fontFamily:F.mono, fontSize:12, fontWeight:700, color:col, background:bg, padding:"4px 10px", borderRadius:12}}>{txt}</span>
           <button onClick={logCard} style={{...btn, padding:"3px 10px", fontSize:12}}>+ Handwritten note</button>
         </div>); })()}
-      <ContactHistory userId={userId} contactId={sel.id} bump={depBump + calledToday.length} />
+      <LogNote key={sel.id} userId={userId} contactId={sel.id} onSaved={() => setNoteBump((n) => n + 1)} />
+      <ContactHistory userId={userId} contactId={sel.id} bump={depBump + calledToday.length + noteBump} />
       <div style={{height:10}}/>
       {pinned === sel.id && <div style={{fontFamily:F.mono, fontSize:11, color:C.amber, marginBottom:8}}>Not on today's call list. Opened from search.</div>}
       <div style={{display:"flex", justifyContent:"space-between", gap:16, flexWrap:"wrap"}}>

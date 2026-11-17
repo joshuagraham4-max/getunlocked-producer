@@ -4,7 +4,7 @@ import { supabase } from "../supabase.js";
 import HowTo from "../HowTo.jsx";
 import { GUIDES } from "../howto/guides.jsx";
 import InvestorPanel, { isInvestorLead, ListingAgentPanel, isListingAgent } from "./InvestorPanel.jsx";
-import ContactHistory from "../calls/ContactHistory.jsx";
+import ContactHistory, { LogNote } from "../calls/ContactHistory.jsx";
 import AgentMatch from "./AgentMatch.jsx";
 import AgentLander from "./AgentLander.jsx";
 import InvestorImport from "../investors/InvestorImport.jsx";
@@ -357,7 +357,8 @@ function Detail({ c, contacts, setContacts, userId, profileName, back, backLabel
           <Field label="Follow-up date" type="date" value={c.follow_up_date} onSave={f("follow_up_date")}/>
           <Field label="Last outcome" value={c.outcome} options={["", "talked", "voicemail", "no answer", "booked", "not interested", "wrong number"]} onSave={f("outcome")}/>
         </div>
-        <Field label="Notes" value={c.contact_note} onSave={f("contact_note")}/>
+        <Field label="About them (permanent notes)" value={c.contact_note} onSave={f("contact_note")}/>
+        <LogNote userId={userId} contactId={c.id} onSaved={() => { setHistBump((n) => n + 1); if (contactable) save({ last_contacted:today() }); }}/>
         <ContactHistory userId={userId} contactId={c.id} bump={histBump} startOpen />
         {contactable && <button onClick={() => save({ last_contacted:today() })} style={{...primary, width:"100%", padding:"11px", marginTop:10}}>Mark contacted today</button>}
       </div>

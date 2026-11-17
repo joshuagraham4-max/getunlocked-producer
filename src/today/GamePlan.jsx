@@ -68,7 +68,7 @@ export default function GamePlan({ userId, avgCommission, onGoCalls }) {
       dials: rows.filter((r) => r.channel === "call").length,
       conv: rows.filter((r) => r.channel === "call" && (r.outcome === "talked" || r.outcome === "booked")).length,
       booked: rows.filter((r) => r.outcome === "booked").length,
-      emails: rows.filter((r) => r.channel === "email" && /^email \d sent$/.test(r.outcome || "")).length,
+      emails: rows.filter((r) => r.channel === "email" && (/^email \d sent$/.test(r.outcome || "") || r.outcome === "back-and-forth")).length,
       posts: (g || []).length + (pp || []).length,
       dms: (dm || []).length,
     });
