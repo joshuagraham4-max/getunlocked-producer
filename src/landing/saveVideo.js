@@ -3,6 +3,10 @@
 export const SAVE_VIDEO = "";
 export const SAVE_VIDEO_TITLE = "A quick hello from Joshua";
 
+// The welcome clip on the Scenario Desk ("welcome to my desk"). Same rules: paste a link and it shows, leave it empty and it hides.
+export const DESK_VIDEO = "";
+export const DESK_VIDEO_TITLE = "Welcome to my desk";
+
 export function embedFor(url) {
   const u = String(url || "").trim(); if (!u) return null;
   let m = u.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/); if (m) return { kind:"iframe", src:`https://www.youtube.com/embed/${m[1]}?rel=0` };
