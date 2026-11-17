@@ -42,8 +42,10 @@ export default function AgentLander({ contact: c }) {
   const url = page ? `${SITE}/a/${page.slug}` : "";
   const first = (c.first_name || "").trim() || "there";
   const mk = page && page.market ? page.market : "your area";
-  const post = page ? `Thinking about buying a home${page.market ? " in " + page.market : ""}? Answer a few quick questions and see where you stand. Free credit report review, appraisal credits and access to wholesale rates through my lender partner, Joshua Graham.\n\n${url}` : "";
-  const setup = page ? `Hi ${first}, your free home buyer page is live: ${url}\n\nTurn it on in 3 steps:\n\n1. POST IT. Copy the post below, paste it on your Facebook with your link, tap Boost, and put $20 to $50 behind it. Aim it at ${mk}.\n\n2. TURN ON YOUR LEAD ALERTS. Install the free app called ntfy. Tap the + button and type this code: ${page.ntfy_topic}\nNow every new lead buzzes your phone with their name and number.\n\n3. CALL THEM WITHIN 5 MINUTES. That's the whole trick. Five minutes from the alert is when they pick up.\n\nThat's it. You don't pay me anything. I'm the lender on the page, and I'll keep you posted on your buyers.\n\nIf a buyer has a home to sell, the alert tells you. That's your listing lead too.\n\nPost copy:\n"${post}"\n\n- Joshua` : "";
+  const edit = page ? `${SITE}/e/${page.edit_token}` : "";
+  const desk = page ? `${SITE}/scenario-desk?ref=AGT-${page.slug}` : "";
+  const post = page ? `Thinking about buying or selling${page.market ? " in " + page.market : ""}? Answer a few quick questions and see where you stand. Free credit report review, appraisal credits and access to wholesale rates through my lender partner, Joshua Graham.\n\n${url}` : "";
+  const setup = page ? `Hi ${first}, your free buyer and seller page is live: ${url}\n\nTurn it on in 4 steps:\n\n1. MAKE IT YOURS. Tap your private link, add your photo, and check your info. You can also add a short intro video (optional, tips are on the page): ${edit}\nPlease keep that link to yourself.\n\n2. POST IT. Your edit page has ready-made posts. Copy one, paste it on Facebook or Instagram with your link, and on Facebook tap Boost and put $20 to $50 behind it. Aim it at ${mk}.\n\n3. TURN ON YOUR LEAD ALERTS. Install the free app called ntfy. Tap the + button and type this code: ${page.ntfy_topic}\nNow every new lead buzzes your phone with their name and number.\n\n4. CALL THEM WITHIN 5 MINUTES. That's the whole trick. Five minutes from the alert is when they pick up.\n\nThat's it. You don't pay me anything. I'm the lender on the page, and I'll keep you posted.\n\nIf a lead has a home to sell, the alert tells you. That's your listing lead too.\n\nGot a tricky deal? Send it to my scenario desk, no client names needed: ${desk}\n\n- Joshua` : "";
 
   const box = { marginTop:14, border:`1px solid ${C.rule}`, borderRadius:8, background:"#fff", padding:"10px 12px" };
   const lab = { fontFamily:F.mono, fontSize:10, letterSpacing:".12em", color:C.mid, textTransform:"uppercase" };
@@ -63,10 +65,11 @@ export default function AgentLander({ contact: c }) {
         <div><a href={url} target="_blank" rel="noreferrer" style={{ color:C.green, fontWeight:600 }}>{url}</a> {!page.active && <b style={{ color:"#a33" }}>(off)</b>}</div>
         <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginTop:8 }}>
           <button style={ghost} onClick={() => copy("setup", setup)}>{copied === "setup" ? "Copied" : "Copy welcome + setup text"}</button>
+          <button style={ghost} onClick={() => copy("edit", edit)}>{copied === "edit" ? "Copied" : "Copy their edit link"}</button>
           <button style={ghost} onClick={() => copy("post", post)}>{copied === "post" ? "Copied" : "Copy their post copy"}</button>
           <button style={ghost} onClick={toggle}>{page.active ? "Turn page off" : "Turn page on"}</button>
         </div>
-        <div style={{ marginTop:8, color:C.mid, fontSize:12 }}>Leads land in your Contacts and go to them by {page.lead_pref === "push" ? "alert" : page.lead_pref === "email" ? "email" : "alert and email"}. Remind them: call within 5 minutes.</div>
+        <div style={{ marginTop:8, color:C.mid, fontSize:12 }}>Their private edit link lets them add a photo, info and video. Leads (buyers and sellers) land in your Contacts and go to them by {page.lead_pref === "push" ? "alert" : page.lead_pref === "email" ? "email" : "alert and email"}. Remind them: call within 5 minutes.</div>
       </div>)}
       {msg && <div style={{ marginTop:8, color:"#a33", fontSize:12 }}>{msg}</div>}
     </div>

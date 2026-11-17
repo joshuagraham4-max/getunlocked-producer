@@ -15,6 +15,7 @@ export default defineConfig({
         'portfolio-snapshot': resolve(__dirname, 'portfolio-snapshot.html'),
         save: resolve(__dirname, 'save.html'),
         agent: resolve(__dirname, 'agent.html'),
+        agentEdit: resolve(__dirname, 'agent-edit.html'),
         'equipment-apply': resolve(__dirname, 'equipment-apply.html'),
         'scenario-desk': resolve(__dirname, 'scenario-desk.html'),
       },

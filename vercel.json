@@ -2,6 +2,7 @@
   "cleanUrls": true,
   "rewrites": [
     { "source": "/a/:slug", "destination": "/agent" },
+    { "source": "/e/:token", "destination": "/agent-edit" },
     { "source": "/", "has": [{ "type": "host", "value": "(www\\.)?grahamfinancial\\.us" }], "destination": "/home" }
   ]
 }

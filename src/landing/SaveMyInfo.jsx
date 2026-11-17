@@ -144,17 +144,18 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
   const [err, setErr] = useState(""); const [busy, setBusy] = useState(false); const [done, setDone] = useState(false);
   const top = React.useRef(null);
   const base = WHO.find((w) => w.id === who);
-  const selling = /^(Yes|Maybe)/.test(a.sellhome || "");
+  const selling = /^Selling/.test(a.intent || "");
+  const sellOnly = a.intent === "Selling my home";
   const flow = base && agent && who === "buyer" ? { ...base, qs:[
+    { id:"intent", short:"Here to", q:"What brings you here?", opts:["Buying a home", "Selling my home", "Selling and buying"] },
     { id:"hasagent", short:"Has agent", q:"Are you already working with an agent?", opts:["No, I don't have one", "Not sure yet", "Yes, I'm working with an agent"] },
-    { id:"sellhome", short:"Home to sell", q:"Do you have a home to sell first?", sub:"Selling often funds the next purchase.", opts:["No, I don't have one to sell", "Yes, I need to sell first", "Maybe, I'm not sure yet"] },
     ...(selling ? [
       { id:"saddr", short:"Sell address", q:"What's the address of the home you'd sell?", sub:"We'll zero in on what it's actually worth, not a Zillow guess.", text:true, ph:"Street, city" },
       { id:"sworth", short:"Thinks it's worth", q:"What do you think it's worth today?", sub:"Your best guess is fine.", money:true, ph:"450,000" },
       { id:"spayoff", short:"Owes", q:"Roughly what do you still owe on it?", sub:"All loans on the home, a ballpark is fine.", money:true, ph:"250,000" },
       { id:"swhen", short:"Sell by", q:"When do you need it sold?", opts:["As soon as possible", "Within 3 months", "In 6 months or more", "Only after I find the next home"] },
     ] : []),
-    ...base.qs] } : base; const vid = embedFor(SAVE_VIDEO);
+    ...(sellOnly ? [] : base.qs)] } : base; const vid = embedFor(SAVE_VIDEO);
   const go = (n) => { setStep(n); setErr(""); setTimeout(() => { try { top.current && top.current.scrollIntoView({ behavior:"smooth", block:"start" }); } catch {} }, 30); };
   const pick = (w) => { setWho(w); setA({}); go(0); };
   const answer = (q, v) => { setA({ ...a, [q.id]:v }); go(step + 1); };
@@ -182,7 +183,7 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
       first_name:f.first.trim(), last_name:f.last.trim() || null, email:f.email.trim(), phone,
       property_state:f.state || null, zip:/^\d{5}$/.test(f.zip.trim()) ? f.zip.trim() : null, consent:true,
       ref:refCode, source:agent ? "agent-page" : "save-my-info", page_url:location.href.slice(0, 500), user_agent:navigator.userAgent.slice(0, 300),
-      answers:{ has_agent:a.hasagent || null, summary, agent_slug:agent ? agent.slug : null, agent_name:agent ? agent.name : null, interest:who, qa:a, class_waitlist:wantsClass, address:f.address.trim() || a.saddr || null, sell_first:selling, send_leads_to:f.sendTo.trim() || null, city:f.city.trim() || null, note:f.note.trim() || null } });
+      answers:{ has_agent:a.hasagent || null, summary, agent_slug:agent ? agent.slug : null, agent_name:agent ? agent.name : null, interest:who, qa:a, class_waitlist:wantsClass, address:f.address.trim() || a.saddr || null, sell_first:selling, intent:a.intent || null, send_leads_to:f.sendTo.trim() || null, city:f.city.trim() || null, note:f.note.trim() || null } });
     setBusy(false);
     if (error) return setErr("We couldn't send that just now. Check your connection and try again, or call " + BRAND.phone + ".");
     setDone(true); try { window.scrollTo({ top:0, behavior:"smooth" }); } catch {}
@@ -197,9 +198,9 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
             <img src="/brand/gf-logo-ink.png" alt="Graham Financial" style={{ height:54, width:"auto" }}/>
             <img src="/brand/zpm-logo-ink.png" alt="Zero Point Mortgage Services" style={{ height:36, width:"auto" }}/>
           </div>
-          <div className="sv-k" style={{ marginTop:30 }}>{agent ? "Home buyers" : "Buyers · Homeowners · Investors · Agents"}</div>
-          <h1 className="sv-h1" style={agent ? { fontSize:"clamp(32px,4.6vw,52px)" } : undefined}>{done ? <>You're in, {f.first.trim()}.</> : agent ? <>Buying a home{agent.market ? <> in {agent.market}</> : null}?<i>Let's see how we get you there.</i></> : <>What are you after?<i>Let's see if I can get you there.</i></>}</h1>
-          <p className="sv-sub">{done ? (agent ? `${agent.name} and I will both be in touch shortly. ${flow.thanks(a)}` : `${flow.thanks(a)} It's not a sales call. When it has to go right, I'm your guy.`) : agent ? `${agent.name}${agent.brokerage ? " of " + agent.brokerage : ""} and I are here to help you buy. I'm a wholesale broker, so I shop several lenders for you and you get access to the best rates. Get a quote from anyone. Then get mine.` : "I'm a wholesale broker. I shop several lenders for you, so you get access to the best rates. Get a quote from anyone. Then get mine."}</p>
+          <div className="sv-k" style={{ marginTop:30 }}>{agent ? "Buyers and sellers" : "Buyers · Homeowners · Investors · Agents"}</div>
+          <h1 className="sv-h1" style={agent ? { fontSize:"clamp(32px,4.6vw,52px)" } : undefined}>{done ? <>You're in, {f.first.trim()}.</> : agent ? <>Buying or selling{agent.market ? <> in {agent.market}</> : null}?<i>Let's see how we get you there.</i></> : <>What are you after?<i>Let's see if I can get you there.</i></>}</h1>
+          <p className="sv-sub">{done ? (agent ? (sellOnly ? `${agent.name} will be in touch about your home, and I'm on the lending side if you buy next.` : `${agent.name} and I will both be in touch shortly. ${flow.thanks(a)}`) : `${flow.thanks(a)} It's not a sales call. When it has to go right, I'm your guy.`) : agent ? `${agent.name}${agent.brokerage ? " of " + agent.brokerage : ""} and I are here to help you buy or sell. I'm a wholesale broker, so I shop several lenders for you and you get access to the best rates. Get a quote from anyone. Then get mine.` : "I'm a wholesale broker. I shop several lenders for you, so you get access to the best rates. Get a quote from anyone. Then get mine."}</p>
 
           {done ? (
             <div style={{ marginTop:30 }}>
@@ -212,6 +213,7 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
               </div>
             </div>
           ) : (<>
+            {agent && agent.video_url && step === 0 && embedFor(agent.video_url) && (() => { const av = embedFor(agent.video_url); return <div className="sv-vid" aria-label={agent.name}>{av.kind === "iframe" ? <iframe src={av.src} title={agent.name} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen/> : <video src={av.src} controls playsInline preload="metadata"/>}</div>; })()}
             {!flow && vid && <div className="sv-vid" aria-label={SAVE_VIDEO_TITLE}>
               {vid.kind === "iframe" ? <iframe src={vid.src} title={SAVE_VIDEO_TITLE} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen/> : <video src={vid.src} controls playsInline preload="metadata"/>}
             </div>}
@@ -234,11 +236,11 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
 
             {flow && q && <div style={{ marginTop:22 }}>
               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                <div className="sv-lab">{flow.label} · {step + 1} of {flow.qs.length + 1}</div>
+                <div className="sv-lab">{agent ? "Your plan" : flow.label} · {step + 1} of {flow.qs.length + 1}</div>
                 <button type="button" onClick={() => (step === 0 ? (lockWho ? null : setWho("")) : go(step - 1))} style={{ all:"unset", cursor:"pointer", font:`italic 400 15px ${SERIF}`, color:C.mute }}>← Back</button>
               </div>
               <div style={{ height:3, background:C.soft, marginTop:10 }}><div style={{ height:3, width:`${((step + 1) / (flow.qs.length + 1)) * 100}%`, background:C.red }}/></div>
-              {who === "buyer" && <Perks title="Answer these and unlock"/>}
+              {who === "buyer" && !sellOnly && <Perks title="Answer these and unlock"/>}
               <h2 style={{ font:`600 clamp(28px,4vw,40px)/1.1 ${SERIF}`, margin:"22px 0 0" }}>{q.q}</h2>
               {q.sub && <p className="sv-sub" style={{ marginTop:8 }}>{q.sub}</p>}
               {q.opts ? <div style={{ marginTop:10 }}>{q.opts.map((o) => (
@@ -256,7 +258,7 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
 
             {flow && inContact && <form onSubmit={submit} noValidate style={{ marginTop:22 }}>
               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                <div className="sv-lab">{flow.label} · {flow.qs.length + 1} of {flow.qs.length + 1}</div>
+                <div className="sv-lab">{agent ? "Your plan" : flow.label} · {flow.qs.length + 1} of {flow.qs.length + 1}</div>
                 <button type="button" onClick={() => go(step - 1)} style={{ all:"unset", cursor:"pointer", font:`italic 400 15px ${SERIF}`, color:C.mute }}>← Back</button>
               </div>
               <div style={{ height:3, background:C.red, marginTop:10 }}/>
@@ -268,7 +270,7 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
                   : <>Where do I reach you?<br/><i style={{ fontWeight:500, color:C.red }}>I'll tell you what I'd do.</i></>}
               </h2>
               {flow.handoff && <p className="sv-sub" style={{ marginTop:10 }}>{flow.handoff}</p>}
-              {wantsClass && <Perks title="Joining the wait list unlocks"/>}
+              {wantsClass && !sellOnly && <Perks title="Joining the wait list unlocks"/>}
               <div className="sv-fields" style={{ marginTop:18 }}>
                 <label className="sv-f"><span>First name</span><input className="sv-in" value={f.first} onChange={set("first")} autoComplete="given-name"/></label>
                 <label className="sv-f"><span>Last name</span><input className="sv-in" value={f.last} onChange={set("last")} autoComplete="family-name"/></label>
