@@ -6,35 +6,60 @@ import { supabase } from "../supabase.js";
 import { BRAND } from "../smart-money/data.js";
 import { SAVE_VIDEO, SAVE_VIDEO_TITLE, embedFor } from "./saveVideo.js";
 
-const C = { bone:"#EFEAE0", ink:"#101820", red:"#C8102E", navy:"#0E1B2A", mute:"#5A5F66", rule:"#101820", soft:"#D8D1C3" };
+const C = { bone:"#EFEAE0", ink:"#101820", red:"#C8102E", navy:"#0E1B2A", maroon:"#4A111C", mustard:"#D9A94A", mute:"#5A5F66", rule:"#101820", soft:"#D8D1C3" };
 const SERIF = "'Bodoni Moda', 'Playfair Display', Georgia, serif", SANS = "'Montserrat', Arial, sans-serif";
 const STATES = "AL AK AZ AR CA CO CT DE DC FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY".split(" ");
 
-// Talking points per choice, in the flyer's ledger shape: [label, sub, value, hot]. Examples only; the small print says so.
+// Four doors. Each is a few tap-answer questions (one per screen) that qualify the visitor and ask what they are trying to accomplish,
+// then a handoff: buyers are offered the 15-minute class (wait list until it is recorded), homeowners get a hand-run equity review,
+// investors get the Portfolio Review, agents join the lead wait list. Every answer lands in the contact note.
+const TIMING = ["No concerns, ready when it's right", "I need to move within 3 months", "I'm 6 months or more out", "Something is forcing the timing"];
 const WHO = [
   { id:"buyer", label:"Buying a home", sub:"First home, next home or moving up",
-    head:["What if you only needed", "3% down, and I could get you 5%?"],
-    rows:[["3% DOWN, $400K HOME", "What you bring", "$12,000", 0], ["ASSISTANCE TOWARD IT", "3.5% to 5% of the price", "$14K–$20K", 0], ["SELLER CREDITS", "3% to 6%, on almost every deal I closed this year", "$12K–$24K", 0], ["YOUR CASH TO CLOSE", "It can drop close to", "Near $0", 1]],
-    fine:"Example: $400,000 purchase price, 3% down. Assistance and seller credits depend on program eligibility, lender and seller agreement, and are illustrative.",
-    next:"I'll text you your next step today, and we'll run your real numbers." },
+    qs:[
+      { id:"goal", short:"Goal", q:"What are we trying to accomplish?", opts:["Buy my first home", "Move up to the next home", "Buy a home to live in and rent a room", "Just see what's possible"] },
+      { id:"job", short:"Employed", q:"Are you employed?", opts:["Yes, W-2", "Yes, self-employed", "Retired or other income", "Not right now"] },
+      { id:"dp", short:"Down payment concern", q:"Is the down payment a concern for you?", opts:["Yes, a big one", "A little", "No"] },
+      { id:"credit", short:"Credit", q:"How's your credit?", opts:["Strong, 700 or higher", "Okay, 640 to 699", "Needs work", "Not sure"] },
+      { id:"pmt", short:"Perfect monthly payment", q:"If you could wave a magic wand, what's the perfect monthly payment for you?", money:true, ph:"2,500" },
+      { id:"cash", short:"Max cash to close", q:"Best case, what's the most you'd want to spend, all in, to buy a home?", sub:"Down payment, closing costs, everything you'd bring to the table.", money:true, ph:"15,000" },
+      { id:"timing", short:"Timing", q:"Any concerns on timing?", opts:TIMING },
+      { id:"class", short:"Class", q:"Want the free 15-minute class that makes you a SMART buyer with SMART money?", sub:"It's how you get access to SMART money.", opts:["Yes, join the wait list", "Not right now"] },
+    ],
+    thanks:(a) => a.class && /^Yes/.test(a.class) ? "You're on the wait list for the SMART Buyer class. I'll text you the day it's live. In the meantime I'll look at your numbers and reach out." : "Got it. I'll look at what you told me and text you what I'd do in your shoes." },
   { id:"homeowner", label:"I own a home", sub:"Equity, a low rate, a second property",
-    head:["What would you do with", "$180,000 of equity?"],
-    rows:[["80% OF YOUR HOME'S VALUE", "On a $600,000 home, up to", "$480,000", 0], ["MINUS WHAT YOU OWE", "Your mortgage balance", "−$300,000", 0], ["EQUITY YOU MAY BE ABLE TO USE", "The down payment on a rental, no sale", "$180,000", 1]],
-    fine:"Example only: home value, balance and equity are illustrative. Equity available depends on value, lien position, credit and program guidelines.",
-    next:"I'll text you today, and we'll see what your equity could do without touching your low rate." },
+    qs:[
+      { id:"goal", short:"Goal", q:"What are we trying to accomplish?", opts:["Buy rentals with my equity", "Optimize the financing I have", "Pull cash out", "Sell and move up", "Just see where I stand"] },
+      { id:"years", short:"Owned", q:"How long have you owned the home?", opts:["Less than 2 years", "2 to 5 years", "5 to 10 years", "More than 10 years"] },
+      { id:"dead", short:"Dead money", q:"Do you have dead money sitting in it?", opts:["Probably", "Not sure", "No"] },
+      { id:"working", short:"Equity working", q:"Is your equity working for you right now?", opts:["Yes", "No", "Not sure"] },
+      { id:"timing", short:"Timing", q:"Any concerns on timing?", opts:TIMING },
+    ],
+    handoff:"Great. I'll run a deep home valuation and equity review, way deeper than an online estimate, and get back to you. I'll need your address.",
+    thanks:() => "Got it. I'll run your deep equity review by hand and get back to you with what I find." },
   { id:"investor", label:"Real estate investor", sub:"One property or a whole portfolio",
-    head:["Is your portfolio financed", "as well as it was bought?"],
-    rows:[["YOUR LOANS TODAY", "Placed one at a time, with whoever was there", "Scattered", 0], ["A PORTFOLIO REVIEW", "Every loan, rate and maturity on one page", "One page", 0], ["THE EDGE", "Several lenders, for every property you hold", "Options", 1]],
-    fine:"Portfolio reviews are for business-purpose (investment) properties and are estimates based on the information you provide. No credit is pulled.",
-    next:"I'll text you today. Ask me about the free portfolio review. No credit pull." },
+    qs:[
+      { id:"goal", short:"Goal", q:"What are we trying to accomplish?", opts:["Buy my next property", "Optimize what I already have", "Pull equity out", "Reduce my portfolio", "Get a second opinion"] },
+      { id:"count", short:"Properties", q:"How many properties do you own?", opts:["None yet", "1 to 4", "5 to 10", "11 or more"] },
+      { id:"direction", short:"Direction", q:"Are you expanding or reducing?", opts:["Expanding", "Reducing", "Holding steady", "Not sure"] },
+      { id:"focus", short:"Main goal", q:"Is cash flow your main goal, or equity position?", opts:["Cash flow", "Equity position", "Both"] },
+      { id:"timing", short:"Timing", q:"Any concerns on timing?", opts:TIMING },
+    ],
+    handoff:"You probably have dead money sitting in properties that aren't optimized. That's why I do a portfolio review.",
+    thanks:() => "Got it. Next, see where your dead money is, and book a call with me when you're ready." },
   { id:"agent", label:"Real estate agent", sub:"Your buyers, your deals, your team",
-    head:["Your buyer loves the house.", "The payment doesn't reach."],
-    rows:[["THE PAYMENT YOUR BUYER CAN HOLD", "Example, all in", "$3,000", 0], ["A HALF-POINT LOWER RATE", "What a wholesale broker can often find", "−0.5%", 0], ["THE HOUSE THEY CAN NOW REACH", "More purchase price, same payment", "+$20K–25K", 1]],
-    fine:"Example only: a $3,000 payment, a half-point lower rate and the added purchase price are illustrative and vary by scenario.",
-    next:"I'll reach out today about your market, your buyers and training your team." },
+    qs:[
+      { id:"goal", short:"Goal", q:"What are we trying to accomplish?", opts:["More buyer leads", "Bigger approvals for my buyers", "Train my team on lending", "A lender I can count on"] },
+      { id:"areas", short:"Areas", q:"What areas do you cover?", sub:"Cities, counties or zip codes.", text:true, ph:"Sarasota, Bradenton, Lakewood Ranch" },
+      { id:"side", short:"Prefers", q:"Do you prefer buyers or sellers?", opts:["Buyers", "Sellers", "Both"] },
+      { id:"invest", short:"Invests", q:"Are you interested in real estate investing yourself?", opts:["Yes", "No", "I already invest"] },
+      { id:"home", short:"Owns a home", q:"Do you own a home?", opts:["Yes", "No"] },
+      { id:"timing", short:"Leads wanted", q:"How soon do you want leads?", opts:["Now", "This quarter", "Just exploring"] },
+    ],
+    handoff:"Here's where we are: we're building out the team and the lead flow now, so this is a wait list. Where should we send leads when they're ready for you?",
+    thanks:() => "You're on the lead wait list. I'll reach out as soon as buyers are ready for your market." },
 ];
 const WHY = [["THE NATIONAL TOTAL", "Overpaid on mortgages, every year", "$65 billion", 0], ["YOUR SHARE", "About, per borrower, per year", "$3,300", 0], ["THE CAUSE", "Most buyers take one lender's quote", "1 quote", 0], ["THE FIX", "A wholesale broker shops several lenders for you", "Me", 1]];
-
 const getWho = () => { try { const w = new URLSearchParams(location.search).get("who"); return WHO.some((x) => x.id === w) ? w : ""; } catch { return ""; } };
 const getRef = () => { try { return new URLSearchParams(location.search).get("ref") || "SAVE-01"; } catch { return "SAVE-01"; } };
 const CSS = `
@@ -42,7 +67,7 @@ const CSS = `
 .sv *{box-sizing:border-box}
 .sv-wrap{display:grid;grid-template-columns:minmax(0,1fr) 300px;max-width:1180px;margin:0 auto}
 .sv-main{padding:34px 48px 56px}
-.sv-side{background:${C.navy};color:${C.bone};position:sticky;top:0;align-self:start;height:100vh;padding:36px 28px;display:flex;flex-direction:column;gap:18px;overflow:hidden}
+.sv-side{background:${C.maroon};color:${C.bone};position:sticky;top:0;align-self:start;height:100vh;padding:36px 28px;display:flex;flex-direction:column;gap:18px;overflow:hidden}
 .sv-h1{font:600 clamp(40px,5.6vw,66px)/1.04 ${SERIF};margin:18px 0 0;letter-spacing:-.01em}
 .sv-h1 i{display:block;font-weight:500;color:${C.red}}
 .sv-k{font:700 12px ${SANS};letter-spacing:.2em;text-transform:uppercase;display:flex;gap:10px;align-items:center}
@@ -72,7 +97,7 @@ const CSS = `
 .sv-vid iframe,.sv-vid video{position:absolute;inset:0;width:100%;height:100%;border:0}
 .sv-side h2{font:italic 500 38px/1.12 ${SERIF};margin:0}
 .sv-side img.ph{width:100%;flex:1;min-height:0;object-fit:cover;object-position:50% 12%}
-.sv-side .bar{width:36px;height:3px;background:#FF4B5C}
+.sv-side .bar{width:36px;height:3px;background:${C.mustard}}
 .sv-side a{color:${C.bone};text-decoration:none}
 @media(max-width:900px){
  .sv-wrap{grid-template-columns:1fr}
@@ -88,34 +113,48 @@ function Ledger({ rows }) {
     <div key={i} className={"sv-row" + (hot ? " hot" : "")}><div><div className="sv-lab lab">{l}</div><div className="sub">{s}</div></div><div className="val">{v}</div></div>))}</div>;
 }
 
+const money = (v) => String(v || "").replace(/[^\d]/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
 export default function SaveMyInfo() {
-  const [f, setF] = useState({ who:getWho(), first:"", last:"", email:"", phone:"", city:"", state:"", zip:"", note:"", consent:false });
+  const [who, setWho] = useState(getWho());
+  const [step, setStep] = useState(() => { try { return Math.max(0, parseInt(new URLSearchParams(location.search).get("step") || "0", 10) || 0); } catch { return 0; } });            // question index; flow.qs.length = the contact step
+  const [a, setA] = useState({});                  // answers by question id
+  const [f, setF] = useState({ first:"", last:"", email:"", phone:"", city:"", state:"", zip:"", address:"", sendTo:"", note:"", consent:false });
   const [err, setErr] = useState(""); const [busy, setBusy] = useState(false); const [done, setDone] = useState(false);
+  const top = React.useRef(null);
+  const flow = WHO.find((w) => w.id === who); const vid = embedFor(SAVE_VIDEO);
+  const go = (n) => { setStep(n); setErr(""); setTimeout(() => { try { top.current && top.current.scrollIntoView({ behavior:"smooth", block:"start" }); } catch {} }, 30); };
+  const pick = (w) => { setWho(w); setA({}); go(0); };
+  const answer = (q, v) => { setA({ ...a, [q.id]:v }); go(step + 1); };
   const set = (k) => (e) => setF({ ...f, [k]: e.target.type === "checkbox" ? e.target.checked : e.target.value });
-  const who = WHO.find((w) => w.id === f.who); const vid = embedFor(SAVE_VIDEO);
+  const inContact = flow && step >= flow.qs.length;
+  const q = flow && !inContact ? flow.qs[step] : null;
+  const wantsClass = who === "buyer" && /^Yes/.test(a.class || "");
 
   const submit = async (ev) => {
     ev.preventDefault(); setErr("");
     const phone = f.phone.replace(/\D/g, ""); const miss = [];
-    if (!f.who) miss.push("what brings you here");
     if (!f.first.trim()) miss.push("first name");
     if (!/^\S+@\S+\.\S+$/.test(f.email.trim())) miss.push("a valid email");
     if (phone.length < 10) miss.push("a 10-digit phone number");
-    if (!f.state && !/^\d{5}$/.test(f.zip.trim())) miss.push("your state or zip");
+    if (who === "homeowner" && !f.address.trim()) miss.push("the home's address");
+    if (who !== "agent" && !f.state && !/^\d{5}$/.test(f.zip.trim())) miss.push("your state or zip");
     if (!f.consent) miss.push("your consent to be contacted");
     if (miss.length) return setErr("Please add " + miss.join(", ") + ".");
     setBusy(true);
     const place = [f.city.trim(), f.state].filter(Boolean).join(", ");
-    const summary = `Save my info: ${who.label}${place ? " · " + place : ""}${f.note.trim() ? ` · "${f.note.trim().slice(0, 160)}"` : ""}`;
+    const qa = flow.qs.map((x) => `${x.short}: ${x.money && a[x.id] ? "$" + a[x.id] : (a[x.id] || "-")}`).join(" · ");
+    const summary = `Save my info: ${flow.label}${wantsClass ? " · CLASS WAIT LIST" : ""}${who === "agent" ? " · LEAD WAIT LIST" : ""} · ${qa}${f.address.trim() ? " · Address: " + f.address.trim() : ""}${f.sendTo.trim() ? " · Send leads to: " + f.sendTo.trim() : ""}${place ? " · " + place : ""}${f.note.trim() ? ` · "${f.note.trim().slice(0, 160)}"` : ""}`.slice(0, 900);
     const { error } = await supabase.from("calculator_leads").insert({
       first_name:f.first.trim(), last_name:f.last.trim() || null, email:f.email.trim(), phone,
       property_state:f.state || null, zip:/^\d{5}$/.test(f.zip.trim()) ? f.zip.trim() : null, consent:true,
       ref:getRef(), source:"save-my-info", page_url:location.href.slice(0, 500), user_agent:navigator.userAgent.slice(0, 300),
-      answers:{ summary, interest:f.who, city:f.city.trim() || null, note:f.note.trim() || null } });
+      answers:{ summary, interest:who, qa:a, class_waitlist:wantsClass, address:f.address.trim() || null, send_leads_to:f.sendTo.trim() || null, city:f.city.trim() || null, note:f.note.trim() || null } });
     setBusy(false);
     if (error) return setErr("We couldn't send that just now. Check your connection and try again, or call " + BRAND.phone + ".");
     setDone(true); try { window.scrollTo({ top:0, behavior:"smooth" }); } catch {}
   };
+  const btnLink = { textAlign:"center", textDecoration:"none", display:"flex", alignItems:"center", justifyContent:"center" };
 
   return (
     <div className="sv"><style>{CSS}</style>
@@ -126,50 +165,86 @@ export default function SaveMyInfo() {
             <img src="/brand/zpm-logo-ink.png" alt="Zero Point Mortgage Services" style={{ height:36, width:"auto" }}/>
           </div>
           <div className="sv-k" style={{ marginTop:30 }}>Buyers · Homeowners · Investors · Agents</div>
-          <h1 className="sv-h1">{done ? <>You're saved, {f.first.trim()}.</> : <>Save my info.<i>I'll show you your number.</i></>}</h1>
-          <p className="sv-sub">{done ? `${who.next} It's not a sales call. When it has to go right, I'm your guy.` : "I'm a wholesale broker. I shop several lenders for you, so you get access to the best rates. Get a quote from anyone. Then get mine."}</p>
+          <h1 className="sv-h1">{done ? <>You're in, {f.first.trim()}.</> : <>What are you after?<i>Let's see if I can get you there.</i></>}</h1>
+          <p className="sv-sub">{done ? `${flow.thanks(a)} It's not a sales call. When it has to go right, I'm your guy.` : "I'm a wholesale broker. I shop several lenders for you, so you get access to the best rates. Get a quote from anyone. Then get mine."}</p>
 
           {done ? (
             <div style={{ marginTop:30 }}>
               <hr className="sv-rule"/>
-              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(min(100%,180px),1fr))", gap:12, marginTop:22 }}>
-                <a href={`tel:${BRAND.phone.replace(/\D/g, "")}`} className="sv-btn" style={{ background:"transparent", color:C.ink, border:`2px solid ${C.ink}`, textAlign:"center", textDecoration:"none", display:"flex", alignItems:"center", justifyContent:"center" }}>Call me</a>
-                <a href={BRAND.booking} target="_blank" rel="noreferrer" className="sv-btn" style={{ textAlign:"center", textDecoration:"none", display:"flex", alignItems:"center", justifyContent:"center" }}>Book a call</a>
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(min(100%,200px),1fr))", gap:12, marginTop:22 }}>
+                {who === "investor" && <a href={`/review?ref=${encodeURIComponent(getRef())}`} className="sv-btn" style={btnLink}>See your dead money</a>}
+                <a href={BRAND.booking} target="_blank" rel="noreferrer" className="sv-btn" style={{ ...btnLink, ...(who === "investor" ? { background:"transparent", color:C.ink, border:`2px solid ${C.ink}` } : {}) }}>Book a call with me</a>
+                <a href={`tel:${BRAND.phone.replace(/\D/g, "")}`} className="sv-btn" style={{ ...btnLink, background:"transparent", color:C.ink, border:`2px solid ${C.ink}` }}>Call me</a>
               </div>
             </div>
           ) : (<>
-            {vid && <div className="sv-vid" aria-label={SAVE_VIDEO_TITLE}>
+            {!flow && vid && <div className="sv-vid" aria-label={SAVE_VIDEO_TITLE}>
               {vid.kind === "iframe" ? <iframe src={vid.src} title={SAVE_VIDEO_TITLE} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen/> : <video src={vid.src} controls playsInline preload="metadata"/>}
             </div>}
             <hr className="sv-rule"/>
-            <div className="sv-lab" style={{ marginTop:22 }}>What brings you here?</div>
-            <div role="radiogroup" style={{ marginTop:6 }}>
-              {WHO.map((w) => (
-                <button key={w.id} type="button" role="radio" aria-checked={f.who === w.id} className={"sv-choice" + (f.who === w.id ? " on" : "")} onClick={() => setF({ ...f, who:w.id })}>
-                  <span><span className="t">{w.label}</span><span className="s">{w.sub}</span></span><span className="dot"/>
-                </button>))}
-            </div>
+            <div ref={top} style={{ scrollMarginTop:16 }}/>
 
-            {who && <div style={{ marginTop:30 }}>
-              <div className="sv-k">For you</div>
-              <h2 style={{ font:`600 clamp(30px,4vw,44px)/1.08 ${SERIF}`, margin:"12px 0 0" }}>{who.head[0]}<br/><i style={{ fontWeight:500, color:C.red }}>{who.head[1]}</i></h2>
-              <Ledger rows={who.rows}/>
-              <p className="sv-fine" style={{ marginTop:10 }}>{who.fine}</p>
+            {!flow && <>
+              <div className="sv-lab" style={{ marginTop:22 }}>What brings you here?</div>
+              <div style={{ marginTop:6 }}>{WHO.map((w) => (
+                <button key={w.id} type="button" className="sv-choice" onClick={() => pick(w.id)}>
+                  <span><span className="t">{w.label}</span><span className="s">{w.sub}</span></span><span className="dot"/>
+                </button>))}</div>
+              <div style={{ marginTop:44 }}>
+                <div className="sv-k">Why me</div>
+                <h2 style={{ font:`600 clamp(30px,4vw,44px)/1.08 ${SERIF}`, margin:"12px 0 0" }}>Buyers leave $65 billion<br/><i style={{ fontWeight:500, color:C.red }}>a year on the table.</i></h2>
+                <Ledger rows={WHY}/>
+                <p style={{ font:`italic 500 20px ${SERIF}`, margin:"14px 0 0" }}>Get a quote from anyone. Then get mine.</p>
+              </div>
+            </>}
+
+            {flow && q && <div style={{ marginTop:22 }}>
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                <div className="sv-lab">{flow.label} · {step + 1} of {flow.qs.length + 1}</div>
+                <button type="button" onClick={() => (step === 0 ? setWho("") : go(step - 1))} style={{ all:"unset", cursor:"pointer", font:`italic 400 15px ${SERIF}`, color:C.mute }}>← Back</button>
+              </div>
+              <div style={{ height:3, background:C.soft, marginTop:10 }}><div style={{ height:3, width:`${((step + 1) / (flow.qs.length + 1)) * 100}%`, background:C.red }}/></div>
+              <h2 style={{ font:`600 clamp(28px,4vw,40px)/1.1 ${SERIF}`, margin:"22px 0 0" }}>{q.q}</h2>
+              {q.sub && <p className="sv-sub" style={{ marginTop:8 }}>{q.sub}</p>}
+              {q.opts ? <div style={{ marginTop:10 }}>{q.opts.map((o) => (
+                <button key={o} type="button" className={"sv-choice" + (a[q.id] === o ? " on" : "")} onClick={() => answer(q, o)}><span className="t" style={{ fontSize:22 }}>{o}</span><span className="dot"/></button>))}</div>
+              : <form onSubmit={(e) => { e.preventDefault(); if (a[q.id]) go(step + 1); }} style={{ marginTop:18 }}>
+                  <div style={{ display:"flex", alignItems:"baseline", gap:6 }}>
+                    {q.money && <span style={{ font:`500 30px ${SERIF}` }}>$</span>}
+                    <input className="sv-in" autoFocus inputMode={q.money ? "numeric" : "text"} placeholder={q.ph} style={{ fontSize:26 }}
+                      value={a[q.id] || ""} onChange={(e) => setA({ ...a, [q.id]: q.money ? money(e.target.value) : e.target.value })}/>
+                  </div>
+                  <button className="sv-btn" type="submit" disabled={!a[q.id]} style={{ marginTop:20 }}>Continue</button>
+                  <button type="button" onClick={() => go(step + 1)} style={{ all:"unset", cursor:"pointer", display:"block", margin:"14px auto 0", font:`italic 400 15px ${SERIF}`, color:C.mute }}>Skip this one</button>
+                </form>}
             </div>}
 
-            <form onSubmit={submit} noValidate style={{ marginTop:34 }}>
-              <hr className="sv-rule" style={{ marginTop:0 }}/>
-              <div className="sv-lab" style={{ margin:"22px 0 8px" }}>Where do I send your number?</div>
-              <div className="sv-fields">
+            {flow && inContact && <form onSubmit={submit} noValidate style={{ marginTop:22 }}>
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                <div className="sv-lab">{flow.label} · {flow.qs.length + 1} of {flow.qs.length + 1}</div>
+                <button type="button" onClick={() => go(step - 1)} style={{ all:"unset", cursor:"pointer", font:`italic 400 15px ${SERIF}`, color:C.mute }}>← Back</button>
+              </div>
+              <div style={{ height:3, background:C.red, marginTop:10 }}/>
+              <h2 style={{ font:`600 clamp(28px,4vw,40px)/1.1 ${SERIF}`, margin:"22px 0 0" }}>
+                {wantsClass ? <>Join the wait list.<br/><i style={{ fontWeight:500, color:C.red }}>I'll send the class the day it's live.</i></>
+                  : who === "homeowner" ? <>Where's the home?<br/><i style={{ fontWeight:500, color:C.red }}>I'll run the deep review by hand.</i></>
+                  : who === "investor" ? <>Where do I send your review?<br/><i style={{ fontWeight:500, color:C.red }}>Then we'll find the dead money.</i></>
+                  : who === "agent" ? <>Join the lead wait list.<br/><i style={{ fontWeight:500, color:C.red }}>I'll reach out when buyers are ready.</i></>
+                  : <>Where do I reach you?<br/><i style={{ fontWeight:500, color:C.red }}>I'll tell you what I'd do.</i></>}
+              </h2>
+              {flow.handoff && <p className="sv-sub" style={{ marginTop:10 }}>{flow.handoff}</p>}
+              <div className="sv-fields" style={{ marginTop:18 }}>
                 <label className="sv-f"><span>First name</span><input className="sv-in" value={f.first} onChange={set("first")} autoComplete="given-name"/></label>
                 <label className="sv-f"><span>Last name</span><input className="sv-in" value={f.last} onChange={set("last")} autoComplete="family-name"/></label>
                 <label className="sv-f"><span>Email</span><input className="sv-in" type="email" value={f.email} onChange={set("email")} autoComplete="email"/></label>
                 <label className="sv-f"><span>Phone</span><input className="sv-in" type="tel" value={f.phone} onChange={set("phone")} autoComplete="tel"/></label>
+                {who === "homeowner" && <label className="sv-f" style={{ gridColumn:"1/-1" }}><span>Home address</span><input className="sv-in" value={f.address} onChange={set("address")} autoComplete="street-address"/></label>}
                 <label className="sv-f"><span>City or area</span><input className="sv-in" value={f.city} onChange={set("city")} autoComplete="address-level2"/></label>
-                <label className="sv-f"><span>State</span>
+                <label className="sv-f"><span>State {who === "agent" && <em>optional</em>}</span>
                   <select className="sv-in" value={f.state} onChange={set("state")}><option value="">Select…</option>{STATES.map((s) => <option key={s}>{s}</option>)}</select></label>
                 <label className="sv-f"><span>Zip <em>optional</em></span><input className="sv-in" value={f.zip} onChange={set("zip")} inputMode="numeric" maxLength={5} autoComplete="postal-code"/></label>
-                <label className="sv-f" style={{ gridColumn:"1/-1" }}><span>What would you like to know? <em>optional</em></span><textarea className="sv-in" rows={2} value={f.note} onChange={set("note")} style={{ resize:"vertical" }}/></label>
+                {who === "agent" && <label className="sv-f" style={{ gridColumn:"1/-1" }}><span>Where should I send leads? <em>email, text or your CRM</em></span><input className="sv-in" value={f.sendTo} onChange={set("sendTo")}/></label>}
+                <label className="sv-f" style={{ gridColumn:"1/-1" }}><span>Anything else I should know? <em>optional</em></span><textarea className="sv-in" rows={2} value={f.note} onChange={set("note")} style={{ resize:"vertical" }}/></label>
               </div>
               <label style={{ display:"flex", gap:10, alignItems:"flex-start", margin:"22px 0 10px" }} className="sv-fine">
                 <input type="checkbox" checked={f.consent} onChange={set("consent")} style={{ marginTop:2, width:18, height:18, accentColor:C.red, flex:"none" }}/>
@@ -177,15 +252,8 @@ export default function SaveMyInfo() {
               </label>
               <p style={{ font:`italic 500 17px/1.4 ${SERIF}`, margin:"4px 0 16px" }}>You will not be spammed. You'll only hear from me, Joshua Graham, a real live person. It's not a sales call.</p>
               {err && <p style={{ color:C.red, font:`600 14px ${SANS}`, margin:"0 0 12px" }}>{err}</p>}
-              <button className="sv-btn" type="submit" disabled={busy}>{busy ? "Saving…" : "Save my info"}</button>
-            </form>
-
-            <div style={{ marginTop:44 }}>
-              <div className="sv-k">Why me</div>
-              <h2 style={{ font:`600 clamp(30px,4vw,44px)/1.08 ${SERIF}`, margin:"12px 0 0" }}>Buyers leave $65 billion<br/><i style={{ fontWeight:500, color:C.red }}>a year on the table.</i></h2>
-              <Ledger rows={WHY}/>
-              <p style={{ font:`italic 500 20px ${SERIF}`, margin:"14px 0 0" }}>Get a quote from anyone. Then get mine.</p>
-            </div>
+              <button className="sv-btn" type="submit" disabled={busy}>{busy ? "Saving…" : wantsClass ? "Join the wait list" : who === "agent" ? "Join the wait list" : "Send it to Joshua"}</button>
+            </form>}
           </>)}
 
           <p className="sv-fine" style={{ marginTop:44 }}>Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity. Licensed in Colorado. Source: Bankrate research, July 2026, based on 2025 mortgage data: about $65 billion a year in mortgage overpayments nationwide; about $3,300 is the national average per borrower per year. Your own savings will vary. Not a commitment to lend; subject to credit approval, underwriting guidelines and change without notice.</p>
@@ -195,7 +263,7 @@ export default function SaveMyInfo() {
           <h2>When it has to go right, I'm your guy.</h2>
           <img className="ph" src="/brand/joshua-plum-suit.jpg" alt="Joshua Graham"/>
           <div style={{ font:`700 12px/1.6 ${SANS}`, letterSpacing:".12em" }}>
-            JOSHUA GRAHAM<br/><span style={{ color:"#FF4B5C" }}>REGIONAL LOAN ORIGINATOR</span><br/><span style={{ fontWeight:500, opacity:.8 }}>NMLS #169809</span><br/>
+            JOSHUA GRAHAM<br/><span style={{ color:C.mustard }}>REGIONAL LOAN ORIGINATOR</span><br/><span style={{ fontWeight:500, opacity:.8 }}>NMLS #169809</span><br/>
             <a href={`tel:${BRAND.phone.replace(/\D/g, "")}`} style={{ font:`500 22px ${SERIF}`, letterSpacing:0 }}>{BRAND.phone}</a>
           </div>
         </aside>
