@@ -118,7 +118,7 @@ export default function AgentEdit() {
     rate: rate ? String(rate.rate) : "", financeCharges: rate ? String(rate.finance_charges) : "", score: rate ? String(rate.score) : "740", asOf:asOfTxt,
     apr: fm.aprAuto, fees: rate ? `$${Math.round(rate.finance_charges).toLocaleString("en-US")} in prepaid finance charges (20% down example)` : "",
     accent:"#1d3f6e", joshuaOff:!fl.joshua, noPay:!rateOk || !fm.aprAuto, qr, qrNote: fl.listingLink.trim() ? "Scan for the full listing" : "Scan to see where you stand" };
-  const canPrint = !!(fl.address.trim() && FIN(fl.price));
+  const canPrint = !!(fl.address.trim() && FIN(fl.price) && fl.photo);
   const flScale = typeof window !== "undefined" ? Math.min(0.62, (window.innerWidth - 44) / 816) : 0.5;
   const posts = [
     ["Buyers", `Most buyers get one lender's quote and call it a day. They leave thousands on the table without ever knowing it.\n\nI work with a lender who shops several lenders for you. Answer a few quick questions and see where you stand: a free credit report review, appraisal credits and access to wholesale rates.\n\n${link}`],
@@ -228,7 +228,7 @@ export default function AgentEdit() {
           </div>
           <div style={{ marginTop:18, display:"flex", gap:12, alignItems:"center", flexWrap:"wrap" }}>
             <button type="button" style={{ ...btn, opacity:canPrint ? 1 : 0.4 }} disabled={!canPrint} onClick={() => setTimeout(() => window.print(), 50)}>Print or save as PDF</button>
-            {!canPrint && <span style={{ font:`italic 500 16px ${SERIF}`, color:C.mute }}>Add the address and price to print.</span>}
+            {!canPrint && <span style={{ font:`italic 500 16px ${SERIF}`, color:C.mute }}>Add the address, price and listing photo to print.</span>}
           </div>
           <p style={{ font:`italic 500 15px/1.4 ${SERIF}`, color:C.mute, margin:"10px 0 18px" }}>In the print window choose Letter, margins None, and turn on Background graphics.</p>
           <div style={{ width:816 * flScale, height:1056 * flScale, overflow:"hidden", border:`1px solid ${C.soft}`, background:"#fff" }}>
