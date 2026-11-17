@@ -129,8 +129,9 @@ function Perks({ title }) {
   </div>);
 }
 
-export default function SaveMyInfo() {
-  const [who, setWho] = useState(getWho());
+export default function SaveMyInfo({ agent = null, lockWho = "" }) {
+  const [who, setWho] = useState(lockWho || getWho());
+  const refCode = agent ? `AGT-${agent.slug}` : getRef();
   Object.assign(C, THEMES[DOOR_THEME[who] || "sky"]);
   useEffect(() => { try { document.body.style.background = C.bone; } catch {} });
   const [step, setStep] = useState(() => { try { return Math.max(0, parseInt(new URLSearchParams(location.search).get("step") || "0", 10) || 0); } catch { return 0; } });            // question index; flow.qs.length = the contact step
@@ -161,12 +162,12 @@ export default function SaveMyInfo() {
     setBusy(true);
     const place = [f.city.trim(), f.state].filter(Boolean).join(", ");
     const qa = flow.qs.map((x) => `${x.short}: ${x.money && a[x.id] ? "$" + a[x.id] : (a[x.id] || "-")}`).join(" · ");
-    const summary = `Save my info: ${flow.label}${wantsClass ? " · CLASS WAIT LIST" : ""}${who === "agent" ? " · LEAD WAIT LIST" : ""} · ${qa}${f.address.trim() ? " · Address: " + f.address.trim() : ""}${f.sendTo.trim() ? " · Send leads to: " + f.sendTo.trim() : ""}${place ? " · " + place : ""}${f.note.trim() ? ` · "${f.note.trim().slice(0, 160)}"` : ""}`.slice(0, 900);
+    const summary = `${agent ? "Agent page: " + agent.name + " · " : "Save my info: "}${flow.label}${wantsClass ? " · CLASS WAIT LIST" : ""}${who === "agent" ? " · LEAD WAIT LIST" : ""} · ${qa}${f.address.trim() ? " · Address: " + f.address.trim() : ""}${f.sendTo.trim() ? " · Send leads to: " + f.sendTo.trim() : ""}${place ? " · " + place : ""}${f.note.trim() ? ` · "${f.note.trim().slice(0, 160)}"` : ""}`.slice(0, 900);
     const { error } = await supabase.from("calculator_leads").insert({
       first_name:f.first.trim(), last_name:f.last.trim() || null, email:f.email.trim(), phone,
       property_state:f.state || null, zip:/^\d{5}$/.test(f.zip.trim()) ? f.zip.trim() : null, consent:true,
-      ref:getRef(), source:"save-my-info", page_url:location.href.slice(0, 500), user_agent:navigator.userAgent.slice(0, 300),
-      answers:{ summary, interest:who, qa:a, class_waitlist:wantsClass, address:f.address.trim() || null, send_leads_to:f.sendTo.trim() || null, city:f.city.trim() || null, note:f.note.trim() || null } });
+      ref:refCode, source:agent ? "agent-page" : "save-my-info", page_url:location.href.slice(0, 500), user_agent:navigator.userAgent.slice(0, 300),
+      answers:{ summary, agent_slug:agent ? agent.slug : null, agent_name:agent ? agent.name : null, interest:who, qa:a, class_waitlist:wantsClass, address:f.address.trim() || null, send_leads_to:f.sendTo.trim() || null, city:f.city.trim() || null, note:f.note.trim() || null } });
     setBusy(false);
     if (error) return setErr("We couldn't send that just now. Check your connection and try again, or call " + BRAND.phone + ".");
     setDone(true); try { window.scrollTo({ top:0, behavior:"smooth" }); } catch {}
@@ -181,15 +182,16 @@ export default function SaveMyInfo() {
             <img src="/brand/gf-logo-ink.png" alt="Graham Financial" style={{ height:54, width:"auto" }}/>
             <img src="/brand/zpm-logo-ink.png" alt="Zero Point Mortgage Services" style={{ height:36, width:"auto" }}/>
           </div>
-          <div className="sv-k" style={{ marginTop:30 }}>Buyers · Homeowners · Investors · Agents</div>
-          <h1 className="sv-h1">{done ? <>You're in, {f.first.trim()}.</> : <>What are you after?<i>Let's see if I can get you there.</i></>}</h1>
-          <p className="sv-sub">{done ? `${flow.thanks(a)} It's not a sales call. When it has to go right, I'm your guy.` : "I'm a wholesale broker. I shop several lenders for you, so you get access to the best rates. Get a quote from anyone. Then get mine."}</p>
+          <div className="sv-k" style={{ marginTop:30 }}>{agent ? "Home buyers" : "Buyers · Homeowners · Investors · Agents"}</div>
+          <h1 className="sv-h1" style={agent ? { fontSize:"clamp(32px,4.6vw,52px)" } : undefined}>{done ? <>You're in, {f.first.trim()}.</> : agent ? <>Buying a home{agent.market ? <> in {agent.market}</> : null}?<i>Let's see how we get you there.</i></> : <>What are you after?<i>Let's see if I can get you there.</i></>}</h1>
+          <p className="sv-sub">{done ? (agent ? `${agent.name} will be calling you shortly, and I'll be in touch about the lending side. ${flow.thanks(a)}` : `${flow.thanks(a)} It's not a sales call. When it has to go right, I'm your guy.`) : agent ? `${agent.name}${agent.brokerage ? " of " + agent.brokerage : ""} is your agent. I'm your lender, a wholesale broker, so I shop several lenders for you and you get access to the best rates. Get a quote from anyone. Then get mine.` : "I'm a wholesale broker. I shop several lenders for you, so you get access to the best rates. Get a quote from anyone. Then get mine."}</p>
 
           {done ? (
             <div style={{ marginTop:30 }}>
               <hr className="sv-rule"/>
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(min(100%,200px),1fr))", gap:12, marginTop:22 }}>
-                {who === "investor" && <a href={`/review?ref=${encodeURIComponent(getRef())}`} className="sv-btn" style={btnLink}>See your dead money</a>}
+                {who === "investor" && <a href={`/review?ref=${encodeURIComponent(refCode)}`} className="sv-btn" style={btnLink}>See your dead money</a>}
+                {agent && agent.phone && <a href={`tel:${String(agent.phone).replace(/\D/g, "")}`} className="sv-btn" style={btnLink}>Call {agent.name.split(" ")[0]}</a>}
                 <a href={BRAND.booking} target="_blank" rel="noreferrer" className="sv-btn" style={{ ...btnLink, ...(who === "investor" ? { background:"transparent", color:C.ink, border:`2px solid ${C.ink}` } : {}) }}>Book a call with me</a>
                 <a href={`tel:${BRAND.phone.replace(/\D/g, "")}`} className="sv-btn" style={{ ...btnLink, background:"transparent", color:C.ink, border:`2px solid ${C.ink}` }}>Call me</a>
               </div>
@@ -218,7 +220,7 @@ export default function SaveMyInfo() {
             {flow && q && <div style={{ marginTop:22 }}>
               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
                 <div className="sv-lab">{flow.label} · {step + 1} of {flow.qs.length + 1}</div>
-                <button type="button" onClick={() => (step === 0 ? setWho("") : go(step - 1))} style={{ all:"unset", cursor:"pointer", font:`italic 400 15px ${SERIF}`, color:C.mute }}>← Back</button>
+                <button type="button" onClick={() => (step === 0 ? (lockWho ? null : setWho("")) : go(step - 1))} style={{ all:"unset", cursor:"pointer", font:`italic 400 15px ${SERIF}`, color:C.mute }}>← Back</button>
               </div>
               <div style={{ height:3, background:C.soft, marginTop:10 }}><div style={{ height:3, width:`${((step + 1) / (flow.qs.length + 1)) * 100}%`, background:C.red }}/></div>
               {who === "buyer" && <Perks title="Answer these and unlock"/>}
@@ -267,22 +269,23 @@ export default function SaveMyInfo() {
               </div>
               <label style={{ display:"flex", gap:10, alignItems:"flex-start", margin:"22px 0 10px" }} className="sv-fine">
                 <input type="checkbox" checked={f.consent} onChange={set("consent")} style={{ marginTop:2, width:18, height:18, accentColor:C.red, flex:"none" }}/>
-                <span>I agree that Graham Financial, powered by Zero Point Mortgage Services, may contact me by phone, text or email at the information above, including by automated means. Consent is not a condition of any purchase or loan. Message and data rates may apply.</span>
+                <span>I agree that Graham Financial, powered by Zero Point Mortgage Services, may contact me by phone, text or email at the information above{agent ? `, as may my agent, ${agent.name}` : ""}, including by automated means. Consent is not a condition of any purchase or loan. Message and data rates may apply.</span>
               </label>
-              <p style={{ font:`italic 500 17px/1.4 ${SERIF}`, margin:"4px 0 16px" }}>You will not be spammed. You'll only hear from me, Joshua Graham, a real live person. It's not a sales call.</p>
+              <p style={{ font:`italic 500 17px/1.4 ${SERIF}`, margin:"4px 0 16px" }}>{agent ? `You will not be spammed. You'll only hear from ${agent.name} and me, Joshua Graham, real live people. It's not a sales call.` : "You will not be spammed. You'll only hear from me, Joshua Graham, a real live person. It's not a sales call."}</p>
               {err && <p style={{ color:C.red, font:`600 14px ${SANS}`, margin:"0 0 12px" }}>{err}</p>}
               <button className="sv-btn" type="submit" disabled={busy}>{busy ? "Saving…" : wantsClass ? "Join the wait list" : who === "agent" ? "Join the wait list" : "Send it to Joshua"}</button>
             </form>}
           </>)}
 
-          <p className="sv-fine" style={{ marginTop:44 }}>Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity. Licensed in Colorado. Source: Bankrate research, July 2026, based on 2025 mortgage data: about $65 billion a year in mortgage overpayments nationwide; about $3,300 is the national average per borrower per year. Your own savings will vary. Not a commitment to lend; subject to credit approval, underwriting guidelines and change without notice.</p>
+          <p className="sv-fine" style={{ marginTop:44 }}>{agent ? `Real estate services provided by ${agent.name}${agent.brokerage ? ", " + agent.brokerage : ""}. ` : ""}Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity. Licensed in Colorado. Source: Bankrate research, July 2026, based on 2025 mortgage data: about $65 billion a year in mortgage overpayments nationwide; about $3,300 is the national average per borrower per year. Your own savings will vary. Not a commitment to lend; subject to credit approval, underwriting guidelines and change without notice.</p>
         </main>
         <aside className="sv-side">
           <div className="bar"/>
-          <h2>When it has to go right, I'm your guy.</h2>
-          <img className="ph" src="/brand/joshua-plum-suit.jpg" alt="Joshua Graham"/>
+          <h2>{agent ? <>{agent.name.split(" ")[0]} is your agent.<br/>I'm your lender.</> : <>When it has to go right, I'm your guy.</>}</h2>
+          {agent && agent.photo_url ? <img className="ph" src={agent.photo_url} alt={agent.name}/> : agent ? <div className="ph" style={{ width:"100%", flex:1, minHeight:96, display:"flex", alignItems:"center", justifyContent:"center", background:C.panelMute, color:C.panel, font:`500 84px ${SERIF}` }}>{agent.name.split(" ").map((x) => x[0]).slice(0, 2).join("").toUpperCase()}</div> : <img className="ph" src="/brand/joshua-plum-suit.jpg" alt="Joshua Graham"/>}
           <div style={{ font:`700 12px/1.6 ${SANS}`, letterSpacing:".12em" }}>
-            JOSHUA GRAHAM<br/><span style={{ color:C.panelMute }}>REGIONAL LOAN ORIGINATOR</span><br/><span style={{ fontWeight:500, opacity:.8 }}>NMLS #169809</span><br/>
+            {agent && <>{agent.name.toUpperCase()}<br/><span style={{ color:C.panelMute }}>{agent.brokerage || "YOUR AGENT"}</span><br/><br/></>}
+            JOSHUA GRAHAM<br/><span style={{ color:C.panelMute }}>{agent ? "YOUR LENDER" : "REGIONAL LOAN ORIGINATOR"}</span><br/><span style={{ fontWeight:500, opacity:.8 }}>NMLS #169809</span><br/>
             <a href={`tel:${BRAND.phone.replace(/\D/g, "")}`} style={{ font:`500 22px ${SERIF}`, letterSpacing:0 }}>{BRAND.phone}</a>
           </div>
         </aside>

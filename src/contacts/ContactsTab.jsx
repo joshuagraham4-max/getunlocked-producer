@@ -6,6 +6,7 @@ import { GUIDES } from "../howto/guides.jsx";
 import InvestorPanel, { isInvestorLead, ListingAgentPanel, isListingAgent } from "./InvestorPanel.jsx";
 import ContactHistory from "../calls/ContactHistory.jsx";
 import AgentMatch from "./AgentMatch.jsx";
+import AgentLander from "./AgentLander.jsx";
 import InvestorImport from "../investors/InvestorImport.jsx";
 import AgentResearch, { emailMismatch } from "./AgentResearch.jsx";
 import SnapshotPanel, { isSnapshotLead } from "./SnapshotPanel.jsx";
@@ -341,6 +342,7 @@ function Detail({ c, contacts, setContacts, userId, profileName, back, backLabel
       </div>
 
       {typeOf(c) === "agent" && <AgentResearch c={c}/>}
+      {typeOf(c) === "agent" && <AgentLander contact={c}/>}
       {isSnapshotLead(c) && <SnapshotPanel c={c}/>}
       {isInvestorLead(c) && <InvestorPanel c={c} profileName={profileName} contacts={contacts} onOpen={open}/>}
       {isListingAgent(c) && <ListingAgentPanel c={c} contacts={contacts} links={links}/>}

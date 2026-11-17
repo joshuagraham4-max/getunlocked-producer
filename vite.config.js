@@ -14,6 +14,7 @@ export default defineConfig({
         'equity-unlock': resolve(__dirname, 'equity-unlock.html'),
         'portfolio-snapshot': resolve(__dirname, 'portfolio-snapshot.html'),
         save: resolve(__dirname, 'save.html'),
+        agent: resolve(__dirname, 'agent.html'),
         'equipment-apply': resolve(__dirname, 'equipment-apply.html'),
       },
     },
