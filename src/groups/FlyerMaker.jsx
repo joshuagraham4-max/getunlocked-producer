@@ -67,6 +67,7 @@ export function Flyer({ f, m }) {
   const headline = f.headline || defaultHeadline(f, m);
   const showPay = !f.joshuaOff && !f.noPay;       // agent version: payments only while Joshua is on and his rate is fresh
   const showJoshua = !f.joshuaOff;
+  const ph = f.qr ? 64 : 84;                       // headshots shrink a little when the QR code shares the contact strip
   const lbl = { fontSize:10, fontWeight:600, letterSpacing:"0.14em", textTransform:"uppercase", color:"#5c564d" };
   const bars = m.years.map((r, i) => ({ r, h: m.years.length === 1 ? 88 : 52 + i * (36 / Math.max(1, m.years.length - 1)), bg: i === m.years.length - 1 ? "#141414" : A, op: i === 0 || i === m.years.length - 1 ? 1 : 0.7, label: yrLabels[i] }));
   const creditNote = m.credit ? `Seller is offering ${usd(m.credit)} in concessions, subject to lender approval; any buydown cost above the seller credit is paid by the buyer. ` : (f.buydown !== "none" ? "Buydown cost shown as paid by the seller. " : "");
@@ -76,7 +77,6 @@ export function Flyer({ f, m }) {
         {f.photo ? <img src={f.photo} alt="" style={{ position:"absolute", inset:0, width:"100%", height:"100%", objectFit:"cover" }}/> :
           <div style={{ position:"absolute", inset:0, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:14, color:"#8d857a", fontSize:15 }}><svg width="120" height="96" viewBox="0 0 120 96" fill="none" stroke="#8d857a" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round"><path d="M10 48 60 8l50 40"/><path d="M22 42v46h76V42"/><path d="M50 88V60h20v28"/><path d="M82 24V12h12v22"/></svg>Add your listing photo</div>}
         <div style={{ position:"absolute", left:0, right:0, bottom:0, height:230, background:"linear-gradient(to bottom, rgba(20,20,20,0) 0%, rgba(20,20,20,0.82) 100%)" }}/>
-        {f.qr && <div style={{ position:"absolute", right:44, top:32, background:"#fff", padding:"8px 8px 6px", textAlign:"center", width:118 }}><img src={f.qr} alt="" style={{ width:102, height:102, display:"block" }}/><div style={{ fontSize:9, fontWeight:700, letterSpacing:"0.08em", textTransform:"uppercase", color:"#141414", marginTop:4, lineHeight:1.25 }}>{f.qrNote || "Scan to get pre-approved"}</div></div>}
         <div style={{ position:"absolute", left:44, top:32, display:"flex", gap:10 }}>
           <div style={{ background:"#fff", color:"#141414", fontSize:11, fontWeight:700, letterSpacing:"0.22em", textTransform:"uppercase", padding:"8px 14px" }}>Open House</div>
           {f.openHouse && <div style={{ background:"rgba(20,20,20,0.6)", color:"#fff", fontSize:12, fontWeight:500, padding:"8px 14px" }}>{f.openHouse}</div>}
@@ -118,9 +118,9 @@ export function Flyer({ f, m }) {
         </div>
       </div>
       )}
-      <div style={{ margin:`24px 44px ${showJoshua ? 0 : 32}px`, borderTop:"1px solid #141414", paddingTop:18, display:"grid", gridTemplateColumns:"minmax(0, 0.92fr) minmax(0, 1.08fr)", gap:24, flexShrink:0 }}>
+      <div style={{ margin:`24px 44px ${showJoshua ? 0 : 32}px`, borderTop:"1px solid #141414", paddingTop:18, display:"grid", gridTemplateColumns:f.qr ? "minmax(0, 0.92fr) minmax(0, 1.08fr) auto" : "minmax(0, 0.92fr) minmax(0, 1.08fr)", gap:24, flexShrink:0, alignItems:"center" }}>
         <div style={{ display:"flex", gap:16, alignItems:"center" }}>
-          {f.agentPhoto ? <img src={f.agentPhoto} alt="" style={{ width:84, height:84, borderRadius:"50%", objectFit:"cover", flexShrink:0, filter:"grayscale(1)" }}/> : <div style={{ width:84, height:84, borderRadius:"50%", background:"#e0d8cc", flexShrink:0 }}/>}
+          {f.agentPhoto ? <img src={f.agentPhoto} alt="" style={{ width:ph, height:ph, borderRadius:"50%", objectFit:"cover", flexShrink:0, filter:"grayscale(1)" }}/> : <div style={{ width:ph, height:ph, borderRadius:"50%", background:"#e0d8cc", flexShrink:0 }}/>}
           <div style={{ display:"flex", flexDirection:"column", gap:2, minWidth:0 }}>
             <div style={{ fontSize:10, fontWeight:700, letterSpacing:"0.2em", textTransform:"uppercase", color:"#5c564d" }}>Listing Broker</div>
             <div style={{ fontFamily:SERIF, fontSize:22, fontWeight:600 }}>{f.agentName || "Agent name"}</div>
@@ -130,15 +130,16 @@ export function Flyer({ f, m }) {
           {f.agentLogo && <img src={f.agentLogo} alt="" style={{ maxWidth:96, maxHeight:60, objectFit:"contain", marginLeft:"auto", flexShrink:0 }}/>}
         </div>
         {showJoshua ? <div style={{ display:"flex", gap:16, alignItems:"center" }}>
-          <img src={JOSHUA.photo} alt="" style={{ width:84, height:84, borderRadius:"50%", objectFit:"cover", flexShrink:0, filter:"grayscale(1)" }}/>
+          <img src={JOSHUA.photo} alt="" style={{ width:ph, height:ph, borderRadius:"50%", objectFit:"cover", flexShrink:0, filter:"grayscale(1)" }}/>
           <div style={{ display:"flex", flexDirection:"column", gap:2, minWidth:0 }}>
             <div style={{ fontSize:10, fontWeight:700, letterSpacing:"0.2em", textTransform:"uppercase", color:"#5c564d" }}>Financing</div>
             <div style={{ fontFamily:SERIF, fontSize:22, fontWeight:600 }}>{JOSHUA.name}</div>
             <div style={{ fontSize:12, color:"#2e2b27" }}>{JOSHUA.title}</div>
             <div style={{ fontSize:12, color:"#2e2b27" }}>{JOSHUA.contact}</div>
           </div>
-          <img src={JOSHUA.logo} alt="Graham Financial" style={{ width:72, height:"auto", marginLeft:"auto", flexShrink:0 }}/>
+          <img src={JOSHUA.logo} alt="Graham Financial" style={{ width:f.qr ? 56 : 72, height:"auto", marginLeft:"auto", flexShrink:0 }}/>
         </div> : <div/>}
+        {f.qr && <div style={{ background:"#fff", border:"1px solid #141414", padding:"6px 6px 5px", textAlign:"center", width:96, boxSizing:"border-box" }}><img src={f.qr} alt="" style={{ width:84, height:84, display:"block" }}/><div style={{ fontSize:8, fontWeight:700, letterSpacing:"0.08em", textTransform:"uppercase", color:"#141414", marginTop:3, lineHeight:1.25 }}>{f.qrNote || "Scan to get pre-approved"}</div></div>}
       </div>
       {showJoshua && !showPay && <div style={{ margin:"14px 44px 24px", flexShrink:0, fontSize:9, lineHeight:1.45, color:"#5c564d" }}>Rates and terms change daily; subject to credit approval and underwriting. Not a commitment to lend. Graham Financial powered by Zero Point Mortgage Services, NMLS 1216108. Equal Housing Opportunity.</div>}
       {showPay && <div style={{ margin:"14px 44px 24px", flexShrink:0, fontSize:9, lineHeight:1.45, color:"#5c564d" }}>

@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../supabase.js";
 import { embedFor } from "./saveVideo.js";
+import { agentPosts } from "./agentPosts.js";
 import QRCode from "qrcode";
 import { Flyer, flyerMath, PRINT_CSS } from "../groups/FlyerMaker.jsx";
 
@@ -109,7 +110,7 @@ export default function AgentEdit() {
   if (bad) return <div style={{ minHeight:"100vh", background:C.bone, padding:"60px 24px", font:`500 22px ${SERIF}`, color:C.ink }}>This edit link isn't valid. Please ask Joshua for your link.</div>;
   if (!f) return <div style={{ minHeight:"100vh", background:C.bone }}/>;
 
-  const link = `${SITE}/a/${f.slug}`; const desk = `${SITE}/scenario-desk?ref=AGT-${f.slug}`;
+  const link = `${SITE}/a/${f.slug}`; const desk = `${SITE}/d/${f.slug}`;
   const mk = f.market ? ` in ${f.market}` : ""; const vid = embedFor(f.video_url);
   const rateOk = !!(rate && rate.rate && (Date.now() - new Date(rate.as_of + "T12:00:00").getTime()) / 864e5 <= 3.5);
   const asOfTxt = rate ? new Date(rate.as_of + "T12:00:00").toLocaleDateString("en-US", { month:"short", day:"numeric", year:"numeric" }) : "";
@@ -120,12 +121,7 @@ export default function AgentEdit() {
     accent:"#1d3f6e", joshuaOff:!fl.joshua, noPay:!rateOk || !fm.aprAuto, qr, qrNote: fl.listingLink.trim() ? "Scan for the full listing" : "Scan to see where you stand" };
   const canPrint = !!(fl.address.trim() && FIN(fl.price) && fl.photo);
   const flScale = typeof window !== "undefined" ? Math.min(0.62, (window.innerWidth - 44) / 816) : 0.5;
-  const posts = [
-    ["Buyers", `Most buyers get one lender's quote and call it a day. They leave thousands on the table without ever knowing it.\n\nI work with a lender who shops several lenders for you. Answer a few quick questions and see where you stand: a free credit report review, appraisal credits and access to wholesale rates.\n\n${link}`],
-    ["Sell, then buy", `Selling and buying in the same move is the part that keeps people up at night. What will I net? When do I list? Can I afford the next one?\n\nAnswer a few quick questions. I'll run the real numbers on your home, not a Zillow guess, while my lender partner looks at the buy side.\n\n${link}`],
-    ["Sellers", `Thinking about selling${mk}? Before you list, find out what your home is really worth and what you'd actually walk away with.\n\nTwo minutes, no pressure: ${link}`],
-    ["Video post", `60 seconds on why I do this differently. Then take two minutes and see where you stand${mk}: ${link}`],
-  ];
+  const posts = agentPosts(link, mk);
   const Block = ({ title, children }) => (<section style={{ marginTop:46 }}><hr style={{ border:0, borderTop:`2px solid ${C.ink}`, margin:"0 0 22px" }}/><h2 style={h2}>{title}</h2>{children}</section>);
 
   return (
@@ -134,8 +130,26 @@ export default function AgentEdit() {
       <div style={{ maxWidth:760, margin:"0 auto", padding:"40px 22px 80px" }}>
         <div style={{ font:`700 11px ${SANS}`, letterSpacing:".2em", textTransform:"uppercase", color:C.red }}>Your page · Graham Financial</div>
         <h1 style={{ font:`600 clamp(34px,6vw,52px)/1.05 ${SERIF}`, margin:"12px 0 6px" }}>Make it yours, {f.name.split(" ")[0]}.</h1>
-        <p style={{ font:`italic 500 20px/1.4 ${SERIF}`, color:C.mute, margin:0 }}>Add your photo, check your info, and your page is ready. Keep this link private. Anyone who has it can change your page.</p>
+        <p style={{ font:`italic 500 20px/1.4 ${SERIF}`, color:C.mute, margin:0 }}>Add your photo, check your info, and your page is ready.</p>
+        <p style={{ font:`600 17px/1.45 ${SERIF}`, margin:"14px 0 0", padding:"12px 14px", background:"#fff", borderLeft:`4px solid ${C.red}` }}>Bookmark this page. It is your home base: your page, your posts, your open house flyer and your scenario desk all live right here. Keep the link private. Anyone who has it can change your page.</p>
         <p style={{ margin:"14px 0 0" }}><a href={link} target="_blank" rel="noreferrer" style={{ color:C.red, font:`700 14px ${SANS}` }}>{link}</a></p>
+
+        <div style={{ marginTop:28, background:C.panel, color:"#fff", padding:"26px 24px" }}>
+          <div style={{ font:`700 11px ${SANS}`, letterSpacing:".2em", textTransform:"uppercase", color:"#F2B84B" }}>Your scenario desk</div>
+          <div style={{ font:`600 clamp(26px,5vw,34px)/1.1 ${SERIF}`, margin:"10px 0 8px" }}>Stuck on a deal? Put it on my desk.</div>
+          <p style={{ font:`500 18px/1.5 ${SERIF}`, margin:"0 0 12px", color:"#C9D6E3" }}>Every agent has a client who can't get a straight answer: self-employed, credit dings, a sell-and-buy that has to line up. Don't lose that client to a "no" from one lender. Put the deal on my desk in plain words. No client names needed.</p>
+          <div style={{ font:`500 17px/1.5 ${SERIF}`, color:"#E4EDF5", margin:"0 0 18px" }}>
+            <div style={{ font:`700 11px ${SANS}`, letterSpacing:".16em", textTransform:"uppercase", color:"#F2B84B", marginBottom:6 }}>What it does for you</div>
+            <div>1. I'm a wholesale broker, so I shop several lenders for your deal, not just one.</div>
+            <div>2. You get a straight answer, usually the same day, that you can take back to your client.</div>
+            <div>3. Keep the client, keep the deal. It's free to you.</div>
+          </div>
+          <div style={{ display:"flex", gap:12, flexWrap:"wrap", alignItems:"center" }}>
+            <a href={desk} target="_blank" rel="noreferrer" style={{ ...btn, textDecoration:"none", display:"inline-block", background:"#F2B84B", color:C.ink }}>Open your scenario desk</a>
+            <button type="button" style={{ ...ghost, color:"#fff", borderColor:"#fff" }} onClick={() => copy("desk", desk)}>{copied === "desk" ? "Copied" : "Copy the link"}</button>
+          </div>
+          <div style={{ font:`500 14px ${SANS}`, color:"#9DB4CC", marginTop:12, wordBreak:"break-all" }}>{desk}</div>
+        </div>
 
         <form onSubmit={save}>
           <Block title="Your photo">
@@ -196,7 +210,7 @@ export default function AgentEdit() {
         </Block>
 
         <Block title="Posts you can copy">
-          <p style={{ font:`italic 500 18px/1.4 ${SERIF}`, color:C.mute, margin:"0 0 14px" }}>Paste one on Facebook or Instagram. Use a photo of yourself, not a stock image. On Facebook, tap Boost and put $20 to $50 behind it, aimed at your market.</p>
+          <p style={{ font:`italic 500 18px/1.4 ${SERIF}`, color:C.mute, margin:"0 0 14px" }}>Post one a day, Monday to Friday. Paste it on Facebook or Instagram. Use a photo of yourself, not a stock image. On Facebook, tap Boost and put $20 to $50 behind it, aimed at your market.</p>
           {posts.map(([t, body]) => (
             <div key={t} style={{ background:"#fff", padding:"14px 16px", marginBottom:14 }}>
               <div style={lab}>{t}</div>
@@ -236,10 +250,7 @@ export default function AgentEdit() {
           </div>
         </Block>
 
-        <Block title="Your scenario desk">
-          <p style={{ font:`500 18px/1.5 ${SERIF}`, margin:"0 0 12px" }}>Got a tricky deal? Send it to Joshua here. No client names needed.</p>
-          <a href={desk} target="_blank" rel="noreferrer" style={{ color:C.red, font:`700 14px ${SANS}`, wordBreak:"break-all" }}>{desk}</a>
-        </Block>
+
       </div>
     </div>
   );

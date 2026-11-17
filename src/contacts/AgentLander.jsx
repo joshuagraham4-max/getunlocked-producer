@@ -2,6 +2,7 @@
 // setup, and a ready-to-post kit. Leads reach the agent by push (and email once Resend is on) and land in Joshua's Contacts too.
 import { useEffect, useState } from "react";
 import { supabase } from "../supabase.js";
+import { agentPosts } from "../landing/agentPosts.js";
 
 const C = { mid:"#6b6358", rule:"#e0d8cc", ink:"#1c1a17", green:"#1e6e4a" };
 const F = { mono:"'DM Mono',monospace", body:"'Barlow',sans-serif" };
@@ -42,10 +43,10 @@ export default function AgentLander({ contact: c }) {
   const url = page ? `${SITE}/a/${page.slug}` : "";
   const first = (c.first_name || "").trim() || "there";
   const mk = page && page.market ? page.market : "your area";
-  const edit = page ? `${SITE}/e/${page.edit_token}` : "";
-  const desk = page ? `${SITE}/scenario-desk?ref=AGT-${page.slug}` : "";
-  const post = page ? `Thinking about buying or selling${page.market ? " in " + page.market : ""}? Answer a few quick questions and see where you stand. Free credit report review, appraisal credits and access to wholesale rates through my lender partner, Joshua Graham.\n\n${url}` : "";
-  const setup = page ? `Hi ${first}, your free buyer and seller page is live: ${url}\n\nTurn it on in 4 steps:\n\n1. MAKE IT YOURS. Tap your private link, add your photo, and check your info. You can also add a short intro video (optional, tips are on the page): ${edit}\nPlease keep that link to yourself. It also has a free open house flyer maker with your QR code.\n\n2. POST IT. Your edit page has ready-made posts. Copy one, paste it on Facebook or Instagram with your link, and on Facebook tap Boost and put $20 to $50 behind it. Aim it at ${mk}.\n\n3. TURN ON YOUR LEAD ALERTS. Install the free app called ntfy. Tap the + button and type this code: ${page.ntfy_topic}\nNow every new lead buzzes your phone with their name and number.\n\n4. CALL THEM WITHIN 5 MINUTES. That's the whole trick. Five minutes from the alert is when they pick up.\n\nThat's it. You don't pay me anything. I'm the lender on the page, and I'll keep you posted.\n\nIf a lead has a home to sell, the alert tells you. That's your listing lead too.\n\nGot a tricky deal? Send it to my scenario desk, no client names needed: ${desk}\n\n- Joshua` : "";
+  const edit = page ? `${SITE}/e/${page.short_code || page.edit_token}` : "";
+  const desk = page ? `${SITE}/d/${page.slug}` : "";
+  const post = page ? agentPosts(url, page.market ? " in " + page.market : "")[0][1] : "";
+  const setup = page ? `Hi ${first}, your free buyer and seller page is live: ${url}\n\nTurn it on in 4 steps:\n\n1. MAKE IT YOURS. Tap your private link, add your photo, and check your info. You can also add a short intro video (optional, tips are on the page): ${edit}\nSave it or bookmark it. That one link is your home base: your page, your ready-made posts, a free open house flyer maker with your QR code, and your scenario desk. Please keep it to yourself.\n\n2. POST IT. Your edit page has ready-made posts. Copy one, paste it on Facebook or Instagram with your link, and on Facebook tap Boost and put $20 to $50 behind it. Aim it at ${mk}.\n\n3. TURN ON YOUR LEAD ALERTS. Install the free app called ntfy. Tap the + button and type this code: ${page.ntfy_topic}\nNow every new lead buzzes your phone with their name and number.\n\n4. CALL THEM WITHIN 5 MINUTES. That's the whole trick. Five minutes from the alert is when they pick up.\n\nThat's it. You don't pay me anything. I'm the lender on the page, and I'll keep you posted.\n\nIf a lead has a home to sell, the alert tells you. That's your listing lead too.\n\nGot a tricky deal? Send it to my scenario desk, no client names needed: ${desk}\n\n- Joshua` : "";
 
   const box = { marginTop:14, border:`1px solid ${C.rule}`, borderRadius:8, background:"#fff", padding:"10px 12px" };
   const lab = { fontFamily:F.mono, fontSize:10, letterSpacing:".12em", color:C.mid, textTransform:"uppercase" };

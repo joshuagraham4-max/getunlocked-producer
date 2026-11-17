@@ -12,7 +12,7 @@ const F = { display:"'Montserrat', Arial, sans-serif", body:"'Public Sans', syst
 export const SCENARIO_TAGS = ["Self-employed / 1099", "Credit issues", "Divorce", "Sell and buy (timing)", "Low down payment", "Investor / rental", "Recently changed jobs", "Non-US citizen", "Big debts / DTI", "Other"];
 const STAGES = ["Buying", "Selling and buying", "Refinancing", "Investor", "Not sure yet"];
 const REACH = ["Text", "Call", "Email"];
-const getRef = () => { try { return new URLSearchParams(location.search).get("ref") || "SD"; } catch { return "SD"; } };
+const getRef = () => { try { const m = location.pathname.match(/\/d\/([^/?#]+)/); if (m) return "AGT-" + decodeURIComponent(m[1]).toLowerCase(); return new URLSearchParams(location.search).get("ref") || "SD"; } catch { return "SD"; } };
 const input = { font:"inherit", fontSize:16, color:C.ink, background:"#fff", border:`1px solid ${C.line}`, borderRadius:8, padding:"10px 12px", width:"100%", boxSizing:"border-box" };
 const labelS = { display:"flex", flexDirection:"column", gap:6, fontWeight:600, fontSize:14 };
 const panel = { background:C.card, border:`1px solid ${C.line}`, borderRadius:14, padding:22 };
