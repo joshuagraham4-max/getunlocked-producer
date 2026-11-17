@@ -11,7 +11,7 @@ const THEMES = {
   maroon: { bone:"#F1ECE6", ink:"#1A1216", red:"#C8102E", panel:"#4A111C", panelText:"#F6ECE9", panelMute:"#D9B3B9", mute:"#5E5358", rule:"#1A1216", soft:"#DDD2C8" },
   teal:   { bone:"#E3EEF0", ink:"#0B1C21", red:"#C8102E", panel:"#0A3A42", panelText:"#E9F3F4", panelMute:"#9CC3C7", mute:"#41585D", rule:"#0B1C21", soft:"#C3D6D9" },
 };
-const DOOR_THEME = { buyer:"sky", homeowner:"maroon", investor:"teal", agent:"sky" };
+const DOOR_THEME = { buyer:"sky", homeowner:"sky", investor:"sky", agent:"sky" };
 const C = { ...THEMES.sky, navy:"#0E1B2A", maroon:"#4A111C", mustard:"#D9A94A", };
 const SERIF = "'Bodoni Moda', 'Playfair Display', Georgia, serif", SANS = "'Montserrat', Arial, sans-serif";
 const STATES = "AL AK AZ AR CA CO CT DE DC FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY".split(" ");
