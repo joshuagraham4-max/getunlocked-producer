@@ -47,7 +47,7 @@ create or replace function public.route_agent_lead() returns trigger
 language plpgsql security definer set search_path = public, extensions as $$
 declare
   a public.agent_pages%rowtype;
-  who text; d text; ph text; msg text; key text; frm text; body text;
+  who text; d text; has_agent boolean; ph text; msg text; key text; frm text; body text;
 begin
   if new.source is distinct from 'agent-page' then return new; end if;
   select * into a from public.agent_pages where slug = (new.answers->>'agent_slug') and active limit 1;
@@ -55,7 +55,8 @@ begin
   who := initcap(trim(new.first_name)) || coalesce(' ' || initcap(trim(new.last_name)), '');
   d := regexp_replace(coalesce(new.phone, ''), '\D', '', 'g');
   ph := case when length(d) = 10 then '(' || substr(d,1,3) || ') ' || substr(d,4,3) || '-' || substr(d,7) else new.phone end;
-  msg := who || ' just asked about buying. Call ' || ph || ' within 5 minutes.';
+  has_agent := coalesce(new.answers->'qa'->>'hasagent', '') like 'Yes%';
+  msg := case when has_agent then 'ALREADY HAS AN AGENT. ' else '' end || who || ' just asked about buying. Call ' || ph || ' within 5 minutes.';
 
   -- 1) Instant push to the agent (free ntfy app, subscribe to their topic). Always on.
   begin
@@ -69,15 +70,15 @@ begin
   key := public.app_secret('RESEND_API_KEY');
   frm := coalesce(public.app_secret('RESEND_FROM'), 'Joshua Graham <onboarding@resend.dev>');
   if key is not null and a.email is not null and a.lead_pref in ('both', 'email') then
-    body := '<p><b>Call within 5 minutes.</b> Leads that get a call in the first 5 minutes are far more likely to answer.</p>'
+    body := case when has_agent then '<p><b>This buyer says they already work with an agent.</b> Your call.</p>' else '' end || '<p><b>Call within 5 minutes.</b> Leads that get a call in the first 5 minutes are far more likely to answer.</p>'
          || '<p><b>' || who || '</b><br>' || ph || '<br>' || coalesce(new.email, '') || '</p>'
          || '<p>' || coalesce(new.answers->>'summary', '') || '</p>'
-         || '<p>This buyer came through your page. I''m their lender, and I''ll keep you posted. - Joshua Graham, 720-468-6872</p>';
+         || '<p>This buyer came through your page. I''m the lender on it, and I''ll keep you posted. - Joshua Graham, 720-468-6872</p>';
     begin
       perform net.http_post(url := 'https://api.resend.com/emails',
         headers := jsonb_build_object('Authorization', 'Bearer ' || key, 'Content-Type', 'application/json'),
         body := jsonb_build_object('from', frm, 'to', jsonb_build_array(a.email), 'reply_to', 'jgraham@grahamfinancial.us',
-          'subject', 'New buyer lead: ' || who || '. Call within 5 minutes.', 'html', body));
+          'subject', case when has_agent then 'Buyer lead (already has an agent): ' else 'New buyer lead: ' end || who || '. Call within 5 minutes.', 'html', body));
     exception when others then null; end;
   end if;
   return new;
