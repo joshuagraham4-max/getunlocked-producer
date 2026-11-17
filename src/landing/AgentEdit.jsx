@@ -7,14 +7,14 @@ import { agentPosts } from "./agentPosts.js";
 import QRCode from "qrcode";
 import { Flyer, flyerMath, PRINT_CSS } from "../groups/FlyerMaker.jsx";
 
-const C = { bone:"#E4EDF5", ink:"#0E1B2A", red:"#C8102E", panel:"#0E1B2A", mute:"#4A5B70", soft:"#C5D3E0" };
-const SERIF = "'Bodoni Moda', 'Didot', 'Playfair Display', Georgia, serif", SANS = "'Montserrat', 'Helvetica Neue', Arial, sans-serif";
+const C = { bone:"#F6EEDF", ink:"#0E1B2A", red:"#4A111C", panel:"#0E1B2A", mute:"#4A5568", soft:"#E3D6BF", gold:"#D9A566", goldDk:"#8A5A24", maroon:"#4A111C" };
+const SERIF = "'Public Sans', system-ui, sans-serif", SANS = "'Montserrat', 'Helvetica Neue', Arial, sans-serif";
 const SITE = typeof location !== "undefined" ? location.origin : "";
 const inp = { width:"100%", boxSizing:"border-box", border:"none", borderBottom:`2px solid ${C.ink}`, background:"transparent", padding:"10px 2px", font:`500 20px ${SERIF}`, color:C.ink, outline:"none", borderRadius:0 };
 const lab = { font:`700 11px ${SANS}`, letterSpacing:".16em", textTransform:"uppercase", color:C.ink };
-const btn = { border:"none", background:C.red, color:"#fff", font:`700 13px ${SANS}`, letterSpacing:".12em", textTransform:"uppercase", padding:"15px 24px", cursor:"pointer" };
+const btn = { border:"none", borderBottom:`4px solid ${C.gold}`, background:C.maroon, color:"#fff", font:`800 13px ${SANS}`, letterSpacing:".12em", textTransform:"uppercase", padding:"15px 24px", cursor:"pointer" };
 const ghost = { ...btn, background:"transparent", color:C.ink, border:`2px solid ${C.ink}`, padding:"10px 16px", fontSize:11 };
-const h2 = { font:`600 30px/1.1 ${SERIF}`, margin:"0 0 6px" };
+const h2 = { font:`800 26px/1.1 ${SANS}`, margin:"0 0 8px", color:C.maroon };
 
 // Listing photos stay larger so they print sharp.
 function shrinkPhoto(file, max) {
@@ -79,7 +79,7 @@ export default function AgentEdit() {
     return () => { live = false; };
   }, [token]);
   useEffect(() => { if (document.getElementById("gup-flyer-fonts")) return; const l = document.createElement("link"); l.id = "gup-flyer-fonts"; l.rel = "stylesheet";
-    l.href = "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap"; document.head.appendChild(l); }, []);
+    l.href = "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,500&display=swap"; document.head.appendChild(l); }, []);
   const [fl, setFl] = useState(BLANK_FL); const [rate, setRate] = useState(null); const [qr, setQr] = useState("");
   useEffect(() => { (async () => { try { const { data } = await supabase.rpc("get_flyer_rate"); if (data && data[0]) setRate(data[0]); } catch {} })(); }, []);
   const setL = (k) => (e) => setFl((x) => ({ ...x, [k]: e.target.type === "checkbox" ? e.target.checked : e.target.value }));
@@ -122,33 +122,35 @@ export default function AgentEdit() {
   const canPrint = !!(fl.address.trim() && FIN(fl.price) && fl.photo);
   const flScale = typeof window !== "undefined" ? Math.min(0.62, (window.innerWidth - 44) / 816) : 0.5;
   const posts = agentPosts(link, mk);
-  const Block = ({ title, children }) => (<section style={{ marginTop:46 }}><hr style={{ border:0, borderTop:`2px solid ${C.ink}`, margin:"0 0 22px" }}/><h2 style={h2}>{title}</h2>{children}</section>);
+  const Block = ({ title, children }) => (<section style={{ marginTop:46 }}><hr style={{ border:0, borderTop:`3px solid ${C.gold}`, margin:"0 0 22px" }}/><h2 style={h2}>{title}</h2>{children}</section>);
 
   return (
     <div style={{ minHeight:"100vh", background:C.bone, color:C.ink, fontFamily:SANS }}>
       <style>{`@media (max-width:640px){.ae-g{grid-template-columns:1fr !important}}`}</style>
       <div style={{ maxWidth:760, margin:"0 auto", padding:"40px 22px 80px" }}>
-        <div style={{ font:`700 11px ${SANS}`, letterSpacing:".2em", textTransform:"uppercase", color:C.red }}>Your page · Graham Financial</div>
-        <h1 style={{ font:`600 clamp(34px,6vw,52px)/1.05 ${SERIF}`, margin:"12px 0 6px" }}>Make it yours, {f.name.split(" ")[0]}.</h1>
-        <p style={{ font:`italic 500 20px/1.4 ${SERIF}`, color:C.mute, margin:0 }}>Add your photo, check your info, and your page is ready.</p>
-        <p style={{ font:`600 17px/1.45 ${SERIF}`, margin:"14px 0 0", padding:"12px 14px", background:"#fff", borderLeft:`4px solid ${C.red}` }}>Bookmark this page. It is your home base: your page, your posts, your open house flyer and your scenario desk all live right here. Keep the link private. Anyone who has it can change your page.</p>
-        <p style={{ margin:"14px 0 0" }}><a href={link} target="_blank" rel="noreferrer" style={{ color:C.red, font:`700 14px ${SANS}` }}>{link}</a></p>
+        <div style={{ font:`700 11px ${SANS}`, letterSpacing:".22em", textTransform:"uppercase", color:C.goldDk }}>Your page · Graham Financial</div>
+        <h1 style={{ font:`800 clamp(34px,7vw,52px)/1.04 ${SANS}`, margin:"12px 0 8px", color:C.ink }}>Make it yours, {f.name.split(" ")[0]}.</h1>
+        <p style={{ font:`500 19px/1.45 ${SERIF}`, color:C.mute, margin:0 }}>Add your photo, check your info, and your page is ready.</p>
+        <div style={{ marginTop:18, background:C.panel, color:"#fff", padding:"14px 16px", borderLeft:`6px solid ${C.gold}` }}>
+          <div style={{ font:`700 11px ${SANS}`, letterSpacing:".2em", textTransform:"uppercase", color:C.gold }}>Bookmark this page</div>
+          <p style={{ font:`500 16px/1.5 ${SERIF}`, margin:"6px 0 0", color:"#E6EDF4" }}>It is your home base: your page, your posts, your open house flyer and your scenario desk all live right here. Keep the link private. Anyone who has it can change your page.</p>
+        </div>
+        <p style={{ margin:"14px 0 0" }}><a href={link} target="_blank" rel="noreferrer" style={{ color:C.maroon, font:`700 14px ${SANS}`, wordBreak:"break-all" }}>{link}</a></p>
 
-        <div style={{ marginTop:28, background:C.panel, color:"#fff", padding:"26px 24px" }}>
-          <div style={{ font:`700 11px ${SANS}`, letterSpacing:".2em", textTransform:"uppercase", color:"#F2B84B" }}>Your scenario desk</div>
-          <div style={{ font:`600 clamp(26px,5vw,34px)/1.1 ${SERIF}`, margin:"10px 0 8px" }}>Stuck on a deal? Put it on my desk.</div>
-          <p style={{ font:`500 18px/1.5 ${SERIF}`, margin:"0 0 12px", color:"#C9D6E3" }}>Every agent has a client who can't get a straight answer: self-employed, credit dings, a sell-and-buy that has to line up. Don't lose that client to a "no" from one lender. Put the deal on my desk in plain words. No client names needed.</p>
-          <div style={{ font:`500 17px/1.5 ${SERIF}`, color:"#E4EDF5", margin:"0 0 18px" }}>
-            <div style={{ font:`700 11px ${SANS}`, letterSpacing:".16em", textTransform:"uppercase", color:"#F2B84B", marginBottom:6 }}>What it does for you</div>
-            <div>1. I'm a wholesale broker, so I shop several lenders for your deal, not just one.</div>
-            <div>2. You get a straight answer, usually the same day, that you can take back to your client.</div>
-            <div>3. Keep the client, keep the deal. It's free to you.</div>
+        <div style={{ marginTop:30, background:C.maroon, color:"#F6ECE9", borderTop:`6px solid ${C.gold}`, borderBottom:`6px solid ${C.gold}`, padding:"30px 24px 28px" }}>
+          <div style={{ font:`700 11px ${SANS}`, letterSpacing:".24em", textTransform:"uppercase", color:C.gold }}>Your scenario desk</div>
+          <div style={{ font:`800 clamp(28px,6vw,38px)/1.06 ${SANS}`, margin:"12px 0 12px", color:"#fff" }}>Stuck on a deal? Put it on my desk.</div>
+          <p style={{ font:`500 17px/1.55 ${SERIF}`, margin:"0 0 22px", color:"#E3C9CC" }}>Every agent has a client who can't get a straight answer: self-employed, credit dings, a sell-and-buy that has to line up. Don't lose that client to a "no" from one lender. Put the deal on my desk in plain words. No client names needed.</p>
+          {[["1","I shop many banks for the best to win your client's deal, not just one."],["2","You get a straight answer, usually the same day, to take back to your client."],["3","Keep the client, keep the deal. It's free to you."]].map(([n, t]) => (
+            <div key={n} style={{ display:"flex", gap:16, alignItems:"flex-start", padding:"14px 0", borderTop:"1px solid rgba(217,165,102,.35)" }}>
+              <div style={{ font:`800 44px/0.9 ${SANS}`, color:C.gold, minWidth:30 }}>{n}</div>
+              <div style={{ font:`600 17px/1.45 ${SERIF}`, color:"#fff", paddingTop:2 }}>{t}</div>
+            </div>))}
+          <a href={desk} target="_blank" rel="noreferrer" style={{ ...btn, textDecoration:"none", display:"block", textAlign:"center", background:C.gold, color:C.maroon, borderBottom:`4px solid #8A5A24`, marginTop:12, fontSize:14, padding:"18px 24px" }}>Open your scenario desk</a>
+          <div style={{ marginTop:14, background:"rgba(0,0,0,.22)", padding:"12px 14px", display:"flex", gap:12, alignItems:"center", justifyContent:"space-between", flexWrap:"wrap" }}>
+            <span style={{ font:`600 14px ${SANS}`, color:"#E3C9CC", wordBreak:"break-all", minWidth:0 }}>{desk}</span>
+            <button type="button" style={{ ...ghost, color:C.gold, borderColor:C.gold }} onClick={() => copy("desk", desk)}>{copied === "desk" ? "Copied" : "Copy link"}</button>
           </div>
-          <div style={{ display:"flex", gap:12, flexWrap:"wrap", alignItems:"center" }}>
-            <a href={desk} target="_blank" rel="noreferrer" style={{ ...btn, textDecoration:"none", display:"inline-block", background:"#F2B84B", color:C.ink }}>Open your scenario desk</a>
-            <button type="button" style={{ ...ghost, color:"#fff", borderColor:"#fff" }} onClick={() => copy("desk", desk)}>{copied === "desk" ? "Copied" : "Copy the link"}</button>
-          </div>
-          <div style={{ font:`500 14px ${SANS}`, color:"#9DB4CC", marginTop:12, wordBreak:"break-all" }}>{desk}</div>
         </div>
 
         <form onSubmit={save}>
