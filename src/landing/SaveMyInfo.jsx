@@ -1,12 +1,18 @@
 // Save my info: the page every Bond flyer and post points to, styled like the flyers (bone ground, Bodoni, hairline ledger, red italic, navy panel).
 // Pick what brings you here → talking points for that choice appear → short form → calculator_leads (source "save-my-info", ref from ?ref=)
 // → existing triggers drop the lead into Contacts and ping the phone. Intro video comes from saveVideo.js (hidden until a link is set).
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { supabase } from "../supabase.js";
 import { BRAND } from "../smart-money/data.js";
 import { SAVE_VIDEO, SAVE_VIDEO_TITLE, embedFor } from "./saveVideo.js";
 
-const C = { bone:"#EFEAE0", ink:"#101820", red:"#C8102E", navy:"#0E1B2A", maroon:"#4A111C", mustard:"#D9A94A", mute:"#5A5F66", rule:"#101820", soft:"#D8D1C3" };
+const THEMES = {
+  sky:    { bone:"#E4EDF5", ink:"#0E1B2A", red:"#C8102E", panel:"#0E1B2A", panelText:"#E4EDF5", panelMute:"#9DB4CC", mute:"#4A5B70", rule:"#0E1B2A", soft:"#C5D3E0" },
+  maroon: { bone:"#F1ECE6", ink:"#1A1216", red:"#C8102E", panel:"#4A111C", panelText:"#F6ECE9", panelMute:"#D9B3B9", mute:"#5E5358", rule:"#1A1216", soft:"#DDD2C8" },
+  teal:   { bone:"#E3EEF0", ink:"#0B1C21", red:"#C8102E", panel:"#0A3A42", panelText:"#E9F3F4", panelMute:"#9CC3C7", mute:"#41585D", rule:"#0B1C21", soft:"#C3D6D9" },
+};
+const DOOR_THEME = { buyer:"sky", homeowner:"maroon", investor:"teal", agent:"sky" };
+const C = { ...THEMES.sky, navy:"#0E1B2A", maroon:"#4A111C", mustard:"#D9A94A", };
 const SERIF = "'Bodoni Moda', 'Playfair Display', Georgia, serif", SANS = "'Montserrat', Arial, sans-serif";
 const STATES = "AL AK AZ AR CA CO CT DE DC FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY".split(" ");
 
@@ -62,12 +68,12 @@ const WHO = [
 const WHY = [["THE NATIONAL TOTAL", "Overpaid on mortgages, every year", "$65 billion", 0], ["YOUR SHARE", "About, per borrower, per year", "$3,300", 0], ["THE CAUSE", "Most buyers take one lender's quote", "1 quote", 0], ["THE FIX", "A wholesale broker shops several lenders for you", "Me", 1]];
 const getWho = () => { try { const w = new URLSearchParams(location.search).get("who"); return WHO.some((x) => x.id === w) ? w : ""; } catch { return ""; } };
 const getRef = () => { try { return new URLSearchParams(location.search).get("ref") || "SAVE-01"; } catch { return "SAVE-01"; } };
-const CSS = `
+const mkCSS = () => `
 .sv{font-family:${SANS};color:${C.ink};background:${C.bone};min-height:100vh}
 .sv *{box-sizing:border-box}
 .sv-wrap{display:grid;grid-template-columns:minmax(0,1fr) 300px;max-width:1180px;margin:0 auto}
 .sv-main{padding:34px 48px 56px}
-.sv-side{background:${C.maroon};color:${C.bone};position:sticky;top:0;align-self:start;height:100vh;padding:36px 28px;display:flex;flex-direction:column;gap:18px;overflow:hidden}
+.sv-side{background:${C.panel};color:${C.panelText};position:sticky;top:0;align-self:start;height:100vh;padding:36px 28px;display:flex;flex-direction:column;gap:18px;overflow:hidden}
 .sv-h1{font:600 clamp(40px,5.6vw,66px)/1.04 ${SERIF};margin:18px 0 0;letter-spacing:-.01em}
 .sv-h1 i{display:block;font-weight:500;color:${C.red}}
 .sv-k{font:700 12px ${SANS};letter-spacing:.2em;text-transform:uppercase;display:flex;gap:10px;align-items:center}
@@ -93,12 +99,12 @@ const CSS = `
 .sv-btn{font:700 15px ${SANS};letter-spacing:.14em;text-transform:uppercase;background:${C.red};color:#fff;border:0;padding:18px 26px;cursor:pointer;width:100%;min-height:56px}
 .sv-btn:disabled{opacity:.6}
 .sv-fine{font:400 11.5px/1.5 ${SANS};color:${C.mute}}
-.sv-vid{position:relative;aspect-ratio:16/9;background:${C.navy};border:1px solid ${C.rule};margin-top:26px}
+.sv-vid{position:relative;aspect-ratio:16/9;background:${C.panel};border:1px solid ${C.rule};margin-top:26px}
 .sv-vid iframe,.sv-vid video{position:absolute;inset:0;width:100%;height:100%;border:0}
 .sv-side h2{font:italic 500 38px/1.12 ${SERIF};margin:0}
 .sv-side img.ph{width:100%;flex:1;min-height:0;object-fit:cover;object-position:50% 12%}
-.sv-side .bar{width:36px;height:3px;background:${C.mustard}}
-.sv-side a{color:${C.bone};text-decoration:none}
+.sv-side .bar{width:36px;height:3px;background:${C.panelMute}}
+.sv-side a{color:${C.panelText};text-decoration:none}
 @media(max-width:900px){
  .sv-wrap{grid-template-columns:1fr}
  .sv-main{padding:24px 20px 40px}
@@ -117,6 +123,8 @@ const money = (v) => String(v || "").replace(/[^\d]/g, "").replace(/\B(?=(\d{3})
 
 export default function SaveMyInfo() {
   const [who, setWho] = useState(getWho());
+  Object.assign(C, THEMES[DOOR_THEME[who] || "sky"]);
+  useEffect(() => { try { document.body.style.background = C.bone; } catch {} });
   const [step, setStep] = useState(() => { try { return Math.max(0, parseInt(new URLSearchParams(location.search).get("step") || "0", 10) || 0); } catch { return 0; } });            // question index; flow.qs.length = the contact step
   const [a, setA] = useState({});                  // answers by question id
   const [f, setF] = useState({ first:"", last:"", email:"", phone:"", city:"", state:"", zip:"", address:"", sendTo:"", note:"", consent:false });
@@ -157,7 +165,7 @@ export default function SaveMyInfo() {
   const btnLink = { textAlign:"center", textDecoration:"none", display:"flex", alignItems:"center", justifyContent:"center" };
 
   return (
-    <div className="sv"><style>{CSS}</style>
+    <div className="sv"><style>{mkCSS()}</style>
       <div className="sv-wrap">
         <main className="sv-main">
           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", gap:12 }}>
@@ -263,7 +271,7 @@ export default function SaveMyInfo() {
           <h2>When it has to go right, I'm your guy.</h2>
           <img className="ph" src="/brand/joshua-plum-suit.jpg" alt="Joshua Graham"/>
           <div style={{ font:`700 12px/1.6 ${SANS}`, letterSpacing:".12em" }}>
-            JOSHUA GRAHAM<br/><span style={{ color:C.mustard }}>REGIONAL LOAN ORIGINATOR</span><br/><span style={{ fontWeight:500, opacity:.8 }}>NMLS #169809</span><br/>
+            JOSHUA GRAHAM<br/><span style={{ color:C.panelMute }}>REGIONAL LOAN ORIGINATOR</span><br/><span style={{ fontWeight:500, opacity:.8 }}>NMLS #169809</span><br/>
             <a href={`tel:${BRAND.phone.replace(/\D/g, "")}`} style={{ font:`500 22px ${SERIF}`, letterSpacing:0 }}>{BRAND.phone}</a>
           </div>
         </aside>
