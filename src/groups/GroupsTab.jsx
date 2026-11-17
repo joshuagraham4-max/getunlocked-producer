@@ -24,6 +24,7 @@ const TOOLS = [
   { name:"Equity Unlock Estimator", url:`${ORIGIN}/equity-unlock`, note:"Homeowners: equity after selling, debt payoff, and down payment toward the next home (BBYS-01). Saves the lead to Contacts." },
   { name:"Free Portfolio Snapshot", url:`${ORIGIN}/portfolio-snapshot`, note:"Investors send the spreadsheet they already keep: no credit pull, no application (PORT-01). Saves to Contacts with the snapshot ready on the contact." },
   { name:"Florida UCC search (equipment leads)", url:"https://www.floridaucc.com/", note:"Florida Secured Transaction Registry: search by debtor (business) name or secured party (a lender like an equipment finance company) to see who financed equipment and when. Filings 3-4 years old = replacement/upgrade candidates. Other states: each Secretary of State runs its own UCC search." },
+  { name:"Scenario Desk (agents)", url:`${ORIGIN}/scenario-desk`, note:"Agents send a tricky scenario, no login and no client details. Lands in Cash → Scenario desk and the agent's timeline, with a phone alert." },
   { name:"Equipment financing application", url:`${ORIGIN}/equipment-apply`, note:"Business owners: quick equipment application, no SSN. Saves to Contacts as an equipment application lead." },
   { name:"Equipment application checklist (PDF)", url:`${ORIGIN}/equipment/Graham_Financial_Equipment_Checklist.pdf`, note:"What to send for app-only (under $75K) and larger deals." },
   { name:"Book a call with Joshua", url:BOOKING, note:"Google booking page." },

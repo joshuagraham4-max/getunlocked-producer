@@ -16,6 +16,7 @@ export default defineConfig({
         save: resolve(__dirname, 'save.html'),
         agent: resolve(__dirname, 'agent.html'),
         'equipment-apply': resolve(__dirname, 'equipment-apply.html'),
+        'scenario-desk': resolve(__dirname, 'scenario-desk.html'),
       },
     },
   },

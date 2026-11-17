@@ -6,6 +6,7 @@ import RadarTab from "./radar/RadarTab.jsx";
 import CallsTab from "./calls/CallsTab.jsx";
 import GroupsTab from "./groups/GroupsTab.jsx";
 import AgentOutreach from "./groups/AgentOutreach.jsx";
+import ScenarioQueue from "./calls/ScenarioQueue.jsx";
 import EquipmentTab from "./equipment/EquipmentTab.jsx";
 import ErrorBoundary from "./ErrorBoundary.jsx";
 import GamePlan from "./today/GamePlan.jsx";
@@ -738,7 +739,7 @@ export default function App() {
   // Navigation by kind of work: Today, Cash (talking to people), Marketing (putting content out), Tools.
   // Each section has sub-tabs; `tab` is still the sub-tab id, so every existing setTab("contacts") etc. keeps working.
   const SUBS = {
-    cash:[["calls","Calls"],["contacts","Contacts"],["radar","Radar"],["partners","Partners"]].concat(isAdmin?[["equipment","Equipment"]]:[]).concat([["scripts","Call scripts"]]),
+    cash:[["calls","Calls"],["contacts","Contacts"],["radar","Radar"],["partners","Partners"]].concat(isAdmin?[["scenarios","Scenario desk"],["equipment","Equipment"]]:[]).concat([["scripts","Call scripts"]]),
     marketing:[["groups","Posts & groups"]].concat(isAdmin?[["bond","The Bond Campaign"]]:[]).concat(isAdmin?[["posts","Smart Money"]]:[]).concat([["ioi","IOI posts"]]),
     tools:[["links","Links"]].concat(isAdmin?[["matrix","Lender matrix"]]:[]).concat([["team","Settings"]]),
   };
@@ -1610,7 +1611,7 @@ export default function App() {
           ) : (
             <>
               <input ref={fRef} type="file" accept=".csv,.txt,.tsv" onChange={handleFile} style={{display:"none"}}/>
-              <ErrorBoundary label="Contacts"><ContactsTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onUpload={startUpload} openId={openContactId} onOpened={()=>setOpenContactId(null)} returnLabel={returnTab==="radar"?"Radar":returnTab==="calls"?"Calls":null} onReturn={()=>{const t=returnTab;setReturnTab(null);if(t)setTab(t);}} onGoCalls={()=>setTab("calls")}/></ErrorBoundary>
+              <ErrorBoundary label="Contacts"><ContactsTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onUpload={startUpload} openId={openContactId} onOpened={()=>setOpenContactId(null)} returnLabel={returnTab==="radar"?"Radar":returnTab==="calls"?"Calls":returnTab==="scenarios"?"Scenario desk":null} onReturn={()=>{const t=returnTab;setReturnTab(null);if(t)setTab(t);}} onGoCalls={()=>setTab("calls")}/></ErrorBoundary>
             </>
           )}
         </div>
@@ -1621,6 +1622,7 @@ export default function App() {
       {(tab==="radar" || radarSeen) && <div style={{display:tab==="radar"?"block":"none"}}><ErrorBoundary label="Radar"><RadarTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onOpen={(c)=>{setOpenContactId(c.id);setReturnTab("radar");setTab("contacts");}} onGoCalls={()=>setTab("calls")}/></ErrorBoundary></div>}
       {tab==="groups" && <ErrorBoundary label="Groups"><GroupsTab userId={user?.id} onContact={(c) => setContacts((p) => p.some((x) => x.id === c.id) ? p.map((x) => (x.id === c.id ? c : x)) : [...p, c])}/></ErrorBoundary>}
       {tab==="partners" && <ErrorBoundary label="Partners"><AgentOutreach userId={user?.id} onContact={(c) => setContacts((p) => p.some((x) => x.id === c.id) ? p.map((x) => (x.id === c.id ? c : x)) : [...p, c])}/></ErrorBoundary>}
+      {tab==="scenarios" && isAdmin && <ErrorBoundary label="Scenario desk"><ScenarioQueue userId={user?.id} contacts={contacts} onOpen={(c)=>{setOpenContactId(c.id);setReturnTab("scenarios");setTab("contacts");}}/></ErrorBoundary>}
       {tab==="links" && <ErrorBoundary label="Links"><GroupsTab userId={user?.id} mode="links"/></ErrorBoundary>}
       {tab==="matrix" && isAdmin && (
         <div style={{background:C.card,border:`1px solid ${C.rule}`,borderRadius:10,padding:18}}>
