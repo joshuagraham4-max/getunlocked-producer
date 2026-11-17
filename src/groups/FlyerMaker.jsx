@@ -56,6 +56,8 @@ const defaultHeadline = (f, m) => {
   return f.buydown === "1/0" ? "A lower payment for your whole first year." : "Settle in at a lower payment for two full years.";
 };
 
+export const PRINT_CSS = `@page { size: letter; margin: 0 } @media print { html, body { height: 1056px !important; overflow: hidden !important; margin: 0 !important } body * { visibility: hidden !important } #gup-flyer, #gup-flyer * { visibility: visible !important } #gup-flyer-wrap { position: fixed !important; left: 0; top: 0; transform: none !important; } #gup-flyer { -webkit-print-color-adjust: exact; print-color-adjust: exact } }`;
+
 // ---------- the printed page (816x1056 = letter at 96px/in) ----------
 export function Flyer({ f, m }) {
   const A = f.accent || "#1e5a42"; const yrLabels = f.buydown === "2/1" ? ["Year 1", "Year 2", "Years 3–30"] : f.buydown === "1/0" ? ["Year 1", "Years 2–30"] : ["Monthly"];
@@ -63,6 +65,8 @@ export function Flyer({ f, m }) {
   const stats = [[f.beds, "Beds"], [f.baths, "Baths"], [f.sqft, "Sq Ft"], [f.extraValue, f.extraLabel]].filter(([v]) => v);
   const eyebrow = f.buydown === "none" ? "30-Year Fixed" : `${m.credit ? "Seller-paid " : ""}${f.buydown} Buydown`;
   const headline = f.headline || defaultHeadline(f, m);
+  const showPay = !f.joshuaOff && !f.noPay;       // agent version: payments only while Joshua is on and his rate is fresh
+  const showJoshua = !f.joshuaOff;
   const lbl = { fontSize:10, fontWeight:600, letterSpacing:"0.14em", textTransform:"uppercase", color:"#5c564d" };
   const bars = m.years.map((r, i) => ({ r, h: m.years.length === 1 ? 88 : 52 + i * (36 / Math.max(1, m.years.length - 1)), bg: i === m.years.length - 1 ? "#141414" : A, op: i === 0 || i === m.years.length - 1 ? 1 : 0.7, label: yrLabels[i] }));
   const creditNote = m.credit ? `Seller is offering ${usd(m.credit)} in concessions, subject to lender approval; any buydown cost above the seller credit is paid by the buyer. ` : (f.buydown !== "none" ? "Buydown cost shown as paid by the seller. " : "");
@@ -72,6 +76,7 @@ export function Flyer({ f, m }) {
         {f.photo ? <img src={f.photo} alt="" style={{ position:"absolute", inset:0, width:"100%", height:"100%", objectFit:"cover" }}/> :
           <div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center", color:"#cfc8bd", fontSize:15 }}>Upload the listing photo</div>}
         <div style={{ position:"absolute", left:0, right:0, bottom:0, height:230, background:"linear-gradient(to bottom, rgba(20,20,20,0) 0%, rgba(20,20,20,0.82) 100%)" }}/>
+        {f.qr && <div style={{ position:"absolute", right:44, top:32, background:"#fff", padding:"8px 8px 6px", textAlign:"center", width:118 }}><img src={f.qr} alt="" style={{ width:102, height:102, display:"block" }}/><div style={{ fontSize:9, fontWeight:700, letterSpacing:"0.08em", textTransform:"uppercase", color:"#141414", marginTop:4, lineHeight:1.25 }}>{f.qrNote || "Scan to get pre-approved"}</div></div>}
         <div style={{ position:"absolute", left:44, top:32, display:"flex", gap:10 }}>
           <div style={{ background:"#fff", color:"#141414", fontSize:11, fontWeight:700, letterSpacing:"0.22em", textTransform:"uppercase", padding:"8px 14px" }}>Open House</div>
           {f.openHouse && <div style={{ background:"rgba(20,20,20,0.6)", color:"#fff", fontSize:12, fontWeight:500, padding:"8px 14px" }}>{f.openHouse}</div>}
@@ -88,6 +93,7 @@ export function Flyer({ f, m }) {
         {stats.map(([v, l], i) => <div key={i} style={{ padding:"14px 0", textAlign:"center", borderRight: i < stats.length - 1 ? "1px solid #3a3733" : "none" }}>
           <span style={{ fontFamily:SERIF, fontSize:22, fontWeight:600 }}>{v}</span> <span style={{ fontSize:11, letterSpacing:"0.18em", textTransform:"uppercase", color:"#cfc8bd" }}>{l}</span></div>)}
       </div>}
+      {showPay && (
       <div style={{ padding:"26px 44px 0", display:"grid", gridTemplateColumns:"250px minmax(0, 1fr)", gap:32, flexShrink:0 }}>
         <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
           <div style={{ fontSize:11, fontWeight:700, letterSpacing:"0.22em", textTransform:"uppercase", color:A }}>{eyebrow}</div>
@@ -111,7 +117,8 @@ export function Flyer({ f, m }) {
           </div>)}
         </div>
       </div>
-      <div style={{ margin:"24px 44px 0", borderTop:"1px solid #141414", paddingTop:18, display:"grid", gridTemplateColumns:"minmax(0, 0.92fr) minmax(0, 1.08fr)", gap:24, flexShrink:0 }}>
+      )}
+      <div style={{ margin:`24px 44px ${showJoshua ? 0 : 32}px`, borderTop:"1px solid #141414", paddingTop:18, display:"grid", gridTemplateColumns:"minmax(0, 0.92fr) minmax(0, 1.08fr)", gap:24, flexShrink:0 }}>
         <div style={{ display:"flex", gap:16, alignItems:"center" }}>
           {f.agentPhoto ? <img src={f.agentPhoto} alt="" style={{ width:84, height:84, borderRadius:"50%", objectFit:"cover", flexShrink:0, filter:"grayscale(1)" }}/> : <div style={{ width:84, height:84, borderRadius:"50%", background:"#e0d8cc", flexShrink:0 }}/>}
           <div style={{ display:"flex", flexDirection:"column", gap:2, minWidth:0 }}>
@@ -120,8 +127,9 @@ export function Flyer({ f, m }) {
             {f.brokerage && <div style={{ fontSize:12, fontWeight:600, letterSpacing:"0.08em" }}>{f.brokerage}</div>}
             <div style={{ fontSize:12, color:"#2e2b27", wordBreak:"break-word" }}>{[f.agentPhone, f.agentEmail].filter(Boolean).join(" · ")}</div>
           </div>
+          {f.agentLogo && <img src={f.agentLogo} alt="" style={{ maxWidth:96, maxHeight:60, objectFit:"contain", marginLeft:"auto", flexShrink:0 }}/>}
         </div>
-        <div style={{ display:"flex", gap:16, alignItems:"center" }}>
+        {showJoshua ? <div style={{ display:"flex", gap:16, alignItems:"center" }}>
           <img src={JOSHUA.photo} alt="" style={{ width:84, height:84, borderRadius:"50%", objectFit:"cover", flexShrink:0, filter:"grayscale(1)" }}/>
           <div style={{ display:"flex", flexDirection:"column", gap:2, minWidth:0 }}>
             <div style={{ fontSize:10, fontWeight:700, letterSpacing:"0.2em", textTransform:"uppercase", color:"#5c564d" }}>Financing</div>
@@ -130,12 +138,13 @@ export function Flyer({ f, m }) {
             <div style={{ fontSize:12, color:"#2e2b27" }}>{JOSHUA.contact}</div>
           </div>
           <img src={JOSHUA.logo} alt="Graham Financial" style={{ width:72, height:"auto", marginLeft:"auto", flexShrink:0 }}/>
-        </div>
+        </div> : <div/>}
       </div>
-      <div style={{ margin:"14px 44px 24px", flexShrink:0, fontSize:9, lineHeight:1.45, color:"#5c564d" }}>
+      {showJoshua && !showPay && <div style={{ margin:"14px 44px 24px", flexShrink:0, fontSize:9, lineHeight:1.45, color:"#5c564d" }}>Rates and terms change daily; subject to credit approval and underwriting. Not a commitment to lend. Graham Financial powered by Zero Point Mortgage Services, NMLS 1216108. Equal Housing Opportunity.</div>}
+      {showPay && <div style={{ margin:"14px 44px 24px", flexShrink:0, fontSize:9, lineHeight:1.45, color:"#5c564d" }}>
         Example for illustration as of {f.asOf || localDate()}. Purchase price {m.price ? usd(m.price) : "[price]"}; 30-year fixed conventional loan. Rate {pct(m.rate)}, APR {f.apr ? `${f.apr}%` : "[APR]"}, based on {f.fees || "[points/fees]"} and a {f.score || "[credit score]"} credit score.
         {f.buydown !== "none" && ` ${f.buydown} buydown: ${m.years.slice(0, -1).map((r, i) => `${pct(r)} in year ${i + 1}`).join(" and ")}, then ${pct(m.rate)} for the remaining term; buydown cost about ${usd(m.costLo)}–${usd(m.costHi)} depending on down payment.`} {creditNote}Payments are principal and interest only and do not include taxes, insurance, HOA dues or mortgage insurance, which is required with less than 20% down and will raise the payment. 3% down is available to qualifying buyers. Rates and terms change daily; subject to credit approval and underwriting. Not a commitment to lend. Graham Financial powered by Zero Point Mortgage Services, NMLS 1216108. Equal Housing Opportunity.
-      </div>
+      </div>}
     </div>
   );
 }
@@ -180,7 +189,7 @@ export default function FlyerMaker({ userId }) {
 
   return (
     <div>
-      <style>{`@page { size: letter; margin: 0 } @media print { html, body { height: 1056px !important; overflow: hidden !important; margin: 0 !important } body * { visibility: hidden !important } #gup-flyer, #gup-flyer * { visibility: visible !important } #gup-flyer-wrap { position: fixed !important; left: 0; top: 0; transform: none !important; } #gup-flyer { -webkit-print-color-adjust: exact; print-color-adjust: exact } }`}</style>
+      <style>{PRINT_CSS}</style>
       <div style={{ display:"flex", gap:24, alignItems:"flex-start", flexWrap:"wrap" }}>
         <div style={{ flex:"1 1 360px", minWidth:0, display:"grid", gridTemplateColumns:"repeat(2, minmax(0, 1fr))", gap:10 }}>
           {saved.length > 0 && lb("Recent flyers", <select value="" onChange={(e) => { const s = saved.find((x) => x.id === e.target.value); if (s) setF({ ...BLANK, ...s }); }} style={inp}><option value="">Open a saved flyer…</option>{saved.map((s) => <option key={s.id} value={s.id}>{s.address || "Untitled"} · {s.agentName}</option>)}</select>, true)}

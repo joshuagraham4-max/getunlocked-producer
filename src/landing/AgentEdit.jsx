@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../supabase.js";
 import { embedFor } from "./saveVideo.js";
+import QRCode from "qrcode";
+import { Flyer, flyerMath, PRINT_CSS } from "../groups/FlyerMaker.jsx";
 
 const C = { bone:"#E4EDF5", ink:"#0E1B2A", red:"#C8102E", panel:"#0E1B2A", mute:"#4A5B70", soft:"#C5D3E0" };
 const SERIF = "'Bodoni Moda', 'Didot', 'Playfair Display', Georgia, serif", SANS = "'Montserrat', 'Helvetica Neue', Arial, sans-serif";
@@ -12,6 +14,18 @@ const lab = { font:`700 11px ${SANS}`, letterSpacing:".16em", textTransform:"upp
 const btn = { border:"none", background:C.red, color:"#fff", font:`700 13px ${SANS}`, letterSpacing:".12em", textTransform:"uppercase", padding:"15px 24px", cursor:"pointer" };
 const ghost = { ...btn, background:"transparent", color:C.ink, border:`2px solid ${C.ink}`, padding:"10px 16px", fontSize:11 };
 const h2 = { font:`600 30px/1.1 ${SERIF}`, margin:"0 0 6px" };
+
+// Listing photos stay larger so they print sharp.
+function shrinkPhoto(file, max) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader(); r.onerror = reject;
+    r.onload = () => { const img = new Image(); img.onerror = reject;
+      img.onload = () => { const k = Math.min(1, max / Math.max(img.width, img.height)); const c = document.createElement("canvas");
+        c.width = Math.round(img.width * k); c.height = Math.round(img.height * k); c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); resolve(c.toDataURL("image/jpeg", 0.88)); };
+      img.src = r.result; };
+    r.readAsDataURL(file);
+  });
+}
 
 // Shrink a phone photo to a small JPEG (long edge 640px) so it saves fast and loads fast.
 function shrink(file) {
@@ -33,6 +47,20 @@ function shrink(file) {
   });
 }
 
+// Logos keep their transparency: shrink to a small PNG (long edge 360px).
+function shrinkPng(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader(); r.onerror = reject;
+    r.onload = () => { const img = new Image(); img.onerror = reject;
+      img.onload = () => { const k = Math.min(1, 360 / Math.max(img.width, img.height)); const c = document.createElement("canvas");
+        c.width = Math.round(img.width * k); c.height = Math.round(img.height * k); c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); resolve(c.toDataURL("image/png")); };
+      img.src = r.result; };
+    r.readAsDataURL(file);
+  });
+}
+const BLANK_FL = { address:"", city:"", price:"", beds:"", baths:"", sqft:"", openHouse:"", photo:"", buydown:"2/1", credit:"", listingLink:"", joshua:true };
+const FIN = (v) => parseFloat(String(v || "").replace(/[^0-9.]/g, "")) || 0;
+
 export default function AgentEdit() {
   const token = (location.pathname.match(/\/e\/([^/?#]+)/) || [])[1] || new URLSearchParams(location.search).get("t") || "";
   const [f, setF] = useState(null); const [bad, setBad] = useState(false);
@@ -43,12 +71,23 @@ export default function AgentEdit() {
       try {
         const { data } = await supabase.rpc("get_agent_edit", { p_token: token });
         if (!live) return;
-        if (data && data[0]) setF({ ...data[0], brokerage:data[0].brokerage || "", market:data[0].market || "", phone:data[0].phone || "", email:data[0].email || "", photo_url:data[0].photo_url || "", video_url:data[0].video_url || "" });
+        if (data && data[0]) setF({ ...data[0], brokerage:data[0].brokerage || "", market:data[0].market || "", phone:data[0].phone || "", email:data[0].email || "", photo_url:data[0].photo_url || "", video_url:data[0].video_url || "", logo_url:data[0].logo_url || "" });
         else setBad(true);
       } catch { if (live) setBad(true); }
     })();
     return () => { live = false; };
   }, [token]);
+  useEffect(() => { if (document.getElementById("gup-flyer-fonts")) return; const l = document.createElement("link"); l.id = "gup-flyer-fonts"; l.rel = "stylesheet";
+    l.href = "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap"; document.head.appendChild(l); }, []);
+  const [fl, setFl] = useState(BLANK_FL); const [rate, setRate] = useState(null); const [qr, setQr] = useState("");
+  useEffect(() => { (async () => { try { const { data } = await supabase.rpc("get_flyer_rate"); if (data && data[0]) setRate(data[0]); } catch {} })(); }, []);
+  const setL = (k) => (e) => setFl((x) => ({ ...x, [k]: e.target.type === "checkbox" ? e.target.checked : e.target.value }));
+  const pickL = (k, max) => async (e) => { const file = e.target.files && e.target.files[0]; if (!file) return;
+    try { const url = await shrinkPhoto(file, max); setFl((x) => ({ ...x, [k]: url })); } catch { setErr("That photo wouldn't load."); } };
+  const qrTarget = f ? (fl.listingLink.trim() || `${SITE}/a/${f.slug}`) : "";
+  useEffect(() => { if (!qrTarget) return; QRCode.toDataURL(qrTarget, { margin:1, width:240 }).then(setQr).catch(() => setQr("")); }, [qrTarget]);
+  const pickLogo = async (e) => { const file = e.target.files && e.target.files[0]; if (!file) return;
+    try { const url = await shrinkPng(file); setSaved(false); setF((x) => ({ ...x, logo_url:url })); } catch { setErr("That logo wouldn't load. Try a PNG or JPG."); } };
   const set = (k) => (e) => { setSaved(false); setF({ ...f, [k]: e.target.value }); };
   const pickPhoto = async (e) => {
     const file = e.target.files && e.target.files[0]; if (!file) return;
@@ -60,7 +99,7 @@ export default function AgentEdit() {
     if (f.video_url.trim() && !embedFor(f.video_url)) return setErr("That video link isn't one I can play. Use a YouTube, Vimeo or Loom share link.");
     setBusy(true);
     const { data, error } = await supabase.rpc("save_agent_edit", { p_token:token, p_name:f.name, p_brokerage:f.brokerage, p_market:f.market, p_phone:f.phone,
-      p_email:f.email, p_photo_url:f.photo_url, p_video_url:f.video_url, p_lead_pref:f.lead_pref });
+      p_email:f.email, p_photo_url:f.photo_url, p_video_url:f.video_url, p_lead_pref:f.lead_pref, p_logo_url:f.logo_url });
     setBusy(false);
     if (error || !data) return setErr("That didn't save. Check your connection and try again.");
     setSaved(true);
@@ -72,6 +111,15 @@ export default function AgentEdit() {
 
   const link = `${SITE}/a/${f.slug}`; const desk = `${SITE}/scenario-desk?ref=AGT-${f.slug}`;
   const mk = f.market ? ` in ${f.market}` : ""; const vid = embedFor(f.video_url);
+  const rateOk = !!(rate && rate.rate && (Date.now() - new Date(rate.as_of + "T12:00:00").getTime()) / 864e5 <= 3.5);
+  const asOfTxt = rate ? new Date(rate.as_of + "T12:00:00").toLocaleDateString("en-US", { month:"short", day:"numeric", year:"numeric" }) : "";
+  const fm = flyerMath({ price:fl.price, rate:rate ? rate.rate : 0, buydown:fl.buydown, credit:fl.credit, financeCharges:rate ? rate.finance_charges : 0 });
+  const fx = { ...fl, agentName:f.name, brokerage:f.brokerage, agentPhone:f.phone, agentEmail:f.email, agentPhoto:f.photo_url, agentLogo:f.logo_url,
+    rate: rate ? String(rate.rate) : "", financeCharges: rate ? String(rate.finance_charges) : "", score: rate ? String(rate.score) : "740", asOf:asOfTxt,
+    apr: fm.aprAuto, fees: rate ? `$${Math.round(rate.finance_charges).toLocaleString("en-US")} in prepaid finance charges (20% down example)` : "",
+    accent:"#1d3f6e", joshuaOff:!fl.joshua, noPay:!rateOk || !fm.aprAuto, qr, qrNote: fl.listingLink.trim() ? "Scan for the full listing" : "Scan to see where you stand" };
+  const canPrint = !!(fl.address.trim() && FIN(fl.price));
+  const flScale = typeof window !== "undefined" ? Math.min(0.62, (window.innerWidth - 44) / 816) : 0.5;
   const posts = [
     ["Buyers", `Most buyers get one lender's quote and call it a day. They leave thousands on the table without ever knowing it.\n\nI work with a lender who shops several lenders for you. Answer a few quick questions and see where you stand: a free credit report review, appraisal credits and access to wholesale rates.\n\n${link}`],
     ["Sell, then buy", `Selling and buying in the same move is the part that keeps people up at night. What will I net? When do I list? Can I afford the next one?\n\nAnswer a few quick questions. I'll run the real numbers on your home, not a Zillow guess, while my lender partner looks at the buy side.\n\n${link}`],
@@ -97,6 +145,17 @@ export default function AgentEdit() {
               <div>
                 <label style={{ ...ghost, display:"inline-block" }}>{f.photo_url ? "Change photo" : "Add your photo"}<input type="file" accept="image/*" onChange={pickPhoto} style={{ display:"none" }}/></label>
                 <p style={{ font:`italic 500 16px ${SERIF}`, color:C.mute, margin:"10px 0 0", maxWidth:360 }}>A clear head-and-shoulders photo with your face centered works best.</p>
+              </div>
+            </div>
+          </Block>
+
+          <Block title="Your logo (optional)">
+            <div style={{ display:"flex", gap:20, alignItems:"center", flexWrap:"wrap" }}>
+              {f.logo_url ? <img src={f.logo_url} alt="" style={{ maxWidth:160, maxHeight:80, objectFit:"contain", background:"#fff", padding:8 }}/> : <div style={{ width:160, height:80, background:C.soft }}/>}
+              <div>
+                <label style={{ ...ghost, display:"inline-block" }}>{f.logo_url ? "Change logo" : "Add your logo"}<input type="file" accept="image/*" onChange={pickLogo} style={{ display:"none" }}/></label>
+                {f.logo_url && <button type="button" style={{ ...ghost, marginLeft:8 }} onClick={() => { setSaved(false); setF({ ...f, logo_url:"" }); }}>Remove</button>}
+                <p style={{ font:`italic 500 16px ${SERIF}`, color:C.mute, margin:"10px 0 0", maxWidth:360 }}>Your brokerage or personal logo. It shows on your page and on your flyers.</p>
               </div>
             </div>
           </Block>
@@ -144,6 +203,37 @@ export default function AgentEdit() {
               <p style={{ font:`500 17px/1.5 ${SERIF}`, whiteSpace:"pre-wrap", margin:"8px 0 12px" }}>{body}</p>
               <button type="button" style={ghost} onClick={() => copy(t, body)}>{copied === t ? "Copied" : "Copy this post"}</button>
             </div>))}
+        </Block>
+
+        <Block title="Open house flyer">
+          <style>{PRINT_CSS}</style>
+          <p style={{ font:`500 18px/1.45 ${SERIF}`, margin:"0 0 14px" }}>Fill in your listing, add a photo, and print it or save it as a PDF. The QR code sends buyers to your page, where they can see where they stand. Your photo, logo and info come from above.</p>
+          <div className="ae-g" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"14px 24px" }}>
+            <label style={{ gridColumn:"1 / -1" }}><span style={lab}>Street address</span><input style={inp} value={fl.address} onChange={setL("address")} placeholder="5701 E Melody Way"/></label>
+            <label><span style={lab}>City, state</span><input style={inp} value={fl.city} onChange={setL("city")} placeholder="Sarasota, FL"/></label>
+            <label><span style={lab}>Price</span><input style={inp} value={fl.price} onChange={setL("price")} inputMode="numeric" placeholder="530000"/></label>
+            <label style={{ gridColumn:"1 / -1" }}><span style={lab}>Open house date and time</span><input style={inp} value={fl.openHouse} onChange={setL("openHouse")} placeholder="Sunday, Nov 23 · 12 to 3 PM"/></label>
+            <label><span style={lab}>Beds</span><input style={inp} value={fl.beds} onChange={setL("beds")}/></label>
+            <label><span style={lab}>Baths</span><input style={inp} value={fl.baths} onChange={setL("baths")}/></label>
+            <label><span style={lab}>Sq ft</span><input style={inp} value={fl.sqft} onChange={setL("sqft")} placeholder="2,150"/></label>
+            <label><span style={lab}>Seller credit $ (optional)</span><input style={inp} value={fl.credit} onChange={setL("credit")} inputMode="numeric"/></label>
+            <label style={{ gridColumn:"1 / -1" }}><span style={lab}>Listing photo</span><input type="file" accept="image/*" onChange={pickL("photo", 1800)} style={{ display:"block", marginTop:8, font:`500 15px ${SANS}` }}/></label>
+            <label style={{ gridColumn:"1 / -1" }}><span style={lab}>Link for the QR code (optional)</span><input style={inp} value={fl.listingLink} onChange={setL("listingLink")} placeholder="Leave blank to send buyers to your page"/></label>
+            <label style={{ gridColumn:"1 / -1", display:"flex", gap:10, alignItems:"flex-start", cursor:"pointer" }}>
+              <input type="checkbox" checked={fl.joshua} onChange={setL("joshua")} style={{ marginTop:3, width:18, height:18, accentColor:C.red, flex:"none" }}/>
+              <span style={{ font:`500 17px/1.4 ${SERIF}` }}>Include my lender partner, Joshua Graham, and a monthly payment breakdown on the flyer.</span>
+            </label>
+            {fl.joshua && !rateOk && <p style={{ gridColumn:"1 / -1", font:`italic 500 16px ${SERIF}`, color:C.red, margin:0 }}>The payment breakdown is paused until Joshua posts today's rate. Your flyer still prints with his contact info.</p>}
+            {fl.joshua && rateOk && fl.buydown && <label><span style={lab}>Buydown</span><select style={inp} value={fl.buydown} onChange={setL("buydown")}><option value="2/1">2/1</option><option value="1/0">1/0</option><option value="none">None</option></select></label>}
+          </div>
+          <div style={{ marginTop:18, display:"flex", gap:12, alignItems:"center", flexWrap:"wrap" }}>
+            <button type="button" style={{ ...btn, opacity:canPrint ? 1 : 0.4 }} disabled={!canPrint} onClick={() => setTimeout(() => window.print(), 50)}>Print or save as PDF</button>
+            {!canPrint && <span style={{ font:`italic 500 16px ${SERIF}`, color:C.mute }}>Add the address and price to print.</span>}
+          </div>
+          <p style={{ font:`italic 500 15px/1.4 ${SERIF}`, color:C.mute, margin:"10px 0 18px" }}>In the print window choose Letter, margins None, and turn on Background graphics.</p>
+          <div style={{ width:816 * flScale, height:1056 * flScale, overflow:"hidden", border:`1px solid ${C.soft}`, background:"#fff" }}>
+            <div id="gup-flyer-wrap" style={{ transform:`scale(${flScale})`, transformOrigin:"top left", width:816, height:1056 }}><Flyer f={fx} m={fm}/></div>
+          </div>
         </Block>
 
         <Block title="Your scenario desk">

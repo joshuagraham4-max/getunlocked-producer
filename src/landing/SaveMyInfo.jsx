@@ -196,7 +196,7 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
         <main className="sv-main">
           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", gap:12 }}>
             <img src="/brand/gf-logo-ink.png" alt="Graham Financial" style={{ height:54, width:"auto" }}/>
-            <img src="/brand/zpm-logo-ink.png" alt="Zero Point Mortgage Services" style={{ height:36, width:"auto" }}/>
+            <div style={{ display:"flex", alignItems:"center", gap:16 }}>{agent && agent.logo_url && <img src={agent.logo_url} alt={agent.brokerage || agent.name} style={{ maxHeight:44, maxWidth:120, width:"auto", objectFit:"contain" }}/>}<img src="/brand/zpm-logo-ink.png" alt="Zero Point Mortgage Services" style={{ height:36, width:"auto" }}/></div>
           </div>
           <div className="sv-k" style={{ marginTop:30 }}>{agent ? "Buyers and sellers" : "Buyers · Homeowners · Investors · Agents"}</div>
           <h1 className="sv-h1" style={agent ? { fontSize:"clamp(32px,4.6vw,52px)" } : undefined}>{done ? <>You're in, {f.first.trim()}.</> : agent ? <>Buying or selling{agent.market ? <> in {agent.market}</> : null}?<i>Let's see how we get you there.</i></> : <>What are you after?<i>Let's see if I can get you there.</i></>}</h1>
