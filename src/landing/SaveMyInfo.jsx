@@ -30,9 +30,9 @@ const WHO = [
       { id:"pmt", short:"Perfect monthly payment", q:"If you could wave a magic wand, what's the perfect monthly payment for you?", money:true, ph:"2,500" },
       { id:"cash", short:"Max cash to close", q:"Best case, what's the most you'd want to spend, all in, to buy a home?", sub:"Down payment, closing costs, everything you'd bring to the table.", money:true, ph:"15,000" },
       { id:"timing", short:"Timing", q:"Any concerns on timing?", opts:TIMING },
-      { id:"class", short:"Class", q:"Want the free 15-minute class that makes you a SMART buyer with SMART money?", sub:"It's how you get access to SMART money.", opts:["Yes, join the wait list", "Not right now"] },
+      { id:"class", short:"Class", q:"Want in? The free 15-minute class makes you a SMART buyer with SMART money.", sub:"Finish it and you unlock free credit report access and review, appraisal credits and wholesale interest rates.", opts:["Yes, join the wait list", "Not right now"] },
     ],
-    thanks:(a) => a.class && /^Yes/.test(a.class) ? "You're on the wait list for the SMART Buyer class. I'll text you the day it's live. In the meantime I'll look at your numbers and reach out." : "Got it. I'll look at what you told me and text you what I'd do in your shoes." },
+    thanks:(a) => a.class && /^Yes/.test(a.class) ? "You're on the wait list for the SMART Buyer class. The day it's live, I'll text you, and your free credit report review, appraisal credits and wholesale rate access unlock with it. In the meantime I'll look at your numbers and reach out." : "Got it. I'll look at what you told me and text you what I'd do in your shoes." },
   { id:"homeowner", label:"I own a home", sub:"Equity, a low rate, a second property",
     qs:[
       { id:"goal", short:"Goal", q:"What are we trying to accomplish?", opts:["Buy rentals with my equity", "Optimize the financing I have", "Pull cash out", "Sell and move up", "Just see where I stand"] },
@@ -66,6 +66,7 @@ const WHO = [
     thanks:() => "You're on the lead wait list. I'll reach out as soon as buyers are ready for your market." },
 ];
 const WHY = [["THE NATIONAL TOTAL", "Overpaid on mortgages, every year", "$65 billion", 0], ["YOUR SHARE", "About, per borrower, per year", "$3,300", 0], ["THE CAUSE", "Most buyers take one lender's quote", "1 quote", 0], ["THE FIX", "A wholesale broker shops several lenders for you", "Me", 1]];
+const PERKS = ["Your credit report, free, reviewed with you", "Appraisal credits toward your purchase", "Access to wholesale interest rates"];
 const getWho = () => { try { const w = new URLSearchParams(location.search).get("who"); return WHO.some((x) => x.id === w) ? w : ""; } catch { return ""; } };
 const getRef = () => { try { return new URLSearchParams(location.search).get("ref") || "SAVE-01"; } catch { return "SAVE-01"; } };
 const mkCSS = () => `
@@ -121,6 +122,13 @@ function Ledger({ rows }) {
 
 const money = (v) => String(v || "").replace(/[^\d]/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
+function Perks({ title }) {
+  return (<div style={{ background:C.panel, color:C.panelText, padding:"16px 18px", marginTop:18 }}>
+    <div style={{ font:`700 11px ${SANS}`, letterSpacing:".18em", textTransform:"uppercase", color:C.panelMute }}>{title || "Smart Money members get"}</div>
+    {PERKS.map((p) => <div key={p} style={{ font:`500 18px/1.35 ${SERIF}`, marginTop:7, display:"flex", gap:10 }}><span style={{ color:C.panelMute }}>✓</span><span>{p}</span></div>)}
+  </div>);
+}
+
 export default function SaveMyInfo() {
   const [who, setWho] = useState(getWho());
   Object.assign(C, THEMES[DOOR_THEME[who] || "sky"]);
@@ -141,6 +149,7 @@ export default function SaveMyInfo() {
 
   const submit = async (ev) => {
     ev.preventDefault(); setErr("");
+    const skipped = flow.qs.findIndex((x) => !a[x.id]); if (skipped >= 0) return go(skipped);
     const phone = f.phone.replace(/\D/g, ""); const miss = [];
     if (!f.first.trim()) miss.push("first name");
     if (!/^\S+@\S+\.\S+$/.test(f.email.trim())) miss.push("a valid email");
@@ -212,6 +221,7 @@ export default function SaveMyInfo() {
                 <button type="button" onClick={() => (step === 0 ? setWho("") : go(step - 1))} style={{ all:"unset", cursor:"pointer", font:`italic 400 15px ${SERIF}`, color:C.mute }}>← Back</button>
               </div>
               <div style={{ height:3, background:C.soft, marginTop:10 }}><div style={{ height:3, width:`${((step + 1) / (flow.qs.length + 1)) * 100}%`, background:C.red }}/></div>
+              {who === "buyer" && <Perks title="Answer these and unlock"/>}
               <h2 style={{ font:`600 clamp(28px,4vw,40px)/1.1 ${SERIF}`, margin:"22px 0 0" }}>{q.q}</h2>
               {q.sub && <p className="sv-sub" style={{ marginTop:8 }}>{q.sub}</p>}
               {q.opts ? <div style={{ marginTop:10 }}>{q.opts.map((o) => (
@@ -223,7 +233,7 @@ export default function SaveMyInfo() {
                       value={a[q.id] || ""} onChange={(e) => setA({ ...a, [q.id]: q.money ? money(e.target.value) : e.target.value })}/>
                   </div>
                   <button className="sv-btn" type="submit" disabled={!a[q.id]} style={{ marginTop:20 }}>Continue</button>
-                  <button type="button" onClick={() => go(step + 1)} style={{ all:"unset", cursor:"pointer", display:"block", margin:"14px auto 0", font:`italic 400 15px ${SERIF}`, color:C.mute }}>Skip this one</button>
+
                 </form>}
             </div>}
 
@@ -241,6 +251,7 @@ export default function SaveMyInfo() {
                   : <>Where do I reach you?<br/><i style={{ fontWeight:500, color:C.red }}>I'll tell you what I'd do.</i></>}
               </h2>
               {flow.handoff && <p className="sv-sub" style={{ marginTop:10 }}>{flow.handoff}</p>}
+              {wantsClass && <Perks title="Joining the wait list unlocks"/>}
               <div className="sv-fields" style={{ marginTop:18 }}>
                 <label className="sv-f"><span>First name</span><input className="sv-in" value={f.first} onChange={set("first")} autoComplete="given-name"/></label>
                 <label className="sv-f"><span>Last name</span><input className="sv-in" value={f.last} onChange={set("last")} autoComplete="family-name"/></label>
