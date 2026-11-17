@@ -5,7 +5,7 @@
     "hook": "Rent went up again. What would owning cost?",
     "theme": "navy",
     "audience": "buyers",
-    "link": "https://getunlocked-producer.vercel.app/save?ref=T-PAY01"
+    "link": "https://getunlocked-producer.vercel.app/save?ref=T-PAY01&who=buyer"
   },
   {
     "id": "DWN-01",
@@ -13,7 +13,7 @@
     "hook": "What if you only needed 3% down, and I could get you 5%?",
     "theme": "maroon",
     "audience": "buyers",
-    "link": "https://getunlocked-producer.vercel.app/save?ref=T-DWN01"
+    "link": "https://getunlocked-producer.vercel.app/save?ref=T-DWN01&who=buyer"
   },
   {
     "id": "WLT-01",
@@ -21,7 +21,7 @@
     "hook": "Who gets the $12,000 your home earns?",
     "theme": "teal",
     "audience": "buyers",
-    "link": "https://getunlocked-producer.vercel.app/save?ref=T-WLT01"
+    "link": "https://getunlocked-producer.vercel.app/save?ref=T-WLT01&who=buyer"
   },
   {
     "id": "WHY-01",
@@ -29,7 +29,7 @@
     "hook": "Buyers leave $65 billion a year on the table.",
     "theme": "navy",
     "audience": "buyers",
-    "link": "https://getunlocked-producer.vercel.app/save?ref=T-WHY01"
+    "link": "https://getunlocked-producer.vercel.app/save?ref=T-WHY01&who=buyer"
   },
   {
     "id": "CRD-01",
@@ -45,6 +45,6 @@
     "hook": "Your buyer loves the house. The payment doesn't reach.",
     "theme": "teal",
     "audience": "agents",
-    "link": "https://getunlocked-producer.vercel.app/save?ref=T-AGT06"
+    "link": "https://getunlocked-producer.vercel.app/save?ref=T-AGT06&who=agent"
   }
 ]

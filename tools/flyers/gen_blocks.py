@@ -48,6 +48,6 @@ if __name__ == "__main__":
         for h, suf in ((1350, ""), (1080, "-sq")):
             shot(page(lines, acc, theme, h), os.path.join(out, f"{id_}-{theme}{suf}.png"), h)
         sheet.append(dict(id=id_, ref=ref, hook=" ".join(lines + acc), theme=theme, audience=aud,
-                          link=f"https://getunlocked-producer.vercel.app/save?ref={ref}"))
+                          link=f"https://getunlocked-producer.vercel.app/save?ref={ref}" + {"buyers": "&who=buyer", "agents": "&who=agent"}.get(aud, "")))
         print(id_, theme)
     json.dump(sheet, open(os.path.join(out, "test-sheet.json"), "w"), indent=2)
