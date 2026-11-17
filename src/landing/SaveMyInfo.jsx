@@ -200,7 +200,7 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
           </div>
           <div className="sv-k" style={{ marginTop:30 }}>{agent ? "Buyers and sellers" : "Buyers · Homeowners · Investors · Agents"}</div>
           <h1 className="sv-h1" style={agent ? { fontSize:"clamp(32px,4.6vw,52px)" } : undefined}>{done ? <>You're in, {f.first.trim()}.</> : agent ? <>Buying or selling{agent.market ? <> in {agent.market}</> : null}?<i>Let's see how we get you there.</i></> : <>What are you after?<i>Let's see if I can get you there.</i></>}</h1>
-          <p className="sv-sub">{done ? (agent ? (sellOnly ? `${agent.name} will be in touch about your home, and I'm on the lending side if you buy next.` : `${agent.name} and I will both be in touch shortly. ${flow.thanks(a)}`) : `${flow.thanks(a)} It's not a sales call. When it has to go right, I'm your guy.`) : agent ? `${agent.name}${agent.brokerage ? " of " + agent.brokerage : ""} and I are here to help you buy or sell. I'm a wholesale broker, so I shop several lenders for you and you get access to the best rates. Get a quote from anyone. Then get mine.` : "I'm a wholesale broker. I shop several lenders for you, so you get access to the best rates. Get a quote from anyone. Then get mine."}</p>
+          <p className="sv-sub">{done ? (agent ? (sellOnly ? `${agent.name} will be in touch about your home, and I'm on the lending side if you buy next.` : `${agent.name} and I will both be in touch shortly. ${flow.thanks(a)}`) : `${flow.thanks(a)} It's not a sales call. When it has to go right, I'm your guy.`) : agent ? `${agent.name}${agent.brokerage ? " of " + agent.brokerage : ""} and I are here to help you buy or sell. I'm a wholesale broker. I shop many banks for the best to win yours.` : "I'm a wholesale broker. I shop many banks for the best to win yours."}</p>
 
           {done ? (
             <div style={{ marginTop:30 }}>
@@ -230,7 +230,7 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
                 <div className="sv-k">Why me</div>
                 <h2 style={{ font:`600 clamp(30px,4vw,44px)/1.08 ${SERIF}`, margin:"12px 0 0" }}>Buyers leave $65 billion<br/><i style={{ fontWeight:500, color:C.red }}>a year on the table.</i></h2>
                 <Ledger rows={WHY}/>
-                <p style={{ font:`italic 500 20px ${SERIF}`, margin:"14px 0 0" }}>Get a quote from anyone. Then get mine.</p>
+                <p style={{ font:`italic 500 20px ${SERIF}`, margin:"14px 0 0" }}>I shop many banks for the best to win yours.</p>
               </div>
             </>}
 
