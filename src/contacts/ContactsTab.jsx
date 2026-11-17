@@ -474,7 +474,7 @@ export default function ContactsTab({ userId, contacts, setContacts, profileName
   };
   const ql = q.trim().toLowerCase(), qd = digits(q);
   const list = useMemo(() => {
-    const out = inCat.filter((c) => {
+    const out = (ql ? contacts : inCat).filter((c) => {   // typing a search looks across every type, not just the tab you are on
       if (bucket && !(c.buckets || []).includes(bucket)) return false;
       if (brokerage && c.company !== brokerage) return false;
       for (const f of filters) if (!test(c, f)) return false;
@@ -495,7 +495,7 @@ export default function ContactsTab({ userId, contacts, setContacts, profileName
     }[sort];
     return out.sort(cmp);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inCat, bucket, brokerage, filters, ql, qd, linkedText, sort, reasons]);
+  }, [contacts, inCat, bucket, brokerage, filters, ql, qd, linkedText, sort, reasons]);
 
   const open = (c) => { setSel(c.id); setView("detail"); window.scrollTo?.(0, 0); };
   const selC = sel ? byId[sel] : null;
