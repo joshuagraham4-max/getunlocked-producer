@@ -47,7 +47,7 @@ create or replace function public.route_agent_lead() returns trigger
 language plpgsql security definer set search_path = public, extensions as $$
 declare
   a public.agent_pages%rowtype;
-  who text; d text; has_agent boolean; ph text; msg text; key text; frm text; body text;
+  who text; d text; has_agent boolean; sells boolean; ph text; msg text; key text; frm text; body text;
 begin
   if new.source is distinct from 'agent-page' then return new; end if;
   select * into a from public.agent_pages where slug = (new.answers->>'agent_slug') and active limit 1;
@@ -56,7 +56,8 @@ begin
   d := regexp_replace(coalesce(new.phone, ''), '\D', '', 'g');
   ph := case when length(d) = 10 then '(' || substr(d,1,3) || ') ' || substr(d,4,3) || '-' || substr(d,7) else new.phone end;
   has_agent := coalesce(new.answers->'qa'->>'hasagent', '') like 'Yes%';
-  msg := case when has_agent then 'ALREADY HAS AN AGENT. ' else '' end || who || ' just asked about buying. Call ' || ph || ' within 5 minutes.';
+  sells := coalesce(new.answers->'qa'->>'sellhome', '') ~ '^(Yes|Maybe)';
+  msg := case when has_agent then 'ALREADY HAS AN AGENT. ' else '' end || who || ' just asked about buying. Call ' || ph || ' within 5 minutes.' || case when sells then ' Also has a home to sell: ' || coalesce(new.answers->'qa'->>'saddr', 'address pending') || '.' else '' end;
 
   -- 1) Instant push to the agent (free ntfy app, subscribe to their topic). Always on.
   begin
@@ -71,6 +72,7 @@ begin
   frm := coalesce(public.app_secret('RESEND_FROM'), 'Joshua Graham <onboarding@resend.dev>');
   if key is not null and a.email is not null and a.lead_pref in ('both', 'email') then
     body := case when has_agent then '<p><b>This buyer says they already work with an agent.</b> Your call.</p>' else '' end || '<p><b>Call within 5 minutes.</b> Leads that get a call in the first 5 minutes are far more likely to answer.</p>'
+         || case when sells then '<p><b>Has a home to sell:</b> ' || coalesce(new.answers->'qa'->>'saddr', '') || '. Their guess: $' || coalesce(new.answers->'qa'->>'sworth', '?') || ', owes about $' || coalesce(new.answers->'qa'->>'spayoff', '?') || '. That is a listing lead for you.</p>' else '' end
          || '<p><b>' || who || '</b><br>' || ph || '<br>' || coalesce(new.email, '') || '</p>'
          || '<p>' || coalesce(new.answers->>'summary', '') || '</p>'
          || '<p>This buyer came through your page. I''m the lender on it, and I''ll keep you posted. - Joshua Graham, 720-468-6872</p>';

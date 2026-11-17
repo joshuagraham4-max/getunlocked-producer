@@ -140,7 +140,17 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
   const [err, setErr] = useState(""); const [busy, setBusy] = useState(false); const [done, setDone] = useState(false);
   const top = React.useRef(null);
   const base = WHO.find((w) => w.id === who);
-  const flow = base && agent && who === "buyer" ? { ...base, qs:[{ id:"hasagent", short:"Has agent", q:"Are you already working with an agent?", opts:["No, I don't have one", "Not sure yet", "Yes, I'm working with an agent"] }, ...base.qs] } : base; const vid = embedFor(SAVE_VIDEO);
+  const selling = /^(Yes|Maybe)/.test(a.sellhome || "");
+  const flow = base && agent && who === "buyer" ? { ...base, qs:[
+    { id:"hasagent", short:"Has agent", q:"Are you already working with an agent?", opts:["No, I don't have one", "Not sure yet", "Yes, I'm working with an agent"] },
+    { id:"sellhome", short:"Home to sell", q:"Do you have a home to sell first?", sub:"Selling often funds the next purchase.", opts:["No, I don't have one to sell", "Yes, I need to sell first", "Maybe, I'm not sure yet"] },
+    ...(selling ? [
+      { id:"saddr", short:"Sell address", q:"What's the address of the home you'd sell?", sub:"We'll zero in on what it's actually worth, not a Zillow guess.", text:true, ph:"Street, city" },
+      { id:"sworth", short:"Thinks it's worth", q:"What do you think it's worth today?", sub:"Your best guess is fine.", money:true, ph:"450,000" },
+      { id:"spayoff", short:"Owes", q:"Roughly what do you still owe on it?", sub:"All loans on the home, a ballpark is fine.", money:true, ph:"250,000" },
+      { id:"swhen", short:"Sell by", q:"When do you need it sold?", opts:["As soon as possible", "Within 3 months", "In 6 months or more", "Only after I find the next home"] },
+    ] : []),
+    ...base.qs] } : base; const vid = embedFor(SAVE_VIDEO);
   const go = (n) => { setStep(n); setErr(""); setTimeout(() => { try { top.current && top.current.scrollIntoView({ behavior:"smooth", block:"start" }); } catch {} }, 30); };
   const pick = (w) => { setWho(w); setA({}); go(0); };
   const answer = (q, v) => { setA({ ...a, [q.id]:v }); go(step + 1); };
@@ -168,7 +178,7 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
       first_name:f.first.trim(), last_name:f.last.trim() || null, email:f.email.trim(), phone,
       property_state:f.state || null, zip:/^\d{5}$/.test(f.zip.trim()) ? f.zip.trim() : null, consent:true,
       ref:refCode, source:agent ? "agent-page" : "save-my-info", page_url:location.href.slice(0, 500), user_agent:navigator.userAgent.slice(0, 300),
-      answers:{ has_agent:a.hasagent || null, summary, agent_slug:agent ? agent.slug : null, agent_name:agent ? agent.name : null, interest:who, qa:a, class_waitlist:wantsClass, address:f.address.trim() || null, send_leads_to:f.sendTo.trim() || null, city:f.city.trim() || null, note:f.note.trim() || null } });
+      answers:{ has_agent:a.hasagent || null, summary, agent_slug:agent ? agent.slug : null, agent_name:agent ? agent.name : null, interest:who, qa:a, class_waitlist:wantsClass, address:f.address.trim() || a.saddr || null, sell_first:selling, send_leads_to:f.sendTo.trim() || null, city:f.city.trim() || null, note:f.note.trim() || null } });
     setBusy(false);
     if (error) return setErr("We couldn't send that just now. Check your connection and try again, or call " + BRAND.phone + ".");
     setDone(true); try { window.scrollTo({ top:0, behavior:"smooth" }); } catch {}
