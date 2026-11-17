@@ -28,7 +28,7 @@ const WHO = [
       { id:"dp", short:"Down payment concern", q:"Is the down payment a concern for you?", opts:["Yes, a big one", "A little", "No"] },
       { id:"credit", short:"Credit", q:"How's your credit?", opts:["Strong, 700 or higher", "Okay, 640 to 699", "Needs work", "Not sure"] },
       { id:"pmt", short:"Perfect monthly payment", q:"If you could wave a magic wand, what's the perfect monthly payment for you?", money:true, ph:"2,500" },
-      { id:"cash", short:"Max cash to close", q:"Best case, what's the most you'd want to spend, all in, to buy a home?", sub:"Down payment, closing costs, everything you'd bring to the table.", money:true, ph:"15,000" },
+      { id:"cash", short:"Max cash to close", q:"Best case, what's the most you'd want to spend, all in, to buy a home?", sub:"Down payment, closing costs, everything you'd bring to the table.", money:true, ph:"5,000" },
       { id:"timing", short:"Timing", q:"Any concerns on timing?", opts:TIMING },
       { id:"class", short:"Class", q:"Want in? The free 15-minute class makes you a SMART buyer with SMART money.", sub:"Finish it and you unlock free credit report access and review, appraisal credits and wholesale interest rates.", opts:["Yes, join the wait list", "Not right now"] },
     ],
@@ -103,14 +103,18 @@ const mkCSS = () => `
 .sv-vid{position:relative;aspect-ratio:16/9;background:${C.panel};border:1px solid ${C.rule};margin-top:26px}
 .sv-vid iframe,.sv-vid video{position:absolute;inset:0;width:100%;height:100%;border:0}
 .sv-side h2{font:italic 500 38px/1.12 ${SERIF};margin:0}
-.sv-side img.ph{width:100%;flex:1;min-height:0;object-fit:cover;object-position:50% 12%}
+@media (max-height:820px) and (min-width:901px){.sv-side{padding:24px 28px;gap:12px}.sv-side h2{font-size:30px}}
+.sv-side img.ph{width:100%;flex:1;min-height:0;object-fit:cover;object-position:50% 0%}
+.sv-side .pb{display:flex;flex-direction:column;gap:10px;flex:1;min-height:0}
+.sv-side .cap{font:700 12px/1.6 ${SANS};letter-spacing:.12em;flex:none}
 .sv-side .bar{width:36px;height:3px;background:${C.panelMute}}
 .sv-side a{color:${C.panelText};text-decoration:none}
 @media(max-width:900px){
  .sv-wrap{grid-template-columns:1fr}
  .sv-main{padding:24px 20px 40px}
  .sv-side{position:static;height:auto;flex-direction:row;align-items:center;padding:22px 20px}
- .sv-side img.ph{width:96px;height:120px;flex:none}
+ .sv-side .pb{flex-direction:row;align-items:center;flex:none}
+ .sv-side img.ph,.sv-side div.ph{width:96px;height:120px;flex:none;min-height:0}
  .sv-side h2{font-size:26px}
  .sv-row .val{font-size:26px}
 }`;
@@ -292,13 +296,17 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
         </main>
         <aside className="sv-side">
           <div className="bar"/>
-          <h2>{agent ? <>Home buying help from {agent.name.split(" ")[0]} and me.</> : <>When it has to go right, I'm your guy.</>}</h2>
-          {agent && (agent.photo_url ? <img className="ph" src={agent.photo_url} alt={agent.name}/> : <div className="ph" style={{ width:"100%", flex:1, minHeight:70, display:"flex", alignItems:"center", justifyContent:"center", background:C.panelMute, color:C.panel, font:`500 64px ${SERIF}` }}>{agent.name.split(" ").map((x) => x[0]).slice(0, 2).join("").toUpperCase()}</div>)}
-          <img className="ph" src="/brand/joshua-plum-suit.jpg" alt="Joshua Graham"/>
-          <div style={{ font:`700 12px/1.6 ${SANS}`, letterSpacing:".12em" }}>
-            {agent && <>{agent.name.toUpperCase()}<br/><span style={{ color:C.panelMute }}>{agent.brokerage || "REAL ESTATE"}</span><br/><br/></>}
-            JOSHUA GRAHAM<br/><span style={{ color:C.panelMute }}>{agent ? "LENDING" : "REGIONAL LOAN ORIGINATOR"}</span><br/><span style={{ fontWeight:500, opacity:.8 }}>NMLS #169809</span><br/>
-            <a href={`tel:${BRAND.phone.replace(/\D/g, "")}`} style={{ font:`500 22px ${SERIF}`, letterSpacing:0 }}>{BRAND.phone}</a>
+          <h2>{agent ? <>Home buying help from {agent.name.split(" ")[0]} and Joshua.</> : <>When it has to go right, I'm your guy.</>}</h2>
+          {agent && <div className="pb">
+            {agent.photo_url ? <img className="ph" src={agent.photo_url} alt={agent.name}/> : <div className="ph" style={{ width:"100%", flex:1, minHeight:60, display:"flex", alignItems:"center", justifyContent:"center", background:C.panelMute, color:C.panel, font:`500 56px ${SERIF}` }}>{agent.name.split(" ").map((x) => x[0]).slice(0, 2).join("").toUpperCase()}</div>}
+            <div className="cap">{agent.name.toUpperCase()}<br/><span style={{ color:C.panelMute }}>{agent.brokerage || "REAL ESTATE"}</span></div>
+          </div>}
+          <div className="pb" style={agent ? { flex:2.4 } : undefined}>
+            <img className="ph" src="/brand/joshua-plum-suit.jpg" alt="Joshua Graham"/>
+            <div className="cap">
+              JOSHUA GRAHAM<br/><span style={{ color:C.panelMute }}>REGIONAL LOAN ORIGINATOR</span><br/><span style={{ fontWeight:500, opacity:.8 }}>NMLS #169809</span><br/>
+              <a href={`tel:${BRAND.phone.replace(/\D/g, "")}`} style={{ font:`500 22px ${SERIF}`, letterSpacing:0 }}>{BRAND.phone}</a>
+            </div>
           </div>
         </aside>
       </div>
