@@ -80,13 +80,26 @@ const mkCSS = () => `
 .sv-hero-l{flex:1;min-width:0;padding:30px 20px 30px 20px;display:flex;flex-direction:column;gap:14px;justify-content:center}
 .sv-k{font:700 11px ${SANS};letter-spacing:.2em;text-transform:uppercase;color:${C.maroon}}
 .sv-h1{font:400 clamp(44px,12vw,92px)/1.0 ${ANTON};letter-spacing:.01em;text-transform:uppercase;margin:0;color:${C.navy}}
-.sv-h1 i{display:block;font-style:normal;color:${C.maroon}}
-.sv-bar{width:40px;height:4px;background:${C.gold}}
+.sv-h1 .ln2{color:${C.maroon}}
+.sv-bar{width:40px;height:4px;background:${C.gold};transform-origin:left;animation:svbar .7s .95s ease-out both}
+.sv-ln{display:block;animation:svln .65s cubic-bezier(.2,.7,.2,1) both}
+.sv-anim{animation:svin .5s cubic-bezier(.2,.7,.2,1) both}
+@keyframes svln{from{opacity:0;transform:translateY(34px)}to{opacity:1;transform:none}}
+@keyframes svin{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+@keyframes svbar{from{transform:scaleX(0)}to{transform:none}}
+@media (prefers-reduced-motion:reduce){.sv-ln,.sv-anim,.sv-bar{animation:none}}
+.sv-why{max-width:760px;margin:0 auto;padding:34px 20px 8px}
+.sv-start{display:flex;gap:16px;align-items:flex-start;padding:6px 0 4px}
+.sv-start .n{font:400 44px/.9 ${ANTON};color:${C.plum};width:36px;flex:none}
+.sv-start .tg{font:700 11px ${SANS};letter-spacing:.2em;text-transform:uppercase;color:${C.maroon}}
+.sv-start .tt{font:400 clamp(26px,5vw,34px)/1.08 ${ANTON};letter-spacing:.02em;text-transform:uppercase;color:${C.navy};margin-top:4px}
+.sv-start .tx{font:400 15px/1.5 'Public Sans',system-ui,sans-serif;color:${C.mute};margin-top:6px}
 .sv-sub{font:400 16px/1.55 'Public Sans',system-ui,sans-serif;color:${C.mute};margin:0}
 .sv-photos{width:132px;flex:none;background:${C.maroon};display:flex;flex-direction:column;gap:12px;padding:0 0 14px}
 .sv-photos img,.sv-photos .ph{display:block;width:100%;object-fit:cover;object-position:50% 10%}
 .sv-photos .a{height:190px;flex:none}
-.sv-photos .j{flex:1;min-height:300px}
+.sv-photos .jbox{position:relative;overflow:hidden;aspect-ratio:1/1.85;flex:none;background:${C.maroon}}
+.sv-photos .jbox img{position:absolute;top:0;left:-22%;width:160%;max-width:none;height:auto;object-fit:initial}
 .sv-photos .ph{display:flex;align-items:center;justify-content:center;background:#6E2A38;color:#E3C9CC;font:400 44px ${ANTON}}
 .sv-photos .cap{padding:0 8px;text-align:center;font:700 10px/1.45 ${SANS};letter-spacing:.12em;text-transform:uppercase;color:#fff;margin-top:-4px}
 .sv-photos .cap span{color:#E3C9CC;font-weight:600}
@@ -129,7 +142,7 @@ const mkCSS = () => `
 .sv-btn:disabled{opacity:.6}
 .sv-fine{font:400 11.5px/1.5 ${SANS};color:${C.mute}}
 @media(min-width:760px){
- .sv-photos{width:300px}.sv-photos .a{height:260px}.sv-photos .j{min-height:420px}.sv-photos .cap{font-size:12px;padding:0 16px}
+ .sv-photos{width:300px}.sv-photos .a{height:260px}.sv-photos .cap{font-size:12px;padding:0 16px}
  .sv-hero-l{padding:48px 36px 48px 20px}
 }`;
 
@@ -213,24 +226,29 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
       <section className="sv-hero">
         <div className="sv-hero-l">
           <div className="sv-k">Real Estate Financing. Smooth. Precise. Elite.</div>
-          <h1 className="sv-h1">{done ? <>You're in, {f.first.trim()}.</> : agent ? <>Buying.<br/>Selling.<i>{agent.market ? `In ${agent.market}?` : "Let's talk."}</i></> : <>When it<br/>has to go<i>right.</i></>}</h1>
+          <h1 className="sv-h1">{done ? <>You're in, {f.first.trim()}.</> : (agent ? ["Buying.", "Selling.", agent.market ? `In ${agent.market}?` : "Let's talk."] : ["When it", "has to go", "right."]).map((t, i) => <span key={t} className={"sv-ln" + (i === 2 ? " ln2" : "")} style={{ animationDelay:`${i * 260}ms` }}>{t}</span>)}</h1>
           <div className="sv-bar"/>
           <p className="sv-sub">{done ? (agent ? (sellOnly ? `${agent.name} will be in touch about your home, and I'm on the lending side if you buy next.` : `${agent.name} and I will both be in touch shortly. ${flow.thanks(a)}`) : `${flow.thanks(a)} It's not a sales call. When it has to go right, I'm your guy.`) : agent ? `${agent.name}${agent.brokerage ? " of " + agent.brokerage : ""} and I will help you buy or sell. As a wholesale broker, I shop many banks and give you options.` : "I'm Joshua Graham. As a wholesale broker, I shop many banks and give you options."}</p>
         </div>
         <aside className="sv-photos">
           {agent && (agent.photo_url ? <img className="a" src={agent.photo_url} alt={agent.name}/> : <div className="ph a">{agent.name.split(" ").map((x) => x[0]).slice(0, 2).join("").toUpperCase()}</div>)}
           {agent && <div className="cap">{agent.name}<br/><span>{agent.brokerage || "Real estate"}</span></div>}
-          <img className="j" src="/brand/joshua-plum-suit.jpg" alt="Joshua Graham"/>
+          <div className="jbox"><img src="/brand/joshua-plum-suit.jpg" alt="Joshua Graham"/></div>
           <div className="cap">Joshua Graham<br/><span>NMLS #169809</span><br/><a href={`tel:${BRAND.phone.replace(/\D/g, "")}`}>{BRAND.phone}</a></div>
         </aside>
       </section>
       {!done && (() => { const av = agent && agent.video_url && step === 0 ? embedFor(agent.video_url) : null; const v2 = av || (!flow ? vid : null); const ttl = av ? agent.name : SAVE_VIDEO_TITLE;
         return v2 ? <div className="sv-vidwrap"><div className="sv-vid" aria-label={ttl}>{v2.kind === "iframe" ? <iframe src={v2.src} title={ttl} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen/> : <video src={v2.src} controls playsInline preload="metadata"/>}</div></div> : null; })()}
       <div className="sv-plum"/>
-      {!done && (!flow || (who === "buyer" && step === 0)) && <section className="sv-ben"><div className="sv-ben-in">
-        <div className="sv-st"><div className="n">1</div><div><div className="tg">Start here</div><div className="tt">Join the free 15-minute SMART Buyer class</div><div className="tx">Answer a few quick questions and you are on the list. I text you the day it is live.</div></div></div>
-        <div className="sv-st"><div className="n">2</div><div><div className="tg">What you learn</div><div className="tt">The loans most buyers never hear about</div>{LEARN.map(([t, d]) => <div className="li" key={t}><b>{t}</b><span>{d}</span></div>)}</div></div>
-        <div className="sv-st"><div className="n">3</div><div><div className="tg">Finish it and unlock, free</div><div className="tt">Three things that cost you nothing</div><div className="ck">{PERKS.map((p) => <div key={p}>✓ {p}</div>)}</div></div></div>
+      {!done && <section className="sv-why">
+        <div className="sv-k">Why me</div>
+        <h2 className="sv-q" style={{ margin:"12px 0 0" }}>Buyers leave $65 billion<br/><span style={{ color:C.maroon }}>a year on the table.</span></h2>
+        <Ledger rows={WHY}/>
+        <p style={{ font:`600 18px/1.4 ${SERIF}`, margin:"14px 0 0" }}>One bank gives you a price. I give you options.</p>
+      </section>}
+      {!done && (!who || who === "buyer") && <section className="sv-ben" style={{ marginTop:30 }}><div className="sv-ben-in">
+        <div className="sv-st"><div className="n">1</div><div><div className="tg">What you learn</div><div className="tt">The loans most buyers never hear about</div>{LEARN.map(([t, d]) => <div className="li" key={t}><b>{t}</b><span>{d}</span></div>)}</div></div>
+        <div className="sv-st"><div className="n">2</div><div><div className="tg">Finish it and unlock, free</div><div className="tt">Three things that cost you nothing</div><div className="ck">{PERKS.map((p) => <div key={p}>✓ {p}</div>)}</div></div></div>
       </div></section>}
       <main className="sv-main">
 
@@ -245,30 +263,26 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
               </div>
             </div>
           ) : (<>
-            <hr className="sv-rule"/>
             <div ref={top} style={{ scrollMarginTop:16 }}/>
+            <div className="sv-start"><div className="n">{!who || who === "buyer" ? 3 : 1}</div><div><div className="tg">Start here</div>
+              <div className="tt">{!who || who === "buyer" ? "Join the free 15-minute SMART Buyer class" : "Tell me where you are"}</div>
+              <div className="tx">{!who || who === "buyer" ? "Answer a few quick questions and you are on the list. I text you the day it is live." : "A few quick questions so I can point you the right way."}</div></div></div>
+            <hr className="sv-rule" style={{ marginTop:16 }}/>
 
-            {!flow && <>
+            {!flow && <div className="sv-anim">
               <div className="sv-lab" style={{ marginTop:22 }}>What brings you here?</div>
               <div style={{ marginTop:6 }}>{WHO.map((w) => (
                 <button key={w.id} type="button" className="sv-choice" onClick={() => pick(w.id)}>
                   <span><span className="t">{w.label}</span><span className="s">{w.sub}</span></span><span className="dot"/>
                 </button>))}</div>
-              <div style={{ marginTop:44 }}>
-                <div className="sv-k">Why me</div>
-                <h2 className="sv-q" style={{ margin:"12px 0 0" }}>Buyers leave $65 billion<br/><i style={{ fontStyle:"normal", color:C.red }}>a year on the table.</i></h2>
-                <Ledger rows={WHY}/>
-                <p style={{ font:`600 18px/1.4 ${SERIF}`, margin:"14px 0 0" }}>One bank gives you a price. I give you options.</p>
-              </div>
-            </>}
+            </div>}
 
-            {flow && q && <div style={{ marginTop:22 }}>
+            {flow && q && <div key={`${who}-${step}`} className="sv-anim" style={{ marginTop:22 }}>
               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                <div className="sv-lab">{agent ? "Your plan" : flow.label} · {step + 1} of {flow.qs.length + 1}</div>
+                <div className="sv-lab">{step + 1} of {flow.qs.length + 1}</div>
                 <button type="button" onClick={() => (step === 0 ? (lockWho ? null : setWho("")) : go(step - 1))} style={{ all:"unset", cursor:"pointer", font:`italic 400 15px ${SERIF}`, color:C.mute }}>← Back</button>
               </div>
               <div style={{ height:3, background:C.soft, marginTop:10 }}><div style={{ height:3, width:`${((step + 1) / (flow.qs.length + 1)) * 100}%`, background:C.red }}/></div>
-              {who === "buyer" && !sellOnly && <Perks title="Answer these and unlock"/>}
               <h2 className="sv-q" style={{ margin:"22px 0 0" }}>{q.q}</h2>
               {q.sub && <p className="sv-sub" style={{ marginTop:8 }}>{q.sub}</p>}
               {q.opts ? <div style={{ marginTop:10 }}>{q.opts.map((o) => (
@@ -284,9 +298,9 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
                 </form>}
             </div>}
 
-            {flow && inContact && <form onSubmit={submit} noValidate style={{ marginTop:22 }}>
+            {flow && inContact && <form key="contact" onSubmit={submit} noValidate className="sv-anim" style={{ marginTop:22 }}>
               <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                <div className="sv-lab">{agent ? "Your plan" : flow.label} · {flow.qs.length + 1} of {flow.qs.length + 1}</div>
+                <div className="sv-lab">{flow.qs.length + 1} of {flow.qs.length + 1}</div>
                 <button type="button" onClick={() => go(step - 1)} style={{ all:"unset", cursor:"pointer", font:`italic 400 15px ${SERIF}`, color:C.mute }}>← Back</button>
               </div>
               <div style={{ height:3, background:C.red, marginTop:10 }}/>
