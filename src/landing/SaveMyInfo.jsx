@@ -7,13 +7,13 @@ import { BRAND } from "../smart-money/data.js";
 import { SAVE_VIDEO, SAVE_VIDEO_TITLE, embedFor } from "./saveVideo.js";
 
 const THEMES = {
-  sky:    { bone:"#F6EEDF", ink:"#0E1B2A", red:"#4A111C", panel:"#0E1B2A", panelText:"#F6EEDF", panelMute:"#D9A566", mute:"#4A5568", rule:"#D9A566", soft:"#E3D6BF" },
+  sky:    { bone:"#F6EEDF", ink:"#0E1B2A", red:"#4A111C", panel:"#0E1B2A", panelText:"#F6EEDF", panelMute:"#C9D6E3", mute:"#4A5568", rule:"#0E1B2A", soft:"#E3D6BF" },
   maroon: { bone:"#F1ECE6", ink:"#1A1216", red:"#C8102E", panel:"#4A111C", panelText:"#F6ECE9", panelMute:"#D9B3B9", mute:"#5E5358", rule:"#1A1216", soft:"#DDD2C8" },
   teal:   { bone:"#E3EEF0", ink:"#0B1C21", red:"#C8102E", panel:"#0A3A42", panelText:"#E9F3F4", panelMute:"#9CC3C7", mute:"#41585D", rule:"#0B1C21", soft:"#C3D6D9" },
 };
 const DOOR_THEME = { buyer:"sky", homeowner:"sky", investor:"sky", agent:"sky" };
-const C = { ...THEMES.sky, navy:"#0E1B2A", maroon:"#4A111C", mustard:"#D9A94A", gold:"#D9A566", goldDk:"#8A5A24" };
-const SERIF = "'Public Sans', system-ui, sans-serif", SANS = "'Montserrat', Arial, sans-serif";
+const C = { ...THEMES.sky, navy:"#0E1B2A", maroon:"#4A111C", mustard:"#D9A94A", gold:"#D9A566", goldDk:"#8A5A24", plum:"#7E4B6F" };
+const SERIF = "'Public Sans', system-ui, sans-serif", SANS = "'Montserrat', Arial, sans-serif", ANTON = "'Anton', 'Arial Narrow', Impact, sans-serif";
 const STATES = "AL AK AZ AR CA CO CT DE DC FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY".split(" ");
 
 // Four doors. Each is a few tap-answer questions (one per screen) that qualify the visitor and ask what they are trying to accomplish,
@@ -65,72 +65,72 @@ const WHO = [
     handoff:"Here's where we are: we're building out the team and the lead flow now, so this is a wait list. Where should we send leads when they're ready for you?",
     thanks:() => "You're on the lead wait list. I'll reach out as soon as buyers are ready for your market." },
 ];
-const WHY = [["THE NATIONAL TOTAL", "Overpaid on mortgages, every year", "$65 billion", 0], ["YOUR SHARE", "About, per borrower, per year", "$3,300", 0], ["THE CAUSE", "Most buyers take one lender's quote", "1 quote", 0], ["THE FIX", "A wholesale broker shops several lenders for you", "Me", 1]];
+const WHY = [["THE NATIONAL TOTAL", "Overpaid on mortgages, every year", "$65 billion", 0], ["YOUR SHARE", "About, per borrower, per year", "$3,300", 0], ["THE CAUSE", "Most buyers take one lender's quote", "1 quote", 0], ["THE FIX", "A wholesale broker shops many banks and gives you options", "Me", 1]];
 const PERKS = ["Your credit report, free, reviewed with you", "Appraisal credits toward your purchase", "Access to wholesale interest rates"];
-const BENEFITS = [["FREE", "Credit report review", "Pulled and walked through with you, on me."], ["CREDITS", "Appraisal credits", "Money back toward your purchase."], ["WHOLESALE", "Interest rates", "The rates banks give brokers, not the public."]];
+const LEARN = [["VA loans", "Get the most out of the benefit you earned."], ["Down payment assistance", "Programs that can cover your down payment and closing costs."], ["Equity Unlock", "Use your equity to buy before your current home sells."], ["Investment property financing", "Rentals, from your first to a whole portfolio."]];
 const getWho = () => { try { const w = new URLSearchParams(location.search).get("who"); return WHO.some((x) => x.id === w) ? w : ""; } catch { return ""; } };
 const getRef = () => { try { return new URLSearchParams(location.search).get("ref") || "SAVE-01"; } catch { return "SAVE-01"; } };
 const mkCSS = () => `
 .sv{font-family:'Public Sans',system-ui,sans-serif;color:${C.ink};background:${C.bone};min-height:100vh}
 .sv *{box-sizing:border-box}
-.sv-top{background:#fff;border-bottom:1px solid ${C.soft}}
-.sv-top>div{max-width:980px;margin:0 auto;padding:10px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px}
-.sv-hero{background:${C.maroon};color:#F6ECE9;border-bottom:6px solid ${C.gold}}
-.sv-hero-in{max-width:980px;margin:0 auto;padding:40px 20px 36px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:28px;align-items:center}
-.sv-h1{font:800 clamp(32px,6vw,58px)/1.05 ${SANS};margin:14px 0 0;color:#fff}
-.sv-h1 i{display:block;font-style:normal;font-weight:800;color:${C.gold}}
-.sv-k{font:700 12px ${SANS};letter-spacing:.22em;text-transform:uppercase;display:flex;gap:10px;align-items:center;color:${C.gold}}
-.sv-k:before{content:"";width:12px;height:12px;background:${C.gold};display:inline-block}
-.sv-sub{font:400 18px/1.55 'Public Sans',system-ui,sans-serif;color:${C.mute};margin:8px 0 0}
-.sv-hero .sv-sub{color:#E3C9CC;margin-top:14px;max-width:540px}
-.sv-photos{display:flex;flex-direction:column;gap:14px}
-.sv-photo{width:150px}
-.sv-photo img,.sv-photo .ph{display:block;width:150px;height:188px;object-fit:cover;object-position:50% 12%;border:3px solid ${C.gold};background:${C.panel}}
-.sv-photo .ph{display:flex;align-items:center;justify-content:center;color:${C.gold};font:800 48px ${SANS}}
-.sv-photo .cap{font:700 11px/1.45 ${SANS};letter-spacing:.14em;text-transform:uppercase;color:${C.gold};margin-top:6px}
-.sv-photo .cap span{color:#E3C9CC;font-weight:600}
+.sv-top{background:#fff;border-bottom:4px solid ${C.plum}}
+.sv-top>div{max-width:1000px;margin:0 auto;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.sv-wm{font:400 24px ${ANTON};letter-spacing:.04em;text-transform:uppercase;color:${C.navy};line-height:1}
+.sv-hero{max-width:1000px;margin:0 auto;display:flex;align-items:stretch}
+.sv-hero-l{flex:1;min-width:0;padding:30px 20px 30px 20px;display:flex;flex-direction:column;gap:14px;justify-content:center}
+.sv-k{font:700 11px ${SANS};letter-spacing:.2em;text-transform:uppercase;color:${C.maroon}}
+.sv-h1{font:400 clamp(44px,12vw,92px)/1.0 ${ANTON};letter-spacing:.01em;text-transform:uppercase;margin:0;color:${C.navy}}
+.sv-h1 i{display:block;font-style:normal;color:${C.maroon}}
+.sv-bar{width:40px;height:4px;background:${C.gold}}
+.sv-sub{font:400 16px/1.55 'Public Sans',system-ui,sans-serif;color:${C.mute};margin:0}
+.sv-photos{width:132px;flex:none;background:${C.maroon};display:flex;flex-direction:column;gap:12px;padding:0 0 14px}
+.sv-photos img,.sv-photos .ph{display:block;width:100%;object-fit:cover;object-position:50% 10%}
+.sv-photos .a{height:190px;flex:none}
+.sv-photos .j{flex:1;min-height:300px}
+.sv-photos .ph{display:flex;align-items:center;justify-content:center;background:#6E2A38;color:#E3C9CC;font:400 44px ${ANTON}}
+.sv-photos .cap{padding:0 8px;text-align:center;font:700 10px/1.45 ${SANS};letter-spacing:.12em;text-transform:uppercase;color:#fff;margin-top:-4px}
+.sv-photos .cap span{color:#E3C9CC;font-weight:600}
+.sv-photos .cap a{color:#fff;text-decoration:none;letter-spacing:.04em}
+.sv-vidwrap{max-width:1000px;margin:0 auto;padding:0 20px 28px}
+.sv-vid{position:relative;aspect-ratio:16/9;background:${C.panel};border:3px solid ${C.plum}}
+.sv-vid iframe,.sv-vid video{position:absolute;inset:0;width:100%;height:100%;border:0}
+.sv-plum{height:10px;background:${C.plum}}
 .sv-ben{background:${C.navy};color:#fff}
-.sv-ben-in{max-width:980px;margin:0 auto;padding:26px 20px 28px}
-.sv-ben-t{font:700 12px ${SANS};letter-spacing:.22em;text-transform:uppercase;color:${C.gold}}
-.sv-ben h2{font:800 clamp(22px,3.4vw,30px)/1.15 ${SANS};margin:8px 0 18px;color:#fff}
-.sv-ben-g{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-.sv-ben-c{border-top:4px solid ${C.gold};background:#12243A;padding:16px 16px 18px}
-.sv-ben-c b{display:block;font:800 clamp(26px,3.4vw,34px)/1 ${SANS};color:${C.gold};letter-spacing:.02em}
-.sv-ben-c strong{display:block;font:800 18px/1.2 ${SANS};margin-top:8px;color:#fff}
-.sv-ben-c span{display:block;font:400 15px/1.45 'Public Sans',system-ui,sans-serif;color:#C9D6E3;margin-top:4px}
+.sv-ben-in{max-width:1000px;margin:0 auto;padding:8px 24px 16px}
+.sv-st{padding:20px 0;border-top:1px solid rgba(246,238,223,.28);display:flex;gap:16px}
+.sv-st:first-child{border-top:0}
+.sv-st .n{font:400 44px/.9 ${ANTON};color:#E3C9CC;width:36px;flex:none}
+.sv-st .tg{font:700 11px ${SANS};letter-spacing:.2em;text-transform:uppercase;color:#C9D6E3}
+.sv-st .tt{font:400 clamp(26px,5vw,34px)/1.08 ${ANTON};letter-spacing:.02em;text-transform:uppercase;color:#fff;margin-top:4px}
+.sv-st .tx{font:400 15px/1.5 'Public Sans',system-ui,sans-serif;color:#C9D6E3;margin-top:6px}
+.sv-st .li{margin-top:12px}.sv-st .li b{display:block;font:400 20px ${ANTON};letter-spacing:.03em;text-transform:uppercase;color:#fff}
+.sv-st .li span{display:block;font:400 14px/1.45 'Public Sans',system-ui,sans-serif;color:#C9D6E3;margin-top:2px}
+.sv-st .ck{margin-top:10px;font:600 16px/1.7 'Public Sans',system-ui,sans-serif;color:#fff}
 .sv-main{max-width:760px;margin:0 auto;padding:30px 20px 56px}
-.sv-rule{border:0;border-top:3px solid ${C.gold};margin:6px 0 0}
+.sv-q{font:400 clamp(30px,5vw,42px)/1.05 ${ANTON};letter-spacing:.01em;text-transform:uppercase;color:${C.navy}}
+.sv-rule{border:0;border-top:3px solid ${C.navy};margin:6px 0 0}
 .sv-hair{border:0;border-top:1px solid ${C.soft};margin:0}
 .sv-lab{font:800 12px ${SANS};letter-spacing:.16em;text-transform:uppercase;color:${C.navy}}
 .sv-row{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:14px 0;border-bottom:1px solid ${C.soft}}
 .sv-row .sub{font:400 16px 'Public Sans',system-ui,sans-serif;color:${C.ink}}
-.sv-row .val{font:800 30px ${SANS};white-space:nowrap;color:${C.navy}}
-.sv-row.hot .lab{color:${C.goldDk}} .sv-row.hot .val{color:${C.maroon}}
-.sv-choice{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;text-align:left;background:#fff;border:1.5px solid ${C.soft};border-radius:2px;padding:16px 18px;margin-bottom:10px;cursor:pointer;color:${C.ink};min-height:60px;box-shadow:0 2px 0 rgba(74,17,28,.05)}
-.sv-choice .t{font:700 20px/1.25 ${SANS}} .sv-choice .s{font:400 15px 'Public Sans',system-ui,sans-serif;color:${C.mute};display:block;margin-top:3px}
+.sv-row .val{font:400 34px ${ANTON};white-space:nowrap;color:${C.navy}}
+.sv-row.hot .lab{color:${C.maroon}} .sv-row.hot .val{color:${C.maroon}}
+.sv-choice{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;text-align:left;background:#fff;border:1.5px solid ${C.soft};border-radius:2px;padding:15px 16px;margin-bottom:9px;cursor:pointer;color:${C.ink};min-height:60px}
+.sv-choice .t{font:400 22px/1.15 ${ANTON};letter-spacing:.02em;text-transform:uppercase} .sv-choice .s{font:400 14px 'Public Sans',system-ui,sans-serif;color:${C.mute};display:block;margin-top:3px}
 .sv-choice .dot{width:22px;height:22px;border:2px solid ${C.navy};border-radius:50%;flex:none}
-.sv-choice.on{background:${C.navy};border-color:${C.navy};color:#fff} .sv-choice.on .t{color:#fff} .sv-choice.on .dot{background:${C.gold};border-color:${C.gold}}
+.sv-choice.on{background:${C.navy};border-color:${C.navy};color:#fff} .sv-choice.on .t{color:#fff} .sv-choice.on .dot{background:${C.plum};border-color:${C.plum}}
 .sv-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:20px 22px;margin-top:6px}
 .sv-f{display:flex;flex-direction:column;gap:4px}
 .sv-f span{font:700 11px ${SANS};letter-spacing:.16em;text-transform:uppercase;color:${C.navy}}
 .sv-f em{font:italic 400 13px 'Public Sans',system-ui,sans-serif;color:${C.mute};text-transform:none;letter-spacing:0;font-weight:400}
 .sv-in{font:400 18px 'Public Sans',system-ui,sans-serif;color:${C.ink};background:#fff;border:1px solid ${C.soft};border-bottom:2px solid ${C.navy};border-radius:2px;padding:11px 12px;width:100%;outline:none}
-.sv-in:focus{border-bottom-color:${C.gold}}
-.sv-btn{font:800 15px ${SANS};letter-spacing:.12em;text-transform:uppercase;background:${C.maroon};color:#fff;border:0;border-bottom:4px solid ${C.gold};border-radius:2px;padding:18px 26px;cursor:pointer;width:100%;min-height:58px}
+.sv-in:focus{border-bottom-color:${C.plum}}
+.sv-btn{font:400 20px ${ANTON};letter-spacing:.08em;text-transform:uppercase;background:${C.maroon};color:#fff;border:0;border-bottom:4px solid ${C.plum};border-radius:2px;padding:16px 26px;cursor:pointer;width:100%;min-height:58px}
 .sv-btn:disabled{opacity:.6}
 .sv-fine{font:400 11.5px/1.5 ${SANS};color:${C.mute}}
-.sv-vid{position:relative;aspect-ratio:16/9;background:${C.panel};border:3px solid ${C.gold};margin-bottom:22px}
-.sv-vid iframe,.sv-vid video{position:absolute;inset:0;width:100%;height:100%;border:0}
-@media(max-width:700px){
- .sv-hero-in{grid-template-columns:minmax(0,1fr) 108px;gap:16px;padding:28px 16px 26px}
- .sv-photo{width:108px}.sv-photo img,.sv-photo .ph{width:108px;height:136px}
- .sv-photo .ph{font-size:34px}.sv-photo .cap{font-size:9.5px}
- .sv-hero .sv-sub{font-size:16px}
- .sv-ben-g{grid-template-columns:1fr}
- .sv-ben-c{display:grid;grid-template-columns:104px 1fr;column-gap:12px;align-items:center;padding:14px}
- .sv-ben-c b{font-size:22px;grid-row:1/3}.sv-ben-c strong{margin-top:0}
- .sv-main{padding:22px 16px 40px}
- .sv-row .val{font-size:24px}
+@media(min-width:760px){
+ .sv-photos{width:300px}.sv-photos .a{height:260px}.sv-photos .j{min-height:420px}.sv-photos .cap{font-size:12px;padding:0 16px}
+ .sv-hero-l{padding:48px 36px 48px 20px}
 }`;
 
 function Ledger({ rows }) {
@@ -143,7 +143,7 @@ const money = (v) => String(v || "").replace(/[^\d]/g, "").replace(/\B(?=(\d{3})
 function Perks({ title }) {
   return (<div style={{ background:C.panel, color:C.panelText, padding:"16px 18px", marginTop:18 }}>
     <div style={{ font:`700 11px ${SANS}`, letterSpacing:".18em", textTransform:"uppercase", color:C.panelMute }}>{title || "Smart Money members get"}</div>
-    {PERKS.map((p) => <div key={p} style={{ font:`500 18px/1.35 ${SERIF}`, marginTop:7, display:"flex", gap:10 }}><span style={{ color:C.gold }}>✓</span><span>{p}</span></div>)}
+    {PERKS.map((p) => <div key={p} style={{ font:`500 18px/1.35 ${SERIF}`, marginTop:7, display:"flex", gap:10 }}><span style={{ color:"#E3C9CC" }}>✓</span><span>{p}</span></div>)}
   </div>);
 }
 
@@ -207,30 +207,30 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
   return (
     <div className="sv"><style>{mkCSS()}</style>
       <div className="sv-top"><div>
-        <img src="/brand/gf-logo-ink.png" alt="Graham Financial" style={{ height:54, width:"auto" }}/>
-        <div style={{ display:"flex", alignItems:"center", gap:16 }}>{agent && agent.logo_url && <img src={agent.logo_url} alt={agent.brokerage || agent.name} style={{ maxHeight:44, maxWidth:120, width:"auto", objectFit:"contain" }}/>}<img src="/brand/zpm-logo-ink.png" alt="Zero Point Mortgage Services" style={{ height:36, width:"auto" }}/></div>
+        <img src="/brand/gf-logo-ink.png" alt="Graham Financial" style={{ height:46, width:"auto" }}/>
+        <div style={{ display:"flex", alignItems:"center", gap:16 }}>{agent && agent.logo_url && <img src={agent.logo_url} alt={agent.brokerage || agent.name} style={{ maxHeight:40, maxWidth:110, width:"auto", objectFit:"contain" }}/>}<img src="/brand/zpm-logo-ink.png" alt="Zero Point Mortgage Services" style={{ height:24, width:"auto" }}/></div>
       </div></div>
-      <section className="sv-hero"><div className="sv-hero-in">
-        <div>
-          <div className="sv-k">{agent ? "Buyers and sellers" : "Buyers · Homeowners · Investors · Agents"}</div>
-          <h1 className="sv-h1">{done ? <>You're in, {f.first.trim()}.</> : agent ? <>Buying or selling{agent.market ? <> in {agent.market}</> : null}?<i>Let's see how we get you there.</i></> : <>What are you after?<i>Let's see if I can get you there.</i></>}</h1>
-          <p className="sv-sub">{done ? (agent ? (sellOnly ? `${agent.name} will be in touch about your home, and I'm on the lending side if you buy next.` : `${agent.name} and I will both be in touch shortly. ${flow.thanks(a)}`) : `${flow.thanks(a)} It's not a sales call. When it has to go right, I'm your guy.`) : agent ? `${agent.name}${agent.brokerage ? " of " + agent.brokerage : ""} and I are here to help you buy or sell. I'm a wholesale broker. I shop many banks for the best to win yours.` : "I'm a wholesale broker. I shop many banks for the best to win yours."}</p>
+      <section className="sv-hero">
+        <div className="sv-hero-l">
+          <div className="sv-k">Real Estate Financing. Smooth. Precise. Elite.</div>
+          <h1 className="sv-h1">{done ? <>You're in, {f.first.trim()}.</> : agent ? <>Buying.<br/>Selling.<i>{agent.market ? `In ${agent.market}?` : "Let's talk."}</i></> : <>When it<br/>has to go<i>right.</i></>}</h1>
+          <div className="sv-bar"/>
+          <p className="sv-sub">{done ? (agent ? (sellOnly ? `${agent.name} will be in touch about your home, and I'm on the lending side if you buy next.` : `${agent.name} and I will both be in touch shortly. ${flow.thanks(a)}`) : `${flow.thanks(a)} It's not a sales call. When it has to go right, I'm your guy.`) : agent ? `${agent.name}${agent.brokerage ? " of " + agent.brokerage : ""} and I will help you buy or sell. As a wholesale broker, I shop many banks and give you options.` : "I'm Joshua Graham. As a wholesale broker, I shop many banks and give you options."}</p>
         </div>
-        <div className="sv-photos">
-          {agent && <div className="sv-photo">
-            {agent.photo_url ? <img src={agent.photo_url} alt={agent.name}/> : <div className="ph">{agent.name.split(" ").map((x) => x[0]).slice(0, 2).join("").toUpperCase()}</div>}
-            <div className="cap">{agent.name}<br/><span>{agent.brokerage || "Real estate"}</span></div>
-          </div>}
-          <div className="sv-photo">
-            <img src="/brand/joshua-plum-suit.jpg" alt="Joshua Graham"/>
-            <div className="cap">Joshua Graham<br/><span>NMLS #169809</span><br/><a href={`tel:${BRAND.phone.replace(/\D/g, "")}`} style={{ color:"#fff", textDecoration:"none", fontWeight:700, letterSpacing:".04em" }}>{BRAND.phone}</a></div>
-          </div>
-        </div>
-      </div></section>
-      {!done && <section className="sv-ben"><div className="sv-ben-in">
-        <div className="sv-ben-t">Included, free</div>
-        <h2>Finish the 15-minute SMART Buyer class and unlock:</h2>
-        <div className="sv-ben-g">{BENEFITS.map(([big, t, s2]) => <div key={t} className="sv-ben-c"><b>{big}</b><strong>{t}</strong><span>{s2}</span></div>)}</div>
+        <aside className="sv-photos">
+          {agent && (agent.photo_url ? <img className="a" src={agent.photo_url} alt={agent.name}/> : <div className="ph a">{agent.name.split(" ").map((x) => x[0]).slice(0, 2).join("").toUpperCase()}</div>)}
+          {agent && <div className="cap">{agent.name}<br/><span>{agent.brokerage || "Real estate"}</span></div>}
+          <img className="j" src="/brand/joshua-plum-suit.jpg" alt="Joshua Graham"/>
+          <div className="cap">Joshua Graham<br/><span>NMLS #169809</span><br/><a href={`tel:${BRAND.phone.replace(/\D/g, "")}`}>{BRAND.phone}</a></div>
+        </aside>
+      </section>
+      {!done && (() => { const av = agent && agent.video_url && step === 0 ? embedFor(agent.video_url) : null; const v2 = av || (!flow ? vid : null); const ttl = av ? agent.name : SAVE_VIDEO_TITLE;
+        return v2 ? <div className="sv-vidwrap"><div className="sv-vid" aria-label={ttl}>{v2.kind === "iframe" ? <iframe src={v2.src} title={ttl} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen/> : <video src={v2.src} controls playsInline preload="metadata"/>}</div></div> : null; })()}
+      <div className="sv-plum"/>
+      {!done && (!flow || (who === "buyer" && step === 0)) && <section className="sv-ben"><div className="sv-ben-in">
+        <div className="sv-st"><div className="n">1</div><div><div className="tg">Start here</div><div className="tt">Join the free 15-minute SMART Buyer class</div><div className="tx">Answer a few quick questions and you are on the list. I text you the day it is live.</div></div></div>
+        <div className="sv-st"><div className="n">2</div><div><div className="tg">What you learn</div><div className="tt">The loans most buyers never hear about</div>{LEARN.map(([t, d]) => <div className="li" key={t}><b>{t}</b><span>{d}</span></div>)}</div></div>
+        <div className="sv-st"><div className="n">3</div><div><div className="tg">Finish it and unlock, free</div><div className="tt">Three things that cost you nothing</div><div className="ck">{PERKS.map((p) => <div key={p}>✓ {p}</div>)}</div></div></div>
       </div></section>}
       <main className="sv-main">
 
@@ -245,10 +245,6 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
               </div>
             </div>
           ) : (<>
-            {agent && agent.video_url && step === 0 && embedFor(agent.video_url) && (() => { const av = embedFor(agent.video_url); return <div className="sv-vid" aria-label={agent.name}>{av.kind === "iframe" ? <iframe src={av.src} title={agent.name} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen/> : <video src={av.src} controls playsInline preload="metadata"/>}</div>; })()}
-            {!flow && vid && <div className="sv-vid" aria-label={SAVE_VIDEO_TITLE}>
-              {vid.kind === "iframe" ? <iframe src={vid.src} title={SAVE_VIDEO_TITLE} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen/> : <video src={vid.src} controls playsInline preload="metadata"/>}
-            </div>}
             <hr className="sv-rule"/>
             <div ref={top} style={{ scrollMarginTop:16 }}/>
 
@@ -260,9 +256,9 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
                 </button>))}</div>
               <div style={{ marginTop:44 }}>
                 <div className="sv-k">Why me</div>
-                <h2 style={{ font:`600 clamp(30px,4vw,44px)/1.08 ${SERIF}`, margin:"12px 0 0" }}>Buyers leave $65 billion<br/><i style={{ fontWeight:500, color:C.red }}>a year on the table.</i></h2>
+                <h2 className="sv-q" style={{ margin:"12px 0 0" }}>Buyers leave $65 billion<br/><i style={{ fontStyle:"normal", color:C.red }}>a year on the table.</i></h2>
                 <Ledger rows={WHY}/>
-                <p style={{ font:`italic 500 20px ${SERIF}`, margin:"14px 0 0" }}>I shop many banks for the best to win yours.</p>
+                <p style={{ font:`600 18px/1.4 ${SERIF}`, margin:"14px 0 0" }}>One bank gives you a price. I give you options.</p>
               </div>
             </>}
 
@@ -273,7 +269,7 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
               </div>
               <div style={{ height:3, background:C.soft, marginTop:10 }}><div style={{ height:3, width:`${((step + 1) / (flow.qs.length + 1)) * 100}%`, background:C.red }}/></div>
               {who === "buyer" && !sellOnly && <Perks title="Answer these and unlock"/>}
-              <h2 style={{ font:`600 clamp(28px,4vw,40px)/1.1 ${SERIF}`, margin:"22px 0 0" }}>{q.q}</h2>
+              <h2 className="sv-q" style={{ margin:"22px 0 0" }}>{q.q}</h2>
               {q.sub && <p className="sv-sub" style={{ marginTop:8 }}>{q.sub}</p>}
               {q.opts ? <div style={{ marginTop:10 }}>{q.opts.map((o) => (
                 <button key={o} type="button" className={"sv-choice" + (a[q.id] === o ? " on" : "")} onClick={() => answer(q, o)}><span className="t" style={{ fontSize:22 }}>{o}</span><span className="dot"/></button>))}</div>
@@ -294,12 +290,12 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
                 <button type="button" onClick={() => go(step - 1)} style={{ all:"unset", cursor:"pointer", font:`italic 400 15px ${SERIF}`, color:C.mute }}>← Back</button>
               </div>
               <div style={{ height:3, background:C.red, marginTop:10 }}/>
-              <h2 style={{ font:`600 clamp(28px,4vw,40px)/1.1 ${SERIF}`, margin:"22px 0 0" }}>
-                {wantsClass ? <>Join the wait list.<br/><i style={{ fontWeight:500, color:C.red }}>I'll send the class the day it's live.</i></>
-                  : who === "homeowner" ? <>Where's the home?<br/><i style={{ fontWeight:500, color:C.red }}>I'll run the deep review by hand.</i></>
-                  : who === "investor" ? <>Where do I send your review?<br/><i style={{ fontWeight:500, color:C.red }}>Then we'll find the dead money.</i></>
-                  : who === "agent" ? <>Join the lead wait list.<br/><i style={{ fontWeight:500, color:C.red }}>I'll reach out when buyers are ready.</i></>
-                  : <>Where do I reach you?<br/><i style={{ fontWeight:500, color:C.red }}>I'll tell you what I'd do.</i></>}
+              <h2 className="sv-q" style={{ margin:"22px 0 0" }}>
+                {wantsClass ? <>Join the wait list.<br/><i style={{ fontStyle:"normal", color:C.red }}>I'll send the class the day it's live.</i></>
+                  : who === "homeowner" ? <>Where's the home?<br/><i style={{ fontStyle:"normal", color:C.red }}>I'll run the deep review by hand.</i></>
+                  : who === "investor" ? <>Where do I send your review?<br/><i style={{ fontStyle:"normal", color:C.red }}>Then we'll find the dead money.</i></>
+                  : who === "agent" ? <>Join the lead wait list.<br/><i style={{ fontStyle:"normal", color:C.red }}>I'll reach out when buyers are ready.</i></>
+                  : <>Where do I reach you?<br/><i style={{ fontStyle:"normal", color:C.red }}>I'll tell you what I'd do.</i></>}
               </h2>
               {flow.handoff && <p className="sv-sub" style={{ marginTop:10 }}>{flow.handoff}</p>}
               {wantsClass && !sellOnly && <Perks title="Joining the wait list unlocks"/>}
@@ -320,7 +316,7 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
                 <input type="checkbox" checked={f.consent} onChange={set("consent")} style={{ marginTop:2, width:18, height:18, accentColor:C.red, flex:"none" }}/>
                 <span>I agree that Graham Financial, powered by Zero Point Mortgage Services, may contact me by phone, text or email at the information above{agent ? `, as may ${agent.name}${agent.brokerage ? " of " + agent.brokerage : ""}` : ""}, including by automated means. Consent is not a condition of any purchase or loan. Message and data rates may apply.</span>
               </label>
-              <p style={{ font:`italic 500 17px/1.4 ${SERIF}`, margin:"4px 0 16px" }}>{agent ? `You will not be spammed. You'll only hear from ${agent.name} and me, Joshua Graham, real live people. It's not a sales call.` : "You will not be spammed. You'll only hear from me, Joshua Graham, a real live person. It's not a sales call."}</p>
+              <p style={{ font:`600 16px/1.45 ${SERIF}`, margin:"4px 0 16px" }}>{agent ? `You will not be spammed. You'll only hear from ${agent.name} and me, Joshua Graham, real live people. It's not a sales call.` : "You will not be spammed. You'll only hear from me, Joshua Graham, a real live person. It's not a sales call."}</p>
               {err && <p style={{ color:C.red, font:`600 14px ${SANS}`, margin:"0 0 12px" }}>{err}</p>}
               <button className="sv-btn" type="submit" disabled={busy}>{busy ? "Saving…" : wantsClass ? "Join the wait list" : who === "agent" ? "Join the wait list" : "Send it to Joshua"}</button>
             </form>}

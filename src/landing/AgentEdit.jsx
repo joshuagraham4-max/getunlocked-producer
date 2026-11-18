@@ -7,14 +7,14 @@ import { agentPosts } from "./agentPosts.js";
 import QRCode from "qrcode";
 import { Flyer, flyerMath, PRINT_CSS } from "../groups/FlyerMaker.jsx";
 
-const C = { bone:"#F6EEDF", ink:"#0E1B2A", red:"#4A111C", panel:"#0E1B2A", mute:"#4A5568", soft:"#E3D6BF", gold:"#D9A566", goldDk:"#8A5A24", maroon:"#4A111C" };
-const SERIF = "'Public Sans', system-ui, sans-serif", SANS = "'Montserrat', 'Helvetica Neue', Arial, sans-serif";
+const C = { bone:"#F6EEDF", ink:"#0E1B2A", red:"#4A111C", panel:"#0E1B2A", mute:"#4A5568", soft:"#E3D6BF", gold:"#D9A566", plum:"#7E4B6F", goldDk:"#4A111C", maroon:"#4A111C" };
+const SERIF = "'Public Sans', system-ui, sans-serif", SANS = "'Montserrat', 'Helvetica Neue', Arial, sans-serif", ANTON = "'Anton', 'Arial Narrow', Impact, sans-serif";
 const SITE = typeof location !== "undefined" ? location.origin : "";
 const inp = { width:"100%", boxSizing:"border-box", border:"none", borderBottom:`2px solid ${C.ink}`, background:"transparent", padding:"10px 2px", font:`500 20px ${SERIF}`, color:C.ink, outline:"none", borderRadius:0 };
 const lab = { font:`700 11px ${SANS}`, letterSpacing:".16em", textTransform:"uppercase", color:C.ink };
-const btn = { border:"none", borderBottom:`4px solid ${C.gold}`, background:C.maroon, color:"#fff", font:`800 13px ${SANS}`, letterSpacing:".12em", textTransform:"uppercase", padding:"15px 24px", cursor:"pointer" };
+const btn = { border:"none", borderBottom:`4px solid ${C.plum}`, background:C.maroon, color:"#fff", font:`800 13px ${SANS}`, letterSpacing:".12em", textTransform:"uppercase", padding:"15px 24px", cursor:"pointer" };
 const ghost = { ...btn, background:"transparent", color:C.ink, border:`2px solid ${C.ink}`, padding:"10px 16px", fontSize:11 };
-const h2 = { font:`800 26px/1.1 ${SANS}`, margin:"0 0 8px", color:C.maroon };
+const h2 = { font:`400 32px/1.05 ${ANTON}`, textTransform:"uppercase", letterSpacing:".02em", margin:"0 0 8px", color:C.ink };
 
 // Listing photos stay larger so they print sharp.
 function shrinkPhoto(file, max) {
@@ -122,34 +122,36 @@ export default function AgentEdit() {
   const canPrint = !!(fl.address.trim() && FIN(fl.price) && fl.photo);
   const flScale = typeof window !== "undefined" ? Math.min(0.62, (window.innerWidth - 44) / 816) : 0.5;
   const posts = agentPosts(link, mk);
-  const Block = ({ title, children }) => (<section style={{ marginTop:46 }}><hr style={{ border:0, borderTop:`3px solid ${C.gold}`, margin:"0 0 22px" }}/><h2 style={h2}>{title}</h2>{children}</section>);
+  const Block = ({ title, children }) => (<section style={{ marginTop:46 }}><hr style={{ border:0, borderTop:`3px solid ${C.plum}`, margin:"0 0 22px" }}/><h2 style={h2}>{title}</h2>{children}</section>);
 
   return (
     <div style={{ minHeight:"100vh", background:C.bone, color:C.ink, fontFamily:SANS }}>
       <style>{`@media (max-width:640px){.ae-g{grid-template-columns:1fr !important}}`}</style>
-      <div style={{ maxWidth:760, margin:"0 auto", padding:"40px 22px 80px" }}>
-        <div style={{ font:`700 11px ${SANS}`, letterSpacing:".22em", textTransform:"uppercase", color:C.goldDk }}>Your page · Graham Financial</div>
-        <h1 style={{ font:`800 clamp(34px,7vw,52px)/1.04 ${SANS}`, margin:"12px 0 8px", color:C.ink }}>Make it yours, {f.name.split(" ")[0]}.</h1>
+      <div style={{ background:"#fff", borderBottom:`4px solid ${C.plum}` }}><div style={{ maxWidth:760, margin:"0 auto", padding:"12px 22px", display:"flex", alignItems:"center", justifyContent:"space-between" }}><img src="/brand/gf-logo-ink.png" alt="Graham Financial" style={{ height:46, width:"auto" }}/><img src="/brand/zpm-logo-ink.png" alt="" style={{ height:24, width:"auto" }}/></div></div>
+      <div style={{ maxWidth:760, margin:"0 auto", padding:"34px 22px 80px" }}>
+        <div style={{ font:`700 11px ${SANS}`, letterSpacing:".22em", textTransform:"uppercase", color:C.maroon }}>Your page</div>
+        <h1 style={{ font:`400 clamp(44px,10vw,72px)/1.02 ${ANTON}`, textTransform:"uppercase", letterSpacing:".01em", margin:"12px 0 8px", color:C.ink }}>Make it yours, {f.name.split(" ")[0]}.</h1>
         <p style={{ font:`500 19px/1.45 ${SERIF}`, color:C.mute, margin:0 }}>Add your photo, check your info, and your page is ready.</p>
-        <div style={{ marginTop:18, background:C.panel, color:"#fff", padding:"14px 16px", borderLeft:`6px solid ${C.gold}` }}>
-          <div style={{ font:`700 11px ${SANS}`, letterSpacing:".2em", textTransform:"uppercase", color:C.gold }}>Bookmark this page</div>
+        <div style={{ marginTop:18, background:C.panel, color:"#fff", padding:"14px 16px", borderLeft:`6px solid ${C.plum}` }}>
+          <div style={{ font:`700 11px ${SANS}`, letterSpacing:".2em", textTransform:"uppercase", color:"#E3C9CC" }}>Bookmark this page</div>
           <p style={{ font:`500 16px/1.5 ${SERIF}`, margin:"6px 0 0", color:"#E6EDF4" }}>It is your home base: your page, your posts, your open house flyer and your scenario desk all live right here. Keep the link private. Anyone who has it can change your page.</p>
         </div>
         <p style={{ margin:"14px 0 0" }}><a href={link} target="_blank" rel="noreferrer" style={{ color:C.maroon, font:`700 14px ${SANS}`, wordBreak:"break-all" }}>{link}</a></p>
 
-        <div style={{ marginTop:30, background:C.maroon, color:"#F6ECE9", borderTop:`6px solid ${C.gold}`, borderBottom:`6px solid ${C.gold}`, padding:"30px 24px 28px" }}>
-          <div style={{ font:`700 11px ${SANS}`, letterSpacing:".24em", textTransform:"uppercase", color:C.gold }}>Your scenario desk</div>
-          <div style={{ font:`800 clamp(28px,6vw,38px)/1.06 ${SANS}`, margin:"12px 0 12px", color:"#fff" }}>Stuck on a deal? Put it on my desk.</div>
+        <div style={{ marginTop:30, background:C.maroon, color:"#F6ECE9", borderTop:`10px solid ${C.plum}`, borderBottom:`10px solid ${C.plum}`, padding:"30px 24px 28px" }}>
+          <div style={{ font:`700 11px ${SANS}`, letterSpacing:".24em", textTransform:"uppercase", color:"#E3C9CC" }}>Your scenario desk</div>
+          <div style={{ font:`400 clamp(38px,9vw,54px)/1.02 ${ANTON}`, textTransform:"uppercase", letterSpacing:".01em", margin:"12px 0 10px", color:"#fff" }}>Stuck on a deal? Put it on my desk.</div>
+          <div style={{ width:40, height:4, background:C.gold, marginBottom:14 }}/>
           <p style={{ font:`500 17px/1.55 ${SERIF}`, margin:"0 0 22px", color:"#E3C9CC" }}>Every agent has a client who can't get a straight answer: self-employed, credit dings, a sell-and-buy that has to line up. Don't lose that client to a "no" from one lender. Put the deal on my desk in plain words. No client names needed.</p>
           {[["1","I shop many banks for the best to win your client's deal, not just one."],["2","You get a straight answer, usually the same day, to take back to your client."],["3","Keep the client, keep the deal. It's free to you."]].map(([n, t]) => (
-            <div key={n} style={{ display:"flex", gap:16, alignItems:"flex-start", padding:"14px 0", borderTop:"1px solid rgba(217,165,102,.35)" }}>
-              <div style={{ font:`800 44px/0.9 ${SANS}`, color:C.gold, minWidth:30 }}>{n}</div>
+            <div key={n} style={{ display:"flex", gap:16, alignItems:"flex-start", padding:"14px 0", borderTop:"1px solid rgba(246,236,233,.25)" }}>
+              <div style={{ font:`400 46px/0.9 ${ANTON}`, color:"#E3C9CC", minWidth:34 }}>{n}</div>
               <div style={{ font:`600 17px/1.45 ${SERIF}`, color:"#fff", paddingTop:2 }}>{t}</div>
             </div>))}
-          <a href={desk} target="_blank" rel="noreferrer" style={{ ...btn, textDecoration:"none", display:"block", textAlign:"center", background:C.gold, color:C.maroon, borderBottom:`4px solid #8A5A24`, marginTop:12, fontSize:14, padding:"18px 24px" }}>Open your scenario desk</a>
+          <a href={desk} target="_blank" rel="noreferrer" style={{ ...btn, textDecoration:"none", display:"block", textAlign:"center", background:"#F6EEDF", color:C.maroon, borderBottom:`4px solid ${C.plum}`, marginTop:12, fontSize:14, padding:"18px 24px" }}>Open your scenario desk</a>
           <div style={{ marginTop:14, background:"rgba(0,0,0,.22)", padding:"12px 14px", display:"flex", gap:12, alignItems:"center", justifyContent:"space-between", flexWrap:"wrap" }}>
             <span style={{ font:`600 14px ${SANS}`, color:"#E3C9CC", wordBreak:"break-all", minWidth:0 }}>{desk}</span>
-            <button type="button" style={{ ...ghost, color:C.gold, borderColor:C.gold }} onClick={() => copy("desk", desk)}>{copied === "desk" ? "Copied" : "Copy link"}</button>
+            <button type="button" style={{ ...ghost, color:"#F6EEDF", borderColor:"#F6EEDF" }} onClick={() => copy("desk", desk)}>{copied === "desk" ? "Copied" : "Copy link"}</button>
           </div>
         </div>
 

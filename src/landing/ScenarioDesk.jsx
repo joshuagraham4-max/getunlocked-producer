@@ -5,20 +5,20 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "../supabase.js";
 import { BRAND } from "../smart-money/data.js";
 import { DESK_VIDEO, DESK_VIDEO_TITLE, embedFor } from "./saveVideo.js";
-import BrandBar, { NoSpam } from "./BrandBar.jsx";
+import { NoSpam } from "./BrandBar.jsx";
 
-const C = { maroon:"#4A111C", navy:"#0E1B2A", gold:"#D9A566", goldDk:"#8A5A24", cream:"#F6EEDF", ink:"#0E1B2A", muted:"#4A5568", line:"#E3D6BF", card:"#FFFFFF", btn:"#4A111C", bad:"#B3261E", chip:"#0E1B2A" };
-const F = { display:"'Montserrat', Arial, sans-serif", body:"'Public Sans', system-ui, sans-serif" };
+const C = { maroon:"#4A111C", navy:"#0E1B2A", gold:"#D9A566", plum:"#7E4B6F", goldDk:"#4A111C", cream:"#F6EEDF", ink:"#0E1B2A", muted:"#4A5568", line:"#E3D6BF", card:"#FFFFFF", btn:"#4A111C", bad:"#B3261E", chip:"#0E1B2A" };
+const F = { display:"'Montserrat', Arial, sans-serif", body:"'Public Sans', system-ui, sans-serif", anton:"'Anton', 'Arial Narrow', Impact, sans-serif" };
 export const SCENARIO_TAGS = ["Self-employed / 1099", "Credit issues", "Divorce", "Sell and buy (timing)", "Low down payment", "Investor / rental", "Recently changed jobs", "Non-US citizen", "Big debts / DTI", "Other"];
 const STAGES = ["Buying", "Selling and buying", "Refinancing", "Investor", "Not sure yet"];
 const REACH = ["Text", "Call", "Email"];
 const getRef = () => { try { const m = location.pathname.match(/\/d\/([^/?#]+)/); if (m) return "AGT-" + decodeURIComponent(m[1]).toLowerCase(); return new URLSearchParams(location.search).get("ref") || "SD"; } catch { return "SD"; } };
 const input = { font:"inherit", fontSize:16, color:C.ink, background:"#fff", border:`1px solid ${C.line}`, borderRadius:4, padding:"12px 12px", width:"100%", boxSizing:"border-box" };
 const labelS = { display:"flex", flexDirection:"column", gap:6, fontWeight:700, fontSize:12, letterSpacing:"0.12em", textTransform:"uppercase", color:C.navy };
-const panel = { background:C.card, border:`1px solid ${C.line}`, borderTop:`4px solid ${C.gold}`, borderRadius:2, padding:24, boxShadow:"0 8px 24px rgba(74,17,28,.08)" };
+const panel = { background:C.card, border:`1px solid ${C.line}`, borderTop:`4px solid ${C.plum}`, borderRadius:2, padding:24, boxShadow:"0 8px 24px rgba(74,17,28,.08)" };
 const eyebrow = { fontFamily:F.display, fontWeight:700, fontSize:12, letterSpacing:"0.2em", textTransform:"uppercase", color:C.goldDk };
-const btnS = { fontFamily:F.display, fontWeight:800, fontSize:15, letterSpacing:"0.1em", textTransform:"uppercase", background:C.btn, color:"#fff", border:0, borderBottom:`4px solid ${C.gold}`, borderRadius:2, padding:"16px 22px", cursor:"pointer", minHeight:54, textDecoration:"none", display:"inline-flex", alignItems:"center", justifyContent:"center", boxSizing:"border-box" };
-const btnO = { ...btnS, background:"#fff", color:C.maroon, border:`2px solid ${C.maroon}`, borderBottom:`4px solid ${C.gold}` };
+const btnS = { fontFamily:F.anton, fontWeight:400, fontSize:20, letterSpacing:"0.08em", textTransform:"uppercase", background:C.btn, color:"#fff", border:0, borderBottom:`4px solid ${C.plum}`, borderRadius:2, padding:"16px 22px", cursor:"pointer", minHeight:54, textDecoration:"none", display:"inline-flex", alignItems:"center", justifyContent:"center", boxSizing:"border-box" };
+const btnO = { ...btnS, background:"#fff", color:C.maroon, border:`2px solid ${C.maroon}`, borderBottom:`4px solid ${C.plum}` };
 const chipS = (on) => ({ font:"inherit", fontSize:15, fontWeight:700, padding:"10px 18px", borderRadius:2, cursor:"pointer", minHeight:46, border:`1.5px solid ${on ? C.navy : C.line}`, background:on ? C.navy : "#fff", color:on ? "#fff" : C.ink });
 
 export default function ScenarioDesk() {
@@ -74,25 +74,31 @@ export default function ScenarioDesk() {
   };
   return (
     <div style={{ fontFamily:F.body, color:C.ink, minHeight:"100vh", background:C.cream }}>
-      <BrandBar max={860}/>
-      <div style={{ background:C.maroon, color:"#F6ECE9", borderBottom:`6px solid ${C.gold}` }}>
+      <div style={{ background:"#fff", borderBottom:`4px solid ${C.plum}` }}>
+        <div style={{ maxWidth:860, margin:"0 auto", padding:"12px 18px", display:"flex", alignItems:"center", justifyContent:"space-between", gap:12 }}>
+          <img src="/brand/gf-logo-ink.png" alt="Graham Financial" style={{ height:46, width:"auto" }}/>
+          <img src="/brand/zpm-logo-ink.png" alt="Zero Point Mortgage Services" style={{ height:24, width:"auto" }}/>
+        </div>
+      </div>
+      <div style={{ background:C.maroon, color:"#F6ECE9", borderBottom:`10px solid ${C.plum}` }}>
         <div style={{ maxWidth:860, margin:"0 auto", padding:"38px 18px 34px", display:"flex", flexWrap:"wrap", gap:28, alignItems:"center", justifyContent:"space-between" }}>
           <div style={{ flex:"1 1 400px", minWidth:0 }}>
-            <div style={{ fontFamily:F.display, fontWeight:700, fontSize:12, letterSpacing:"0.22em", color:C.gold }}>PRIVATE LINE · JOSHUA'S DESK</div>
-            <h1 style={{ fontFamily:F.display, fontWeight:800, fontSize:"clamp(32px, 7vw, 50px)", lineHeight:1.06, margin:"12px 0", color:"#fff" }}>{first && ag ? `Welcome to my desk, ${first}.` : "Welcome to my desk."}</h1>
-            <p style={{ fontSize:18, lineHeight:1.55, color:"#E3C9CC", margin:0, maxWidth:540 }}>Odd income, credit dings, tight timing, a sell-and-buy that has to line up. Put it on my desk in plain words. I shop many banks for the best to win yours. No client details needed.</p>
+            <div style={{ fontFamily:F.display, fontWeight:700, fontSize:11, letterSpacing:"0.22em", color:"#E3C9CC" }}>PRIVATE LINE · JOSHUA'S DESK</div>
+            <h1 style={{ fontFamily:F.anton, fontWeight:400, fontSize:"clamp(44px, 11vw, 72px)", lineHeight:1.02, letterSpacing:"0.01em", textTransform:"uppercase", margin:"12px 0", color:"#fff" }}>{first && ag ? `Welcome to my desk, ${first}.` : "Welcome to my desk."}</h1>
+            <div style={{ width:40, height:4, background:C.gold, marginBottom:14 }}/>
+            <p style={{ fontSize:18, lineHeight:1.55, color:"#E3C9CC", margin:0, maxWidth:540 }}>Odd income, credit dings, tight timing, a sell-and-buy that has to line up. Put it on my desk in plain words. I shop many banks and give you options. No client details needed.</p>
           </div>
           <div style={{ flex:"0 0 auto", width:150 }}>
-            <img src="/brand/joshua-headshot.jpg" alt="Joshua Graham" style={{ display:"block", width:150, height:190, objectFit:"cover", objectPosition:"50% 18%", border:`3px solid ${C.gold}`, boxSizing:"border-box" }}/>
-            <div style={{ fontFamily:F.display, fontWeight:700, fontSize:12, letterSpacing:"0.14em", color:C.gold, marginTop:8, textTransform:"uppercase" }}>Joshua Graham</div>
+            <img src="/brand/joshua-plum-suit.jpg" alt="Joshua Graham" style={{ display:"block", width:150, height:200, objectFit:"cover", objectPosition:"50% 10%", border:`3px solid ${C.plum}`, boxSizing:"border-box" }}/>
+            <div style={{ fontFamily:F.display, fontWeight:700, fontSize:11, letterSpacing:"0.14em", color:"#E3C9CC", marginTop:8, textTransform:"uppercase", textAlign:"center" }}>Joshua Graham</div>
           </div>
         </div>
       </div>
       {rateOk && (
         <div style={{ background:C.navy, color:"#fff" }}>
           <div style={{ maxWidth:860, margin:"0 auto", padding:"16px 18px", display:"flex", flexWrap:"wrap", gap:"6px 22px", alignItems:"baseline" }}>
-            <span style={{ fontFamily:F.display, fontWeight:700, fontSize:12, letterSpacing:"0.2em", color:C.gold }}>ON MY DESK TODAY</span>
-            <span style={{ fontFamily:F.display, fontWeight:800, fontSize:34, lineHeight:1.1 }}>{Number(rate.rate).toFixed(3)}%</span>
+            <span style={{ fontFamily:F.display, fontWeight:700, fontSize:12, letterSpacing:"0.2em", color:"#E3C9CC" }}>ON MY DESK TODAY</span>
+            <span style={{ fontFamily:F.anton, fontSize:38, lineHeight:1.1 }}>{Number(rate.rate).toFixed(3)}%</span>
             <span style={{ fontSize:15, color:"#C9D6E3" }}>30-year fixed conventional · as of {asOfTxt} · example rate, not a quote</span>
           </div>
         </div>
@@ -107,7 +113,7 @@ export default function ScenarioDesk() {
         )}
         {done ? (
           <div style={panel}>
-            <h2 style={{ fontFamily:F.display, fontWeight:800, color:C.maroon, margin:"0 0 8px", fontSize:26 }}>It's on my desk{first ? `, ${first}` : ""}.</h2>
+            <h2 style={{ fontFamily:F.anton, fontWeight:400, textTransform:"uppercase", color:C.navy, margin:"0 0 8px", fontSize:34 }}>It's on my desk{first ? `, ${first}` : ""}.</h2>
             <p style={{ fontSize:16, lineHeight:1.6, margin:"0 0 14px" }}>I'll get back to you by {v.reach.toLowerCase()}, usually the same day. If your client is ready to talk options, book a 5-minute call.</p>
             <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(min(100%, 200px), 1fr))", gap:10 }}>
               <a href={BRAND.booking} target="_blank" rel="noreferrer" style={btnS}>Book 5 minutes</a>
@@ -118,7 +124,7 @@ export default function ScenarioDesk() {
           <form onSubmit={submit} noValidate style={{ ...panel, display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(min(100%, 240px), 1fr))", gap:16 }}>
             <div style={{ gridColumn:"1/-1" }}>
               <div style={eyebrow}>Step 1</div>
-              <h2 style={{ fontFamily:F.display, fontWeight:800, margin:"4px 0 0", fontSize:24, color:C.maroon }}>What's on your desk?</h2>
+              <h2 style={{ fontFamily:F.anton, fontWeight:400, textTransform:"uppercase", letterSpacing:"0.02em", margin:"4px 0 0", fontSize:30, color:C.navy }}>What's on your desk?</h2>
               <p style={{ margin:"6px 0 0", color:C.muted, fontSize:15 }}>Please don't include your client's last name, SSN or account numbers. First name or initials is plenty.</p>
             </div>
             <div style={{ gridColumn:"1/-1", display:"flex", flexWrap:"wrap", gap:8 }}>
@@ -129,7 +135,7 @@ export default function ScenarioDesk() {
             <label style={labelS}>Property state<input value={v.state} onChange={set("state")} style={input} maxLength={2} placeholder="FL"/></label>
             <div style={{ gridColumn:"1/-1", borderTop:`1px solid ${C.line}`, paddingTop:14 }}>
               <div style={eyebrow}>Step 2</div>
-              <h2 style={{ fontFamily:F.display, fontWeight:800, margin:"4px 0 0", fontSize:22, color:C.maroon }}>How should I get back to you?</h2>
+              <h2 style={{ fontFamily:F.anton, fontWeight:400, textTransform:"uppercase", letterSpacing:"0.02em", margin:"4px 0 0", fontSize:28, color:C.navy }}>How should I get back to you?</h2>
               <div style={{ display:"flex", flexWrap:"wrap", gap:8, marginTop:10 }}>
                 {REACH.map((r) => <button type="button" key={r} onClick={() => setV({ ...v, reach:r })} style={chipS(v.reach === r)} aria-pressed={v.reach === r}>{r}</button>)}
               </div>
