@@ -89,7 +89,13 @@ const mkCSS = () => `
 @keyframes svln{from{opacity:0;transform:translateY(34px)}to{opacity:1;transform:none}}
 @keyframes svin{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
 @keyframes svbar{from{transform:scaleX(0)}to{transform:none}}
-@media (prefers-reduced-motion:reduce){.sv-ln,.sv-anim,.sv-bar{animation:none}}
+@keyframes svph{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes svdrift{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.sv-photos .a{animation:svph .9s .15s cubic-bezier(.2,.7,.2,1) both}
+.sv-photos .jbox{animation:svph .9s .35s cubic-bezier(.2,.7,.2,1) both}
+.sv-photos .jbox img{transform-origin:0 0;animation:svdrift 14s ease-in-out 1.4s infinite}
+.sv-photos .cap{animation:svph .8s .75s cubic-bezier(.2,.7,.2,1) both}
+@media (prefers-reduced-motion:reduce){.sv-ln,.sv-anim,.sv-bar,.sv-photos .a,.sv-photos .jbox,.sv-photos .jbox img,.sv-photos .cap{animation:none}}
 .sv-why{max-width:760px;margin:0 auto;padding:34px 20px 8px}
 .sv-start{display:flex;gap:16px;align-items:flex-start;padding:6px 0 4px}
 .sv-start .n{font:400 44px/.9 ${ANTON};color:${C.plum};width:36px;flex:none}
