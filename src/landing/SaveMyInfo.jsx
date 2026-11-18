@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "../supabase.js";
 import { BRAND } from "../smart-money/data.js";
 import { SAVE_VIDEO, SAVE_VIDEO_TITLE, embedFor } from "./saveVideo.js";
-import { ApplyNow, SiteFooter, WhoLink, DpaEstimate, LogoLink, APPLY_URL } from "./SiteBits.jsx";
+import { ApplyNow, SiteFooter, WhoLink, DpaEstimate, LogoLink, TopButtons, APPLY_URL } from "./SiteBits.jsx";
 
 const THEMES = {
   sky:    { bone:"#F6EEDF", ink:"#0E1B2A", red:"#4A111C", panel:"#0E1B2A", panelText:"#F6EEDF", panelMute:"#C9D6E3", mute:"#4A5568", rule:"#0E1B2A", soft:"#E3D6BF" },
@@ -76,7 +76,7 @@ const mkCSS = () => `
 .sv{font-family:'Public Sans',system-ui,sans-serif;color:${C.ink};background:${C.bone};min-height:100vh}
 .sv *{box-sizing:border-box}
 .sv-top{background:#fff;border-bottom:4px solid ${C.plum}}
-.sv-top>div{max-width:1000px;margin:0 auto;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.sv-top>div{max-width:1000px;margin:0 auto;padding:12px 20px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px 12px}
 .sv-wm{font:400 24px ${ANTON};letter-spacing:.04em;text-transform:uppercase;color:${C.navy};line-height:1}
 .sv-hero{max-width:1000px;margin:0 auto;display:flex;align-items:stretch}
 .sv-hero-l{flex:1;min-width:0;padding:30px 20px 30px 20px;display:flex;flex-direction:column;gap:14px;justify-content:center}
@@ -269,7 +269,8 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
     <div className="sv"><style>{mkCSS()}</style>
       <div className="sv-top"><div>
         <LogoLink to={agent ? `/a/${agent.slug}` : "/save"}/>
-        <div style={{ display:"flex", alignItems:"center", gap:14 }}>{agent && agent.logo_url && <img src={agent.logo_url} alt={agent.brokerage || agent.name} style={{ maxHeight:38, maxWidth:96, width:"auto", objectFit:"contain" }}/>}<WhoLink label="Who is Joshua?" style={{ color:C.navy, fontSize:11, whiteSpace:"nowrap" }}/><ApplyNow/></div>
+        <TopButtons hideAgent={!!agent} onAgent={() => { setWho("agent"); setA({}); setStep(0); setErr(""); setOpen(true); setTimeout(() => { try { top.current && top.current.scrollIntoView({ behavior:"smooth", block:"start" }); } catch {} }, 80); }}
+          extra={agent && agent.logo_url ? <img src={agent.logo_url} alt={agent.brokerage || agent.name} style={{ maxHeight:38, maxWidth:96, width:"auto", objectFit:"contain" }}/> : null}/>
       </div></div>
       <section className="sv-hero">
         <div className="sv-hero-l">

@@ -16,6 +16,30 @@ export function LogoLink({ src = "/brand/gf-logo-ink.png", height = 46, to }) {
   return <a href={href} aria-label="Graham Financial home" style={{ display:"inline-flex", lineHeight:0 }}><img src={src} alt="Graham Financial" style={{ height, width:"auto" }}/></a>;
 }
 
+// Top-right button cluster for every public page: Are you an agent? / Who is Joshua? / Get approved.
+// On a phone the cluster drops its two secondary buttons onto a slim second row (parent header must flex-wrap).
+export function TopButtons({ onAgent, hideAgent = false, noApply = false, extra = null }) {
+  let ref = ""; try { ref = new URLSearchParams(location.search).get("ref") || ""; } catch {}
+  const agentHref = "/save?who=agent" + (ref ? "&ref=" + encodeURIComponent(ref) : "");
+  const base = { fontFamily:M, fontWeight:800, fontSize:11, letterSpacing:"0.1em", textTransform:"uppercase", textDecoration:"none", borderRadius:2, padding:"9px 12px", whiteSpace:"nowrap", display:"inline-flex", alignItems:"center", gap:7, cursor:"pointer", background:"#fff", boxSizing:"border-box", lineHeight:1.1 };
+  return (
+    <>
+      <style>{`.tb{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}.tb-sec{display:flex;align-items:center;gap:8px}.tb-ap{display:inline-flex}.tb a:hover,.tb button:hover{background:#F6EEDF !important}
+@media(max-width:640px){.tb{display:contents}.tb-ap{order:1;margin-left:auto}.tb-sec{order:2;flex:1 1 100%;justify-content:flex-end;margin-top:-2px}}`}</style>
+      <div className="tb">
+        {extra}
+        <div className="tb-sec">
+          {!hideAgent && (onAgent
+            ? <button type="button" onClick={onAgent} style={{ ...base, border:`2px solid ${PLUM}`, color:PLUM }}>Are you an agent?</button>
+            : <a href={agentHref} style={{ ...base, border:`2px solid ${PLUM}`, color:PLUM }}>Are you an agent?</a>)}
+          <WhoLink label={<><img src="/brand/joshua-headshot.jpg" alt="" style={{ width:22, height:22, borderRadius:"50%", objectFit:"cover", flex:"none" }}/>Who is Joshua?</>} style={{ ...base, fontFamily:M, fontSize:11, letterSpacing:"0.1em", fontWeight:800, border:`2px solid ${NAVY}`, color:NAVY, padding:"5px 12px 5px 6px" }}/>
+        </div>
+        {!noApply && <span className="tb-ap"><ApplyNow/></span>}
+      </div>
+    </>
+  );
+}
+
 export const APPLY_URL = BRAND.apply || "https://approvedbyjoshua.com";
 
 export function ApplyNow({ style }) {

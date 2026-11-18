@@ -6,7 +6,7 @@ import { supabase } from "../supabase.js";
 import { BRAND } from "../smart-money/data.js";
 import { DESK_VIDEO, DESK_VIDEO_TITLE, embedFor } from "./saveVideo.js";
 import { NoSpam } from "./BrandBar.jsx";
-import { ApplyNow, SiteFooter, WhoLink, LogoLink } from "./SiteBits.jsx";
+import { ApplyNow, SiteFooter, WhoLink, LogoLink, TopButtons } from "./SiteBits.jsx";
 
 const C = { maroon:"#4A111C", navy:"#0E1B2A", gold:"#D9A566", plum:"#7E4B6F", goldDk:"#4A111C", cream:"#F6EEDF", ink:"#0E1B2A", muted:"#4A5568", line:"#E3D6BF", card:"#FFFFFF", btn:"#4A111C", bad:"#B3261E", chip:"#0E1B2A" };
 const F = { display:"'Montserrat', Arial, sans-serif", body:"'Public Sans', system-ui, sans-serif", anton:"'Anton', 'Arial Narrow', Impact, sans-serif" };
@@ -76,9 +76,9 @@ export default function ScenarioDesk() {
   return (
     <div style={{ fontFamily:F.body, color:C.ink, minHeight:"100vh", background:C.cream }}>
       <div style={{ background:"#fff", borderBottom:`4px solid ${C.plum}` }}>
-        <div style={{ maxWidth:860, margin:"0 auto", padding:"12px 18px", display:"flex", alignItems:"center", justifyContent:"space-between", gap:12 }}>
+        <div style={{ maxWidth:860, margin:"0 auto", padding:"12px 18px", display:"flex", flexWrap:"wrap", alignItems:"center", justifyContent:"space-between", gap:"10px 12px" }}>
           <LogoLink/>
-          <ApplyNow/>
+          <TopButtons/>
         </div>
       </div>
       <div style={{ background:C.maroon, color:"#F6ECE9", borderBottom:`10px solid ${C.plum}` }}>
