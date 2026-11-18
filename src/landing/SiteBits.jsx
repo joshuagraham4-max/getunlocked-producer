@@ -86,7 +86,7 @@ function WhoModal({ onClose }) {
           <p style={{ fontSize:16, lineHeight:1.6, margin:"12px 0 0" }}>Most buyers who think they can't qualify actually can. Let's find out.</p>
           <div style={{ marginTop:16, borderTop:`1px solid ${LINE}`, paddingTop:12, fontSize:13, lineHeight:1.55, color:MUTE }}>
             <b style={{ color:NAVY }}>Agency and conventional loans:</b> Colorado.<br/>
-            <b style={{ color:NAVY }}>Business-purpose (DSCR) loans:</b> most states.
+            <b style={{ color:NAVY }}>Investor business-purpose (DSCR) loans:</b> Colorado, Alabama, Connecticut, DC, Florida, Georgia, Hawaii, Illinois, Indiana, Kentucky, Louisiana, Maine, Maryland, Massachusetts, Michigan, New Jersey, New Mexico, Ohio, Oklahoma, Pennsylvania, Rhode Island, South Carolina, Tennessee, Texas, Virginia, Washington, West Virginia, Wisconsin and Wyoming.
           </div>
           <div style={{ display:"flex", flexWrap:"wrap", gap:10, marginTop:18 }}>
             <a href={BRAND.booking} target="_blank" rel="noreferrer" style={{ flex:"1 1 200px", textAlign:"center", textDecoration:"none", fontFamily:A, fontSize:19, letterSpacing:"0.08em", textTransform:"uppercase", background:MAROON, color:"#fff", borderBottom:`4px solid ${PLUM}`, padding:"14px 18px", borderRadius:2 }}>Book my free credit review</a>
