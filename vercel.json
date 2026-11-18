@@ -1,9 +1,28 @@
 {
+  "ignoreCommand": "[ \"$VERCEL_GIT_COMMIT_REF\" != \"main\" ]",
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/a/:slug", "destination": "/agent" },
-    { "source": "/e/:token", "destination": "/agent-edit" },
-    { "source": "/d/:slug", "destination": "/scenario-desk" },
-    { "source": "/", "has": [{ "type": "host", "value": "(www\\.)?grahamfinancial\\.us" }], "destination": "/home" }
+    {
+      "source": "/a/:slug",
+      "destination": "/agent"
+    },
+    {
+      "source": "/e/:token",
+      "destination": "/agent-edit"
+    },
+    {
+      "source": "/d/:slug",
+      "destination": "/scenario-desk"
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "(www\\.)?grahamfinancial\\.us"
+        }
+      ],
+      "destination": "/home"
+    }
   ]
 }
