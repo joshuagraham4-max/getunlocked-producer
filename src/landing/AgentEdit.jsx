@@ -1,6 +1,7 @@
 // /e/<private key>: an agent edits their own page (photo, contact info, optional intro video) and copies ready-made posts.
 // No login: the long secret in the link is the key (see supabase/agent_pages_v2.sql). Anyone holding the link can change the page.
 import React, { useEffect, useState } from "react";
+import { LogoLink } from "./SiteBits.jsx";
 import { supabase } from "../supabase.js";
 import { embedFor } from "./saveVideo.js";
 import { agentPosts } from "./agentPosts.js";
@@ -127,7 +128,7 @@ export default function AgentEdit() {
   return (
     <div style={{ minHeight:"100vh", background:C.bone, color:C.ink, fontFamily:SANS }}>
       <style>{`@media (max-width:640px){.ae-g{grid-template-columns:1fr !important}}`}</style>
-      <div style={{ background:"#fff", borderBottom:`4px solid ${C.plum}` }}><div style={{ maxWidth:760, margin:"0 auto", padding:"12px 22px", display:"flex", alignItems:"center", justifyContent:"space-between" }}><img src="/brand/gf-logo-ink.png" alt="Graham Financial" style={{ height:46, width:"auto" }}/><img src="/brand/zpm-logo-ink.png" alt="" style={{ height:24, width:"auto" }}/></div></div>
+      <div style={{ background:"#fff", borderBottom:`4px solid ${C.plum}` }}><div style={{ maxWidth:760, margin:"0 auto", padding:"12px 22px", display:"flex", alignItems:"center", justifyContent:"space-between" }}><LogoLink/><img src="/brand/zpm-logo-ink.png" alt="" style={{ height:24, width:"auto" }}/></div></div>
       <div style={{ maxWidth:760, margin:"0 auto", padding:"34px 22px 80px" }}>
         <div style={{ font:`700 11px ${SANS}`, letterSpacing:".22em", textTransform:"uppercase", color:C.maroon }}>Your page</div>
         <h1 style={{ font:`400 clamp(44px,10vw,72px)/1.02 ${ANTON}`, textTransform:"uppercase", letterSpacing:".01em", margin:"12px 0 8px", color:C.ink }}>Make it yours, {f.name.split(" ")[0]}.</h1>

@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "../supabase.js";
 import { BRAND } from "../smart-money/data.js";
 import { SAVE_VIDEO, SAVE_VIDEO_TITLE, embedFor } from "./saveVideo.js";
-import { ApplyNow, SiteFooter, WhoLink, DpaEstimate, APPLY_URL } from "./SiteBits.jsx";
+import { ApplyNow, SiteFooter, WhoLink, DpaEstimate, LogoLink, APPLY_URL } from "./SiteBits.jsx";
 
 const THEMES = {
   sky:    { bone:"#F6EEDF", ink:"#0E1B2A", red:"#4A111C", panel:"#0E1B2A", panelText:"#F6EEDF", panelMute:"#C9D6E3", mute:"#4A5568", rule:"#0E1B2A", soft:"#E3D6BF" },
@@ -38,7 +38,7 @@ const WHO = [
     qs:[
       { id:"goal", short:"Goal", q:"What are we trying to accomplish?", opts:["Buy rentals with my equity", "Optimize the financing I have", "Pull cash out", "Sell and move up", "Just see where I stand"] },
       { id:"years", short:"Owned", q:"How long have you owned the home?", opts:["Less than 2 years", "2 to 5 years", "5 to 10 years", "More than 10 years"] },
-      { id:"dead", short:"Dead money", q:"Do you have dead money sitting in it?", opts:["Probably", "Not sure", "No"] },
+      { id:"dead", short:"Idle equity", q:"Do you have equity sitting idle in your properties?", opts:["Probably", "Not sure", "No"] },
       { id:"working", short:"Equity working", q:"Is your equity working for you right now?", opts:["Yes", "No", "Not sure"] },
       { id:"timing", short:"Timing", q:"Any concerns on timing?", opts:TIMING },
     ],
@@ -52,8 +52,8 @@ const WHO = [
       { id:"focus", short:"Main goal", q:"Is cash flow your main goal, or equity position?", opts:["Cash flow", "Equity position", "Both"] },
       { id:"timing", short:"Timing", q:"Any concerns on timing?", opts:TIMING },
     ],
-    handoff:"You probably have dead money sitting in properties that aren't optimized. That's why I do a portfolio review.",
-    thanks:() => "Got it. Next, see where your dead money is, and book a call with me when you're ready." },
+    handoff:"You probably have equity sitting idle in properties that aren't optimized. That's why I do a portfolio review.",
+    thanks:() => "Got it. Next, see where your idle equity is, and book a call with me when you're ready." },
   { id:"agent", label:"Real estate agent", sub:"Your buyers, your deals, your team",
     qs:[
       { id:"goal", short:"Goal", q:"What are we trying to accomplish?", opts:["More buyer leads", "Bigger approvals for my buyers", "Train my team on lending", "A lender I can count on"] },
@@ -268,7 +268,7 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
   return (
     <div className="sv"><style>{mkCSS()}</style>
       <div className="sv-top"><div>
-        <img src="/brand/gf-logo-ink.png" alt="Graham Financial" style={{ height:46, width:"auto" }}/>
+        <LogoLink to={agent ? `/a/${agent.slug}` : "/save"}/>
         <div style={{ display:"flex", alignItems:"center", gap:14 }}>{agent && agent.logo_url && <img src={agent.logo_url} alt={agent.brokerage || agent.name} style={{ maxHeight:38, maxWidth:96, width:"auto", objectFit:"contain" }}/>}<WhoLink label="Who is Joshua?" style={{ color:C.navy, fontSize:11, whiteSpace:"nowrap" }}/><ApplyNow/></div>
       </div></div>
       <section className="sv-hero">
@@ -326,7 +326,7 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
                     {who === "investor" && <>
                       <a href={`/rental-calculator?ref=${rq}`} className="sv-btn" style={btnLink}>Open the Rental Prop Calc</a>
                       <a href={`/portfolio-snapshot?ref=${rq}`} className="sv-btn" style={{ ...btnLink, ...out }}>Upload your portfolio spreadsheet</a>
-                      <a href={`/review?ref=${rq}`} className="sv-btn" style={{ ...btnLink, ...out }}>See your dead money</a>
+                      <a href={`/review?ref=${rq}`} className="sv-btn" style={{ ...btnLink, ...out }}>See your idle equity</a>
                     </>}
                     {isAgentDoor && <>
                       <a href={BRAND.booking} target="_blank" rel="noreferrer" className="sv-btn" style={btnLink}>Book a call with me to set up your page and tool</a>
@@ -384,7 +384,7 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
               <h2 className="sv-q" style={{ margin:"22px 0 0" }}>
                 {wantsClass ? <>Join the wait list.<br/><i style={{ fontStyle:"normal", color:C.red }}>I'll send the class the day it's live.</i></>
                   : who === "homeowner" ? <>Where's the home?<br/><i style={{ fontStyle:"normal", color:C.red }}>I'll run the deep review by hand.</i></>
-                  : who === "investor" ? <>Where do I send your review?<br/><i style={{ fontStyle:"normal", color:C.red }}>Then we'll find the dead money.</i></>
+                  : who === "investor" ? <>Where do I send your review?<br/><i style={{ fontStyle:"normal", color:C.red }}>Then we'll find the idle equity.</i></>
                   : who === "agent" ? <>Join the lead wait list.<br/><i style={{ fontStyle:"normal", color:C.red }}>I'll reach out when buyers are ready.</i></>
                   : <>Where do I reach you?<br/><i style={{ fontStyle:"normal", color:C.red }}>I'll tell you what I'd do.</i></>}
               </h2>

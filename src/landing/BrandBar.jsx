@@ -1,11 +1,11 @@
-import { ApplyNow, WhoLink } from "./SiteBits.jsx";
+import { ApplyNow, WhoLink, LogoLink } from "./SiteBits.jsx";
 // Shared top bar for public pages: Graham Financial logo + Joshua's headshot and name.
 export default function BrandBar({ max = 1120, noApply = false }) {
   return (
     <div style={{ background:"#fff", borderBottom:"4px solid #7E4B6F" }}>
       <style>{`@media(max-width:560px){.bb-name{display:none !important}}`}</style>
       <div style={{ maxWidth:max, margin:"0 auto", padding:"10px 16px", display:"flex", alignItems:"center", justifyContent:"space-between", gap:12 }}>
-        <img src="/brand/gf-logo.png" alt="Graham Financial" style={{ height:58, width:"auto" }}/>
+        <LogoLink src="/brand/gf-logo.png" height={58}/>
         <div style={{ display:"flex", alignItems:"center", gap:10 }}>
           <div className="bb-name" style={{ textAlign:"right", fontFamily:"'Public Sans', system-ui, sans-serif", lineHeight:1.25 }}>
             <div style={{ fontFamily:"'Montserrat', Arial, sans-serif", fontWeight:700, fontSize:14, color:"#0E1B2A" }}>Joshua Graham</div>

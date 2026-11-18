@@ -1,4 +1,4 @@
-// Portfolio Review survey funnel: one question per screen, then contact, then the "dead money" result.
+// Portfolio Review survey funnel: one question per screen, then contact, then the idle equity result.
 // Submissions go to portfolio_reviews; a database trigger turns each one into an investor lead on Joshua's call list.
 import React, { useState } from "react";
 import { supabase } from "../supabase.js";
@@ -108,8 +108,8 @@ export default function PortfolioReview() {
                 <div style={{ fontSize:14, color:C.muted }}>every year you hold them</div></div>
             </div>
             <p style={{ fontSize:16, lineHeight:1.55, margin:"0 0 14px" }}>Without selling anything or putting in your own cash. You'd still keep 25% equity in every property you own now{left >= 10000 ? <>, with about <b>{k$(left)}</b> left over for reserves</> : ""}.</p>
-            <p style={{ fontSize:16, lineHeight:1.55, color:C.muted, margin:"0 0 14px" }}>That's your dead money: about <b>{k$(pl.cash)}{pl.plus ? "+" : ""}</b> sitting in your rentals right now, earning nothing.</p>
-          </> : <h2 style={{ fontFamily:F.display, fontWeight:800, fontSize:26, margin:"8px 0" }}>Let's find your dead money.</h2>}
+            <p style={{ fontSize:16, lineHeight:1.55, color:C.muted, margin:"0 0 14px" }}>That's idle equity: about <b>{k$(pl.cash)}{pl.plus ? "+" : ""}</b> sitting in your rentals right now, earning nothing.</p>
+          </> : <h2 style={{ fontFamily:F.display, fontWeight:800, fontSize:26, margin:"8px 0" }}>Let's find the equity that isn't working for you.</h2>}
           <ul style={{ fontSize:16, lineHeight:1.7, margin:"0 0 18px", paddingLeft:20 }}>
             <li>Buy your next property, where the rent qualifies the loan instead of your tax return</li>
             {a.hard_money && a.hard_money !== "No" && <li>Pay off the hard money loan before it comes due</li>}
@@ -170,7 +170,7 @@ export default function PortfolioReview() {
             <span>I agree that Graham Financial, powered by Zero Point Mortgage Services, may contact me by phone, text or email at the information above, including by automated means. Consent is not a condition of any loan. Message and data rates may apply.<NoSpam/></span>
           </label>
           {err && <p style={{ color:C.bad, margin:0 }}>{err}</p>}
-          <button type="submit" disabled={busy} style={btn}>{busy ? "Sending..." : "Show me my dead money"}</button>
+          <button type="submit" disabled={busy} style={btn}>{busy ? "Sending..." : "Show me my idle equity"}</button>
           <button type="button" onClick={() => setStep((s) => s - 1)} style={{ background:"none", border:0, color:C.muted, cursor:"pointer", fontSize:14 }}>Back</button>
         </form>
       )}

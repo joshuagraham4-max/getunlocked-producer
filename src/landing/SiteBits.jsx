@@ -9,6 +9,13 @@ const M = "'Montserrat', Arial, sans-serif";
 const P = "'Public Sans', system-ui, sans-serif";
 const NAVY = "#0E1B2A", MAROON = "#4A111C", PLUM = "#7E4B6F", CREAM = "#F6EEDF", LINE = "#E3D6BF", MUTE = "#4A5568";
 
+// Top-left logo: always takes the visitor back to the main lander (keeps their ref code).
+export function LogoLink({ src = "/brand/gf-logo-ink.png", height = 46, to }) {
+  let href = to;
+  if (!href) { let r = ""; try { r = new URLSearchParams(location.search).get("ref") || ""; } catch {} href = "/save" + (r ? "?ref=" + encodeURIComponent(r) : ""); }
+  return <a href={href} aria-label="Graham Financial home" style={{ display:"inline-flex", lineHeight:0 }}><img src={src} alt="Graham Financial" style={{ height, width:"auto" }}/></a>;
+}
+
 export const APPLY_URL = BRAND.apply || "https://approvedbyjoshua.com";
 
 export function ApplyNow({ style }) {
