@@ -1,4 +1,4 @@
-// Small shared pieces for the public pages: Apply now button, "Who is Joshua Graham" popup,
+// Small shared pieces for the public pages: Get approved button, "Who is Joshua Graham" popup,
 // the "Powered by ZPM" mark, and the DPA estimate. Plain inline styles so every page can use them.
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
@@ -15,7 +15,7 @@ export function ApplyNow({ style }) {
   return (
     <a href={APPLY_URL} target="_blank" rel="noreferrer"
       style={{ fontFamily:M, fontWeight:800, fontSize:12, letterSpacing:"0.12em", textTransform:"uppercase", textDecoration:"none", background:MAROON, color:"#fff", borderBottom:`3px solid ${PLUM}`, borderRadius:2, padding:"11px 14px", whiteSpace:"nowrap", display:"inline-block", ...style }}>
-      Apply now
+      Get approved
     </a>
   );
 }
@@ -82,7 +82,7 @@ function WhoModal({ onClose }) {
         </div>
         <div style={{ padding:"8px 24px 24px", fontFamily:P, color:NAVY }}>
           <p style={{ fontSize:16, lineHeight:1.6, margin:"14px 0 0" }}>I help buyers, owners and investors with the deals other lenders walk away from: VA loans, self-employed borrowers, non-QM, DSCR investment loans and credit-challenged files.</p>
-          <p style={{ fontSize:16, lineHeight:1.6, margin:"12px 0 0" }}>Over 25 years I've averaged about $700,000 in loan volume a month. That's roughly $210 million since 2001. I'm a wholesale broker, so I shop many banks and give you options.</p>
+          <p style={{ fontSize:16, lineHeight:1.6, margin:"12px 0 0" }}>Since 2001 I've personally produced over $200 million in loans and overseen and managed over $500 million. I'm a wholesale broker, so I shop many banks and give you options.</p>
           <p style={{ fontSize:16, lineHeight:1.6, margin:"12px 0 0" }}>Most buyers who think they can't qualify actually can. Let's find out.</p>
           <div style={{ marginTop:16, borderTop:`1px solid ${LINE}`, paddingTop:12, fontSize:13, lineHeight:1.55, color:MUTE }}>
             <b style={{ color:NAVY }}>Agency and conventional loans:</b> Colorado.<br/>
@@ -118,7 +118,7 @@ export function DpaEstimate() {
         </span>
       </label>
       <div style={{ marginTop:14, background:NAVY, color:"#fff", padding:"14px 16px" }}>
-        <div style={{ fontFamily:P, fontSize:13, color:"#C9D6E3" }}>If you qualify, up to 5% of the purchase price</div>
+        <div style={{ fontFamily:P, fontSize:13, color:"#C9D6E3" }}>You could be eligible for up to 5% of the purchase price</div>
         <div style={{ fontFamily:A, fontSize:44, lineHeight:1.05, letterSpacing:"0.01em" }}>{n >= 50000 ? fmt(n * 0.05) : "$ —"}</div>
       </div>
       <p style={{ fontFamily:P, fontSize:11.5, lineHeight:1.5, color:MUTE, margin:"10px 0 0" }}>Estimate only. Down payment assistance programs, amounts and terms vary by area and eligibility and are subject to change. Not a commitment to lend; subject to credit approval and underwriting.</p>

@@ -281,7 +281,7 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
                     </>}
                     {agent && agent.phone && <a href={`tel:${String(agent.phone).replace(/\D/g, "")}`} className="sv-btn" style={btnLink}>Call {agent.name.split(" ")[0]}</a>}
                     {!buyer && !isAgentDoor && <a href={BRAND.booking} target="_blank" rel="noreferrer" className="sv-btn" style={{ ...btnLink, ...out }}>Book a call with me</a>}
-                    <a href={APPLY_URL} target="_blank" rel="noreferrer" className="sv-btn" style={{ ...btnLink, ...out }}>Apply now</a>
+                    <a href={APPLY_URL} target="_blank" rel="noreferrer" className="sv-btn" style={{ ...btnLink, ...out }}>Get approved</a>
                     <a href={`tel:${BRAND.phone.replace(/\D/g, "")}`} className="sv-btn" style={{ ...btnLink, ...out }}>Call me</a>
                   </>;
                 })()}
