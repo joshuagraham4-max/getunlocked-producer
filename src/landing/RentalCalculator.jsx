@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { supabase } from "../supabase.js";
 import { BRAND, FOOTERS } from "../smart-money/data.js";
 import BrandBar, { NoSpam } from "./BrandBar.jsx";
+import { SiteFooter } from "./SiteBits.jsx";
 import CtaRow from "./CtaRow.jsx";
 
 const SKOOL_URL = ""; // add the Smart Money Skool invite link when it's ready
@@ -198,6 +199,7 @@ export default function RentalCalculator() {
       <footer style={{ maxWidth: 1120, margin: "0 auto", padding: "0 16px 40px" }}>
         <p style={{ fontSize: 12, color: C.muted, textAlign: "center", maxWidth: "90ch", margin: "0 auto" }}>{FOOTERS.business} This calculator is an estimate for scenario review only.</p>
       </footer>
+      <SiteFooter max={1120}/>
     </div>
   );
 }

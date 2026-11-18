@@ -61,7 +61,7 @@ export default function EquipmentApply() {
 
   return (
     <div style={{ fontFamily:F.body, color:C.ink, minHeight:"100vh" }}>
-      <BrandBar max={860}/>
+      <BrandBar max={860} noApply/>
       <div style={{ background:C.green, color:"#fff" }}>
         <div style={{ maxWidth:860, margin:"0 auto", padding:"34px 16px 30px" }}>
           <div style={{ fontFamily:F.display, fontWeight:700, fontSize:13, letterSpacing:"0.18em", color:C.gold }}>BUSINESS OWNERS · EQUIPMENT FINANCING</div>

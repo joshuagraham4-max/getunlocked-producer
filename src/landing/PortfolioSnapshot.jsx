@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import { supabase } from "../supabase.js";
 import { BRAND, FOOTERS } from "../smart-money/data.js";
 import BrandBar, { NoSpam } from "./BrandBar.jsx";
+import { SiteFooter } from "./SiteBits.jsx";
 import CtaRow from "./CtaRow.jsx";
 
 const C = { navy:"#0E1B2A", sky:"#4FB0EA", ink:"#0E1B2A", muted:"#51647A", line:"#DCE3EB", bg:"#F3F6F9", card:"#FFFFFF", blue:"#1F6FA8", good:"#2E8B3E", bad:"#C0392B" };
@@ -126,6 +127,7 @@ export default function PortfolioSnapshot() {
       <footer style={{ maxWidth:960, margin:"0 auto", padding:"0 16px 40px" }}>
         <p style={{ fontSize:12, color:C.muted, textAlign:"center", maxWidth:"90ch", margin:"0 auto" }}>Snapshots are estimates for investment (business-purpose) properties based on the information you provide. Not an offer to lend or a commitment. {FOOTERS.business || FOOTERS.consumer}</p>
       </footer>
+      <SiteFooter max={960}/>
     </div>
   );
 }

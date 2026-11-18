@@ -4,6 +4,7 @@ import React, { useMemo, useState } from "react";
 import { supabase } from "../supabase.js";
 import { BRAND, FOOTERS } from "../smart-money/data.js";
 import BrandBar, { NoSpam } from "./BrandBar.jsx";
+import { SiteFooter } from "./SiteBits.jsx";
 import CtaRow from "./CtaRow.jsx";
 
 const STATES = "AL AK AZ AR CA CO CT DE DC FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY".split(" ");
@@ -177,6 +178,7 @@ export default function EquityUnlock() {
       <footer style={{ maxWidth:1120, margin:"0 auto", padding:"0 16px 40px" }}>
         <p style={{ fontSize:12, color:C.muted, textAlign:"center", maxWidth:"90ch", margin:"0 auto" }}>Estimates for illustration only, based on the numbers you enter. Not an appraisal, an offer of credit or a prediction of home values. {FOOTERS.consumer}</p>
       </footer>
+      <SiteFooter max={1120}/>
     </div>
   );
 }

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { supabase } from "../supabase.js";
 import { BRAND, FOOTERS } from "../smart-money/data.js";
 import BrandBar, { NoSpam } from "./BrandBar.jsx";
+import { SiteFooter } from "./SiteBits.jsx";
 
 const BOOKING = "https://calendar.app.google/nz1sdrnBGK1D4LXh7";
 const C = { navy:"#0E1B2A", sky:"#4FB0EA", ink:"#0E1B2A", muted:"#51647A", line:"#DCE3EB", bg:"#F3F6F9", card:"#FFFFFF", blue:"#1F6FA8", gold:"#D4A537", good:"#2E8B3E", bad:"#C0392B" };
@@ -54,6 +55,7 @@ function Shell({ children }) {
     <main style={{ maxWidth:640, margin:"0 auto", padding:"24px 20px 40px" }}>{children}
       <p style={{ fontSize:12, color:C.muted, marginTop:32 }}>{FOOTERS.business}</p>
     </main>
+    <SiteFooter max={640}/>
   </div>
 );
 }
