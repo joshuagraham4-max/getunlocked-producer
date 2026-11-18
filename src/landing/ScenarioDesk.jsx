@@ -6,6 +6,7 @@ import { supabase } from "../supabase.js";
 import { BRAND } from "../smart-money/data.js";
 import { DESK_VIDEO, DESK_VIDEO_TITLE, embedFor } from "./saveVideo.js";
 import { NoSpam } from "./BrandBar.jsx";
+import { ApplyNow, SiteFooter, WhoLink } from "./SiteBits.jsx";
 
 const C = { maroon:"#4A111C", navy:"#0E1B2A", gold:"#D9A566", plum:"#7E4B6F", goldDk:"#4A111C", cream:"#F6EEDF", ink:"#0E1B2A", muted:"#4A5568", line:"#E3D6BF", card:"#FFFFFF", btn:"#4A111C", bad:"#B3261E", chip:"#0E1B2A" };
 const F = { display:"'Montserrat', Arial, sans-serif", body:"'Public Sans', system-ui, sans-serif", anton:"'Anton', 'Arial Narrow', Impact, sans-serif" };
@@ -77,7 +78,7 @@ export default function ScenarioDesk() {
       <div style={{ background:"#fff", borderBottom:`4px solid ${C.plum}` }}>
         <div style={{ maxWidth:860, margin:"0 auto", padding:"12px 18px", display:"flex", alignItems:"center", justifyContent:"space-between", gap:12 }}>
           <img src="/brand/gf-logo-ink.png" alt="Graham Financial" style={{ height:46, width:"auto" }}/>
-          <img src="/brand/zpm-logo-ink.png" alt="Zero Point Mortgage Services" style={{ height:24, width:"auto" }}/>
+          <ApplyNow/>
         </div>
       </div>
       <div style={{ background:C.maroon, color:"#F6ECE9", borderBottom:`10px solid ${C.plum}` }}>
@@ -90,7 +91,7 @@ export default function ScenarioDesk() {
           </div>
           <div style={{ flex:"0 0 auto", width:150 }}>
             <img src="/brand/joshua-plum-suit.jpg" alt="Joshua Graham" style={{ display:"block", width:150, height:200, objectFit:"cover", objectPosition:"50% 10%", border:`3px solid ${C.plum}`, boxSizing:"border-box" }}/>
-            <div style={{ fontFamily:F.display, fontWeight:700, fontSize:11, letterSpacing:"0.14em", color:"#E3C9CC", marginTop:8, textTransform:"uppercase", textAlign:"center" }}>Joshua Graham</div>
+            <div style={{ fontFamily:F.display, fontWeight:700, fontSize:11, letterSpacing:"0.14em", color:"#E3C9CC", marginTop:8, textTransform:"uppercase", textAlign:"center" }}>Joshua Graham<div style={{ marginTop:4 }}><WhoLink label="Who is Joshua?" style={{ color:"#fff", fontSize:11 }}/></div></div>
           </div>
         </div>
       </div>
@@ -158,6 +159,7 @@ export default function ScenarioDesk() {
         )}
         <p style={{ fontSize:12, color:C.muted, lineHeight:1.5, textAlign:"center", margin:0 }}>Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity. General guidance only, not a loan approval or commitment to lend.</p>
       </div>
+      <SiteFooter max={860}/>
     </div>
   );
 }

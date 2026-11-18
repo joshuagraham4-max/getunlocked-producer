@@ -5,6 +5,7 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "../supabase.js";
 import { BRAND } from "../smart-money/data.js";
 import { SAVE_VIDEO, SAVE_VIDEO_TITLE, embedFor } from "./saveVideo.js";
+import { ApplyNow, SiteFooter, WhoLink, DpaEstimate, APPLY_URL } from "./SiteBits.jsx";
 
 const THEMES = {
   sky:    { bone:"#F6EEDF", ink:"#0E1B2A", red:"#4A111C", panel:"#0E1B2A", panelText:"#F6EEDF", panelMute:"#C9D6E3", mute:"#4A5568", rule:"#0E1B2A", soft:"#E3D6BF" },
@@ -221,7 +222,7 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
     <div className="sv"><style>{mkCSS()}</style>
       <div className="sv-top"><div>
         <img src="/brand/gf-logo-ink.png" alt="Graham Financial" style={{ height:46, width:"auto" }}/>
-        <div style={{ display:"flex", alignItems:"center", gap:16 }}>{agent && agent.logo_url && <img src={agent.logo_url} alt={agent.brokerage || agent.name} style={{ maxHeight:40, maxWidth:110, width:"auto", objectFit:"contain" }}/>}<img src="/brand/zpm-logo-ink.png" alt="Zero Point Mortgage Services" style={{ height:24, width:"auto" }}/></div>
+        <div style={{ display:"flex", alignItems:"center", gap:14 }}>{agent && agent.logo_url && <img src={agent.logo_url} alt={agent.brokerage || agent.name} style={{ maxHeight:38, maxWidth:96, width:"auto", objectFit:"contain" }}/>}<ApplyNow/></div>
       </div></div>
       <section className="sv-hero">
         <div className="sv-hero-l">
@@ -235,6 +236,7 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
           {agent && <div className="cap">{agent.name}<br/><span>{agent.brokerage || "Real estate"}</span></div>}
           <div className="jbox"><img src="/brand/joshua-plum-suit.jpg" alt="Joshua Graham"/></div>
           <div className="cap">Joshua Graham<br/><span>NMLS #169809</span><br/><a href={`tel:${BRAND.phone.replace(/\D/g, "")}`}>{BRAND.phone}</a></div>
+          <div className="cap" style={{ marginTop:-6 }}><WhoLink label="Who is Joshua?" style={{ color:"#fff", fontSize:11 }}/></div>
         </aside>
       </section>
       {!done && (() => { const av = agent && agent.video_url && step === 0 ? embedFor(agent.video_url) : null; const v2 = av || (!flow ? vid : null); const ttl = av ? agent.name : SAVE_VIDEO_TITLE;
@@ -247,24 +249,47 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
         <p style={{ font:`600 18px/1.4 ${SERIF}`, margin:"14px 0 0" }}>One bank gives you a price. I give you options.</p>
       </section>}
       {!done && (!who || who === "buyer") && <section className="sv-ben" style={{ marginTop:30 }}><div className="sv-ben-in">
-        <div className="sv-st"><div className="n">1</div><div><div className="tg">What you learn</div><div className="tt">The loans most buyers never hear about</div>{LEARN.map(([t, d]) => <div className="li" key={t}><b>{t}</b><span>{d}</span></div>)}</div></div>
-        <div className="sv-st"><div className="n">2</div><div><div className="tg">Finish it and unlock, free</div><div className="tt">Three things that cost you nothing</div><div className="ck">{PERKS.map((p) => <div key={p}>✓ {p}</div>)}</div></div></div>
+        <div className="sv-st"><div><div className="tg">The class</div><div className="tt">What you learn</div>{LEARN.map(([t, d]) => <div className="li" key={t}><b>{t}</b><span>{d}</span></div>)}</div></div>
+        <div className="sv-st"><div><div className="tg">Free when you finish</div><div className="tt">Yours free when you finish the class</div><div className="ck">{PERKS.map((p) => <div key={p}>✓ {p}</div>)}</div></div></div>
       </div></section>}
       <main className="sv-main">
 
           {done ? (
             <div style={{ marginTop:30 }}>
               <hr className="sv-rule"/>
-              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(min(100%,200px),1fr))", gap:12, marginTop:22 }}>
-                {who === "investor" && <a href={`/review?ref=${encodeURIComponent(refCode)}`} className="sv-btn" style={btnLink}>See your dead money</a>}
-                {agent && agent.phone && <a href={`tel:${String(agent.phone).replace(/\D/g, "")}`} className="sv-btn" style={btnLink}>Call {agent.name.split(" ")[0]}</a>}
-                <a href={BRAND.booking} target="_blank" rel="noreferrer" className="sv-btn" style={{ ...btnLink, ...(who === "investor" ? { background:"transparent", color:C.ink, border:`2px solid ${C.ink}` } : {}) }}>Book a call with me</a>
-                <a href={`tel:${BRAND.phone.replace(/\D/g, "")}`} className="sv-btn" style={{ ...btnLink, background:"transparent", color:C.ink, border:`2px solid ${C.ink}` }}>Call me</a>
+              <div className="sv-anim" style={{ marginTop:22, display:"flex", flexDirection:"column", gap:12 }}>
+                {(() => {
+                  const rq = encodeURIComponent(refCode);
+                  const out = { background:"transparent", color:C.ink, border:`2px solid ${C.ink}`, borderBottom:`4px solid ${C.plum}` };
+                  const isAgentDoor = who === "agent";
+                  const buyer = who === "buyer" && !sellOnly;
+                  const owner = who === "homeowner" || (who === "buyer" && sellOnly);
+                  return <>
+                    <div className="sv-k">{isAgentDoor ? "Next step" : "Yours now"}</div>
+                    {buyer && <DpaEstimate/>}
+                    {buyer && <a href={BRAND.booking} target="_blank" rel="noreferrer" className="sv-btn" style={btnLink}>Book my free credit review · 15 min</a>}
+                    {buyer && wantsClass && <p className="sv-sub" style={{ margin:0 }}>You're on the class wait list. I text you the day it's live.</p>}
+                    {owner && <a href={`/equity-unlock?ref=${rq}`} className="sv-btn" style={btnLink}>Open your Equity Unlock Estimator</a>}
+                    {who === "investor" && <>
+                      <a href={`/rental-calculator?ref=${rq}`} className="sv-btn" style={btnLink}>Open the Rental Prop Calc</a>
+                      <a href={`/portfolio-snapshot?ref=${rq}`} className="sv-btn" style={{ ...btnLink, ...out }}>Upload your portfolio spreadsheet</a>
+                      <a href={`/review?ref=${rq}`} className="sv-btn" style={{ ...btnLink, ...out }}>See your dead money</a>
+                    </>}
+                    {isAgentDoor && <>
+                      <a href={BRAND.booking} target="_blank" rel="noreferrer" className="sv-btn" style={btnLink}>Book a call with me to set up your page and tool</a>
+                      <a href={`/scenario-desk?ref=${rq}`} className="sv-btn" style={{ ...btnLink, ...out }}>Open the Scenario Desk</a>
+                    </>}
+                    {agent && agent.phone && <a href={`tel:${String(agent.phone).replace(/\D/g, "")}`} className="sv-btn" style={btnLink}>Call {agent.name.split(" ")[0]}</a>}
+                    {!buyer && !isAgentDoor && <a href={BRAND.booking} target="_blank" rel="noreferrer" className="sv-btn" style={{ ...btnLink, ...out }}>Book a call with me</a>}
+                    <a href={APPLY_URL} target="_blank" rel="noreferrer" className="sv-btn" style={{ ...btnLink, ...out }}>Apply now</a>
+                    <a href={`tel:${BRAND.phone.replace(/\D/g, "")}`} className="sv-btn" style={{ ...btnLink, ...out }}>Call me</a>
+                  </>;
+                })()}
               </div>
             </div>
           ) : (<>
             <div ref={top} style={{ scrollMarginTop:16 }}/>
-            <div className="sv-start"><div className="n">{!who || who === "buyer" ? 3 : 1}</div><div><div className="tg">Start here</div>
+            <div className="sv-start"><div className="n">1</div><div><div className="tg">Start here</div>
               <div className="tt">{!who || who === "buyer" ? "Join the free 15-minute SMART Buyer class" : "Tell me where you are"}</div>
               <div className="tx">{!who || who === "buyer" ? "Answer a few quick questions and you are on the list. I text you the day it is live." : "A few quick questions so I can point you the right way."}</div></div></div>
             <hr className="sv-rule" style={{ marginTop:16 }}/>
@@ -338,6 +363,7 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
 
           <p className="sv-fine" style={{ marginTop:44 }}>{agent ? `Real estate services provided by ${agent.name}${agent.brokerage ? ", " + agent.brokerage : ""}. ` : ""}Joshua Graham NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity. Licensed in Colorado. Source: Bankrate research, July 2026, based on 2025 mortgage data: about $65 billion a year in mortgage overpayments nationwide; about $3,300 is the national average per borrower per year. Your own savings will vary. Not a commitment to lend; subject to credit approval, underwriting guidelines and change without notice.</p>
         </main>
+      <SiteFooter/>
     </div>
   );
 }
