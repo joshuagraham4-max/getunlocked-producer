@@ -67,7 +67,8 @@ const WHO = [
     thanks:() => "You're on the lead wait list. I'll reach out as soon as buyers are ready for your market." },
 ];
 const WHY = [["THE NATIONAL TOTAL", "Overpaid on mortgages, every year", "$65 billion", 0], ["YOUR SHARE", "About, per borrower, per year", "$3,300", 0], ["THE CAUSE", "Most buyers take one lender's quote", "1 quote", 0], ["THE FIX", "A wholesale broker shops many banks and gives you options", "Me", 1]];
-const PERKS = ["Your credit report, free, reviewed with you", "Appraisal credits toward your purchase", "Access to wholesale interest rates"];
+const PERKS = ["Your credit report, free, reviewed with you", "Appraisal credits toward your purchase", "Access to wholesale interest rates", "Down payment assistance options, matched to you", "A game plan with me, Joshua"];
+const GETS = { buyer:"Get: a free credit review, wholesale rates, down payment assistance and a game plan with me", homeowner:"Get: your Equity Unlock Estimator", investor:"Get: the Rental Prop Calc and your portfolio snapshot", agent:"Get leads and develop lead-generating activities with Joshua Graham" };
 const LEARN = [["VA loans", "Get the most out of the benefit you earned."], ["Down payment assistance", "Programs that can cover your down payment and closing costs."], ["Equity Unlock", "Use your equity to buy before your current home sells."], ["Investment property financing", "Rentals, from your first to a whole portfolio."]];
 const getWho = () => { try { const w = new URLSearchParams(location.search).get("who"); return WHO.some((x) => x.id === w) ? w : ""; } catch { return ""; } };
 const getRef = () => { try { return new URLSearchParams(location.search).get("ref") || "SAVE-01"; } catch { return "SAVE-01"; } };
@@ -109,6 +110,19 @@ const mkCSS = () => `
 .sv-vid{position:relative;aspect-ratio:16/9;background:${C.panel};border:3px solid ${C.plum}}
 .sv-vid iframe,.sv-vid video{position:absolute;inset:0;width:100%;height:100%;border:0}
 .sv-plum{height:10px;background:${C.plum}}
+.rv{opacity:0;transform:translateY(22px);transition:opacity .6s cubic-bezier(.2,.7,.2,1),transform .6s cubic-bezier(.2,.7,.2,1);transition-delay:var(--d,0ms)}
+.rv.in{opacity:1;transform:none}
+.rv.rl{transform:translateX(-26px)}.rv.rl.in{transform:none}
+.sv-class{max-width:1000px;margin:0 auto;padding:36px 24px 24px}
+.sv-class h2{font:400 clamp(38px,8vw,64px)/1 ${ANTON};letter-spacing:.01em;text-transform:uppercase;color:${C.navy};margin:10px 0 0}
+.sv-class p{font:400 17px/1.5 'Public Sans',system-ui,sans-serif;color:${C.mute};margin:12px 0 0;max-width:560px}
+.sv-go{max-width:760px;margin:0 auto;padding:26px 20px 6px;text-align:center}
+.sv-go small{display:block;font:400 13px 'Public Sans',system-ui,sans-serif;color:${C.mute};margin-top:10px}
+.sv-choice .g{display:block;margin-top:7px;font:700 12px/1.4 ${SANS};letter-spacing:.04em;color:${C.maroon}}
+.sv-choice.on .g{color:#E3C9CC}
+.sv-ck{display:flex;gap:10px}.sv-ck i{font-style:normal;color:#E3C9CC}
+.sv-who{font:700 11px ${SANS};letter-spacing:.06em;color:${C.navy};white-space:nowrap}
+@media (prefers-reduced-motion:reduce){.rv,.rv.rl{opacity:1;transform:none;transition:none}}
 .sv-ben{background:${C.navy};color:#fff}
 .sv-ben-in{max-width:1000px;margin:0 auto;padding:8px 24px 16px}
 .sv-st{padding:20px 0;border-top:1px solid rgba(246,238,223,.28);display:flex;gap:16px}
@@ -147,9 +161,28 @@ const mkCSS = () => `
  .sv-hero-l{padding:48px 36px 48px 20px}
 }`;
 
+function Count({ text }) {
+  const m = String(text).match(/^(\D*)([\d,]+)(.*)$/);
+  const ref = React.useRef(null);
+  const target = m ? Number(m[2].replace(/,/g, "")) : 0;
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    if (!m) return;
+    let raf, t0;
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const run = () => { if (reduce) return setN(target); const tick = (t) => { if (!t0) t0 = t; const k = Math.min(1, (t - t0) / 1100); setN(Math.round(target * (1 - Math.pow(1 - k, 3)))); if (k < 1) raf = requestAnimationFrame(tick); }; raf = requestAnimationFrame(tick); };
+    if (!("IntersectionObserver" in window)) { setN(target); return; }
+    const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { io.disconnect(); run(); } }, { threshold:.6 });
+    ref.current && io.observe(ref.current);
+    return () => { io.disconnect(); cancelAnimationFrame(raf); };
+  }, [text]);
+  if (!m) return <span>{text}</span>;
+  return <span ref={ref}>{m[1]}{n.toLocaleString("en-US")}{m[3]}</span>;
+}
+
 function Ledger({ rows }) {
   return <div style={{ borderTop:`2px solid ${C.rule}`, marginTop:12 }}>{rows.map(([l, s, v, hot], i) => (
-    <div key={i} className={"sv-row" + (hot ? " hot" : "")}><div><div className="sv-lab lab">{l}</div><div className="sub">{s}</div></div><div className="val">{v}</div></div>))}</div>;
+    <div key={i} className={"rv sv-row" + (hot ? " hot" : "")} style={{ "--d":`${i * 140}ms` }}><div><div className="sv-lab lab">{l}</div><div className="sub">{s}</div></div><div className="val"><Count text={v}/></div></div>))}</div>;
 }
 
 const money = (v) => String(v || "").replace(/[^\d]/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -171,6 +204,16 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
   const [f, setF] = useState({ first:"", last:"", email:"", phone:"", city:"", state:"", zip:"", address:"", sendTo:"", note:"", consent:false });
   const [err, setErr] = useState(""); const [busy, setBusy] = useState(false); const [done, setDone] = useState(false);
   const top = React.useRef(null);
+  const [open, setOpen] = useState(() => { try { return !!new URLSearchParams(location.search).get("who") || parseInt(new URLSearchParams(location.search).get("step") || "0", 10) > 0; } catch { return false; } });
+  useEffect(() => {
+    const els = Array.from(document.querySelectorAll(".rv:not(.in)"));
+    if (!els.length) return;
+    if (!("IntersectionObserver" in window)) { els.forEach((e) => e.classList.add("in")); return; }
+    const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold:.15, rootMargin:"0px 0px -6% 0px" });
+    els.forEach((e) => io.observe(e));
+    return () => io.disconnect();
+  });
+  const begin = () => { setOpen(true); setTimeout(() => { try { top.current && top.current.scrollIntoView({ behavior:"smooth", block:"start" }); } catch {} }, 60); };
   const base = WHO.find((w) => w.id === who);
   const selling = /^Selling/.test(a.intent || "");
   const sellOnly = a.intent === "Selling my home";
@@ -222,7 +265,7 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
     <div className="sv"><style>{mkCSS()}</style>
       <div className="sv-top"><div>
         <img src="/brand/gf-logo-ink.png" alt="Graham Financial" style={{ height:46, width:"auto" }}/>
-        <div style={{ display:"flex", alignItems:"center", gap:14 }}>{agent && agent.logo_url && <img src={agent.logo_url} alt={agent.brokerage || agent.name} style={{ maxHeight:38, maxWidth:96, width:"auto", objectFit:"contain" }}/>}<ApplyNow/></div>
+        <div style={{ display:"flex", alignItems:"center", gap:14 }}>{agent && agent.logo_url && <img src={agent.logo_url} alt={agent.brokerage || agent.name} style={{ maxHeight:38, maxWidth:96, width:"auto", objectFit:"contain" }}/>}<WhoLink label="Who is Joshua?" style={{ color:C.navy, fontSize:11, whiteSpace:"nowrap" }}/><ApplyNow/></div>
       </div></div>
       <section className="sv-hero">
         <div className="sv-hero-l">
@@ -248,11 +291,17 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
         <Ledger rows={WHY}/>
         <p style={{ font:`600 18px/1.4 ${SERIF}`, margin:"14px 0 0" }}>One bank gives you a price. I give you options.</p>
       </section>}
-      {!done && (!who || who === "buyer") && <section className="sv-ben" style={{ marginTop:30 }}><div className="sv-ben-in">
-        <div className="sv-st"><div><div className="tg">The class</div><div className="tt">What you learn</div>{LEARN.map(([t, d]) => <div className="li" key={t}><b>{t}</b><span>{d}</span></div>)}</div></div>
-        <div className="sv-st"><div><div className="tg">Free when you finish</div><div className="tt">Yours free when you finish the class</div><div className="ck">{PERKS.map((p) => <div key={p}>✓ {p}</div>)}</div></div></div>
+      {!done && <section className="sv-class">
+        <div className="sv-k rv">The free class</div>
+        <h2 className="rv" style={{ "--d":"80ms" }}>Join the free 15-minute SMART Buyer class</h2>
+        <p className="rv" style={{ "--d":"160ms" }}>Finish it, and these are yours, free.</p>
+      </section>}
+      {!done && <section className="sv-ben"><div className="sv-ben-in">
+        <div className="sv-st"><div><div className="tg rv">Free when you finish</div><div className="ck">{PERKS.map((p, i) => <div key={p} className="rv rl sv-ck" style={{ "--d":`${i * 120}ms` }}><i>✓</i><span>{p}</span></div>)}</div></div></div>
+        <div className="sv-st"><div><div className="tg rv">The class</div><div className="tt rv" style={{ "--d":"60ms" }}>What you learn</div>{LEARN.map(([t, d], i) => <div className="li rv rl" key={t} style={{ "--d":`${i * 130}ms` }}><b>{t}</b><span>{d}</span></div>)}</div></div>
       </div></section>}
-      <main className="sv-main">
+      {!done && !open && <div className="sv-go rv"><button type="button" className="sv-btn" onClick={begin}>Join the class waitlist</button><small>A few quick questions. I text you the day it's live.</small></div>}
+      <main className="sv-main" style={!done && !open ? { display:"none" } : undefined}>
 
           {done ? (
             <div style={{ marginTop:30 }}>
@@ -290,15 +339,14 @@ export default function SaveMyInfo({ agent = null, lockWho = "" }) {
           ) : (<>
             <div ref={top} style={{ scrollMarginTop:16 }}/>
             <div className="sv-start"><div className="n">1</div><div><div className="tg">Start here</div>
-              <div className="tt">{!who || who === "buyer" ? "Join the free 15-minute SMART Buyer class" : "Tell me where you are"}</div>
-              <div className="tx">{!who || who === "buyer" ? "Answer a few quick questions and you are on the list. I text you the day it is live." : "A few quick questions so I can point you the right way."}</div></div></div>
+              <div className="tt">{!flow ? "What brings you here?" : who === "buyer" ? "Join the class waitlist" : "Tell me where you are"}</div>
+              <div className="tx">{!flow ? "Pick one. Each comes with a free tool." : who === "buyer" ? "Answer a few quick questions and you are on the list. I text you the day it is live." : "A few quick questions so I can point you the right way."}</div></div></div>
             <hr className="sv-rule" style={{ marginTop:16 }}/>
 
             {!flow && <div className="sv-anim">
-              <div className="sv-lab" style={{ marginTop:22 }}>What brings you here?</div>
-              <div style={{ marginTop:6 }}>{WHO.map((w) => (
+                            <div style={{ marginTop:6 }}>{WHO.map((w) => (
                 <button key={w.id} type="button" className="sv-choice" onClick={() => pick(w.id)}>
-                  <span><span className="t">{w.label}</span><span className="s">{w.sub}</span></span><span className="dot"/>
+                  <span><span className="t">{w.label}</span><span className="s">{w.sub}</span><span className="g">{GETS[w.id]}</span></span><span className="dot"/>
                 </button>))}</div>
             </div>}
 
