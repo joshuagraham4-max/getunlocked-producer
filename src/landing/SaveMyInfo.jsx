@@ -157,6 +157,10 @@ const mkCSS = () => `
 .sv-btn:disabled{opacity:.6}
 .sv-fine{font:400 11.5px/1.5 ${SANS};color:${C.mute}}
 @media(min-width:760px){
+ .sv-ben-in{display:grid;grid-template-columns:1fr 1fr;gap:0 64px;padding:20px 24px 28px}
+ .sv-ben-in .sv-st{border-top:0;padding:14px 0}
+ .sv-ben-in .sv-st+.sv-st{border-left:1px solid rgba(246,238,223,.28);padding-left:64px}
+ .sv-ben-in .sv-st .ck{font-size:18px}
  .sv-photos{width:300px}.sv-photos .a{height:260px}.sv-photos .cap{font-size:12px;padding:0 16px}
  .sv-hero-l{padding:48px 36px 48px 20px}
 }`;
