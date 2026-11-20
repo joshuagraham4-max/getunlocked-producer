@@ -179,6 +179,7 @@ export default function GroupsTab({ userId, onContact, mode = "marketing" }) {
 
       {view === "tools" && (
         <div style={{display:"grid", gap:14}}>
+          <LinkGuide card={card} btnG={btnG}/>
           {TOOLS.map((x) => (
             <div key={x.name} style={{...card, padding:"14px 16px", display:"flex", gap:12, alignItems:"center", flexWrap:"wrap"}}>
               <div style={{flex:"1 1 260px"}}><div style={{fontFamily:F.cond, fontWeight:800, fontSize:18}}>{x.name}</div><div style={{fontSize:13, color:C.mid}}>{x.note}</div><div style={{fontFamily:F.mono, fontSize:11, color:C.light, wordBreak:"break-all"}}>{x.url}</div></div>
@@ -213,6 +214,33 @@ export default function GroupsTab({ userId, onContact, mode = "marketing" }) {
             </div>))}
         </div>
       )}
+    </div>
+  );
+}
+
+// "Which link is which": the link / who it's for table, behind one button on Tools → Links.
+const LINK_GUIDE = [
+  ["/save", "Your main consumer page (buyers, homeowners, investors)"],
+  ["/a/<name>", "Agent: their co-branded lead page"],
+  ["/e/<private key>", "Agent: their private edit link"],
+  ["/d/<name>", "Agent: their scenario desk"],
+  ["/p/<name>", "Planner or attorney: the page you send them"],
+  ["/scenario-desk?ref=PTR-<name>", "Planner or attorney: their tailored desk (opens from the button on their page)"],
+  ["/pl/<name>", "Planner or attorney: their client page to share or boost; leads buzz them and you"],
+  ["/pe/<private key>", "Planner or attorney: their private edit link (photo, logo, info, alert code)"],
+];
+function LinkGuide({ card, btnG }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{...card, padding:"14px 16px"}}>
+      <button onClick={() => setOpen(!open)} style={btnG}>{open ? "Hide link guide" : "Which link is which?"}</button>
+      {open && <>
+        <table style={{width:"100%", borderCollapse:"collapse", marginTop:12, fontSize:14}}>
+          <thead><tr><th style={{textAlign:"left", padding:"6px 8px", borderBottom:"2px solid #1c1a17"}}>Link</th><th style={{textAlign:"left", padding:"6px 8px", borderBottom:"2px solid #1c1a17"}}>Who it's for</th></tr></thead>
+          <tbody>{LINK_GUIDE.map(([l, w]) => <tr key={l}><td style={{padding:"8px", borderBottom:"1px solid #e0d8cc", fontFamily:"'DM Mono',monospace", fontSize:12, whiteSpace:"nowrap"}}>{l}</td><td style={{padding:"8px", borderBottom:"1px solid #e0d8cc"}}>{w}</td></tr>)}</tbody>
+        </table>
+        <div style={{fontSize:12, color:"#6b6358", marginTop:8}}>You never type these. Each one comes from the copy buttons on that person's contact.</div>
+      </>}
     </div>
   );
 }
