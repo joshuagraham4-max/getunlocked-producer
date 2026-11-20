@@ -165,7 +165,8 @@ function Today({ userId, campaign }) {
     const ok = await posts.save(userId, day, id, n[id], n); setSaveErr(!ok);
   };
   const v = plan.video.video;
-  const count = ["am", "pm", "video"].filter((k) => done[pfx + k]).length;
+  const keys = [...plan.slots.map((s) => s.slot.id), "video"];
+  const count = keys.filter((k) => done[pfx + k]).length;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
@@ -174,10 +175,16 @@ function Today({ userId, campaign }) {
         <div style={{ fontFamily: F.display, fontWeight: 800, fontSize: 20 }}>{date.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}</div>
         <button style={ghost} onClick={() => setOffset(offset + 1)} aria-label="Next day">›</button>
         {offset !== 0 && <button style={ghost} onClick={() => setOffset(0)}>Today</button>}
-        <span style={{ marginLeft: "auto" }}><Tag tone={count === 3 ? "good" : "neutral"}>{count}/3 done</Tag></span>
+        <span style={{ marginLeft: "auto" }}><Tag tone={count === keys.length ? "good" : "neutral"}>{count}/{keys.length} done</Tag></span>
         {saveErr && <span style={{ width: "100%", fontSize: 13, color: C.warn }}>Saved on this device only. The database didn't accept it; check that the smart_money_posts table exists.</span>}
       </div>
 
+      {!bond && plan.slots.length === 0 && (
+        <section style={{ ...panel, padding: "12px 16px" }}>
+          <div style={{ fontWeight: 700 }}>No flyer today.</div>
+          <div style={{ fontSize: 14, color: C.muted }}>Flyers are one every few days now{plan.nextFlyer ? `; next one ${plan.nextFlyer.toLocaleDateString("en-US", { weekday: "long" })}` : ""}. Today is the video and the conversation post. Want one anyway? Pick it from the Flyers tab.</div>
+        </section>
+      )}
       {plan.slots.map((s) => (
         <section key={s.slot.id} style={panel}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 14 }}>
@@ -210,7 +217,7 @@ function Today({ userId, campaign }) {
         <div style={{ fontStyle: "italic", marginBottom: 10 }}>Hook: “{v.hook}”</div>
         <ol style={{ margin: "0 0 10px 18px", padding: 0, lineHeight: 1.6 }}>{v.points.map((p) => <li key={p}>{p}</li>)}</ol>
         <div><b>Close:</b> {v.cta}</div>
-        <div style={{ fontSize: 12, color: C.muted, marginTop: 10 }}>Post to Skool as a lesson; cut a short version for Reels / FB.</div>
+        <div style={{ fontSize: 12, color: C.muted, marginTop: 10 }}>Talk it, don't read it: open with the hook, hit the points in your own words. Post to Facebook (and Skool if it fits). The morning run also brings a conversational video topic that matches that day's post.</div>
       </section>
     </div>
   );

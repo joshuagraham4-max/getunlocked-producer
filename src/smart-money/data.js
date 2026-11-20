@@ -1426,16 +1426,24 @@ export function planFor(date) {
     WEEK_PLAN[wd].forEach((a) => (a === "investor" ? inv++ : con++));
   }
   const wd = date.getDay();
-  const out = WEEK_PLAN[wd].map((aud, i) => {
+  const all = WEEK_PLAN[wd].map((aud, i) => {
     const pool = pools[aud];
     const n = aud === "investor" ? inv++ : con++;
     const card = pool[((n % pool.length) + pool.length) % pool.length];
     const weekend = wd === 0 || wd === 6;
     return { slot: SLOTS[i], audience: aud, card, copy: weekend ? "long" : i === 0 ? "short" : "long", style: weekend ? "Educational" : "Program" };
   });
-  const morningInvestor = out.find((s) => s.audience === "investor") || out[0];
-  return { slots: out, video: morningInvestor.card };
+  // Nov 20: flyers drop to one every FLYER_EVERY days (Joshua posts them by hand); video stays daily.
+  // Flyer days alternate investor / consumer.
+  const flyerDay = ((di - epoch) % FLYER_EVERY + FLYER_EVERY) % FLYER_EVERY === 0;
+  const pick = Math.floor((di - epoch) / FLYER_EVERY) % 2 === 0 ? "investor" : "consumer";
+  const out = flyerDay ? [all.find((s) => s.audience === pick) || all[0]].map((s) => ({ ...s, slot: SLOTS[0] })) : [];
+  const vids = CARDS.filter((c) => c.campaign !== "bond" && c.video);
+  const video = vids.length ? vids[((di - epoch) % vids.length + vids.length) % vids.length] : all[0].card;
+  const next = new Date(date); next.setDate(next.getDate() + (FLYER_EVERY - ((di - epoch) % FLYER_EVERY + FLYER_EVERY) % FLYER_EVERY) % FLYER_EVERY);
+  return { slots: out, video, nextFlyer: flyerDay ? null : next };
 }
+export const FLYER_EVERY = 4;
 
 // ---- Message bank: core Smart Money messages in Joshua's voice. Use as hooks, captions, video openers.
 export const MESSAGES = [
