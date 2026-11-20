@@ -38,14 +38,17 @@ export function placeAgent(r) {
 }
 
 export default function AgentCoverage({ rows, onContact }) {
-  const [info, setInfo] = useState({}); const [st, setSt] = useState("ALL"); const [showEmpty, setShowEmpty] = useState(true);
+  const [info, setInfo] = useState({}); const [pages, setPages] = useState({}); const [onlyMissing, setOnlyMissing] = useState(false); const [st, setSt] = useState("ALL"); const [showEmpty, setShowEmpty] = useState(true);
   const replied = useMemo(() => rows.filter((r) => r.status === "replied")
     .sort((a, b) => RATING_ORDER[agentRating(a).grade] - RATING_ORDER[agentRating(b).grade] || (a.full_name || "").localeCompare(b.full_name || "")), [rows]);
   const ids = useMemo(() => replied.map((r) => r.contact_id).filter(Boolean).join(","), [replied]);
   useEffect(() => {
     const list = ids ? ids.split(",") : []; if (!list.length) { setInfo({}); return; }
-    supabase.from("contacts").select("id,phone,phone_2,email,email_2").in("id", list).then(({ data }) => {
+    supabase.from("contacts").select("id,phone,phone_2,email,email_2,tags").in("id", list).then(({ data }) => {
       const m = {}; (data || []).forEach((c) => { m[c.id] = c; }); setInfo(m);
+    });
+    supabase.from("agent_pages").select("contact_id,slug,active").in("contact_id", list).then(({ data }) => {
+      const m = {}; (data || []).forEach((p) => { m[p.contact_id] = p; }); setPages(m);
     });
   }, [ids]);
 
@@ -59,7 +62,10 @@ export default function AgentCoverage({ rows, onContact }) {
   // Placement goes by the area words only (the state field is ignored, since it defaults to FL for new rows).
   // The Other column catches areas the word list does not know.
   const cols = (st === "ALL" ? REGIONS : REGIONS.filter((g) => g.st === st)).concat([OTHER]);
-  const mine = replied;
+  const missing = (r) => { const ct = contactOf(r); return !ct.phone || !ct.email; };
+  const invited = (r) => ((info[r.contact_id] || {}).tags || []).includes("page invite sent");
+  const nMissing = replied.filter(missing).length, nNoPage = replied.filter((r) => !pages[r.contact_id]).length, nInvited = replied.filter(invited).length;
+  const mine = onlyMissing ? replied.filter(missing) : replied;
   const byCol = {}; cols.forEach((g) => { byCol[g.k] = []; });
   mine.forEach((r) => { const keys = placeAgent(r).filter((k) => byCol[k]); (keys.length ? keys : ["other"]).forEach((k) => byCol[k].push(r)); });
   const shown = cols.filter((g) => showEmpty || byCol[g.k].length);
@@ -73,7 +79,10 @@ export default function AgentCoverage({ rows, onContact }) {
         <label style={{ fontFamily:F.mono, fontSize:11, color:C.mid, display:"flex", gap:6, alignItems:"center", marginLeft:8 }}>
           <input type="checkbox" checked={showEmpty} onChange={(e) => setShowEmpty(e.target.checked)}/> show empty areas (the gaps)
         </label>
-        <span style={{ fontFamily:F.mono, fontSize:11, color:C.light }}>{mine.length} agents who replied · updates itself from their areas</span>
+        <label style={{ fontFamily:F.mono, fontSize:11, color:C.amber, display:"flex", gap:6, alignItems:"center", marginLeft:8 }}>
+          <input type="checkbox" checked={onlyMissing} onChange={(e) => setOnlyMissing(e.target.checked)}/> only missing phone or email
+        </label>
+        <span style={{ fontFamily:F.mono, fontSize:11, color:C.light }}>{replied.length} replied · {nMissing} missing info · {nNoPage} without a page · {nInvited} invited to their page</span>
       </div>
       <div style={{ display:"flex", gap:10, overflowX:"auto", paddingBottom:10, alignItems:"flex-start" }}>
         {shown.map((g) => { const list = byCol[g.k]; return (
@@ -89,7 +98,11 @@ export default function AgentCoverage({ rows, onContact }) {
                 <div style={{ fontFamily:F.mono, fontSize:10, color:C.mid }}>{r.brokerage || ""}</div>
                 {ct.phone ? <a href={`tel:${digits(ct.phone)}`} style={{ display:"block", fontFamily:F.mono, fontSize:12, color:C.ink, textDecoration:"none", marginTop:2 }}>{fmtPhone(ct.phone)}</a> : null}
                 {ct.email ? <a href={`mailto:${ct.email}`} style={{ display:"block", fontFamily:F.mono, fontSize:11, color:C.green, textDecoration:"none", wordBreak:"break-all" }}>{ct.email}</a> : null}
-                {!ct.phone && !ct.email ? <div style={{ fontFamily:F.mono, fontSize:10, color:C.amber }}>no contact info yet</div> : null}
+                {!ct.phone && !ct.email ? <div style={{ fontFamily:F.mono, fontSize:10, color:C.amber }}>no contact info yet</div>
+                  : (!ct.phone || !ct.email) ? <div style={{ fontFamily:F.mono, fontSize:10, color:C.amber }}>missing {!ct.phone ? "phone" : "email"}</div> : null}
+                <div style={{ fontFamily:F.mono, fontSize:10, color: invited(r) ? C.green : C.light, marginTop:2 }}>
+                  {pages[r.contact_id] ? <a href={`/a/${pages[r.contact_id].slug}`} target="_blank" rel="noreferrer" style={{ color:"inherit" }}>page</a> : "no page yet"}{invited(r) ? " · invited" : ""}
+                </div>
                 {g.k === "other" ? <div style={{ fontFamily:F.mono, fontSize:10, color:C.light, marginTop:2 }}>{r.area ? `area: ${r.area}` : "area not given yet"}</div> : null}
               </div>); })}
           </div>); })}
