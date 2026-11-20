@@ -54,7 +54,15 @@ const CSS = `
 .pp-step .n{font:400 40px/1 ${ANTON};color:${C.plum}}
 .pp-step .t{font:800 17px ${SANS};color:${C.navy};margin:10px 0 6px}
 .pp-step .x{font-size:15px;line-height:1.55;color:${C.muted}}
-.pp-desk{background:${C.navy};color:#fff;padding:40px 24px;border-bottom:6px solid ${C.plum};text-align:center;margin-top:44px}
+.pp-desk{background:${C.navy};color:#fff;padding:40px 24px;border-bottom:6px solid ${C.plum};text-align:center}
+.pp-tick{background:#08111C;border-top:6px solid ${C.plum};border-bottom:1px solid rgba(217,165,102,.35);overflow:hidden;white-space:nowrap;margin-top:44px}
+.pp-tick-in{display:inline-flex;padding:13px 0;animation:pptick 38s linear infinite}
+.pp-tick:hover .pp-tick-in{animation-play-state:paused}
+.pp-tick span{font:700 12px ${SANS};letter-spacing:.16em;text-transform:uppercase;color:#C9D6E3;padding:0 26px;border-right:1px solid rgba(201,214,227,.22)}
+.pp-tick .pp-tick-dup{padding:0;border:0}
+.pp-tick b{color:${C.gold};font-weight:800;margin-left:8px}
+.pp-tick i{font-style:normal;color:${C.rose}}
+@keyframes pptick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 .pp-desk h2{color:#fff}.pp-desk .lead{color:#C9D6E3}
 .pp-btn{font:400 20px ${ANTON};letter-spacing:.08em;text-transform:uppercase;background:${C.maroon};color:#fff;border:0;border-bottom:4px solid ${C.plum};border-radius:2px;padding:16px 26px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;min-height:54px}
 .pp-btn.ghost{background:#fff;color:${C.maroon};border:2px solid ${C.maroon};border-bottom:4px solid ${C.plum}}
@@ -62,7 +70,7 @@ const CSS = `
 .rv{opacity:0;transform:translateY(22px);transition:opacity .6s cubic-bezier(.2,.7,.2,1),transform .6s cubic-bezier(.2,.7,.2,1);transition-delay:var(--d,0ms)}
 .rv.in{opacity:1;transform:none}
 @media (max-width:640px){.pp-row{grid-template-columns:1fr}.pp-row .m{border-left:0;padding-top:0}.pp-row .w{padding-bottom:6px}.pp-head{display:none}.pp-photos{width:118px}.pp-hero-l{padding:26px 16px}}
-@media (prefers-reduced-motion:reduce){.pp-ln,.pp-bar,.pp-photos .jbox,.pp-photos .jbox img,.pp-photos .cap{animation:none}.rv{opacity:1;transform:none;transition:none}}
+@media (prefers-reduced-motion:reduce){.pp-tick{white-space:normal}.pp-tick-in{animation:none;flex-wrap:wrap;justify-content:center}.pp-tick .pp-tick-dup{display:none !important}.pp-ln,.pp-bar,.pp-photos .jbox,.pp-photos .jbox img,.pp-photos .cap{animation:none}.rv{opacity:1;transform:none;transition:none}}
 `;
 
 export default function PartnerPage() {
@@ -77,6 +85,8 @@ export default function PartnerPage() {
     els.forEach((e) => io.observe(e));
     return () => io.disconnect();
   }, [p]);
+  const [rates, setRates] = useState(null);
+  useEffect(() => { fetch("/api/rates").then((r) => r.ok ? r.json() : {}).then((d) => setRates(d && d.r30 ? d : {})).catch(() => setRates({})); }, []);
   if (p === undefined) return <div style={{ minHeight:"100vh", background:C.cream }}/>;
 
   const type = p ? p.type : "planner";
@@ -133,6 +143,7 @@ export default function PartnerPage() {
         </div>
       </section>
 
+      <RateTicker rates={rates}/>
       <section className="pp-desk">
         <div className="pp-sec" style={{ padding:0 }}>
           <div className="pp-k rv" style={{ color:C.rose }}>Your private line</div>
@@ -158,6 +169,23 @@ export default function PartnerPage() {
         Joshua Graham, loan originator, NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity. General guidance only, not a loan approval or commitment to lend.
       </p>
       <SiteFooter max={1000}/>
+    </div>
+  );
+}
+
+// Market strip above the private line: Freddie Mac national averages (market stats, not an offer), then "ask me" for the rest.
+function RateTicker({ rates }) {
+  const wk = rates && rates.date ? new Date(rates.date + "T12:00:00").toLocaleDateString("en-US", { month:"short", day:"numeric" }) : "";
+  const items = [
+    ...(rates && rates.r30 ? [<>30-yr fixed · national avg<b>{rates.r30.toFixed(2)}%</b></>, <>15-yr fixed · national avg<b>{rates.r15.toFixed(2)}%</b></>] : []),
+    <>Conventional · FHA · VA · DSCR · Bank statement</>,
+    <i>Ask me for today's wholesale rate</i>,
+    ...(wk ? [<>Freddie Mac PMMS · week of {wk}</>] : []),
+  ];
+  const row = (k) => items.map((x, i) => <span key={k + i}>{x}</span>);
+  return (
+    <div className="pp-tick" aria-label="Mortgage rate market strip">
+      <div className="pp-tick-in">{row("a")}<span className="pp-tick-dup" style={{ display:"contents" }}>{row("b")}</span></div>
     </div>
   );
 }
