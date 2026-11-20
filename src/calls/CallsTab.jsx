@@ -162,6 +162,16 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
   };
   // Deposits: every contact attempt (calls, voicemails, texts, emails, handwritten notes) before asking for business.
   const [deposits, setDeposits] = useState(null); const [depBump, setDepBump] = useState(0); const [noteBump, setNoteBump] = useState(0);
+  // Bounced (Joshua, Nov 20): same as the Emails desk. Off the email sequence, bounce on the timeline, note line; keeps them on calls to get a new email.
+  const bounced = async () => { if (!sel?.email) return; const t = today();
+    await supabase.from("contact_touches").insert({ user_id:userId, contact_id:sel.id, channel:"email", outcome:"bounced", note:sel.email });
+    const fields = { email_bad:true, email_step:0, email_next:null, contact_note:[sel.contact_note, `${t} · email bounced: ${sel.email}`].filter(Boolean).join("\n") };
+    const { data } = await supabase.from("contacts").update(fields).eq("id", sel.id).select().single();
+    setContacts((cs) => cs.map((x) => x.id === sel.id ? (data || { ...x, ...fields }) : x)); setNoteBump((n) => n + 1); };
+  // A logged call / email / text / meeting marks them contacted today; a plain note doesn't.
+  const noteSaved = async (kind) => { setNoteBump((n) => n + 1); if (!sel || kind === "note" || sel.last_contacted === today()) return;
+    const { data } = await supabase.from("contacts").update({ last_contacted:today() }).eq("id", sel.id).select().single();
+    if (data) setContacts((cs) => cs.map((x) => x.id === sel.id ? data : x)); };
   useEffect(() => { if (!sel?.id) return; let live = true;
     supabase.from("contact_touches").select("id", { count:"exact", head:true }).eq("contact_id", sel.id).neq("channel", "update")
       .then(({ count }) => { if (live) setDeposits({ id:sel.id, n:count || 0 }); });
@@ -240,9 +250,6 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
           <span style={{fontFamily:F.mono, fontSize:12, fontWeight:700, color:col, background:bg, padding:"4px 10px", borderRadius:12}}>{txt}</span>
           <button onClick={logCard} style={{...btn, padding:"3px 10px", fontSize:12}}>+ Handwritten note</button>
         </div>); })()}
-      <LogNote key={sel.id} userId={userId} contactId={sel.id} onSaved={() => setNoteBump((n) => n + 1)} />
-      <ContactHistory userId={userId} contactId={sel.id} bump={depBump + calledToday.length + noteBump} />
-      <div style={{height:10}}/>
       {pinned === sel.id && <div style={{fontFamily:F.mono, fontSize:11, color:C.amber, marginBottom:8}}>Not on today's call list. Opened from search.</div>}
       <div style={{display:"flex", justifyContent:"space-between", gap:16, flexWrap:"wrap"}}>
         <div>
@@ -254,7 +261,8 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
         </div>
         <div style={{fontFamily:F.mono, fontSize:13, textAlign:"right", lineHeight:1.6}}>
           <a href={`tel:${digits(sel.phone)}`} style={{color:C.ink, textDecoration:"none"}}>{sel.phone}</a><br/>
-          <span style={{color:C.mid}}>{sel.email || ""}</span>
+          {sel.email && <span style={{color:C.mid, display:"inline-flex", alignItems:"center", gap:6}}>{sel.email_bad ? <s>{sel.email}</s> : sel.email}
+            {sel.email_bad ? <span style={{fontSize:11, color:C.amber}}>bounced</span> : <button onClick={bounced} style={{...btn, padding:"2px 8px", fontSize:11}}>Bounced</button>}</span>}
         </div>
       </div>
       {reason && (
@@ -340,6 +348,11 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
         </>
       )}
       <QuickUpdate key={sel.id} userId={userId} c={sel} setContacts={setContacts} onLoansChanged={() => loadRadarData(userId).then(setData)}/>
+      {/* Notes live at the bottom (Joshua, Nov 20): one line to log, newest history under it. Own keyed wrapper so a new person always gets a fresh box. */}
+      <div key={`notes-${sel.id}`}>
+        <LogNote userId={userId} contactId={sel.id} onSaved={noteSaved} />
+        <ContactHistory userId={userId} contactId={sel.id} bump={depBump + calledToday.length + noteBump} preview={2} />
+      </div>
     </div>
   );
 
