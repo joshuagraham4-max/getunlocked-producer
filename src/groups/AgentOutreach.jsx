@@ -26,7 +26,7 @@ export default function AgentOutreach({ userId, onContact }) {
   const t = localDay();
   const load = useCallback(async () => {
     const { data, error } = await supabase.from("agent_outreach").select("*").order("created_at");
-    if (error) setMsg(error.message); setRows(data || []);
+    if (error) setMsg(error.message); setRows((data || []).filter((r) => !r.audience || r.audience === "agent"));
   }, []);
   useEffect(() => { if (userId) load(); }, [userId, load]);
 
