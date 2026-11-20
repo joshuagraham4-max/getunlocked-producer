@@ -102,7 +102,8 @@ export default function PartnerPage() {
           <div style={{ ...eyebrow, color:C.rose }}>Your private line</div>
           <h2 style={{ ...h2, color:"#fff" }}>{t.deskTitle}</h2>
           <p style={{ fontSize:17, lineHeight:1.6, color:"#C9D6E3", margin:"10px 0 20px", maxWidth:620 }}>{t.deskSub}</p>
-          <a href={desk} style={btn}>Register for my desk</a>
+          <div style={{ fontSize:15, color:"#E3C9CC", marginBottom:12 }}>Complete this once so I can tailor your desk to you.</div>
+          <a href={desk} style={btn}>Access your tailored scenario desk</a>
           <div style={{ fontSize:14, color:"#C9D6E3", marginTop:14 }}>Rather talk? Text or call {BRAND.phone}.</div>
         </section>
 
