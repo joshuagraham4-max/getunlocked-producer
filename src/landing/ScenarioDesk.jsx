@@ -6,6 +6,7 @@ import { supabase } from "../supabase.js";
 import { BRAND } from "../smart-money/data.js";
 import { DESK_VIDEO, DESK_VIDEO_TITLE, embedFor } from "./saveVideo.js";
 import { NoSpam } from "./BrandBar.jsx";
+import { findPartner, PARTNER_TAGS, PARTNER_PLACEHOLDER } from "./partners.js";
 import { ApplyNow, SiteFooter, WhoLink, LogoLink, TopButtons } from "./SiteBits.jsx";
 
 const C = { maroon:"#4A111C", navy:"#0E1B2A", gold:"#D9A566", plum:"#7E4B6F", goldDk:"#4A111C", cream:"#F6EEDF", ink:"#0E1B2A", muted:"#4A5568", line:"#E3D6BF", card:"#FFFFFF", btn:"#4A111C", bad:"#B3261E", chip:"#0E1B2A" };
@@ -22,15 +23,20 @@ const btnS = { fontFamily:F.anton, fontWeight:400, fontSize:20, letterSpacing:"0
 const btnO = { ...btnS, background:"#fff", color:C.maroon, border:`2px solid ${C.maroon}`, borderBottom:`4px solid ${C.plum}` };
 const chipS = (on) => ({ font:"inherit", fontSize:15, fontWeight:700, padding:"10px 18px", borderRadius:2, cursor:"pointer", minHeight:46, border:`1.5px solid ${on ? C.navy : C.line}`, background:on ? C.navy : "#fff", color:on ? "#fff" : C.ink });
 
+// Partner mode (planners, attorneys): ?ref=PTR-<slug>&for=planner|attorney. Plain-language tags, no lending terms.
+const getAud = () => { try { const ref = getRef(); if (!/^PTR-/i.test(ref)) return null; const p = findPartner(ref.slice(4)); const f = new URLSearchParams(location.search).get("for"); return { p, type: f === "attorney" || f === "planner" ? f : (p ? p.type : "planner") }; } catch { return null; } };
+
 export default function ScenarioDesk() {
+  const aud = getAud();
   const [v, setV] = useState({ first:"", last:"", phone:"", email:"", brokerage:"", state:"", stage:"", reach:"Text", scenario:"", consent:false });
   const [tags, setTags] = useState([]); const [err, setErr] = useState(""); const [busy, setBusy] = useState(false); const [done, setDone] = useState(false);
-  const [ag, setAg] = useState(null); const [edit, setEdit] = useState(false); const [rate, setRate] = useState(null);
+  const [ag, setAg] = useState(aud && aud.p ? { name: aud.p.first, brokerage: aud.p.firm } : null); const [edit, setEdit] = useState(false); const [rate, setRate] = useState(null);
   const set = (k) => (e) => setV({ ...v, [k]: e.target.type === "checkbox" ? e.target.checked : e.target.value });
   const tog = (t) => setTags((x) => (x.includes(t) ? x.filter((y) => y !== t) : [...x, t]));
 
   // Per-agent link: pull their name, brokerage and phone from their page (the same public fields their lander shows).
   useEffect(() => {
+    if (aud && aud.p) setV((x) => ({ ...x, first: x.first || aud.p.first, brokerage: x.brokerage || aud.p.firm }));
     const ref = getRef(); if (!/^AGT-/i.test(ref)) return;
     (async () => {
       try {
@@ -48,7 +54,7 @@ export default function ScenarioDesk() {
   const asOfTxt = rate ? new Date(rate.as_of + "T12:00:00").toLocaleDateString("en-US", { month:"short", day:"numeric" }) : "";
 
   const digits = v.phone.replace(/\D/g, "");
-  const known = !!(ag && digits.length >= 10 && v.first.trim() && !edit);
+  const known = !!(ag && !aud && digits.length >= 10 && v.first.trim() && !edit);
   const showEmail = !known || v.reach === "Email";
   const vid = embedFor(DESK_VIDEO);
   const first = v.first.trim();
@@ -64,10 +70,10 @@ export default function ScenarioDesk() {
     if (!v.consent) miss.push("your consent to be contacted");
     if (miss.length) return setErr("Please add " + miss.join(", ") + ".");
     setBusy(true);
-    const summary = `Scenario from ${v.first.trim()}${v.brokerage ? ` (${v.brokerage.trim()})` : ""}${v.stage ? ` · ${v.stage}` : ""}${tags.length ? ` · ${tags.join(", ")}` : ""} · reply by ${v.reach}: ${v.scenario.trim().slice(0, 1500)}`;
+    const summary = `${aud ? (aud.type === "attorney" ? "[Attorney] " : "[Planner] ") : ""}Scenario from ${v.first.trim()}${v.brokerage ? ` (${v.brokerage.trim()})` : ""}${v.stage ? ` · ${v.stage}` : ""}${tags.length ? ` · ${tags.join(", ")}` : ""} · reply by ${v.reach}: ${v.scenario.trim().slice(0, 1500)}`;
     const lead = { first_name:v.first.trim(), last_name:v.last.trim() || null, email:v.email.trim() || null, phone, property_state:v.state.trim().toUpperCase().slice(0, 2) || null,
       consent:true, ref:getRef(), source:"scenario-desk", page_url:location.href.slice(0, 500), user_agent:navigator.userAgent.slice(0, 300),
-      answers:{ summary, brokerage:v.brokerage.trim(), stage:v.stage, tags, reach:v.reach, scenario:v.scenario.trim().slice(0, 3000) } };
+      answers:{ summary, partner_type: aud ? aud.type : null, brokerage:v.brokerage.trim(), stage:v.stage, tags, reach:v.reach, scenario:v.scenario.trim().slice(0, 3000) } };
     const { error } = await supabase.from("calculator_leads").insert(lead);
     setBusy(false);
     if (error) return setErr("We couldn't send that just now. Try again, or text Joshua at " + BRAND.phone + ".");
@@ -78,7 +84,7 @@ export default function ScenarioDesk() {
       <div style={{ background:"#fff", borderBottom:`4px solid ${C.plum}` }}>
         <div style={{ maxWidth:860, margin:"0 auto", padding:"12px 18px", display:"flex", flexWrap:"wrap", alignItems:"center", justifyContent:"space-between", gap:"10px 12px" }}>
           <LogoLink/>
-          <TopButtons/>
+          <TopButtons hideAgent={!!aud}/>
         </div>
       </div>
       <div style={{ background:C.maroon, color:"#F6ECE9", borderBottom:`10px solid ${C.plum}` }}>
@@ -87,7 +93,7 @@ export default function ScenarioDesk() {
             <div style={{ fontFamily:F.display, fontWeight:700, fontSize:11, letterSpacing:"0.22em", color:"#E3C9CC" }}>PRIVATE LINE · JOSHUA'S DESK</div>
             <h1 style={{ fontFamily:F.anton, fontWeight:400, fontSize:"clamp(44px, 11vw, 72px)", lineHeight:1.02, letterSpacing:"0.01em", textTransform:"uppercase", margin:"12px 0", color:"#fff" }}>{first && ag ? `Welcome to my desk, ${first}.` : "Welcome to my desk."}</h1>
             <div style={{ width:40, height:4, background:C.gold, marginBottom:14 }}/>
-            <p style={{ fontSize:18, lineHeight:1.55, color:"#E3C9CC", margin:0, maxWidth:540 }}>Odd income, credit dings, tight timing, a sell-and-buy that has to line up. Put it on my desk in plain words. I shop many banks and give you options. No client details needed.</p>
+            <p style={{ fontSize:18, lineHeight:1.55, color:"#E3C9CC", margin:0, maxWidth:540 }}>{aud ? (aud.type === "attorney" ? "Send me the house terms in plain words. I'll tell you what can close, and what the decree needs to say, usually within 24 hours." : "Throw any scenario past me in plain words. No lending terms needed. I'll tell you what's possible and what it does to the plan, usually the same day.") : <>Odd income, credit dings, tight timing, a sell-and-buy that has to line up. Put it on my desk in plain words. I shop many banks and give you options. No client details needed.</>}</p>
           </div>
           <div style={{ flex:"0 0 auto", width:150 }}>
             <img src="/brand/joshua-plum-suit.jpg" alt="Joshua Graham" style={{ display:"block", width:150, height:200, objectFit:"cover", objectPosition:"50% 10%", border:`3px solid ${C.plum}`, boxSizing:"border-box" }}/>
@@ -129,10 +135,10 @@ export default function ScenarioDesk() {
               <p style={{ margin:"6px 0 0", color:C.muted, fontSize:15 }}>Please don't include your client's last name, SSN or account numbers. First name or initials is plenty.</p>
             </div>
             <div style={{ gridColumn:"1/-1", display:"flex", flexWrap:"wrap", gap:8 }}>
-              {SCENARIO_TAGS.map((t) => <button type="button" key={t} onClick={() => tog(t)} style={{ font:"inherit", fontSize:14, fontWeight:600, padding:"9px 13px", borderRadius:2, cursor:"pointer", border:`1.5px solid ${tags.includes(t) ? C.navy : C.line}`, background:tags.includes(t) ? C.navy : "#fff", color:tags.includes(t) ? "#fff" : C.ink }}>{t}</button>)}
+              {(aud ? PARTNER_TAGS[aud.type] : SCENARIO_TAGS).map((t) => <button type="button" key={t} onClick={() => tog(t)} style={{ font:"inherit", fontSize:14, fontWeight:600, padding:"9px 13px", borderRadius:2, cursor:"pointer", border:`1.5px solid ${tags.includes(t) ? C.navy : C.line}`, background:tags.includes(t) ? C.navy : "#fff", color:tags.includes(t) ? "#fff" : C.ink }}>{t}</button>)}
             </div>
-            <label style={{ ...labelS, gridColumn:"1/-1" }}>The scenario<textarea value={v.scenario} onChange={set("scenario")} style={{ ...input, minHeight:120 }} placeholder="Seller wants to buy next. Self-employed 14 months, paid on 1099. Credit around 660. Wants to stay under $4,000 a month."/></label>
-            <label style={labelS}>Where they are<select value={v.stage} onChange={set("stage")} style={input}><option value="">Select…</option>{STAGES.map((s) => <option key={s}>{s}</option>)}</select></label>
+            <label style={{ ...labelS, gridColumn:"1/-1" }}>The scenario<textarea value={v.scenario} onChange={set("scenario")} style={{ ...input, minHeight:120 }} placeholder={aud ? PARTNER_PLACEHOLDER[aud.type] : "Seller wants to buy next. Self-employed 14 months, paid on 1099. Credit around 660. Wants to stay under $4,000 a month."}/></label>
+            {!aud && <label style={labelS}>Where they are<select value={v.stage} onChange={set("stage")} style={input}><option value="">Select…</option>{STAGES.map((s) => <option key={s}>{s}</option>)}</select></label>}
             <label style={labelS}>Property state<input value={v.state} onChange={set("state")} style={input} maxLength={2} placeholder="FL"/></label>
             <div style={{ gridColumn:"1/-1", borderTop:`1px solid ${C.line}`, paddingTop:14 }}>
               <div style={eyebrow}>Step 2</div>
@@ -146,7 +152,7 @@ export default function ScenarioDesk() {
               <label style={labelS}>First name<input value={v.first} onChange={set("first")} style={input} autoComplete="given-name"/></label>
               <label style={labelS}>Last name<input value={v.last} onChange={set("last")} style={input} autoComplete="family-name"/></label>
               <label style={labelS}>Mobile phone<input value={v.phone} onChange={set("phone")} style={input} inputMode="tel" autoComplete="tel"/></label>
-              <label style={labelS}>Brokerage<input value={v.brokerage} onChange={set("brokerage")} style={input} autoComplete="organization"/></label>
+              <label style={labelS}>{aud ? "Firm" : "Brokerage"}<input value={v.brokerage} onChange={set("brokerage")} style={input} autoComplete="organization"/></label>
             </>}
             {showEmail && <label style={labelS}>{v.reach === "Email" ? "Email" : "Email (optional)"}<input value={v.email} onChange={set("email")} style={input} inputMode="email" autoComplete="email"/></label>}
             <label style={{ gridColumn:"1/-1", display:"flex", gap:10, alignItems:"flex-start", fontSize:14, lineHeight:1.5 }}>

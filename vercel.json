@@ -15,6 +15,10 @@
       "destination": "/scenario-desk"
     },
     {
+      "source": "/p/:slug",
+      "destination": "/partner"
+    },
+    {
       "source": "/",
       "has": [
         {

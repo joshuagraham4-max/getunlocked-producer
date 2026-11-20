@@ -18,6 +18,7 @@ export default defineConfig({
         agentEdit: resolve(__dirname, 'agent-edit.html'),
         'equipment-apply': resolve(__dirname, 'equipment-apply.html'),
         'scenario-desk': resolve(__dirname, 'scenario-desk.html'),
+        partner: resolve(__dirname, 'partner.html'),
       },
     },
   },
