@@ -154,10 +154,8 @@ export const CHANNELS = [
 
 // Coverage lane (Nov 20): replied agents get one invite to the page Joshua built them (their /a/<slug> lander)
 // plus their private edit link to add photo and contact info. Separate from the daily 20. Joshua's go first.
-export function pageInviteFor(r, lander, edit, missingInfo) {
+export function pageInviteFor(r, lander, edit, missingInfo) {   // missingInfo kept for callers; Joshua (Nov 20): no info ask, just the page
   const first = r.first_name || (r.full_name || "").split(/\s+/)[0] || "there";
   const area = (r.area || "").trim();
-  return missingInfo
-    ? `Hey ${first}, you mentioned you cover ${area || "your area"}. I built you your own page so I can start sending buyers and sellers your way: ${lander}\n\nCan you take a minute to add your photo and your best cell and email here? ${edit}\n\nThat way I know exactly where to send people. Okay with you?`
-    : `Hey ${first}, I built you your own page${area ? " for " + area : ""} so I can start driving leads your way: ${lander}\n\nTake a look, and add your photo and info here when you get a sec: ${edit}\n\nOkay with you if I start sending people to it?`;
+  return `Hey ${first}, I built you your own page${area ? " for " + area : ""} so I can start sending buyers and sellers your way: ${lander}\n\nIt's still in the testing phase, so take a look when you get a sec. If you want to add your photo or tweak anything, here's your link: ${edit}`;
 }
