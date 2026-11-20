@@ -1,9 +1,9 @@
 // /p/<slug>: a referral partner's page (financial planner or divorce attorney). "Welcome, Phil."
 // Video, the with-me / without-me checklist, how easy it is, then Register, which opens the Scenario Desk in partner mode.
 // MOCK: partners come from partners.js. No database changes yet.
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { BRAND } from "../smart-money/data.js";
-import { findPartner, PARTNER_COPY } from "./partners.js";
+import { loadPartner, PARTNER_COPY } from "./partners.js";
 import { embedFor } from "./saveVideo.js";
 import { SiteFooter, WhoLink, LogoLink, TopButtons } from "./SiteBits.jsx";
 
@@ -16,7 +16,9 @@ const btn = { fontFamily:F.anton, fontSize:20, letterSpacing:"0.08em", textTrans
 
 export default function PartnerPage() {
   const slug = (location.pathname.match(/\/p\/([^/?#]+)/) || [])[1] || new URLSearchParams(location.search).get("p") || "";
-  const p = findPartner(slug);
+  const [p, setP] = useState(undefined);
+  useEffect(() => { let live = true; loadPartner(slug).then((x) => { if (live) setP(x || null); }); return () => { live = false; }; }, [slug]);
+  if (p === undefined) return <div style={{ minHeight:"100vh", background:C.cream }}/>;
   const type = p ? p.type : "planner";
   const t = PARTNER_COPY[type];
   const desk = `/scenario-desk?ref=PTR-${encodeURIComponent(p ? p.slug : "partner")}&for=${type}`;
@@ -37,7 +39,7 @@ export default function PartnerPage() {
       <div style={{ background:C.maroon, color:"#F6ECE9", borderBottom:`10px solid ${C.plum}` }}>
         <div style={{ maxWidth:920, margin:"0 auto", padding:"40px 18px 36px", display:"flex", flexWrap:"wrap", gap:28, alignItems:"center", justifyContent:"space-between" }}>
           <div style={{ flex:"1 1 420px", minWidth:0 }}>
-            <div style={{ fontFamily:F.display, fontWeight:700, fontSize:11, letterSpacing:"0.22em", color:C.rose }}>{t.eyebrow}{p ? ` · ${p.firm.toUpperCase()}` : ""}</div>
+            <div style={{ fontFamily:F.display, fontWeight:700, fontSize:11, letterSpacing:"0.22em", color:C.rose }}>{t.eyebrow}{p && p.firm ? ` · ${p.firm.toUpperCase()}` : ""}</div>
             <div style={{ fontFamily:F.display, fontWeight:700, fontSize:20, color:"#fff", margin:"14px 0 4px" }}>{p ? `Welcome, ${p.first}.` : "Welcome."}</div>
             <h1 style={{ fontFamily:F.anton, fontWeight:400, fontSize:"clamp(42px, 10vw, 68px)", lineHeight:1.02, textTransform:"uppercase", margin:"4px 0 12px", color:"#fff" }}>{t.headline}</h1>
             <div style={{ width:40, height:4, background:C.gold, marginBottom:14 }}/>
@@ -109,7 +111,7 @@ export default function PartnerPage() {
           <div style={eyebrow}>Both ways</div>
           <h2 style={h2}>Interested in leads from me?</h2>
           <p style={{ fontSize:17, lineHeight:1.6, color:C.muted, margin:"10px 0 18px", maxWidth:620 }}>{type === "attorney" ? "When my clients need a family law attorney, I want to send them to someone I trust. Tap below and I'll set up how they reach you." : "When my clients need a financial advisor, I want to send them to someone I trust. Tap below and I'll set up how they reach you."}</p>
-          <a href={`sms:${BRAND.phone.replace(/\D/g, "")}?&body=${encodeURIComponent(`Hi Joshua, it's ${p ? p.first : ""}${p ? ` at ${p.firm}` : ""}. Yes, I'm interested in leads from you.`)}`} style={{ ...btn, background:"#fff", color:C.maroon, border:`2px solid ${C.maroon}`, borderBottom:`4px solid ${C.plum}` }}>Yes, send me leads</a>
+          <a href={`sms:${BRAND.phone.replace(/\D/g, "")}?&body=${encodeURIComponent(`Hi Joshua, it's ${p ? p.first : ""}${p && p.firm ? ` at ${p.firm}` : ""}. Yes, I'm interested in leads from you.`)}`} style={{ ...btn, background:"#fff", color:C.maroon, border:`2px solid ${C.maroon}`, borderBottom:`4px solid ${C.plum}` }}>Yes, send me leads</a>
         </section>
 
         <p style={{ fontSize:12, color:C.muted, lineHeight:1.5, textAlign:"center", margin:0 }}>

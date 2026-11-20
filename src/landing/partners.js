@@ -7,11 +7,23 @@ export const DEMO_PARTNERS = {
   "phil-law": { slug: "phil-law",   first: "Phil", firm: "Demo Family Law",      type: "attorney" },
 };
 
+import { supabase } from "../supabase.js";
+
+const asOverride = (p) => { let as = ""; try { as = new URLSearchParams(location.search).get("as") || ""; } catch {} return p && (as === "planner" || as === "attorney") ? { ...p, type: as } : p; };
+
+// Real partners come from partner_pages (supabase/partner_pages_v1.sql); the demo Phil pages stay as a fallback.
+export async function loadPartner(slug) {
+  const s = String(slug || "").toLowerCase().trim(); if (!s) return null;
+  try {
+    const { data } = await supabase.rpc("get_partner_page", { p_slug: s });
+    const r = data && data[0];
+    if (r) return asOverride({ slug: r.slug, first: r.first_name, firm: r.firm || "", type: r.kind });
+  } catch {}
+  return findPartner(s);
+}
+
 export function findPartner(slug) {
-  const p = DEMO_PARTNERS[String(slug || "").toLowerCase()] || null;
-  let as = ""; try { as = new URLSearchParams(location.search).get("as") || ""; } catch {}
-  if (p && (as === "planner" || as === "attorney")) return { ...p, type: as };
-  return p;
+  return asOverride(DEMO_PARTNERS[String(slug || "").toLowerCase()] || null);
 }
 
 export const PARTNER_COPY = {

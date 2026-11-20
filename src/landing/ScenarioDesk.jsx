@@ -6,7 +6,7 @@ import { supabase } from "../supabase.js";
 import { BRAND } from "../smart-money/data.js";
 import { DESK_VIDEO, DESK_VIDEO_TITLE, embedFor } from "./saveVideo.js";
 import { NoSpam } from "./BrandBar.jsx";
-import { findPartner, PARTNER_TAGS, PARTNER_PLACEHOLDER } from "./partners.js";
+import { findPartner, loadPartner, PARTNER_TAGS, PARTNER_PLACEHOLDER } from "./partners.js";
 import { ApplyNow, SiteFooter, WhoLink, LogoLink, TopButtons } from "./SiteBits.jsx";
 
 const C = { maroon:"#4A111C", navy:"#0E1B2A", gold:"#D9A566", plum:"#7E4B6F", goldDk:"#4A111C", cream:"#F6EEDF", ink:"#0E1B2A", muted:"#4A5568", line:"#E3D6BF", card:"#FFFFFF", btn:"#4A111C", bad:"#B3261E", chip:"#0E1B2A" };
@@ -24,7 +24,7 @@ const btnO = { ...btnS, background:"#fff", color:C.maroon, border:`2px solid ${C
 const chipS = (on) => ({ font:"inherit", fontSize:15, fontWeight:700, padding:"10px 18px", borderRadius:2, cursor:"pointer", minHeight:46, border:`1.5px solid ${on ? C.navy : C.line}`, background:on ? C.navy : "#fff", color:on ? "#fff" : C.ink });
 
 // Partner mode (planners, attorneys): ?ref=PTR-<slug>&for=planner|attorney. Plain-language tags, no lending terms.
-const getAud = () => { try { const ref = getRef(); if (!/^PTR-/i.test(ref)) return null; const p = findPartner(ref.slice(4)); const f = new URLSearchParams(location.search).get("for"); return { p, type: f === "attorney" || f === "planner" ? f : (p ? p.type : "planner") }; } catch { return null; } };
+const getAud = () => { try { const ref = getRef(); if (!/^PTR-/i.test(ref)) return null; const slug = ref.slice(4); const p = findPartner(slug); const f = new URLSearchParams(location.search).get("for"); return { slug, p, type: f === "attorney" || f === "planner" ? f : (p ? p.type : "planner") }; } catch { return null; } };
 
 export default function ScenarioDesk() {
   const aud = getAud();
@@ -36,7 +36,7 @@ export default function ScenarioDesk() {
 
   // Per-agent link: pull their name, brokerage and phone from their page (the same public fields their lander shows).
   useEffect(() => {
-    if (aud && aud.p) setV((x) => ({ ...x, first: x.first || aud.p.first, brokerage: x.brokerage || aud.p.firm }));
+    if (aud) loadPartner(aud.slug).then((p) => { if (!p) return; setAg({ name: p.first, brokerage: p.firm }); setV((x) => ({ ...x, first: x.first || p.first, brokerage: x.brokerage || p.firm })); });
     const ref = getRef(); if (!/^AGT-/i.test(ref)) return;
     (async () => {
       try {
