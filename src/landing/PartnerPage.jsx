@@ -104,6 +104,14 @@ export default function PartnerPage() {
           <div style={{ fontSize:14, color:"#C9D6E3", marginTop:14 }}>Rather talk? Text or call {BRAND.phone}.</div>
         </section>
 
+        {/* Leads the other way: one tap texts Joshua */}
+        <section style={{ background:"#fff", border:`1px solid ${C.line}`, borderTop:`4px solid ${C.plum}`, padding:"26px 24px" }}>
+          <div style={eyebrow}>Both ways</div>
+          <h2 style={h2}>Interested in leads from me?</h2>
+          <p style={{ fontSize:17, lineHeight:1.6, color:C.muted, margin:"10px 0 18px", maxWidth:620 }}>{type === "attorney" ? "When my clients need a family law attorney, I want to send them to someone I trust. Tap below and I'll set up how they reach you." : "When my clients need a financial advisor, I want to send them to someone I trust. Tap below and I'll set up how they reach you."}</p>
+          <a href={`sms:${BRAND.phone.replace(/\D/g, "")}?&body=${encodeURIComponent(`Hi Joshua, it's ${p ? p.first : ""}${p ? ` at ${p.firm}` : ""}. Yes, I'm interested in leads from you.`)}`} style={{ ...btn, background:"#fff", color:C.maroon, border:`2px solid ${C.maroon}`, borderBottom:`4px solid ${C.plum}` }}>Yes, send me leads</a>
+        </section>
+
         <p style={{ fontSize:12, color:C.muted, lineHeight:1.5, textAlign:"center", margin:0 }}>
           {t.footnote && <>{t.footnote}<br/></>}
           Joshua Graham, loan originator, NMLS #169809 | Graham Financial, powered by Zero Point Mortgage Services NMLS #1216108 | Equal Housing Opportunity. General guidance only, not a loan approval or commitment to lend.
