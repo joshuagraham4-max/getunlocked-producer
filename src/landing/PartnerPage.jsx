@@ -1,4 +1,4 @@
-// /p/<slug>: a referral partner's page (financial planner or divorce attorney). "Welcome, Phil."
+// /p/<slug>: a referral partner's page (financial planner, divorce attorney or CPA). "Welcome, Phil."
 // Hero and motion match /save (line-by-line headline, gold bar, maroon photo column with the slow drift, scroll reveals).
 // Then: video, done-for-you with-me / without-me table, three moves, the private-line desk, leads both ways.
 import React, { useEffect, useState } from "react";
@@ -90,7 +90,7 @@ export default function PartnerPage() {
   if (p === undefined) return <div style={{ minHeight:"100vh", background:C.cream }}/>;
 
   const type = p ? p.type : "planner";
-  const t = PARTNER_COPY[type];
+  const t = PARTNER_COPY[type] || PARTNER_COPY.planner;
   const desk = `/scenario-desk?ref=PTR-${encodeURIComponent(p ? p.slug : "partner")}&for=${type}`;
   const vid = embedFor(PARTNER_VIDEO);
   const sms = `sms:${BRAND.phone.replace(/\D/g, "")}?&body=${encodeURIComponent(`Hi Joshua, it's ${p ? p.first : ""}${p && p.firm ? ` at ${p.firm}` : ""}. Yes, I'm interested in leads from you.`)}`;
@@ -162,7 +162,7 @@ export default function PartnerPage() {
       <section className="pp-sec">
         <div className="pp-k rv">Both ways</div>
         <h2 className="rv" style={{ "--d":"80ms" }}>Interested in leads from me?</h2>
-        <p className="lead rv" style={{ "--d":"160ms" }}>{type === "attorney" ? "When my clients need a family law attorney, I want to send them to someone I trust. Tap below and I'll set up how they reach you." : "When my clients need a financial advisor, I want to send them to someone I trust. Tap below and I'll set up how they reach you."}</p>
+        <p className="lead rv" style={{ "--d":"160ms" }}>{type === "cpa" ? "I work with a lot of investors and business owners who need a CPA who gets it. When they ask me for one, I want to send them to someone I trust. Tap below and I'll set up how they reach you." : type === "attorney" ? "When my clients need a family law attorney, I want to send them to someone I trust. Tap below and I'll set up how they reach you." : "When my clients need a financial advisor, I want to send them to someone I trust. Tap below and I'll set up how they reach you."}</p>
         <div className="rv" style={{ "--d":"220ms", marginTop:20 }}><a href={sms} className="pp-btn ghost">Yes, send me leads</a></div>
       </section>
 

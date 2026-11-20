@@ -249,8 +249,8 @@ function AgentList({ userId, onContact }) {
 }
 
 // Cash → Partners: one switch for the three Facebook DM campaigns. Agents use the full list above;
-// planners and attorneys (audience column, filled by the partner DM scheduled tasks) get a simple status view.
-const CAMPAIGNS = [["agent", "Agents"], ["planner", "Financial planners"], ["attorney", "Family law attorneys"]];
+// planners, attorneys and CPAs (audience column, filled by the partner DM scheduled tasks) get a simple status view.
+const CAMPAIGNS = [["agent", "Agents"], ["planner", "Financial planners"], ["attorney", "Family law attorneys"], ["cpa", "CPAs"]];
 export default function AgentOutreach(props) {
   const [aud, setAud] = useState(() => { try { return localStorage.getItem("gup-outreach-aud") || "agent"; } catch { return "agent"; } });
   const pick = (k) => { setAud(k); try { localStorage.setItem("gup-outreach-aud", k); } catch {} };
@@ -283,14 +283,14 @@ function PartnerCampaign({ aud, userId }) {
     ["Ready to message", rows.filter((r) => r.status === "ready")],
     ["No reply / skipped", rows.filter((r) => ["no reply", "skipped"].includes(r.status))],
   ];
-  const label = aud === "attorney" ? "family law attorneys" : "financial planners";
+  const label = aud === "attorney" ? "family law attorneys" : aud === "cpa" ? "CPAs" : "financial planners";
   return (
     <div>
       <div style={{display:"flex", gap:16, flexWrap:"wrap", alignItems:"center", marginBottom:12}}>
         <div style={{fontFamily:F.cond, fontWeight:800, fontSize:20}}>Messaged today {sentToday}/10</div>
         <div style={{fontFamily:F.cond, fontWeight:800, fontSize:20, color:C.mid}}>{rows.length} {label} in the campaign</div>
       </div>
-      <div style={{fontSize:13, color:C.mid, marginBottom:14}}>Filled by the weekday scheduled task ({aud === "attorney" ? "2:23 PM" : "12:37 PM"} ET). Nothing sends until you say go in that run's chat. Win = a scenario on your desk.</div>
+      <div style={{fontSize:13, color:C.mid, marginBottom:14}}>Filled by the weekday scheduled task ({aud === "attorney" ? "2:23 PM" : aud === "cpa" ? "11:07 AM" : "12:37 PM"} ET). Nothing sends until you say go in that run's chat. Win = a scenario on your desk.</div>
       {msg && <div style={{color:C.red, marginBottom:10}}>{msg}</div>}
       {rows.length === 0 && <div style={{...card, padding:16, color:C.mid}}>No {label} yet. The first batch lands with the next run.</div>}
       {groups.filter(([, g]) => g.length).map(([title, g]) => (

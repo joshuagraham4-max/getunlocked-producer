@@ -1,15 +1,19 @@
-// Referral partners (financial planners, divorce attorneys). MOCK: demo partners live here until the partner table exists.
+// Referral partners (financial planners, divorce attorneys, CPAs). MOCK: demo partners live here until the partner table exists.
 // /p/<slug> shows the partner page; its Register button opens the Scenario Desk in partner mode (ref PTR-<slug>).
-// Preview the other audience on any slug with ?as=attorney or ?as=planner.
+// Preview another audience on any slug with ?as=attorney, ?as=planner or ?as=cpa.
 
 export const DEMO_PARTNERS = {
   phil:       { slug: "phil",       first: "Phil", firm: "Demo Wealth Partners", type: "planner" },
   "phil-law": { slug: "phil-law",   first: "Phil", firm: "Demo Family Law",      type: "attorney" },
+  "phil-cpa": { slug: "phil-cpa",   first: "Phil", firm: "Demo CPA Group",       type: "cpa" },
 };
 
 import { supabase } from "../supabase.js";
 
-const asOverride = (p) => { let as = ""; try { as = new URLSearchParams(location.search).get("as") || ""; } catch {} return p && (as === "planner" || as === "attorney") ? { ...p, type: as } : p; };
+export const PARTNER_TYPES = ["planner", "attorney", "cpa"];
+export const PARTNER_LABEL = { planner: "Financial planner", attorney: "Family law attorney", cpa: "CPA" };
+
+const asOverride = (p) => { let as = ""; try { as = new URLSearchParams(location.search).get("as") || ""; } catch {} return p && PARTNER_TYPES.includes(as) ? { ...p, type: as } : p; };
 
 // Real partners come from partner_pages (supabase/partner_pages_v1.sql); the demo Phil pages stay as a fallback.
 export async function loadPartner(slug) {
@@ -78,16 +82,44 @@ export const PARTNER_COPY = {
     deskSub: "Who keeps the home, what's owed, the rate, the deadline, any support. Initials only for your client. I'll come back with what can close in 2 hours or less.",
     footnote: "",
   },
+  cpa: {
+    eyebrow: "FOR CPAs",
+    headline: "No letters. No calls. Approved.",
+    sub: "25 years of complex files. When a client wants to buy, refinance or pull equity, hand them to me. I read the returns myself, I never ask you for a CPA letter, and I have lenders that approve self-employed clients on bank statements or a P&L alone.",
+    pains: "What a lender usually costs you: a comfort letter you can't sign, a processor calling you to explain a return, a client panicking three days before closing, and a denial that gets blamed on the return.",
+    lines: ["No letters.", "No calls.", "Approved."],
+    rows: [
+      ["A lender asks you for a comfort letter or a self-employment verification", "I never ask you for a CPA letter. Not a comfort letter, not a verification"],
+      ["A processor calls you to explain the Schedule C, the K-1s and the depreciation", "I read any tax return myself. Your phone stays quiet"],
+      ["The return is right, and the bank still says the income is too low", "Bank statements, P&L only, written VOE, and DSCR for rentals. Simple approvals"],
+      ["Your client calls you in a panic 72 hours before closing", "Fully underwritten before your client hears a number. If I say it closes, it closes"],
+      ["You hear about the purchase after the return is already filed", "Tell me who's buying this year, and we get ahead of it before you do their returns"],
+      ["An investor client gets stuck at the bank's limit on properties", "DSCR and portfolio lenders that qualify the rental on its rent"],
+      ["Cash-out and HELOC questions land on your desk in busy season", "Seconds and HELOCs handled start to finish, without pulling you in"],
+      ["The lender keeps your client and pitches them everything", "Mortgage only. Your client stays your client"],
+      ["Mortgage people only call when they need something", "I send business both ways: investors and business owners who need a real CPA"],
+    ],
+    steps: [
+      ["Send a name and number", "Or put the situation on my desk in plain words. Any time of year, and best before you file."],
+      ["I take it from there", "Returns, bank statements, lenders, underwriting and closing. No letters, and no calls asking you to explain a return."],
+      ["It comes back to you finished", "Closed, and your client thanks you for the introduction."],
+    ],
+    deskTitle: "Who's buying this year?",
+    deskSub: "Plain words are fine. \"S-corp owner wants a rental in March\" is plenty. I'll tell you what's possible, usually the same day, before you file.",
+    footnote: "",
+  },
 };
 
 // Scenario Desk in partner mode: plain-language tags, no lending terms.
 export const PARTNER_TAGS = {
   planner: ["Buying a home", "Refinancing", "Wants cash from the home", "Retiring or recently retired", "Business owner / self-employed", "Income is mostly investments", "Inheritance or estate", "Divorce", "Not sure yet"],
+  cpa: ["Buying a home", "Buying a rental", "Refinancing", "Wants cash from the home", "Self-employed / business owner", "Real estate investor", "Not sure yet"],
   attorney: ["Client wants to keep the house", "Buying out the spouse", "Selling the house", "Decree says refinance", "Low rate they want to keep", "Relies on support income", "Deadline coming up", "Not sure yet"],
 };
 export const PARTNER_PLACEHOLDER = {
   planner: "Anything the questions didn't cover: a liquidity event, a property to sell first, a payment ceiling.",
   attorney: "Anything the questions didn't cover: a second property, a HELOC, a date that can't move.",
+  cpa: "Anything the questions didn't cover: the entity type, a 1031, a property to sell first.",
 };
 
 // Tailored desk questions per profession. opts = tap one; ph = short typed answer.
@@ -104,6 +136,19 @@ export const PARTNER_DESK = {
       { id:"support", label:"Support in the agreement: amount, and when it started", ph:"$2,400/mo maintenance, starts next month" },
       { id:"income", label:"Your client's income", opts:["W-2", "Self-employed", "Commission", "Retired"] },
       { id:"deadline", label:"Deadline in the draft", ph:"Refinance within 90 days of decree" },
+    ],
+    notes: "Anything else (optional)",
+  },
+  cpa: {
+    title: "Who's buying this year?",
+    promise: "Usually same day: what your client qualifies for and the simplest way to document it, before you file.",
+    qs: [
+      { id:"goal", label:"Your client wants to", opts:["Buy a home", "Buy a rental", "Refinance", "Cash out or HELOC", "Not sure yet"] },
+      { id:"income", label:"How they earn", opts:["Schedule C", "S-corp or partnership (K-1)", "W-2 plus rentals", "Mostly rentals"] },
+      { id:"years", label:"Self-employed for", opts:["Under 2 years", "2 years or more"] },
+      { id:"filed", label:"This year's return", opts:["Not filed yet", "On extension", "Filed"] },
+      { id:"numbers", label:"Rough price or value, and down payment or balance", ph:"Rental around $450K, 25% down" },
+      { id:"timeline", label:"Timeline", ph:"Closing by spring" },
     ],
     notes: "Anything else (optional)",
   },
@@ -126,6 +171,13 @@ export const PARTNER_DESK = {
 // Shown in Contacts → Referral Partner → Partner page box, with copy buttons. Metric: scenarios submitted, not replies.
 export function partnerScripts(kind, first, url) {
   const f = first || "[Name]", link = url || "[their page link]";
+  if (kind === "cpa") return [
+    ["1. Opener (DM)", `Hi ${f}, your post on [topic] was sharp, especially [the specific point]. Most people skip that part.`],
+    ["2. The ask (DM)", `I'm building a small close circle of CPAs I trust. Could I send you a quick tool for one pain point: lenders asking you for CPA letters and to explain your clients' returns?`],
+    ["3. When they say yes", `Here it is: ${link}\n\nWhen a client mentions buying, refinancing or pulling equity, put it on my desk from there, or just text me a name and number. I read the returns myself and I never ask you for a CPA letter. And if anyone's talking about buying this year, I'd love to get ahead of it before you do their returns.`],
+    ["4. When they reply (go deeper)", `Glad it's useful. Quick question so I'm useful to you: what kind of clients do you want more of? I work with a lot of investors and business owners who need a good CPA.\n\nAnd do you send your clients a newsletter? If not, I can help you get one going.`],
+    ["Call version (30 seconds)", `Hi ${f}, Joshua Graham, Graham Financial. I'll be quick. I take the mortgage side off CPAs' desks: I read the returns myself, I never ask you for a CPA letter, and I have lenders that approve self-employed clients on bank statements or a P&L. 25 years of complex files. Can I text you a link to my desk, so the next time a client mentions buying you have it?\n\n(If yes) What kind of clients do you want more of? And do you send your clients a newsletter?`],
+  ];
   if (kind === "attorney") return [
     ["1. Opener (DM)", `Hi ${f}, your post on [topic] was sharp, especially [the specific point]. Most people skip that part.`],
     ["2. The ask (DM)", `I'm building a small close circle of family law attorneys. Could I send you a quick tool for one pain point: the house and mortgage piece of a settlement?`],

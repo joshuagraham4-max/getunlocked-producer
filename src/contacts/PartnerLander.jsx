@@ -1,9 +1,9 @@
-// Referral partner (planner or divorce attorney): one click makes their page at /p/<slug> ("Welcome, Phil.").
+// Referral partner (planner, divorce attorney or CPA): one click makes their page at /p/<slug> ("Welcome, Phil.").
 // Their Register button opens the Scenario Desk in partner mode; every scenario files here and pings Joshua.
 // Same pattern as AgentLander.jsx. Needs supabase/partner_pages_v1.sql.
 import { useEffect, useState } from "react";
 import { supabase } from "../supabase.js";
-import { partnerScripts } from "../landing/partners.js";
+import { partnerScripts, PARTNER_TYPES, PARTNER_LABEL } from "../landing/partners.js";
 
 const C = { mid:"#6b6358", rule:"#e0d8cc", ink:"#1c1a17", green:"#1e6e4a" };
 const F = { mono:"'DM Mono',monospace", body:"'Barlow',sans-serif" };
@@ -12,7 +12,8 @@ const slugify = (s) => String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, "-")
 const inp = { width:"100%", boxSizing:"border-box", border:`1px solid ${C.rule}`, borderRadius:6, padding:"7px 9px", fontFamily:F.body, fontSize:14 };
 const btn = { border:`1px solid ${C.ink}`, background:C.ink, color:"#fff", borderRadius:6, padding:"7px 12px", fontFamily:F.mono, fontSize:11, letterSpacing:".08em", cursor:"pointer" };
 const ghost = { ...btn, background:"transparent", color:C.ink };
-const guessKind = (c) => /attorney|law|legal|esq|divorce/i.test([c.subtype, c.company, c.title, (c.tags || []).join(" ")].join(" ")) ? "attorney" : "planner";
+const guessKind = (c) => { const t = [c.subtype, c.company, c.title, c.last_name, (c.tags || []).join(" ")].join(" ");
+  return /attorney|law|legal|esq|divorce/i.test(t) ? "attorney" : /\bcpa\b|account|tax\b|bookkeep/i.test(t) ? "cpa" : "planner"; };
 
 export default function PartnerLander({ contact: c }) {
   const nm = [c.first_name, c.last_name].filter(Boolean).join(" ");
@@ -49,7 +50,9 @@ export default function PartnerLander({ contact: c }) {
   const setup = !page ? "" : `Hi ${page.first_name}, two quick things so your pages carry your name:\n\n1. Your private link (keep it to yourself). Add your photo, firm logo and contact info: ${editUrl}\n\n2. Turn on lead alerts: install the free app ntfy, tap +, and type ${page.ntfy_topic}. Every lead from your client page buzzes your phone, and I get it too.\n\nYour client page, to share or boost: ${client}\n\n- Joshua`;
   const desk = page ? `${SITE}/scenario-desk?ref=PTR-${page.slug}&for=${page.kind}` : "";
   const first = page ? page.first_name : "";
-  const welcome = !page ? "" : page.kind === "attorney"
+  const welcome = !page ? "" : page.kind === "cpa"
+    ? `Hi ${first}, here's the tool I mentioned: ${url}\n\nWhen a client mentions buying, refinancing or pulling equity, put it on my desk from there, or just text me a name and number. I read the returns myself and never ask you for a CPA letter. Then I take it from there.\n\n- Joshua`
+    : page.kind === "attorney"
     ? `Hi ${first}, here's the tool I mentioned: ${url}\n\nWhen a client is keeping the house, text me the draft terms or just a name and number. I'll tell you in 2 hours or less whether the house terms can close, and what the decree needs to say. Then I take it from there.\n\n- Joshua`
     : `Hi ${first}, here's the tool I mentioned: ${url}\n\nWhen a client's mortgage gets complicated, put it on my desk from there, or just text me a name and number. Mortgage only, you see everything first, and your client comes back to you at closing.\n\n- Joshua`;
 
@@ -59,17 +62,17 @@ export default function PartnerLander({ contact: c }) {
   const scripts = partnerScripts(page ? page.kind : form.kind, (c.first_name || "").trim(), url);
   return (
     <div style={box}>
-      <div style={lab}>Partner page (planner or attorney)</div>
+      <div style={lab}>Partner page (planner, attorney or CPA)</div>
       {!page ? (<div style={{ marginTop:8 }}>
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:8 }}>
           <label style={{ fontSize:12 }}>Link name<input style={inp} value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })}/></label>
           <label style={{ fontSize:12 }}>Firm<input style={inp} value={form.firm} onChange={(e) => setForm({ ...form, firm: e.target.value })}/></label>
-          <label style={{ fontSize:12 }}>They are a<select style={inp} value={form.kind} onChange={(e) => setForm({ ...form, kind: e.target.value })}><option value="planner">Financial planner</option><option value="attorney">Divorce attorney</option></select></label>
+          <label style={{ fontSize:12 }}>They are a<select style={inp} value={form.kind} onChange={(e) => setForm({ ...form, kind: e.target.value })}>{PARTNER_TYPES.map((k) => <option key={k} value={k}>{PARTNER_LABEL[k]}</option>)}</select></label>
         </div>
         <button style={{ ...btn, marginTop:10 }} disabled={busy} onClick={create}>{busy ? "Creating…" : "Create their partner page"}</button>
       </div>) : (<div style={{ marginTop:8, fontFamily:F.body, fontSize:13 }}>
         <div><a href={url} target="_blank" rel="noreferrer" style={{ color:C.green, fontWeight:600 }}>{url}</a> {!page.active && <b style={{ color:"#a33" }}>(off)</b>}
-          <span style={{ marginLeft:8, color:C.mid }}>{page.kind === "attorney" ? "Attorney" : "Planner"} · <button onClick={() => setKind(page.kind === "attorney" ? "planner" : "attorney")} style={{ background:"none", border:0, padding:0, color:C.ink, textDecoration:"underline", cursor:"pointer", fontSize:12 }}>switch</button></span></div>
+          <span style={{ marginLeft:8, color:C.mid }}>{PARTNER_LABEL[page.kind] || page.kind} · <button onClick={() => setKind(PARTNER_TYPES[(PARTNER_TYPES.indexOf(page.kind) + 1) % PARTNER_TYPES.length])} style={{ background:"none", border:0, padding:0, color:C.ink, textDecoration:"underline", cursor:"pointer", fontSize:12 }}>switch</button></span></div>
         <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginTop:8 }}>
           <button style={ghost} onClick={() => copy("welcome", welcome)}>{copied === "welcome" ? "Copied" : "Copy welcome text"}</button>
           <button style={ghost} onClick={() => copy("link", url)}>{copied === "link" ? "Copied" : "Copy their page link"}</button>
@@ -83,7 +86,7 @@ export default function PartnerLander({ contact: c }) {
       </div>)}
       {msg && <div style={{ marginTop:8, color:"#a33", fontSize:12 }}>{msg}</div>}
       <details style={{ marginTop:12 }}>
-        <summary style={{ ...lab, cursor:"pointer" }}>Outreach script ({(page ? page.kind : form.kind) === "attorney" ? "attorney" : "planner"})</summary>
+        <summary style={{ ...lab, cursor:"pointer" }}>Outreach script ({(PARTNER_LABEL[page ? page.kind : form.kind] || "planner").toLowerCase()})</summary>
         {scripts.map(([title, text], i) => (
           <div key={i} style={{ marginTop:10, borderTop:`1px solid ${C.rule}`, paddingTop:8 }}>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", gap:8 }}>

@@ -23,8 +23,8 @@ const btnS = { fontFamily:F.anton, fontWeight:400, fontSize:20, letterSpacing:"0
 const btnO = { ...btnS, background:"#fff", color:C.maroon, border:`2px solid ${C.maroon}`, borderBottom:`4px solid ${C.plum}` };
 const chipS = (on) => ({ font:"inherit", fontSize:15, fontWeight:700, padding:"10px 18px", borderRadius:2, cursor:"pointer", minHeight:46, border:`1.5px solid ${on ? C.navy : C.line}`, background:on ? C.navy : "#fff", color:on ? "#fff" : C.ink });
 
-// Partner mode (planners, attorneys): ?ref=PTR-<slug>&for=planner|attorney. Plain-language tags, no lending terms.
-const getAud = () => { try { const ref = getRef(); if (!/^PTR-/i.test(ref)) return null; const slug = ref.slice(4); const p = findPartner(slug); const f = new URLSearchParams(location.search).get("for"); return { slug, p, type: f === "attorney" || f === "planner" ? f : (p ? p.type : "planner") }; } catch { return null; } };
+// Partner mode (planners, attorneys, CPAs): ?ref=PTR-<slug>&for=planner|attorney|cpa. Plain-language tags, no lending terms.
+const getAud = () => { try { const ref = getRef(); if (!/^PTR-/i.test(ref)) return null; const slug = ref.slice(4); const p = findPartner(slug); const f = new URLSearchParams(location.search).get("for"); return { slug, p, type: f === "attorney" || f === "planner" || f === "cpa" ? f : (p ? p.type : "planner") }; } catch { return null; } };
 
 export default function ScenarioDesk() {
   const aud = getAud();
@@ -72,7 +72,7 @@ export default function ScenarioDesk() {
     if (!v.consent) miss.push("your consent to be contacted");
     if (miss.length) return setErr("Please add " + miss.join(", ") + ".");
     setBusy(true);
-    const summary = `${aud ? (aud.type === "attorney" ? "[Attorney] " : "[Planner] ") : ""}Scenario from ${v.first.trim()}${v.brokerage ? ` (${v.brokerage.trim()})` : ""}${v.stage ? ` · ${v.stage}` : ""}${tags.length ? ` · ${tags.join(", ")}` : ""}${PD ? " · " + PD.qs.filter((x) => q[x.id] && String(q[x.id]).trim()).map((x) => `${x.label}: ${String(q[x.id]).trim()}`).join(" | ") : ""} · reply by ${v.reach}: ${v.scenario.trim().slice(0, 1500)}`;
+    const summary = `${aud ? (aud.type === "attorney" ? "[Attorney] " : aud.type === "cpa" ? "[CPA] " : "[Planner] ") : ""}Scenario from ${v.first.trim()}${v.brokerage ? ` (${v.brokerage.trim()})` : ""}${v.stage ? ` · ${v.stage}` : ""}${tags.length ? ` · ${tags.join(", ")}` : ""}${PD ? " · " + PD.qs.filter((x) => q[x.id] && String(q[x.id]).trim()).map((x) => `${x.label}: ${String(q[x.id]).trim()}`).join(" | ") : ""} · reply by ${v.reach}: ${v.scenario.trim().slice(0, 1500)}`;
     const lead = { first_name:v.first.trim(), last_name:v.last.trim() || null, email:v.email.trim() || null, phone, property_state:v.state.trim().toUpperCase().slice(0, 2) || null,
       consent:true, ref:getRef(), source:"scenario-desk", page_url:location.href.slice(0, 500), user_agent:navigator.userAgent.slice(0, 300),
       answers:{ summary, partner_type: aud ? aud.type : null, brokerage:v.brokerage.trim(), stage:v.stage, tags, reach:v.reach, scenario:v.scenario.trim().slice(0, 3000), partner_answers: PD ? q : null } };

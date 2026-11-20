@@ -34,6 +34,7 @@ const TOOLS = [
   { name:"AGENTS · their desk · /d/<name>", url:`${ORIGIN}/scenario-desk`, note:"The Scenario Desk with the agent's name on it." },
   { name:"PARTNERS · their partner page · /p/<name> (demo: Phil, planner)", url:`${ORIGIN}/p/phil`, note:"What you send a planner or attorney: Welcome, video, with/without me, three moves, their private desk. Made in Contacts → Referral Partner → Create their partner page." },
   { name:"PARTNERS · partner page, attorney demo · /p/phil-law", url:`${ORIGIN}/p/phil-law`, note:"Same page, family law attorney version." },
+  { name:"PARTNERS · partner page, CPA demo · /p/phil-cpa", url:`${ORIGIN}/p/phil-cpa`, note:"Same page, CPA version: no letters, no calls, approved." },
   { name:"PARTNERS · their desk (tailored) · /scenario-desk?ref=PTR-<name>", url:`${ORIGIN}/scenario-desk?ref=PTR-phil-law&for=attorney`, note:"Opens from Access your tailored scenario desk. Attorney or planner questions. Lands on their contact and buzzes you: Partner scenario." },
   { name:"PARTNERS · their client page · /pl/<name> (demo: attorney)", url:`${ORIGIN}/pl/phil-law`, note:"Consumer page co-branded with the partner, for them to share or boost. Leads buzz you AND them (ntfy) and land in your Contacts." },
   { name:"PARTNERS · their edit link · /pe/<private key>", url:`${ORIGIN}/p/phil`, note:"Private to the partner: photo, logo, info, their ntfy alert code and their 3 links. Copy it from their contact (Copy setup text)." },
@@ -224,10 +225,10 @@ const LINK_GUIDE = [
   ["/a/<name>", "Agent: their co-branded lead page"],
   ["/e/<private key>", "Agent: their private edit link"],
   ["/d/<name>", "Agent: their scenario desk"],
-  ["/p/<name>", "Planner or attorney: the page you send them"],
-  ["/scenario-desk?ref=PTR-<name>", "Planner or attorney: their tailored desk (opens from the button on their page)"],
-  ["/pl/<name>", "Planner or attorney: their client page to share or boost; leads buzz them and you"],
-  ["/pe/<private key>", "Planner or attorney: their private edit link (photo, logo, info, alert code)"],
+  ["/p/<name>", "Planner, attorney or CPA: the page you send them"],
+  ["/scenario-desk?ref=PTR-<name>", "Planner, attorney or CPA: their tailored desk (opens from the button on their page)"],
+  ["/pl/<name>", "Planner, attorney or CPA: their client page to share or boost; leads buzz them and you"],
+  ["/pe/<private key>", "Planner, attorney or CPA: their private edit link (photo, logo, info, alert code)"],
 ];
 function LinkGuide({ card, btnG }) {
   const [open, setOpen] = useState(false);

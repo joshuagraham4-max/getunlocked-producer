@@ -1,4 +1,4 @@
-// /pl/<slug>: the partner's client page (consumer-facing, co-branded with the planner or attorney and Joshua).
+// /pl/<slug>: the partner's client page (consumer-facing, co-branded with the planner, attorney or CPA and Joshua).
 // A few tap questions + contact. Saves to calculator_leads (source "partner-lander", ref PTL-<slug>): files in Joshua's Contacts,
 // buzzes Joshua's phone, and buzzes the partner's phone on their ntfy code (route_partner_lead, partner_pages_v2.sql).
 import React, { useEffect, useState } from "react";
@@ -34,6 +34,17 @@ const COPY = {
       { id:"when", label:"When does it need to be done?", opts:["Within 90 days", "3 to 6 months", "No deadline yet"] },
     ],
     thanks: (p) => `Thank you. I'll reach out shortly. Everything stays private, and I'll keep ${p.first} in the loop on the house.`,
+  },
+  cpa: {
+    eyebrow: "Self-employed? Investing?",
+    lines: ["Approved on", "how you really", "earn."],
+    sub: (p) => `${p.first}${p.firm ? " at " + p.firm : ""} keeps your taxes right. I get your home or rental loan approved, on your returns, your bank statements or a P&L, whichever works best. Plain answers, no pressure.`,
+    qs: [
+      { id:"goal", label:"What are you looking to do?", opts:["Buy a home", "Buy a rental", "Refinance", "Cash out or HELOC", "Not sure yet"] },
+      { id:"when", label:"When?", opts:["Now", "Within 3 months", "3 to 12 months", "Just planning"] },
+      { id:"income", label:"Your income is mostly", opts:["My own business", "Rentals", "Salary plus rentals", "Commission"] },
+    ],
+    thanks: (p) => `Thank you. I'll reach out shortly, and I'll keep ${p.first} in the loop.`,
   },
 };
 
@@ -92,7 +103,7 @@ export default function PartnerClientPage() {
     if (miss.length) return setErr("Please add " + miss.join(", ") + ".");
     setBusy(true);
     const qa = t.qs.filter((x) => q[x.id]).map((x) => `${x.label} ${q[x.id]}`).join(" | ");
-    const summary = `Client of ${pp.first}${pp.firm ? " (" + pp.firm + ")" : ""}, ${pp.type === "attorney" ? "family law" : "financial planner"} partner · ${qa}`;
+    const summary = `Client of ${pp.first}${pp.firm ? " (" + pp.firm + ")" : ""}, ${pp.type === "attorney" ? "family law" : pp.type === "cpa" ? "CPA" : "financial planner"} partner · ${qa}`;
     const { error } = await supabase.from("calculator_leads").insert({
       first_name:v.first.trim(), last_name:v.last.trim() || null, phone:digits, email:v.email.trim() || null,
       property_state:v.state.trim().toUpperCase().slice(0, 2) || null, consent:true, ref:`PTL-${pp.slug || "partner"}`, source:"partner-lander",
