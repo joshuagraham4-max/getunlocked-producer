@@ -20,7 +20,7 @@ const copy = (t) => navigator.clipboard?.writeText(t);
 const chName = (k) => (CHANNELS.find((c) => c.k === k) || {}).l || k;
 const EMPTY = { full_name:"", area:"", state:"FL", brokerage:"", profile_url:"", hook:"", channel:"facebook", source:"existing friend" };
 
-export default function AgentOutreach({ userId, onContact }) {
+function AgentList({ userId, onContact }) {
   const [rows, setRows] = useState([]); const [view, setView] = useState("today"); const [chan, setChan] = useState("all");
   const [drafts, setDrafts] = useState({}); const [news, setNews] = useState({}); const [add, setAdd] = useState(null); const [msg, setMsg] = useState(""); const [q, setQ] = useState(""); const [lastQ, setLastQ] = useState("");
   const t = localDay();
@@ -244,6 +244,77 @@ export default function AgentOutreach({ userId, onContact }) {
           {WEEKLY_TOUCH.map((v, i) => <div key={i} style={{fontSize:14, whiteSpace:"pre-wrap", lineHeight:1.5, marginTop:6, padding:10, background:"#fff", borderRadius:6, border:`1px solid ${C.rule}`}}>{v({ first:"Paige" })}</div>)}
         </div>
       </div>}
+    </div>
+  );
+}
+
+// Cash → Partners: one switch for the three Facebook DM campaigns. Agents use the full list above;
+// planners and attorneys (audience column, filled by the partner DM scheduled tasks) get a simple status view.
+const CAMPAIGNS = [["agent", "Agents"], ["planner", "Financial planners"], ["attorney", "Family law attorneys"]];
+export default function AgentOutreach(props) {
+  const [aud, setAud] = useState(() => { try { return localStorage.getItem("gup-outreach-aud") || "agent"; } catch { return "agent"; } });
+  const pick = (k) => { setAud(k); try { localStorage.setItem("gup-outreach-aud", k); } catch {} };
+  return (
+    <div>
+      <div style={{display:"flex", gap:8, flexWrap:"wrap", marginBottom:16}}>
+        {CAMPAIGNS.map(([k, l]) => <button key={k} onClick={() => pick(k)} style={aud === k ? btnG : btn}>{l}</button>)}
+      </div>
+      {aud === "agent" ? <AgentList {...props}/> : <PartnerCampaign key={aud} aud={aud} userId={props.userId}/>}
+    </div>
+  );
+}
+
+function PartnerCampaign({ aud, userId }) {
+  const [rows, setRows] = useState(null); const [msg, setMsg] = useState("");
+  const t = localDay();
+  const load = useCallback(async () => {
+    const { data, error } = await supabase.from("agent_outreach").select("*").eq("audience", aud).order("created_at", { ascending:false });
+    if (error) { setMsg(/audience/.test(error.message) ? "Run supabase/partner_pages_v2.sql first." : error.message); setRows([]); return; }
+    setRows(data || []);
+  }, [aud]);
+  useEffect(() => { if (userId) load(); }, [userId, load]);
+  const upd = async (r, f) => { const { error } = await supabase.from("agent_outreach").update(f).eq("id", r.id); if (error) setMsg(error.message); load(); };
+  if (rows === null) return null;
+  const sentToday = rows.filter((r) => r.sent_at && localDay(new Date(r.sent_at)) === t).length;
+  const groups = [
+    ["Replied", rows.filter((r) => r.status === "replied")],
+    ["Nudge due", rows.filter((r) => r.status === "messaging" && r.next_date && r.next_date <= t)],
+    ["Messaged, waiting", rows.filter((r) => r.status === "messaging" && (!r.next_date || r.next_date > t))],
+    ["Ready to message", rows.filter((r) => r.status === "ready")],
+    ["No reply / skipped", rows.filter((r) => ["no reply", "skipped"].includes(r.status))],
+  ];
+  const label = aud === "attorney" ? "family law attorneys" : "financial planners";
+  return (
+    <div>
+      <div style={{display:"flex", gap:16, flexWrap:"wrap", alignItems:"center", marginBottom:12}}>
+        <div style={{fontFamily:F.cond, fontWeight:800, fontSize:20}}>Messaged today {sentToday}/10</div>
+        <div style={{fontFamily:F.cond, fontWeight:800, fontSize:20, color:C.mid}}>{rows.length} {label} in the campaign</div>
+      </div>
+      <div style={{fontSize:13, color:C.mid, marginBottom:14}}>Filled by the weekday scheduled task ({aud === "attorney" ? "2:23 PM" : "12:37 PM"} ET). Nothing sends until you say go in that run's chat. Win = a scenario on your desk.</div>
+      {msg && <div style={{color:C.red, marginBottom:10}}>{msg}</div>}
+      {rows.length === 0 && <div style={{...card, padding:16, color:C.mid}}>No {label} yet. The first batch lands with the next run.</div>}
+      {groups.filter(([, g]) => g.length).map(([title, g]) => (
+        <div key={title} style={{marginBottom:18}}>
+          <div style={lbl}>{title} · {g.length}</div>
+          <div style={{display:"grid", gap:10, marginTop:8}}>
+            {g.map((r) => (
+              <div key={r.id} style={{...card, padding:"12px 14px"}}>
+                <div style={{display:"flex", justifyContent:"space-between", gap:10, flexWrap:"wrap"}}>
+                  <div><b style={{fontFamily:F.cond, fontSize:18}}>{r.full_name}</b> <span style={{color:C.mid, fontSize:13}}>{[r.brokerage, [r.area, r.state].filter(Boolean).join(", ")].filter(Boolean).join(" · ")}</span></div>
+                  <div style={{display:"flex", gap:6, flexWrap:"wrap"}}>
+                    {r.profile_url && <a href={r.profile_url} target="_blank" rel="noreferrer" style={btn}>Profile</a>}
+                    {r.status !== "replied" && <button style={btn} onClick={() => upd(r, { status:"replied", replied_at:new Date().toISOString(), next_date:null })}>Got a reply</button>}
+                    {!["skipped", "no reply"].includes(r.status) && <button style={btn} onClick={() => upd(r, { status:"skipped", next_date:null })}>Skip</button>}
+                  </div>
+                </div>
+                {r.hook && <div style={{fontSize:13, marginTop:6}}><span style={lbl}>Hook </span>{r.hook}</div>}
+                {r.last_message && <div style={{fontSize:13, marginTop:6, whiteSpace:"pre-wrap", color:C.ink}}><span style={lbl}>Last sent </span>{r.last_message}</div>}
+                {r.notes && <div style={{fontSize:12, marginTop:6, color:C.mid}}>{r.notes}</div>}
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
