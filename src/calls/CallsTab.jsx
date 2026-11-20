@@ -12,6 +12,7 @@ import { personFirst, sunbizUrl, isEntity } from "../radar/investorPlaybook.js";
 import { LeadStory, useLead } from "../contacts/InvestorPanel.jsx";
 import AgentResearch from "../contacts/AgentResearch.jsx";
 import RefiCalendar from "./RefiCalendar.jsx";
+import EquityAsk from "./EquityAsk.jsx";
 
 const C = { bg:"#f5f0e8", card:"#faf7f2", ink:"#1c1a17", mid:"#6b6358", light:"#a89e92", rule:"#e0d8cc", green:"#1e6e4a", amber:"#b05e0d", amberBg:"#fdf0e0", greenBg:"#e6f2ea" };
 const F = { mono:"'DM Mono',monospace", cond:"'Barlow Condensed',sans-serif", body:"'Barlow',sans-serif" };
@@ -274,6 +275,7 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
       {(sel.contact_type || "") === "agent" && <AgentResearch c={sel} compact/>}
       {isInvestor(sel) && <LeadStory c={sel} lead={invLead} contacts={contacts} onOpen={onOpen}/>}
       {scripts?.playbook && <Playbook pb={scripts.playbook}/>}
+      {!isInvestor(sel) && <EquityAsk userId={userId} c={sel} setContacts={setContacts} onLogged={() => setNoteBump((n) => n + 1)}/>}
       {sel.last_contacted === today() && !follow && (
         <div style={{display:"flex", gap:8, alignItems:"center", marginBottom:10, padding:"9px 12px", borderRadius:8, background:"#fff", border:`1px solid ${C.rule}`}}>
           <span style={{fontFamily:F.mono, fontSize:12}}>Logged today: <b>{sel.outcome}</b></span>

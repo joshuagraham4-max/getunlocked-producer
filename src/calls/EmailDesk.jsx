@@ -1,5 +1,6 @@
 // Reconnect emails: 3 personal emails per contact, about 10 a day, sent by hand from Joshua's own mail app.
 // Priority: agents and clients he has worked with, then his other clients, then other agents, leads, past LO fundings last.
+import EquityAsk from "./EquityAsk.jsx";
 import { useState, useMemo, useEffect } from "react";
 import { supabase } from "../supabase.js";
 import { today, addDays, fullName, BOOKING, MY_PHONE, CTA, isInvestor } from "../radar/engine.js";
@@ -256,6 +257,7 @@ export default function EmailDesk({ userId, contacts, setContacts, callIds, wide
           {!sel.email_bad && <button onClick={bounced} style={{...btn, padding:"4px 12px", marginLeft: canUndo(sel.id) ? 0 : "auto"}}>Bounced</button>}
           <button onClick={goNext} style={{...btnG, padding:"4px 12px", marginLeft: canUndo(sel.id) || !sel.email_bad ? 0 : "auto"}}>Next person</button>
         </div>
+        {sel.outcome === "replied to email" && <EquityAsk userId={userId} c={sel} setContacts={setContacts}/>}
         {sentToday[sel.id]?.note && <>
           <div style={{fontFamily:F.cond, fontWeight:700, fontSize:12, letterSpacing:"0.16em", textTransform:"uppercase", color:C.light, marginTop:14}}>What you sent</div>
           <textarea readOnly value={sentToday[sel.id].note} rows={12} style={{...inp, marginTop:6, lineHeight:1.5, background:"#f7f4ee", fontFamily:F.body}}/>

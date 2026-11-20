@@ -1,4 +1,5 @@
 // Contacts CRM — list, filters, full detail/edit, loans, linked people, duplicate review.
+import EquityAsk from "../calls/EquityAsk.jsx";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "../supabase.js";
 import HowTo from "../HowTo.jsx";
@@ -359,6 +360,7 @@ function Detail({ c, contacts, setContacts, userId, profileName, back, backLabel
           <Field label="Follow-up date" type="date" value={c.follow_up_date} onSave={f("follow_up_date")}/>
           <Field label="Last outcome" value={c.outcome} options={["", "talked", "voicemail", "no answer", "booked", "not interested", "wrong number"]} onSave={f("outcome")}/>
         </div>
+        {!isInvestorLead(c) && <EquityAsk userId={userId} c={c} setContacts={setContacts} onLogged={() => setHistBump((n) => n + 1)} compact/>}
         <Field label="About them (permanent notes)" value={c.contact_note} onSave={f("contact_note")}/>
         <LogNote userId={userId} contactId={c.id} onSaved={() => { setHistBump((n) => n + 1); if (contactable) save({ last_contacted:today() }); }}/>
         <ContactHistory userId={userId} contactId={c.id} bump={histBump} startOpen />
