@@ -44,6 +44,9 @@ export default function PartnerLander({ contact: c }) {
   const copy = async (k, t) => { try { await navigator.clipboard.writeText(t); setCopied(k); setTimeout(() => setCopied(""), 1500); } catch {} };
 
   const url = page ? `${SITE}/p/${page.slug}` : "";
+  const editUrl = page && page.edit_token ? `${SITE}/pe/${page.edit_token}` : "";
+  const client = page ? `${SITE}/pl/${page.slug}` : "";
+  const setup = !page ? "" : `Hi ${page.first_name}, two quick things so your pages carry your name:\n\n1. Your private link (keep it to yourself). Add your photo, firm logo and contact info: ${editUrl}\n\n2. Turn on lead alerts: install the free app ntfy, tap +, and type ${page.ntfy_topic}. Every lead from your client page buzzes your phone, and I get it too.\n\nYour client page, to share or boost: ${client}\n\n- Joshua`;
   const desk = page ? `${SITE}/scenario-desk?ref=PTR-${page.slug}&for=${page.kind}` : "";
   const first = page ? page.first_name : "";
   const welcome = !page ? "" : page.kind === "attorney"
@@ -70,6 +73,9 @@ export default function PartnerLander({ contact: c }) {
         <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginTop:8 }}>
           <button style={ghost} onClick={() => copy("welcome", welcome)}>{copied === "welcome" ? "Copied" : "Copy welcome text"}</button>
           <button style={ghost} onClick={() => copy("link", url)}>{copied === "link" ? "Copied" : "Copy their page link"}</button>
+          {editUrl && <button style={ghost} onClick={() => copy("setup", setup)}>{copied === "setup" ? "Copied" : "Copy setup text (edit link + alerts)"}</button>}
+          {editUrl && <button style={ghost} onClick={() => copy("edit", editUrl)}>{copied === "edit" ? "Copied" : "Copy their edit link"}</button>}
+          <button style={ghost} onClick={() => copy("client", client)}>{copied === "client" ? "Copied" : "Copy their client page"}</button>
           <button style={ghost} onClick={() => copy("desk", desk)}>{copied === "desk" ? "Copied" : "Copy their desk link"}</button>
           <button style={ghost} onClick={toggle}>{page.active ? "Turn page off" : "Turn page on"}</button>
         </div>

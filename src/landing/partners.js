@@ -17,7 +17,7 @@ export async function loadPartner(slug) {
   try {
     const { data } = await supabase.rpc("get_partner_page", { p_slug: s });
     const r = data && data[0];
-    if (r) return asOverride({ slug: r.slug, first: r.first_name, firm: r.firm || "", type: r.kind });
+    if (r) return asOverride({ slug: r.slug, first: r.first_name, last: r.last_name || "", firm: r.firm || "", type: r.kind, photo: r.photo_url || "", logo: r.logo_url || "" });
   } catch {}
   return findPartner(s);
 }

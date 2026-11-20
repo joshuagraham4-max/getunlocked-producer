@@ -19,6 +19,14 @@
       "destination": "/partner"
     },
     {
+      "source": "/pe/:token",
+      "destination": "/partner-edit"
+    },
+    {
+      "source": "/pl/:slug",
+      "destination": "/partner-client"
+    },
+    {
       "source": "/",
       "has": [
         {

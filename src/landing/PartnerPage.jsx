@@ -97,7 +97,7 @@ export default function PartnerPage() {
 
   return (
     <div className="pp"><style>{CSS}</style>
-      <div className="pp-top"><div><LogoLink to={location.pathname + location.search}/><TopButtons hideAgent noApply/></div></div>
+      <div className="pp-top"><div><LogoLink to={location.pathname + location.search}/><TopButtons hideAgent noApply extra={p && p.logo ? <img src={p.logo} alt={p.firm} style={{ maxHeight:38, maxWidth:110, objectFit:"contain" }}/> : null}/></div></div>
 
       <section className="pp-hero">
         <div className="pp-hero-l">
@@ -108,6 +108,8 @@ export default function PartnerPage() {
           <p className="pp-sub pp-ln" style={{ animationDelay:"1100ms" }}>{t.sub}</p>
         </div>
         <aside className="pp-photos">
+          {p && p.photo && <img src={p.photo} alt={p.first} style={{ display:"block", width:"100%", height:170, objectFit:"cover", objectPosition:"50% 15%", animation:"ppph 1.4s 1.1s both" }}/>}
+          {p && p.photo && <div className="cap">{p.first} {p.last || ""}<br/><span>{p.firm}</span></div>}
           <div className="jbox"><img src="/brand/joshua-plum-suit.jpg" alt="Joshua Graham"/></div>
           <div className="cap">Joshua Graham<br/><span>NMLS #169809</span><br/><a href={`tel:${BRAND.phone.replace(/\D/g, "")}`}>{BRAND.phone}</a></div>
           <div className="cap"><WhoLink label="Who is Joshua?" style={{ color:"#fff", fontSize:11 }}/></div>

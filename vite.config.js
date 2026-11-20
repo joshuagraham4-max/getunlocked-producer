@@ -19,6 +19,8 @@ export default defineConfig({
         'equipment-apply': resolve(__dirname, 'equipment-apply.html'),
         'scenario-desk': resolve(__dirname, 'scenario-desk.html'),
         partner: resolve(__dirname, 'partner.html'),
+        'partner-edit': resolve(__dirname, 'partner-edit.html'),
+        'partner-client': resolve(__dirname, 'partner-client.html'),
       },
     },
   },
