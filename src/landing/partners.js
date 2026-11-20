@@ -121,3 +121,23 @@ export const PARTNER_DESK = {
     notes: "Anything else (optional)",
   },
 };
+
+// Outreach scripts (the sale is three moves: opener, ask, their page). [brackets] = fill in.
+// Shown in Contacts → Referral Partner → Partner page box, with copy buttons. Metric: scenarios submitted, not replies.
+export function partnerScripts(kind, first, url) {
+  const f = first || "[Name]", link = url || "[their page link]";
+  if (kind === "attorney") return [
+    ["1. Opener (DM)", `Hi ${f}, your post on [topic] was sharp, especially [the specific point]. Most people skip that part.`],
+    ["2. The ask (DM)", `I'm building a small close circle of family law attorneys. Could I send you a quick tool for one pain point: the house and mortgage piece of a settlement?`],
+    ["3. When they say yes", `Here it is: ${link}\n\nWhen a client is keeping the house, text me the draft terms or just a name and number. In 2 hours or less I'll tell you if the house terms will close, and what to change if not. Then I take it from there.`],
+    ["4. When they reply (go deeper)", `Glad it's useful. Quick question so I'm useful to you: when the house is in play, who do you lean on today for the mortgage side?\n\nAnd do you put out a newsletter? Who's sponsoring it right now?`],
+    ["Call version (30 seconds)", `Hi ${f}, Joshua Graham, Graham Financial. I'll be quick. I help family law attorneys with the house and mortgage piece of a settlement: I read the draft before it's signed and tell you in 2 hours or less if the house terms will close. 25 years of complex files. Can I text you a link to my desk so you have it the next time a client wants to keep the house?\n\n(If yes) Who do you use today for the mortgage side? And do you run a newsletter, who's sponsoring it right now?`],
+  ];
+  return [
+    ["1. Opener (DM)", `Hi ${f}, your post on [topic] was sharp, especially [the specific point]. Most people skip that part.`],
+    ["2. The ask (DM)", `I'm building a small close circle of advisors I trust. Could I send you a quick tool for one pain point: the mortgage piece of a client's plan?`],
+    ["3. When they say yes", `Here it is: ${link}\n\nWhen a client's mortgage comes up, put it on my desk from there, or just text me a name and number. Mortgage only, you see everything first, and your client comes back to you at closing.`],
+    ["4. When they reply (go deeper)", `Glad it's useful. Quick question so I'm useful to you: when a client's mortgage comes up, who handles it today?\n\nAnd do you put out a newsletter? Who's sponsoring it right now?`],
+    ["Call version (30 seconds)", `Hi ${f}, Joshua Graham, Graham Financial. I'll be quick. I take the mortgage and debt piece of a client's plan off advisors' plates: mortgage only, no asset requirements, and the client comes back to you at closing. 25 years of complex files. Can I text you a link to my desk so you have it the next time a client's mortgage comes up?\n\n(If yes) Who handles the mortgage side for your clients today? And do you run a newsletter, who's sponsoring it right now?`],
+  ];
+}

@@ -3,6 +3,7 @@
 // Same pattern as AgentLander.jsx. Needs supabase/partner_pages_v1.sql.
 import { useEffect, useState } from "react";
 import { supabase } from "../supabase.js";
+import { partnerScripts } from "../landing/partners.js";
 
 const C = { mid:"#6b6358", rule:"#e0d8cc", ink:"#1c1a17", green:"#1e6e4a" };
 const F = { mono:"'DM Mono',monospace", body:"'Barlow',sans-serif" };
@@ -52,6 +53,7 @@ export default function PartnerLander({ contact: c }) {
   const box = { marginTop:14, border:`1px solid ${C.rule}`, borderRadius:8, background:"#fff", padding:"10px 12px" };
   const lab = { fontFamily:F.mono, fontSize:10, letterSpacing:".12em", color:C.mid, textTransform:"uppercase" };
   if (page === undefined) return null;
+  const scripts = partnerScripts(page ? page.kind : form.kind, (c.first_name || "").trim(), url);
   return (
     <div style={box}>
       <div style={lab}>Partner page (planner or attorney)</div>
@@ -74,6 +76,19 @@ export default function PartnerLander({ contact: c }) {
         <div style={{ marginTop:8, color:C.mid, fontSize:12 }}>Scenarios they send land here on their timeline and buzz your phone as "Partner scenario". Their lead-alert code for later: {page.ntfy_topic}</div>
       </div>)}
       {msg && <div style={{ marginTop:8, color:"#a33", fontSize:12 }}>{msg}</div>}
+      <details style={{ marginTop:12 }}>
+        <summary style={{ ...lab, cursor:"pointer" }}>Outreach script ({(page ? page.kind : form.kind) === "attorney" ? "attorney" : "planner"})</summary>
+        {scripts.map(([title, text], i) => (
+          <div key={i} style={{ marginTop:10, borderTop:`1px solid ${C.rule}`, paddingTop:8 }}>
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", gap:8 }}>
+              <b style={{ fontFamily:F.body, fontSize:13 }}>{title}</b>
+              <button style={{ ...ghost, padding:"4px 9px" }} onClick={() => copy("s" + i, text)}>{copied === "s" + i ? "Copied" : "Copy"}</button>
+            </div>
+            <div style={{ whiteSpace:"pre-wrap", fontFamily:F.body, fontSize:13, color:C.ink, marginTop:4, lineHeight:1.45 }}>{text}</div>
+          </div>
+        ))}
+        <div style={{ marginTop:8, color:C.mid, fontSize:12 }}>Swap the [brackets] for a real compliment on their post. Win = a scenario on your desk, not a reply.</div>
+      </details>
     </div>
   );
 }
