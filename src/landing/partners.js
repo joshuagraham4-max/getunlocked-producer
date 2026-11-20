@@ -30,7 +30,7 @@ export const PARTNER_COPY = {
   planner: {
     eyebrow: "FOR FINANCIAL ADVISORS",
     headline: "Your client's mortgage, handled.",
-    sub: "25 years of complex files. Hand me the mortgage nobody wants to touch. I hand it back to you perfected, and your client back to you at closing.",
+    sub: "25 years of complex files. Hand me the mortgage and debt piece of your client's plan. I handle it start to finish, you keep the relationship, and your client comes back to you with it done.",
     pains: "What a bad mortgage costs you: assets lured to a bank, documents asked for three times, a denial the week of closing, and a client who blames the referral.",
     lines: ["Your client's", "mortgage,", "handled."],
     rows: [
@@ -56,7 +56,7 @@ export const PARTNER_COPY = {
   attorney: {
     eyebrow: "FOR FAMILY LAW ATTORNEYS",
     headline: "One text. House handled.",
-    sub: "25 years of complex files. Send me the draft before it's signed. I make sure the house terms can actually close, then I run the loan and hand it back to you done.",
+    sub: "25 years of complex files. Hand me the house and mortgage piece of the divorce you're working through. I get it solved start to finish, so you can focus on the rest of the case.",
     pains: "Where the house breaks a settlement: wording a lender reads differently, a deadline nobody can hit, support income that doesn't count, and a servicer that stalls for months. Then the client calls you.",
     lines: ["One text.", "House", "handled."],
     rows: [
@@ -86,6 +86,38 @@ export const PARTNER_TAGS = {
   attorney: ["Client wants to keep the house", "Buying out the spouse", "Selling the house", "Decree says refinance", "Low rate they want to keep", "Relies on support income", "Deadline coming up", "Not sure yet"],
 };
 export const PARTNER_PLACEHOLDER = {
-  planner: "Client retiring in 8 months, wants to buy a smaller place before selling. Most income is from the portfolio. Wants to keep the payment under $3,000.",
-  attorney: "Wife keeps the house. Joint FHA loan at 3.1%, about $310K owed. Buyout to husband around $90K. Draft says refinance within 90 days. She gets $2,400/mo maintenance starting next month.",
+  planner: "Anything the questions didn't cover: a liquidity event, a property to sell first, a payment ceiling.",
+  attorney: "Anything the questions didn't cover: a second property, a HELOC, a date that can't move.",
+};
+
+// Tailored desk questions per profession. opts = tap one; ph = short typed answer.
+export const PARTNER_DESK = {
+  attorney: {
+    title: "Send me the house terms.",
+    promise: "In 2 hours or less: will the house terms close, and what to change if not.",
+    qs: [
+      { id:"case", label:"Where's the case?", opts:["Filed", "In mediation", "Draft agreement", "Decree entered"] },
+      { id:"keep", label:"Who's keeping the home?", opts:["Your client", "The spouse", "Selling it", "Undecided"] },
+      { id:"loan", label:"Loan type, if known", opts:["FHA", "VA", "Conventional", "Not sure"] },
+      { id:"owed", label:"What's owed and the rate, roughly", ph:"About $310K at 3.1%" },
+      { id:"buyout", label:"Buyout to the other spouse, if any", ph:"About $90K" },
+      { id:"support", label:"Support in the agreement: amount, and when it started", ph:"$2,400/mo maintenance, starts next month" },
+      { id:"income", label:"Your client's income", opts:["W-2", "Self-employed", "Commission", "Retired"] },
+      { id:"deadline", label:"Deadline in the draft", ph:"Refinance within 90 days of decree" },
+    ],
+    notes: "Anything else (optional)",
+  },
+  planner: {
+    title: "Throw any scenario past me.",
+    promise: "Usually same day: options with payment and cash-flow impact, ready for the plan.",
+    qs: [
+      { id:"goal", label:"Your client wants to", opts:["Buy", "Refinance", "Use equity", "Downsize", "Pay off debt", "Second home or rental"] },
+      { id:"stage", label:"Stage", opts:["Working", "Retiring within 2 years", "Retired"] },
+      { id:"income", label:"Income", opts:["W-2", "Business owner", "Portfolio or retirement income", "Commission"] },
+      { id:"matters", label:"What matters most", opts:["Lowest payment", "Keep assets invested", "Pay off faster", "Cash flow"] },
+      { id:"numbers", label:"Rough home value, balance and rate", ph:"Worth $850K, owes $300K at 6.9%" },
+      { id:"timeline", label:"Timeline", ph:"Next 6 months" },
+    ],
+    notes: "Anything else (optional)",
+  },
 };
