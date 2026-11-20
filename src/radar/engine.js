@@ -273,6 +273,9 @@ export function scriptsFor(c, i, reason, me = "Joshua Graham") {
         ? `Hey ${first}, ${me}. I've got those numbers we talked about. Got a minute?`
         : `Hey ${first}, ${me} again. Wanted to catch you live this time. Quick question for you: how's everything with the house?`;
       short = `Following up from our last conversation`; break;
+    case "replied":
+      say = `Hey ${first}, ${me}. Saw your message on Facebook and wanted to connect live. How's business right now?`;
+      short = `Saw your reply on Facebook and wanted to connect`; break;
     case "agent":
       say = worked
         ? `Hey ${first}, ${me}. It's been too long since our last closing together. What are you working on right now? Anybody stuck I can help get to the table?`
@@ -286,14 +289,14 @@ export function scriptsFor(c, i, reason, me = "Joshua Graham") {
   }
   const vmText = `Hi ${first}, it's ${me}. Just tried you. ${short}. Call me back at ${MY_PHONE}, book a time at ${BOOKING}, or apply anytime at ${APPLY}`;
   const emailSubject = reason?.key === "bday" ? "Happy birthday!" : reason?.key === "rate" ? "Quick rate check" : "Checking in";
-  const emailBody = `Hi ${first},\n\nI just tried giving you a call. ${short}.\n\n${CTA}\n\n${me}\nGraham Financial`;
+  const emailBody = `Hi ${first},\n\nI just tried giving you a call. ${short}.\n\n${CTA}`;
   const invKind = tags.includes("investor lead") ? Object.keys(PLAYBOOKS).find((k) => tags.includes(k)) || null : null;
   if (invKind) { const f = investorFollowUps(c, invKind, me, MY_PHONE, BOOKING); return { say, vmText:f.vmText, emailSubject:f.emailSubject, emailBody:f.emailBody, playbook:PLAYBOOKS[invKind] }; }
   return { say, vmText, emailSubject, emailBody };
 }
 
-export const REASON_COLOR = { rate:"#9e3020", bday:"#5b3fa6", equity:"#1e6e4a", inherited:"#1a4f8a", followup:"#b05e0d", newlead:"#b05e0d", anniv:"#1a6570", watch:"#b05e0d", agent:"#7a6a1e", checkin:"#6b6358" };
-export const REASON_BG = { rate:"#fbeae7", bday:"#eeebf8", equity:"#e8f4ee", inherited:"#e6eef9", followup:"#fdf0e0", newlead:"#fdf0e0", anniv:"#e4f2f4", watch:"#fdf0e0", agent:"#f8f4e3", checkin:"#f0ece5" };
+export const REASON_COLOR = { replied:"#1a4f8a", rate:"#9e3020", bday:"#5b3fa6", equity:"#1e6e4a", inherited:"#1a4f8a", followup:"#b05e0d", newlead:"#b05e0d", anniv:"#1a6570", watch:"#b05e0d", agent:"#7a6a1e", checkin:"#6b6358" };
+export const REASON_BG = { replied:"#e6eef9", rate:"#fbeae7", bday:"#eeebf8", equity:"#e8f4ee", inherited:"#e6eef9", followup:"#fdf0e0", newlead:"#fdf0e0", anniv:"#e4f2f4", watch:"#fdf0e0", agent:"#f8f4e3", checkin:"#f0ece5" };
 
 // Log an outcome: touch row + contact fields. Returns the updated contact.
 export async function logOutcome(userId, c, result, note, followUp, channel = "call") {
@@ -326,6 +329,6 @@ export function wrongNumberEmail(c, me = "Joshua Graham") {
   const first = personFirst(c) || "there";
   return {
     subject: "Trying to reach you",
-    body: `Hi ${first},\n\nI tried calling you at ${c.phone || "the number I have on file"}, and it looks like that number isn't yours anymore. What's the best number to reach you?\n\nThanks,\n${me}\nAVP / Regional Loan Originator\nGraham Financial powered by Zero Point Mortgage Services\nNMLS 169809 | ${MY_PHONE}`,
+    body: `Hi ${first},\n\nI tried calling you at ${c.phone || "the number I have on file"}, and it looks like that number isn't yours anymore. What's the best number to reach you?\n\nThanks,`,
   };
 }

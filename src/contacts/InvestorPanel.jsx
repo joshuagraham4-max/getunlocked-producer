@@ -91,10 +91,10 @@ export function useLead(contactId) {
 
 export const agentEmail = (agentFirst, addr, leasing) => leasing ? {
   subject: addr,
-  body: `Hi ${agentFirst || "there"},\n\nSaw the unit at ${addr} came off the rental market. Is the owner keeping the building long term?\n\nI'm a local loan originator working with investors here in Sarasota and Manatee. I help owners who are holding rentals move out of short-term loans and into long-term rental financing. If the owner's in that spot, I'd love an introduction, and I'm glad to send leasing clients your way when I can.\n\nWorth a quick call?\n\nJoshua Graham\nAVP / Regional Loan Originator\nGraham Financial powered by Zero Point Mortgage Services\nNMLS 169809 | 720-468-6872`,
+  body: `Hi ${agentFirst || "there"},\n\nSaw the unit at ${addr} came off the rental market. Is the owner keeping the building long term?\n\nI'm a local loan originator working with investors here in Sarasota and Manatee. I help owners who are holding rentals move out of short-term loans and into long-term rental financing. If the owner's in that spot, I'd love an introduction, and I'm glad to send leasing clients your way when I can.\n\nWorth a quick call?`,
 } : {
   subject: addr,
-  body: `Hi ${agentFirst || "there"},\n\nSaw the listing on ${addr} fell through. What's up with the property? Is the owner still looking to sell, or would they consider holding it as a rental for now?\n\nI'm a local loan originator working with investors here in Sarasota and Manatee. When a flip doesn't sell, I help owners move out of the short-term loan into long-term rental financing, which takes the time pressure off. If your seller's in that spot, I'm glad to help, and you stay their agent on it either way.\n\nWorth a quick call?\n\nJoshua Graham\nAVP / Regional Loan Originator\nGraham Financial powered by Zero Point Mortgage Services\nNMLS 169809 | 720-468-6872`,
+  body: `Hi ${agentFirst || "there"},\n\nSaw the listing on ${addr} fell through. What's up with the property? Is the owner still looking to sell, or would they consider holding it as a rental for now?\n\nI'm a local loan originator working with investors here in Sarasota and Manatee. When a flip doesn't sell, I help owners move out of the short-term loan into long-term rental financing, which takes the time pressure off. If your seller's in that spot, I'm glad to help, and you stay their agent on it either way.\n\nWorth a quick call?`,
 };
 
 // "What happened" + why + watch, and the listing/leasing agent one tap away. Used on the Calls card and the contact.

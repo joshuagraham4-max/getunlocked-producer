@@ -68,6 +68,12 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
   useEffect(() => { loadCalled(); }, [loadCalled]);
   useEffect(() => { if (!userId) return; supabase.from("smart_money_posts").select("slot").eq("user_id", userId).like("slot", "callskip:%").gte("day", today())
     .then(({ data: r, error }) => { if (!error && r) setMonthSkips(new Set(r.map((x) => x.slot.slice(9)))); }); }, [userId]);
+  // Replies first (Joshua, Nov 20): anyone who answered a Facebook DM (agents, partners) sits at the top of Calls
+  // until he logs an outcome on them after the reply.
+  const [replies, setReplies] = useState([]);
+  useEffect(() => { if (!userId) return; supabase.from("agent_outreach").select("contact_id,full_name,replied_at,notes,audience")
+    .eq("user_id", userId).eq("status", "replied").not("contact_id", "is", null).gte("replied_at", new Date(Date.now() - 21 * 864e5).toISOString())
+    .order("replied_at", { ascending:false }).then(({ data: r, error }) => { if (!error && r) setReplies(r); }); }, [userId]);
   const radar = useMemo(() => data ? computeRadar(contacts, data.loans, data.rates, data.settings) : null, [contacts, data]);
   const byId = useMemo(() => Object.fromEntries(contacts.map((c) => [c.id, c])), [contacts]);
 
@@ -90,7 +96,20 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
 
   // Investors are live (not cached): new imports and follow-ups show up right away.
   const invQ = useMemo(() => investorQueue(contacts), [contacts]);
-  const all = useMemo(() => queue ? [...queue.filter((x) => !isInvestor(byId[x.id])), ...invQ] : null, [queue, invQ, byId]);
+  const repQ = useMemo(() => {
+    const seen = new Set(); const out = [];
+    for (const r of replies) { const c = byId[r.contact_id]; if (!c || seen.has(c.id) || monthSkips.has(c.id)) continue; seen.add(c.id);
+      const day = String(r.replied_at).slice(0, 10);
+      if (c.last_contacted && c.last_contacted > day && c.last_contacted !== today()) continue;   // handled since the reply
+      const segs = String(r.notes || "").split(" | "); const said = ([...segs].reverse().find((x) => /repl/i.test(x)) || "").replace(/^\s*\d{4}-\d{2}-\d{2}\s*/, "").slice(0, 140);
+      const who = r.audience && r.audience !== "agent" ? r.audience : "agent";
+      out.push({ id:c.id, group:"replies", reason:{ key:"replied", score:10000, title:`Replied on Facebook ${day.slice(5).replace("-", "/")} (${who})`, detail:said, also:[] } }); }
+    return out;
+  }, [replies, byId, monthSkips]);
+  const all = useMemo(() => { if (!queue) return null; const rep = new Set(repQ.map((x) => x.id));
+    return [...repQ, ...queue.filter((x) => !isInvestor(byId[x.id]) && !rep.has(x.id)), ...invQ.filter((x) => !rep.has(x.id))]; }, [queue, invQ, byId, repQ]);
+  const repJumped = useRef(false);
+  useEffect(() => { if (!repJumped.current && repQ.length) { repJumped.current = true; setSeg("replies"); setSelId(null); } }, [repQ.length]);
   const segQ = useMemo(() => all ? all.filter((x) => x.group === seg) : null, [all, seg]);
   const reach = useMemo(() => { const cut = addDays(-21); const pool = contacts.filter((c) => !c.do_not_contact && c.phone && c.outcome !== "wrong number" && ["past_client","lead","agent"].includes(c.contact_type || "past_client") && !isInvestor(c));
     return { total: pool.length, done: pool.filter((c) => c.last_contacted && c.last_contacted >= cut).length }; }, [contacts]);
@@ -106,7 +125,7 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
   const invLead = useLead(sel && isInvestor(sel) ? sel.id : null);
   const item = all?.find((x) => x.id === selId);
   const info = sel ? radar?.info[sel.id] : null;
-  const reason = sel ? (reasonFor(sel, info) || item?.reason) : null;
+  const reason = sel ? (item?.group === "replies" ? item.reason : (reasonFor(sel, info) || item?.reason)) : null;
   const scripts = sel ? scriptsFor(sel, info, item?.reason || reason, profileName || "Joshua Graham") : null;
   useEffect(() => { setSay(scripts?.say || ""); setNote(""); setFu(""); setFollow(null); }, [selId]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -344,7 +363,7 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
           </div></>}
       </div>
       <div style={{display:"flex", gap:8, marginBottom:14, flexWrap:"wrap"}}>
-        {[["customers",`Customers ${segDone("customers")}/${segN("customers")}`],["agents",`Agents ${segDone("agents")}/${segN("agents")}`],["investors",`Investors ${segDone("investors")}/${segN("investors")}`],["emails","Emails"]].map(([k, l]) => (
+        {[...(repQ.length ? [["replies",`Replies first ${segDone("replies")}/${segN("replies")}`]] : []),["customers",`Customers ${segDone("customers")}/${segN("customers")}`],["agents",`Agents ${segDone("agents")}/${segN("agents")}`],["investors",`Investors ${segDone("investors")}/${segN("investors")}`],["emails","Emails"]].map(([k, l]) => (
           <button key={k} onClick={() => { setSeg(k); setSelId(null); }} style={{...(seg === k ? btnG : btn), padding:"9px 18px", fontSize:15}}>{l}</button>
         ))}
       </div>

@@ -16,11 +16,7 @@ const inp = { padding:"8px 10px", borderRadius:6, border:`1px solid ${C.rule}`, 
 const TARGETS = [5, 10, 15, 20, 30, 40];
 const GAP = { 1:4, 2:7 };   // days to wait after email 1 and email 2
 
-const SIG = `Joshua Graham
-AVP | Regional Loan Originator
-Graham Financial, powered by Zero Point Mortgage Services
-${MY_PHONE} | approvedbyjoshua.com
-NMLS 169809 | Company NMLS 1216108`;
+// No signature block: Joshua's mail app adds his signature (Nov 20).
 const STOP = `If you'd rather I not reach out, just reply "stop" and I won't.`;
 
 const workedWith = (c) => (c.tags || []).includes("closed deal together") || (c.buckets || []).some((b) => /Closed/.test(b) && !/Never Closed/.test(b));
@@ -50,25 +46,19 @@ ${w ? "It's been too long since our last closing together." : "It's been a while
 
 I'm updating my partner list and want to make sure I have you right. ${c.company ? `Still with ${c.company}? ` : ""}Best cell for you?
 
-${CTA}
-
-${SIG}` };
+${CTA}` };
     if (step === 2) return { subject:"One more closing this year", body:`Hi ${first},
 
 Quick thought. A lot of the buyers I talk to think they can't buy yet: they think they need more saved, they're self-employed, or they need to sell before they can buy. Most of them are closer than they think.
 
 I'd like to send some of those buyers your way and make sure the ones you already have get to the closing table. Worth a quick conversation?
 
-${CTA}
-
-${SIG}` };
+${CTA}` };
     return { subject:"15 minutes?", body:`Hi ${first},
 
 I'd love 15 minutes to hear what you're working on and show you how I take care of the buyers you send me. No pitch, just two people who should be doing more business together.
 
 ${CTA}
-
-${SIG}
 
 ${STOP}` };
   }
@@ -85,9 +75,7 @@ I'm also updating my info on you. Did anything change? New number, new email, a 
 
 No agenda, just checking in.
 
-${CTA}
-
-${SIG}` };
+${CTA}` };
   }
   if (step === 2) return { subject:"Want to see what your home is worth now?", body:`Hi ${first},
 
@@ -95,9 +83,7 @@ As a mortgage broker I have access to the property value tool lenders use, which
 
 Want me to run it? Just reply "yes."
 
-${CTA}
-
-${SIG}` };
+${CTA}` };
   return { subject:"What's next for you?", body:`Hi ${first},
 
 Whatever is next, whether that's moving up, downsizing, using your equity, buying a rental, or helping your kids buy their first home, I'd love to help you build the plan.
@@ -105,8 +91,6 @@ Whatever is next, whether that's moving up, downsizing, using your equity, buyin
 I'm a real person, not an automated email, and it's free advice. No pressure.
 
 ${CTA}
-
-${SIG}
 
 ${STOP}` };
 }
