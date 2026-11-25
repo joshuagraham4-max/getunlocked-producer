@@ -10,7 +10,7 @@ import QuickUpdate from "./QuickUpdate.jsx";
 import Playbook from "./Playbook.jsx";
 import { personFirst, sunbizUrl, isEntity } from "../radar/investorPlaybook.js";
 import { LeadStory, useLead } from "../contacts/InvestorPanel.jsx";
-import AgentResearch from "../contacts/AgentResearch.jsx";
+import AgentResearch, { AgentStats } from "../contacts/AgentResearch.jsx";
 import RefiCalendar from "./RefiCalendar.jsx";
 import EquityAsk from "./EquityAsk.jsx";
 
@@ -239,7 +239,7 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
   );
 
   const facts = !sel ? [] : (sel.contact_type === "agent"
-    ? [["BROKERAGE", sel.company || "—"], ["ROLE", sel.agent_role || "—"], ["CLOSED DEALS", (sel.tags || []).includes("closed deal together") ? "Yes" : "—"], ["LAST CALL", sel.last_contacted || "Never"]]
+    ? [["BROKERAGE", sel.company || "—"], ["ROLE", sel.agent_role || "—"], ["SALES (12 MO)", sel.agent_stats?.sales_12m != null ? String(sel.agent_stats.sales_12m) : (sel.tags || []).includes("closed deal together") ? "Closed with you" : "—"], ["LAST CALL", sel.last_contacted || "Never"]]
     : [["NOTE RATE", info?.rate ? `${info.rate}%` : "—"], ["LOAN TYPE", info?.type ? `${info.type}${info.est ? " (est.)" : ""}` : "—"], ["FUNDED", info?.funded ? fmtMo(info.funded) : "—"], ["LAST CALL", sel.last_contacted || "Never"]]);
 
   const Focus = !sel ? <div style={{...card, padding:30, fontFamily:F.mono, color:C.light}}>Pick someone from the list.</div> : (
@@ -274,6 +274,7 @@ export default function CallsTab({ userId, contacts, setContacts, profileName, o
       <div style={{display:"grid", gridTemplateColumns: wide ? "repeat(4,1fr)" : "repeat(2,1fr)", gap:10, margin:"14px 0"}}>
         {facts.map(([k, v]) => <div key={k} style={{background:C.bg, borderRadius:8, padding:"10px 12px"}}><div style={{fontFamily:F.mono, fontSize:10, color:C.light}}>{k}</div><div style={{fontFamily:F.cond, fontWeight:700, fontSize:20}}>{v}</div></div>)}
       </div>
+      {sel.contact_type === "agent" && <AgentStats c={sel}/>}
       <div style={lbl}>Say this</div>
       <textarea value={say} onChange={(e) => setSay(e.target.value)} rows={4} style={{...inp, width:"100%", marginTop:6, fontSize:15, lineHeight:1.55, resize:"vertical", fontFamily:F.body}}/>
       {sel.phone ? <a href={`tel:${digits(sel.phone)}`} style={{display:"block", textAlign:"center", fontFamily:F.cond, fontWeight:800, fontSize:22, letterSpacing:"0.06em", background:C.green, color:"#fff", borderRadius:9, padding:14, margin:"16px 0 12px", textDecoration:"none"}}>

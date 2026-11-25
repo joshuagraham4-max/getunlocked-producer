@@ -66,3 +66,24 @@ export default function AgentResearch({ c, compact }) {
     </div>
   );
 }
+
+// Public production numbers for a replied agent (Zillow / Realtor.com / brokerage page), saved on contacts.agent_stats by the morning run.
+// { sales_12m, total_sales, price_low, price_high, avg_price, reviews, url, source, checked }
+const money = (n) => n == null || n === "" ? null : n >= 1e6 ? `$${(n / 1e6).toFixed(n >= 1e7 ? 0 : 1)}M` : n >= 1e3 ? `$${Math.round(n / 1e3)}K` : `$${n}`;
+export function agentStatsLine(st) {
+  if (!st) return null;
+  const range = st.price_low || st.price_high ? `${money(st.price_low) || "?"}–${money(st.price_high) || "?"}` : null;
+  return [st.sales_12m != null && `${st.sales_12m} sales (12 mo)`, st.total_sales != null && `${st.total_sales} total`, range && `${range} range`, st.avg_price && `avg ${money(st.avg_price)}`, st.reviews != null && `${st.reviews} reviews`].filter(Boolean).join(" · ") || null;
+}
+export function AgentStats({ c }) {
+  const st = c?.agent_stats; if (!st) return null;
+  const line = agentStatsLine(st);
+  return (
+    <div style={{gridColumn:"1 / -1", fontFamily:"'DM Mono',monospace", fontSize:12, color:"#1c1a17", background:"#eef4ef", border:"1px solid #cfe1d5", borderRadius:6, padding:"7px 10px", margin:"6px 0"}}>
+      <span style={{color:"#1e6e4a", fontWeight:700, letterSpacing:"0.08em"}}>{(st.source || "ZILLOW").toUpperCase()}</span>{"  "}
+      {line || "No public sales found"}
+      {st.url && <> · <a href={st.url} target="_blank" rel="noreferrer" style={{color:"#1e6e4a"}}>profile</a></>}
+      {st.checked && <span style={{color:"#a89e92"}}> · checked {st.checked}</span>}
+    </div>
+  );
+}

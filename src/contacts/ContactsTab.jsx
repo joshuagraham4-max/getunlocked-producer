@@ -10,7 +10,7 @@ import AgentMatch from "./AgentMatch.jsx";
 import AgentLander from "./AgentLander.jsx";
 import PartnerLander from "./PartnerLander.jsx";
 import InvestorImport from "../investors/InvestorImport.jsx";
-import AgentResearch, { emailMismatch } from "./AgentResearch.jsx";
+import AgentResearch, { emailMismatch, AgentStats } from "./AgentResearch.jsx";
 import SnapshotPanel, { isSnapshotLead } from "./SnapshotPanel.jsx";
 import { loadRadarData, peekRadarData, computeRadar, reasonFor, priorityScore, REASON_COLOR, REASON_BG } from "../radar/engine.js";
 
@@ -332,6 +332,7 @@ function Detail({ c, contacts, setContacts, userId, profileName, back, backLabel
           <Field label="Email 2" value={c.email_2} href={c.email_2 ? `mailto:${c.email_2}` : null} onSave={f("email_2")}/>
           <Field label={typeOf(c) === "agent" ? "Brokerage" : "Company"} value={c.company} onSave={f("company")}/>
           {typeOf(c) === "agent" && <Field label="Agent role" value={c.agent_role} options={["", "buyer", "seller", "buyer, seller"]} onSave={f("agent_role")}/>}
+          {typeOf(c) === "agent" && <AgentStats c={c}/>}
           <Field label="Birthday (YYYY-MM-DD or MM-DD)" value={c.birthday} onSave={f("birthday")}/>
           <Field label="Mailing address" value={c.address} onSave={f("address")}/>
           <Field label="City" value={c.city} onSave={f("city")}/>
