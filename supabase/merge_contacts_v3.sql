@@ -1,0 +1,9 @@
+-- merge_contacts v3 (Nov 25, 2026): applied live from the SQL editor.
+-- Changes from v2 (supabase/merge_contacts_v2.sql):
+--   * agent_stats carries over: agent_stats = coalesce(k.agent_stats, d.agent_stats)
+--   * contact_merge_log.moved (jsonb) records the ids moved off the dropped contact
+--     (loans, touches, outreach, leads, links_c, links_l, agent_of) so a merge can be undone.
+--   * new function unmerge_contacts(log_id uuid) returns uuid: re-creates the dropped contact from the log,
+--     restores the kept contact to how it was, moves those rows back, and deletes the log row.
+--     Merges made before v3 have no "moved" list and can't be undone this way.
+-- GUP: Contacts > any contact > "Duplicate? Merge" (Merge with…), with an Undo banner right after.

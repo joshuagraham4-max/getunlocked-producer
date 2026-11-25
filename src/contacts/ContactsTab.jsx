@@ -271,7 +271,81 @@ function BucketEditor({ c, contacts, save }) {
   );
 }
 
-function Detail({ c, contacts, setContacts, userId, profileName, back, backLabel, open, links, reloadLinks, createContact }) {
+// ── merge from inside a contact (Nov 25) ────────────────────────────────────────
+// Same engine as the Duplicates screen (merge_contacts): everything from both records ends up on the one you keep,
+// and every merge is logged so it can be undone (unmerge_contacts).
+const normName = (c) => [c.first_name, c.last_name].filter(Boolean).join(" ").toLowerCase().replace(/[^a-z ]/g, "").replace(/\s+/g, " ").trim();
+const keysOf = (c) => {
+  const k = []; const n = normName(c); if (n.includes(" ")) k.push("n:" + n);
+  [c.phone, c.phone_2].map(digits).map((d) => d.slice(-10)).filter((d) => d.length === 10).forEach((d) => k.push("p:" + d));
+  [c.email, c.email_2].filter(Boolean).map((e) => String(e).trim().toLowerCase()).forEach((e) => k.push("e:" + e));
+  return k;
+};
+export const dupeIndex = (contacts) => { const m = new Map(); contacts.forEach((c) => keysOf(c).forEach((k) => m.set(k, (m.get(k) || 0) + 1))); return m; };
+const isDupe = (c, idx) => keysOf(c).some((k) => (idx.get(k) || 0) > 1);
+
+function MergeBox({ contact, contacts, setContacts, open, onMerged }) {
+  const [openBox, setOpenBox] = useState(false); const [q, setQ] = useState(""); const [other, setOther] = useState(null);
+  const [keepId, setKeepId] = useState(contact.id); const [busy, setBusy] = useState(false); const [err, setErr] = useState("");
+  const mine = useMemo(() => new Set(keysOf(contact)), [contact]);
+  const likely = useMemo(() => contacts.filter((c) => c.id !== contact.id && keysOf(c).some((k) => mine.has(k))).slice(0, 6), [contacts, contact, mine]);
+  const hits = q.trim().length < 2 ? [] : contacts.filter((c) => c.id !== contact.id && (fullName(c).toLowerCase().includes(q.toLowerCase()) || (c.email || "").toLowerCase().includes(q.toLowerCase()) || (digits(q).length >= 4 && digits(c.phone).includes(digits(q))))).slice(0, 8);
+  const pick = (o) => { setOther(o); setErr("");
+    const score = (c) => [c.funded_date || "", c.last_contacted || "", c.agent_stats ? "1" : ""].join("|");
+    setKeepId(score(o) > score(contact) ? o.id : contact.id); };
+  const doMerge = async () => {
+    const keep = keepId, drop = keepId === contact.id ? other.id : contact.id; setBusy(true); setErr("");
+    const { error } = await supabase.rpc("merge_contacts", { keep_id:keep, drop_id:drop });
+    if (error) { setErr("Merge failed: " + error.message); setBusy(false); return; }
+    const { data } = await supabase.from("contacts").select("*").eq("id", keep).single();
+    const { data: log } = await supabase.from("contact_merge_log").select("id").eq("keep_id", keep).order("merged_at", { ascending:false }).limit(1);
+    const droppedName = fullName(keep === contact.id ? other : contact);
+    setContacts((prev) => prev.filter((c) => c.id !== drop).map((c) => (c.id === keep ? data : c)));
+    setBusy(false); setOther(null); setOpenBox(false);
+    onMerged && onMerged({ keep, drop, logId:log?.[0]?.id, name:droppedName });
+    if (keep !== contact.id && data) open(data);
+  };
+  const Side = ({ c }) => { const on = keepId === c.id; return (
+    <div onClick={() => setKeepId(c.id)} style={{flex:"1 1 220px", cursor:"pointer", padding:10, borderRadius:8, border:`2px solid ${on ? C.green : C.stoneBg}`, background: on ? "#eef4ef" : "#fff", fontFamily:F.body, fontSize:13, lineHeight:1.5}}>
+      <div style={{fontFamily:F.mono, fontSize:9, letterSpacing:"0.08em", color: on ? C.green : C.light}}>{on ? "KEEP AS MAIN" : "TAP TO KEEP THIS ONE"}{c.id === contact.id ? " · THIS CONTACT" : ""}</div>
+      <div style={{fontFamily:F.cond, fontSize:17, fontWeight:700}}>{fullName(c)}</div>
+      <div>{TYPE_LABEL[typeOf(c)]}{c.company ? ` · ${c.company}` : ""}</div>
+      <div>{c.phone || "no phone"}{c.phone_2 ? ` / ${c.phone_2}` : ""}</div>
+      <div style={{wordBreak:"break-all"}}>{c.email || "no email"}{c.email_2 ? ` / ${c.email_2}` : ""}</div>
+      <div style={{color:C.mid}}>{c.funded_date ? `Loan ${year(c.funded_date)}${c.note_rate ? ` at ${c.note_rate}%` : ""} · ` : ""}{c.last_contacted ? `last contact ${c.last_contacted}` : "never contacted"}</div>
+      {c.agent_stats?.sales_12m != null && <div style={{color:C.mid}}>{c.agent_stats.sales_12m} sales (12 mo)</div>}
+      <div style={{color:C.light, fontSize:11}}>{(c.tags || []).slice(0, 4).join(", ")}</div>
+    </div>); };
+  const Pick = ({ c }) => (
+    <div onClick={() => pick(c)} style={{cursor:"pointer", padding:"6px 8px", borderBottom:`1px solid ${C.stoneBg}`, fontFamily:F.body, fontSize:13}}>
+      {fullName(c)} <span style={{color:C.light, fontSize:11}}>{TYPE_LABEL[typeOf(c)]} {c.company || ""} {c.phone || c.email || ""}</span>
+    </div>);
+  return (
+    <div style={box}>
+      <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", gap:8, flexWrap:"wrap"}}>
+        <div style={lbl}>Duplicate? Merge</div>
+        {!openBox && <button onClick={() => setOpenBox(true)} style={ghost}>Merge with…{likely.length ? ` (${likely.length} look${likely.length === 1 ? "s" : ""} like the same person)` : ""}</button>}
+        {openBox && <button onClick={() => { setOpenBox(false); setOther(null); setQ(""); }} style={ghost}>Close</button>}
+      </div>
+      {openBox && !other && <div style={{marginTop:8}}>
+        {likely.length > 0 && <><div style={{fontFamily:F.mono, fontSize:10, color:C.amber, marginBottom:4}}>SAME NAME, PHONE OR EMAIL</div>{likely.map((c) => <Pick key={c.id} c={c}/>)}</>}
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Or search any contact: name, phone or email" style={{...inp, marginTop:8}}/>
+        {hits.map((c) => <Pick key={c.id} c={c}/>)}
+      </div>}
+      {openBox && other && <div style={{marginTop:10}}>
+        <div style={{display:"flex", gap:10, flexWrap:"wrap"}}><Side c={contact}/><Side c={other}/></div>
+        <div style={{fontFamily:F.body, fontSize:13, color:C.mid, marginTop:8}}>Everything from both comes over to the one you keep: phones, emails, loans, notes, tags, call history, Facebook outreach and links. You can undo it right after.</div>
+        <div style={{display:"flex", gap:8, marginTop:8}}>
+          <button disabled={busy} onClick={doMerge} style={primary}>{busy ? "Merging…" : "Merge"}</button>
+          <button onClick={() => setOther(null)} style={ghost}>Pick someone else</button>
+        </div>
+      </div>}
+      {err && <div style={{fontFamily:F.mono, fontSize:11, color:C.red || "#9e3020", marginTop:6}}>{err}</div>}
+    </div>
+  );
+}
+
+function Detail({ c, contacts, setContacts, userId, profileName, back, backLabel, open, links, reloadLinks, createContact, onMerged }) {
   const [histBump, setHistBump] = useState(0);
   // Every call / text / email tapped from this record is logged, so the history below is complete.
   const logTap = async (channel, outcome) => { await supabase.from("contact_touches").insert({ user_id:userId, contact_id:c.id, channel, outcome }); setHistBump((n) => n + 1); };
@@ -353,6 +427,7 @@ function Detail({ c, contacts, setContacts, userId, profileName, back, backLabel
       {["past_client","lead"].includes(typeOf(c)) && <Loans contact={c} userId={userId}/>}
       {typeOf(c) === "lead" && <AgentMatch contact={c} contacts={contacts} userId={userId} onLogged={() => setHistBump((n) => n + 1)}/>}
       <Linked contact={c} contacts={contacts} userId={userId} open={open} links={links} reloadLinks={reloadLinks} onCreate={createContact}/>
+      <MergeBox key={c.id} contact={c} contacts={contacts} setContacts={setContacts} open={open} onMerged={onMerged}/>
 
       <div style={box}>
         <div style={lbl}>Follow-up</div>
@@ -417,8 +492,18 @@ export default function ContactsTab({ userId, contacts, setContacts, profileName
   const [view, setView] = useState("list");
   const [links, setLinks] = useState([]);
   const [dupeCount, setDupeCount] = useState(null);
+  const [undo, setUndo] = useState(null);   // last merge from inside a contact, for the Undo banner
+  const undoMerge = async () => {
+    if (!undo?.logId) return; const { error } = await supabase.rpc("unmerge_contacts", { log_id:undo.logId });
+    if (error) { alert("Undo failed: " + error.message); return; }
+    const { data } = await supabase.from("contacts").select("*").in("id", [undo.keep, undo.drop]);
+    setContacts((prev) => { const m = Object.fromEntries((data || []).map((c) => [c.id, c])); const rest = prev.filter((c) => !m[c.id]); return [...rest, ...(data || [])]; });
+    reloadLinks(); setUndo(null);
+  };
   const [radarData, setRadarData] = useState(() => peekRadarData(userId));
   const wide = typeof window !== "undefined" && window.innerWidth >= 900;
+  const dIdx = useMemo(() => dupeIndex(contacts), [contacts]);
+  const DupeTag = ({ c }) => isDupe(c, dIdx) ? <span title="Same name, phone or email as another contact. Open it to merge." style={{fontFamily:F.mono, fontSize:9, letterSpacing:"0.06em", color:C.amber, border:`1px solid ${C.amber}`, borderRadius:4, padding:"1px 5px", marginLeft:8, verticalAlign:"middle"}}>POSSIBLE DUPLICATE</span> : null;
 
   const reloadLinks = useCallback(async () => {
     const all = [];
@@ -515,7 +600,12 @@ export default function ContactsTab({ userId, contacts, setContacts, profileName
   }, [byId, userId, t]);
 
   if (view === "dupes") return <Dupes contacts={contacts} setContacts={setContacts} userId={userId} close={() => { setView("list"); reloadLinks(); }} open={open} reloadLinks={reloadLinks}/>;
-  if (view === "detail" && selC) return <Detail c={selC} contacts={contacts} setContacts={setContacts} userId={userId} profileName={profileName} back={() => { setView("list"); if (returnLabel && onReturn) onReturn(); }} backLabel={returnLabel ? `Back to ${returnLabel}` : null} open={open} links={links} reloadLinks={reloadLinks} createContact={createContact}/>;
+  if (view === "detail" && selC) return <>
+    {undo && <div style={{...box, display:"flex", justifyContent:"space-between", alignItems:"center", gap:8, flexWrap:"wrap", borderColor:C.green, background:"#eef4ef"}}>
+      <span style={{fontFamily:F.body, fontSize:14}}>Merged {undo.name} into this contact.</span>
+      <span style={{display:"flex", gap:8}}>{undo.logId && <button onClick={undoMerge} style={ghost}>Undo</button>}<button onClick={() => setUndo(null)} style={ghost}>OK</button></span>
+    </div>}
+    <Detail onMerged={setUndo} c={selC} contacts={contacts} setContacts={setContacts} userId={userId} profileName={profileName} back={() => { setView("list"); if (returnLabel && onReturn) onReturn(); }} backLabel={returnLabel ? `Back to ${returnLabel}` : null} open={open} links={links} reloadLinks={reloadLinks} createContact={createContact}/></>;
 
   const toggleF = (f) => setFilters((p) => (p.includes(f) ? p.filter((x) => x !== f) : [...p, f]));
   const sel2 = { ...inp, width:"auto", padding:"9px 12px", fontFamily:F.cond, fontWeight:700, fontSize:15, cursor:"pointer" };
@@ -601,7 +691,7 @@ export default function ContactsTab({ userId, contacts, setContacts, profileName
               {rows.map((c, n) => (
                 <tr key={c.id} onClick={() => open(c)} style={{cursor:"pointer", background: n % 2 ? "#f8f4ed" : "transparent"}}>
                   <td style={{...td, minWidth:180}}>
-                    <div style={{fontFamily:F.cond, fontWeight:700, fontSize:16}}>{fullName(c)}</div>
+                    <div style={{fontFamily:F.cond, fontWeight:700, fontSize:16}}>{fullName(c)}<DupeTag c={c}/></div>
                     <div style={{fontFamily:F.mono, fontSize:10, color:C.light}}>{sub(c)}</div>
                   </td>
                   <td style={td}><Pill r={reasons[c.id]}/></td>
@@ -616,7 +706,7 @@ export default function ContactsTab({ userId, contacts, setContacts, profileName
         </div>
       ) : rows.map((c) => (
         <div key={c.id} onClick={() => open(c)} style={{...box, padding:"10px 12px", marginBottom:6, cursor:"pointer"}}>
-          <div style={{fontFamily:F.cond, fontSize:16, fontWeight:700}}>{fullName(c)}</div>
+          <div style={{fontFamily:F.cond, fontSize:16, fontWeight:700}}>{fullName(c)}<DupeTag c={c}/></div>
           <div style={{fontFamily:F.mono, fontSize:10, color:C.light}}>{sub(c)}</div>
           <div style={{marginTop:4, fontSize:13}}><Pill r={reasons[c.id]}/></div>
           <div style={{marginTop:4, fontSize:13}}>{c.phone ? <a href={`tel:${digits(c.phone)}`} onClick={(e) => e.stopPropagation()} style={{color:C.blue, textDecoration:"none"}}>{c.phone}</a> : <span style={{color:C.light}}>no phone</span>}</div>
