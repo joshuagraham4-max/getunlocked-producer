@@ -123,6 +123,23 @@ try {
     }
     assert(O.replySuggestions({ news: "the Brighton listing!" })[0].text.includes("Congrats on the Brighton listing."), "news not mirrored");
   });
+  check("Agent pages: reminder due rules and texts", () => {
+    const now = new Date("2026-11-25T12:00:00-05:00");
+    const due = (p) => O.pageNeedsReminder(p, now);
+    assert(due({ invited_at: "2026-11-20T13:00:00-05:00" }), "5 days, never edited: due");
+    assert(!due({ invited_at: "2026-11-24T12:33:00-05:00" }), "1 day: not yet");
+    assert(!due({ invited_at: "2026-11-20", edited_at: "2026-11-21" }), "set up: not due");
+    assert(!due({ invited_at: "2026-11-20", reminded_at: "2026-11-24" }), "already reminded");
+    assert(!due({}) && !due(null) && !due({ invited_at: "garbage" }), "blanks");
+    for (const r of [{ first_name: "Zach" }, { full_name: "Lani Carwin" }, {}, null]) {
+      const e = O.pageReminderEmail(r, { lander: "https://x/a/z", edit: "https://x/e/abc", area: "Denver", ntfy: "gup-ag-1" });
+      const e2 = O.pageReminderEmail(r, {});
+      const d = O.pageReminderDM(r, { lander: "https://x/a/z" });
+      for (const t of [e.subject, e.body, d]) assert(t && !/undefined|null/.test(t), `bad reminder text for ${JSON.stringify(r)}: ${t}`);
+      assert(e2.subject === "Your page" && !/undefined|null/.test(e2.body.replace("(it's on your edit page)", "")), "reminder without page details");
+    }
+    assert(O.pageReminderDM({ first_name: "Kim" }, { lander: "L" }).includes("best email"), "DM asks for email");
+  });
 } catch (e) {
   failed++; console.error("  FAIL could not load the app code:", e?.message || e);
 } finally {

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../supabase.js";
 import { agentPosts } from "../landing/agentPosts.js";
+import { pageReminderEmail, pageReminderDM, pageNeedsReminder, REMINDER_WAIT_DAYS } from "../groups/outreachScripts.js";
 
 const C = { mid:"#6b6358", rule:"#e0d8cc", ink:"#1c1a17", green:"#1e6e4a" };
 const F = { mono:"'DM Mono',monospace", body:"'Barlow',sans-serif" };
@@ -48,6 +49,19 @@ export default function AgentLander({ contact: c }) {
   const post = page ? agentPosts(url, page.market ? " in " + page.market : "")[0][1] : "";
   const setup = page ? `Hi ${first}, your free buyer and seller page is live: ${url}\n\nTurn it on in 4 steps:\n\n1. MAKE IT YOURS. Tap your private link, add your photo, and check your info. You can also add a short intro video (optional, tips are on the page): ${edit}\nSave it or bookmark it. That one link is your home base: your page, your ready-made posts, a free open house flyer maker with your QR code, and your scenario desk. Please keep it to yourself.\n\n2. POST IT. Your edit page has ready-made posts. Copy one, paste it on Facebook or Instagram with your link, and on Facebook tap Boost and put $20 to $50 behind it. Aim it at ${mk}.\n\n3. TURN ON YOUR LEAD ALERTS. Install the free app called ntfy. Tap the + button and type this code: ${page.ntfy_topic}\nNow every new lead buzzes your phone with their name and number.\n\n4. CALL THEM WITHIN 5 MINUTES. That's the whole trick. Five minutes from the alert is when they pick up.\n\nThat's it. You don't pay me anything. I'm the lender on the page, and I'll keep you posted.\n\nIf a lead has a home to sell, the alert tells you. That's your listing lead too.\n\nGot a tricky deal? Send it to my scenario desk, no client names needed: ${desk}\n\n- Joshua` : "";
 
+  // Page reminder (Nov 25): invited but never set up -> one reminder. Email if we have one, else Messenger asking for it.
+  const email = (c.email || c.email_2 || (page && page.email) || "").trim();
+  const day = (t) => t ? new Date(t).toLocaleDateString("en-US", { month:"short", day:"numeric" }) : "";
+  const rem = page ? pageReminderEmail(c, { lander:url, edit, area:page.market, ntfy:page.ntfy_topic }) : null;
+  const remDM = page ? pageReminderDM(c, { lander:url }) : "";
+  const due = page ? pageNeedsReminder(page) : false;
+  const markReminded = async () => {
+    const { data } = await supabase.from("agent_pages").update({ reminded_at: new Date().toISOString() }).eq("id", page.id).select().single();
+    if (data) setPage(data);
+    const tags = Array.isArray(c.tags) ? c.tags : [];
+    if (!tags.includes("page reminder sent")) await supabase.from("contacts").update({ tags: [...tags, "page reminder sent"] }).eq("id", c.id);
+  };
+
   const box = { marginTop:14, border:`1px solid ${C.rule}`, borderRadius:8, background:"#fff", padding:"10px 12px" };
   const lab = { fontFamily:F.mono, fontSize:10, letterSpacing:".12em", color:C.mid, textTransform:"uppercase" };
   if (page === undefined) return null;
@@ -70,6 +84,22 @@ export default function AgentLander({ contact: c }) {
           <button style={ghost} onClick={() => copy("post", post)}>{copied === "post" ? "Copied" : "Copy their post copy"}</button>
           <button style={ghost} onClick={toggle}>{page.active ? "Turn page off" : "Turn page on"}</button>
         </div>
+        {page.invited_at ? (<div style={{ marginTop:10, padding:"8px 10px", borderRadius:6, background: page.edited_at ? "#e8f4ee" : "#fdf0e0" }}>
+          {page.edited_at ? <div style={{ fontSize:12, color:C.green }}>Set up: they saved their page {day(page.edited_at)}.</div> : (<>
+            <div style={{ fontSize:12, color:"#b05e0d" }}>Invited {day(page.invited_at)}, not set up yet.{page.reminded_at ? ` Reminder sent ${day(page.reminded_at)}.` : due ? " Reminder due." : ` Reminder due ${REMINDER_WAIT_DAYS} days after the invite.`}</div>
+            <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginTop:8 }}>
+              {email ? (<>
+                <button style={ghost} onClick={() => copy("remsub", rem.subject)}>{copied === "remsub" ? "Copied" : "Copy reminder subject"}</button>
+                <button style={ghost} onClick={() => copy("rembody", rem.body)}>{copied === "rembody" ? "Copied" : "Copy reminder email"}</button>
+                <a style={{ ...ghost, textDecoration:"none" }} href={`mailto:${email}?subject=${encodeURIComponent(rem.subject)}&body=${encodeURIComponent(rem.body)}`}>Open in email</a>
+              </>) : (
+                <button style={ghost} onClick={() => copy("remdm", remDM)}>{copied === "remdm" ? "Copied" : "Copy Messenger reminder (asks for email)"}</button>
+              )}
+              {!page.reminded_at && <button style={ghost} onClick={markReminded}>Mark reminder sent</button>}
+            </div>
+            <div style={{ marginTop:6, color:C.mid, fontSize:11 }}>{email ? `Email: ${email}` : "No email on file, so the Messenger version asks for it."}</div>
+          </>)}
+        </div>) : null}
         <div style={{ marginTop:8, color:C.mid, fontSize:12 }}>Their private edit link lets them add a photo, info and video. Leads (buyers and sellers) land in your Contacts and go to them by {page.lead_pref === "push" ? "alert" : page.lead_pref === "email" ? "email" : "alert and email"}. Remind them: call within 5 minutes.</div>
       </div>)}
       {msg && <div style={{ marginTop:8, color:"#a33", fontSize:12 }}>{msg}</div>}

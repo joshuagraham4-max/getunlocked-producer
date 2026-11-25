@@ -154,6 +154,43 @@ export const CHANNELS = [
 
 // Coverage lane (Nov 20): replied agents get one invite to the page Joshua built them (their /a/<slug> lander)
 // plus their private edit link to add photo and contact info. Separate from the daily 20. Joshua's go first.
+// Page reminder (Joshua, Nov 25): agents who got the page invite but never set the page up (agent_pages.edited_at is null)
+// get one reminder, 3+ days after the invite. Email if we have one (Joshua sends it from his own mail, no signature block);
+// otherwise a Messenger nudge that makes sure they saw the page and asks for their email.
+export const REMINDER_WAIT_DAYS = 3;
+export function pageNeedsReminder(p, now = new Date()) {
+  if (!p || !p.invited_at || p.edited_at || p.reminded_at) return false;
+  const t = new Date(p.invited_at).getTime();
+  return !Number.isNaN(t) && (now.getTime() - t) >= REMINDER_WAIT_DAYS * 86400000;
+}
+const firstOf = (r) => ((r && (r.first_name || (r.full_name || r.name || "").split(/\s+/)[0])) || "").trim() || "there";
+export function pageReminderEmail(r, { lander = "", edit = "", area, ntfy } = {}) {
+  const first = firstOf(r); const a = (area || "").trim();
+  const subject = a ? `Your page for ${a}` : "Your page";
+  const body = `Hey ${first},
+
+Don't forget about the page I built for you so I can start sending buyers and sellers your way:
+${lander}
+
+You can start posting that link as your landing page right away.
+
+All you need to do:
+1. Open your edit link: ${edit}
+2. Add your headshot and your cell, and check that your areas look right. Hit save.
+3. Turn on lead alerts (don't skip this one): download the free app ntfy from the App Store or Google Play, tap the + button and type this code: ${ntfy || "(it's on your edit page)"}. Every lead from your page will buzz your phone the second it comes in.
+
+To start, this is our joint landing page to drive people to our classes and nurture those leads into actual buyers and sellers. From there we can add versions built for a specific focus, like investors, down payment assistance or buy-before-you-sell programs.
+
+It's still in the testing phase, so if anything looks off, just reply here and I'll fix it. Once you're set up, let me know. The best next step is a quick call to walk through it together and set a game plan for the coming quarter.`;
+  return { subject, body };
+}
+export function pageReminderDM(r, { lander = "" } = {}) {
+  const first = firstOf(r);
+  return `Hey ${first}, wanted to make sure you saw the page I built for you: ${lander}
+
+Setup takes a couple of minutes, and I'd like to email you the steps so you have them handy (including how to get leads sent straight to your phone). What's the best email for you?`;
+}
+
 export function pageInviteFor(r, lander, edit, missingInfo) {   // missingInfo kept for callers; Joshua (Nov 20): no info ask, just the page
   const first = r.first_name || (r.full_name || "").split(/\s+/)[0] || "there";
   const area = (r.area || "").trim();

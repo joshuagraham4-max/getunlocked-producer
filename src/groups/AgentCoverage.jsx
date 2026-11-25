@@ -47,7 +47,7 @@ export default function AgentCoverage({ rows, onContact }) {
     supabase.from("contacts").select("id,phone,phone_2,email,email_2,tags").in("id", list).then(({ data }) => {
       const m = {}; (data || []).forEach((c) => { m[c.id] = c; }); setInfo(m);
     });
-    supabase.from("agent_pages").select("contact_id,slug,active").in("contact_id", list).then(({ data }) => {
+    supabase.from("agent_pages").select("contact_id,slug,active,invited_at,edited_at,reminded_at").in("contact_id", list).then(({ data }) => {
       const m = {}; (data || []).forEach((p) => { m[p.contact_id] = p; }); setPages(m);
     });
   }, [ids]);
@@ -101,7 +101,7 @@ export default function AgentCoverage({ rows, onContact }) {
                 {!ct.phone && !ct.email ? <div style={{ fontFamily:F.mono, fontSize:10, color:C.amber }}>no contact info yet</div>
                   : (!ct.phone || !ct.email) ? <div style={{ fontFamily:F.mono, fontSize:10, color:C.amber }}>missing {!ct.phone ? "phone" : "email"}</div> : null}
                 <div style={{ fontFamily:F.mono, fontSize:10, color: invited(r) ? C.green : C.light, marginTop:2 }}>
-                  {pages[r.contact_id] ? <a href={`/a/${pages[r.contact_id].slug}`} target="_blank" rel="noreferrer" style={{ color:"inherit" }}>page</a> : "no page yet"}{invited(r) ? " · invited" : ""}
+                  {pages[r.contact_id] ? <a href={`/a/${pages[r.contact_id].slug}`} target="_blank" rel="noreferrer" style={{ color:"inherit" }}>page</a> : "no page yet"}{invited(r) ? (pages[r.contact_id] && pages[r.contact_id].edited_at ? " · set up" : pages[r.contact_id] && pages[r.contact_id].reminded_at ? " · invited, reminded" : " · invited, not set up") : ""}
                 </div>
                 {g.k === "other" ? <div style={{ fontFamily:F.mono, fontSize:10, color:C.light, marginTop:2 }}>{r.area ? `area: ${r.area}` : "area not given yet"}</div> : null}
               </div>); })}
