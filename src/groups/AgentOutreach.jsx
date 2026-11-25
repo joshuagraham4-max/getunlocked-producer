@@ -20,7 +20,7 @@ const copy = (t) => navigator.clipboard?.writeText(t);
 const chName = (k) => (CHANNELS.find((c) => c.k === k) || {}).l || k;
 const EMPTY = { full_name:"", area:"", state:"FL", brokerage:"", profile_url:"", hook:"", channel:"facebook", source:"existing friend" };
 
-function AgentList({ userId, onContact }) {
+function AgentList({ userId, onContact, onOpen }) {
   const [rows, setRows] = useState([]); const [view, setView] = useState("today"); const [chan, setChan] = useState("all");
   const [drafts, setDrafts] = useState({}); const [news, setNews] = useState({}); const [add, setAdd] = useState(null); const [msg, setMsg] = useState(""); const [q, setQ] = useState(""); const [lastQ, setLastQ] = useState("");
   const t = localDay();
@@ -29,6 +29,13 @@ function AgentList({ userId, onContact }) {
     if (error) setMsg(error.message); setRows((data || []).filter((r) => !r.audience || r.audience === "agent"));
   }, []);
   useEffect(() => { if (userId) load(); }, [userId, load]);
+  // Phone / email live on the GUP contact (Nov 25): pull them so search hits and Replied cards can show and copy them.
+  const [cmap, setCmap] = useState({});
+  useEffect(() => { const ids = [...new Set(rows.map((r) => r.contact_id).filter(Boolean))]; if (!ids.length) return;
+    (async () => { const m = {}; for (let i = 0; i < ids.length; i += 80) {
+      const { data } = await supabase.from("contacts").select("*").in("id", ids.slice(i, i + 80)); (data || []).forEach((c) => { m[c.id] = c; }); }
+      setCmap(m); })(); }, [rows]);
+  const openFull = (r) => { const c = cmap[r.contact_id]; if (!c) return; onContact && onContact(c); onOpen && onOpen(c); };
 
   const mine = rows.filter((r) => chan === "all" || r.channel === chan);
   const replied = mine.filter((r) => r.status === "replied").sort((a, b) => RATING_ORDER[agentRating(a).grade] - RATING_ORDER[agentRating(b).grade]);
@@ -79,6 +86,18 @@ function AgentList({ userId, onContact }) {
       {r.volume_checked && <span style={{fontFamily:F.mono, fontSize:10, color:C.light}}>checked {r.volume_checked.slice(5)}{r.volume_source ? ` · ${r.volume_source}` : ""}</span>}
     </div>);
   const Profile = ({ r }) => r.profile_url ? <a href={r.profile_url} target="_blank" rel="noreferrer" style={btn}>Open profile</a> : null;
+  const Name = ({ r, size = 18 }) => { const can = !!(r.contact_id && cmap[r.contact_id] && onOpen);
+    return <div onClick={() => can && openFull(r)} title={can ? "Open full contact" : ""} style={{fontFamily:F.cond, fontWeight:800, fontSize:size, cursor: can ? "pointer" : "default", color: can ? C.green : "inherit", textDecoration: can ? "underline" : "none", textUnderlineOffset:3}}>{r.full_name}</div>; };
+  const Reach = ({ r }) => { const c = cmap[r.contact_id]; if (!c) return r.contact_id ? null : <div style={{fontFamily:F.mono, fontSize:11, color:C.light, marginTop:6}}>Not linked to a GUP contact yet.</div>;
+    const items = [["Phone", c.phone], ["Phone 2", c.phone_2], ["Email", c.email], ["Email 2", c.email_2]].filter(([, v]) => v);
+    if (!items.length) return <div style={{fontFamily:F.mono, fontSize:11, color:C.amber, marginTop:6}}>No phone or email on file yet.</div>;
+    return <div style={{display:"flex", gap:12, flexWrap:"wrap", marginTop:6}}>
+      {items.map(([k, v]) => <span key={k} style={{display:"inline-flex", alignItems:"center", gap:6, fontFamily:F.mono, fontSize:12}}>
+        <span style={{color:C.light}}>{k}</span>
+        <a href={k.startsWith("Phone") ? `tel:${String(v).replace(/[^\d+]/g, "")}` : `mailto:${v}`} style={{color:C.ink}}>{v}</a>
+        <button onClick={() => copy(v)} style={{...btn, padding:"2px 8px", fontSize:11}}>Copy</button></span>)}
+    </div>; };
+  const OpenBtn = ({ r }) => r.contact_id && cmap[r.contact_id] && onOpen ? <button onClick={() => openFull(r)} style={btn}>Open full contact</button> : null;
 
   const DueCard = ({ r }) => { const m = messageFor(r); return (
     <div style={{...card, padding:14}}>
@@ -121,15 +140,16 @@ function AgentList({ userId, onContact }) {
           {hits.map((r) => (
             <div key={r.id} style={{...card, padding:12, borderColor:C.green}}>
               <div style={{display:"flex", justifyContent:"space-between", gap:8, flexWrap:"wrap"}}>
-                <div style={{fontFamily:F.cond, fontWeight:800, fontSize:18}}>{r.full_name}</div>
+                <Name r={r}/>
                 <div style={{fontFamily:F.mono, fontSize:11, color:C.mid, textTransform:"uppercase"}}>{r.status}{r.step ? ` · message ${r.step} of 3` : ""}{r.sent_at ? ` · last sent ${localDay(new Date(r.sent_at))}` : ""}</div>
               </div>
               <Meta r={r}/>
+              <Reach r={r}/>
               {prefLabel(r) && <div style={{fontFamily:F.cond, fontWeight:800, fontSize:15, color:C.green, marginTop:4}}>{prefLabel(r)}</div>}
               {r.hook && <div style={{fontSize:13, color:C.mid, marginTop:4}}>Hook: {r.hook}</div>}
               {r.last_message && <div style={{fontSize:13, color:C.mid, marginTop:6, whiteSpace:"pre-wrap"}}>Last sent: {r.last_message.slice(0, 220)}{r.last_message.length > 220 ? "..." : ""}</div>}
               <div style={{display:"flex", gap:8, marginTop:8, flexWrap:"wrap"}}>
-                <Profile r={r}/>
+                <Profile r={r}/><OpenBtn r={r}/>
                 {r.status !== "replied" && <button onClick={() => { gotReply(r); setLastQ(q); setQ(""); setView("replied"); }} style={btnG}>They replied</button>}
                 {r.status === "replied" && <button onClick={() => { setLastQ(q); setQ(""); setView("replied"); }} style={btn}>Open in Replied</button>}
               </div>
@@ -184,10 +204,11 @@ function AgentList({ userId, onContact }) {
         <div style={{fontFamily:F.mono, fontSize:12, color:C.mid}}>These are yours now. Pick up the conversation in Messenger. They're tagged "outreach: replied" in Contacts. Best-rated first: A is 24+ sales or $10M+ in the last 12 months, B is 10+ or $4M+, C is less.</div>
         {replied.map((r) => (
           <div key={r.id} style={{...card, padding:12, borderColor:C.amber}}>
-            <div style={{fontFamily:F.cond, fontWeight:800, fontSize:17}}>{r.full_name}</div><Meta r={r}/>
+            <Name r={r} size={17}/><Meta r={r}/>
+            <Reach r={r}/>
             <div style={{fontFamily:F.cond, fontWeight:800, fontSize:15, color: r.pref_channel ? C.green : C.amber, marginTop:4}}>{prefLabel(r) || "How they want to hear from you: not noted yet"}</div>
             {r.last_message && <div style={{fontSize:13, color:C.mid, marginTop:6, whiteSpace:"pre-wrap"}}>Last sent: {r.last_message.slice(0, 160)}{r.last_message.length > 160 ? "..." : ""}</div>}
-            <div style={{display:"flex", gap:8, marginTop:8}}><Profile r={r}/></div>
+            <div style={{display:"flex", gap:8, marginTop:8}}><Profile r={r}/><OpenBtn r={r}/></div>
             <PrefRow r={r}/>
             <RateRow r={r}/>
             <div style={{marginTop:10}}>

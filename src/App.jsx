@@ -1611,7 +1611,7 @@ export default function App() {
           ) : (
             <>
               <input ref={fRef} type="file" accept=".csv,.txt,.tsv" onChange={handleFile} style={{display:"none"}}/>
-              <ErrorBoundary label="Contacts"><ContactsTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onUpload={startUpload} openId={openContactId} onOpened={()=>setOpenContactId(null)} returnLabel={returnTab==="radar"?"Radar":returnTab==="calls"?"Calls":returnTab==="scenarios"?"Scenario desk":null} onReturn={()=>{const t=returnTab;setReturnTab(null);if(t)setTab(t);}} onGoCalls={()=>setTab("calls")}/></ErrorBoundary>
+              <ErrorBoundary label="Contacts"><ContactsTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onUpload={startUpload} openId={openContactId} onOpened={()=>setOpenContactId(null)} returnLabel={returnTab==="radar"?"Radar":returnTab==="calls"?"Calls":returnTab==="scenarios"?"Scenario desk":returnTab==="partners"?"Partners":null} onReturn={()=>{const t=returnTab;setReturnTab(null);if(t)setTab(t);}} onGoCalls={()=>setTab("calls")}/></ErrorBoundary>
             </>
           )}
         </div>
@@ -1621,7 +1621,7 @@ export default function App() {
       {(tab==="calls" || callsSeen) && <div style={{display:tab==="calls"?"block":"none"}}><ErrorBoundary label="Calls"><CallsTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onOpen={(c)=>{setOpenContactId(c.id);setReturnTab("calls");setTab("contacts");}} onGoRadar={()=>setTab("radar")}/></ErrorBoundary></div>}
       {(tab==="radar" || radarSeen) && <div style={{display:tab==="radar"?"block":"none"}}><ErrorBoundary label="Radar"><RadarTab userId={user?.id} contacts={contacts} setContacts={setContacts} profileName={profile.name} onOpen={(c)=>{setOpenContactId(c.id);setReturnTab("radar");setTab("contacts");}} onGoCalls={()=>setTab("calls")}/></ErrorBoundary></div>}
       {tab==="groups" && <ErrorBoundary label="Groups"><GroupsTab userId={user?.id} onContact={(c) => setContacts((p) => p.some((x) => x.id === c.id) ? p.map((x) => (x.id === c.id ? c : x)) : [...p, c])}/></ErrorBoundary>}
-      {tab==="partners" && <ErrorBoundary label="Partners"><AgentOutreach userId={user?.id} onContact={(c) => setContacts((p) => p.some((x) => x.id === c.id) ? p.map((x) => (x.id === c.id ? c : x)) : [...p, c])}/></ErrorBoundary>}
+      {tab==="partners" && <ErrorBoundary label="Partners"><AgentOutreach userId={user?.id} onContact={(c) => setContacts((p) => p.some((x) => x.id === c.id) ? p.map((x) => (x.id === c.id ? c : x)) : [...p, c])} onOpen={(c) => { setOpenContactId(c.id); setReturnTab("partners"); setTab("contacts"); }}/></ErrorBoundary>}
       {tab==="scenarios" && isAdmin && <ErrorBoundary label="Scenario desk"><ScenarioQueue userId={user?.id} contacts={contacts} onOpen={(c)=>{setOpenContactId(c.id);setReturnTab("scenarios");setTab("contacts");}}/></ErrorBoundary>}
       {tab==="links" && <ErrorBoundary label="Links"><GroupsTab userId={user?.id} mode="links"/></ErrorBoundary>}
       {tab==="matrix" && isAdmin && (
